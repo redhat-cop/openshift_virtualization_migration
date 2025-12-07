@@ -110,6 +110,8 @@ Description: Management of Machine Credentials.
 
 ```
 
+## Author Information
+
 #### License
 
 GPL-3.0-only

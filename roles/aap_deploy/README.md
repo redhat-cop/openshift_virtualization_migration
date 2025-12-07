@@ -119,6 +119,7 @@ Description: Deploys an instance of Ansible Automation Platform.
 
 ```
 
+## Author Information
 
 #### License
 

@@ -117,6 +117,8 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 
 ```
 
+## Author Information
+
 #### License
 
 GPL-3.0-only

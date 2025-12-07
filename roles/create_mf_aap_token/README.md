@@ -61,6 +61,8 @@ Description: create_mf_aap_token
 | Retrieve Migration Factory AAP Service Account API key | kubernetes.core.k8s_info | False |
 | Set fact with Service Account API key | ansible.builtin.set_fact | False |
 
+## Author Information
+
 #### License
 
 GPL-3.0-only
