@@ -7,8 +7,7 @@ exclude_paths:
   - .cache/ # implicit unless exclude_paths is defined in config
   - collections # location that pytest installs required collections
   - changelogs/ # checked by antsibull-changelog lint
-  - .gitlab-ci.yml # Not ansible
-  - .gitlab/ # Not ansible
+  - .github/ # Not ansible
   - devfile.yaml # Not ansible
   - docs/ # Not ansible
   - .pre-commit-config.yaml # Not ansible
