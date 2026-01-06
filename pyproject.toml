@@ -53,7 +53,6 @@ ignore_merge_commits = false
 [tool.semantic_release.remote]
 name = "origin"
 type = "github"
-# A Project Access Token should exist with permission to push/tag/release
 ignore_token_for_push = false
 insecure = false
 

@@ -10,7 +10,7 @@ on:
 
 jobs:
   ci:
-    uses: open-appdev-lab/ansible-collections-ci/.github/workflows/ci-ansible-collection.yml@main
+    uses: redhat-cop/openshift_virtualization_migration_ci/.github/workflows/ci-ansible-collection.yml@main
     permissions:
       contents: write
       packages: write
