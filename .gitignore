@@ -6,7 +6,6 @@ __pycache__/
 
 .ansible/.lock
 .ansible/**
-.github
 *.log
 *.json
 !.vscode/extensions.json

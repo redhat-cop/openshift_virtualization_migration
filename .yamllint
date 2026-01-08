@@ -7,7 +7,7 @@ yaml-files:
   - '.yamllint'
 
 ignore:
-  - .gitlab-ci.yml
+  - .github/
   - .venv/
   - .ansible/
   - changelogs/.plugin-cache.yaml
