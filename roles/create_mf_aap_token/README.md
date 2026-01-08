@@ -34,7 +34,12 @@ Description: create_mf_aap_token
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [create_mf_aap_token_secure_logging](defaults/main.yml#L2)   | str   | `{{ secure_logging ¦ default(true) }}` |  n/a  |   n/a  |  n/a |
+| [create_mf_aap_token_secure_logging](defaults/main.yml#L2)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
+<summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
+<br>
+<b>create_mf_aap_token_secure_logging:</b> None
+<br>
+<br>
 
 
 
@@ -61,7 +66,14 @@ Description: create_mf_aap_token
 | Retrieve Migration Factory AAP Service Account API key | kubernetes.core.k8s_info | False |
 | Set fact with Service Account API key | ansible.builtin.set_fact | False |
 
+
+
+
+
+
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 

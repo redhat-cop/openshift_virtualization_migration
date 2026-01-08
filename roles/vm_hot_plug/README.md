@@ -37,11 +37,11 @@ Description: Hot Plug Virtual Machine resources.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [vm_hot_plug_request](defaults/main.yml#L7)   | list   | `[]` |  n/a  |   True  |  Hot Plug Requests |
-| [vm_hot_plug_openshift_host](defaults/main.yml#L26)   | str   | `{{ openshift_host }}` |  n/a  |   True  |  OpenShift Host |
-| [vm_hot_plug_api_key](defaults/main.yml#L30)   | str   | `{{ openshift_api_key }}` |  n/a  |   True  |  OpenShift API Key |
-| [vm_hot_plug_openshift_verify_ssl](defaults/main.yml#L34)   | str   | `{{ openshift_verify_ssl }}` |  n/a  |   True  |  Verify SSL Certificate |
-| [vm_hot_plug_kubevirt_api_version](defaults/main.yml#L38)   | str   | `kubevirt.io/v1` |  n/a  |   True  |  KubeVirt API Version |
+| [vm_hot_plug_request](defaults/main.yml#L7)   | list   | `[]` |  None  |   True  |  Hot Plug Requests |
+| [vm_hot_plug_openshift_host](defaults/main.yml#L26)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift Host |
+| [vm_hot_plug_api_key](defaults/main.yml#L30)   | str   | `{{ openshift_api_key }}` |  None  |   True  |  OpenShift API Key |
+| [vm_hot_plug_openshift_verify_ssl](defaults/main.yml#L34)   | str   | `{{ openshift_verify_ssl }}` |  None  |   True  |  Verify SSL Certificate |
+| [vm_hot_plug_kubevirt_api_version](defaults/main.yml#L38)   | str   | `kubevirt.io/v1` |  None  |   True  |  KubeVirt API Version |
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
 <b>vm_hot_plug_request:</b> List of Hot Plug Requests
@@ -113,7 +113,9 @@ Description: Hot Plug Virtual Machine resources.
 
 ```
 
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 

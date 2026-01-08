@@ -64,11 +64,11 @@ Description: Management of Virtual Machine MAC Addresses.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [vm_mac_address_request](defaults/main.yml#L7)   | list   | `[]` |  n/a  |   True  |  MAC Address Request |
-| [vm_mac_address_openshift_host](defaults/main.yml#L17)   | str   | `{{ openshift_host }}` |  n/a  |   True  |  OpenShift Host |
-| [vm_mac_address_api_key](defaults/main.yml#L21)   | str   | `{{ openshift_api_key }}` |  n/a  |   True  |  OpenShift API Key |
-| [vm_mac_address_openshift_verify_ssl](defaults/main.yml#L25)   | str   | `{{ openshift_verify_ssl }}` |  n/a  |   True  |  Verify SSL Certificate |
-| [vm_mac_address_kubevirt_api_version](defaults/main.yml#L29)   | str   | `kubevirt.io/v1` |  n/a  |   True  |  KubeVirt API Version |
+| [vm_mac_address_request](defaults/main.yml#L7)   | list   | `[]` |  None  |   True  |  MAC Address Request |
+| [vm_mac_address_openshift_host](defaults/main.yml#L17)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift Host |
+| [vm_mac_address_api_key](defaults/main.yml#L21)   | str   | `{{ openshift_api_key }}` |  None  |   True  |  OpenShift API Key |
+| [vm_mac_address_openshift_verify_ssl](defaults/main.yml#L25)   | str   | `{{ openshift_verify_ssl }}` |  None  |   True  |  Verify SSL Certificate |
+| [vm_mac_address_kubevirt_api_version](defaults/main.yml#L29)   | str   | `kubevirt.io/v1` |  None  |   True  |  KubeVirt API Version |
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
 <b>vm_mac_address_request:</b> List of MAC Address Requests
@@ -132,7 +132,9 @@ Description: Management of Virtual Machine MAC Addresses.
 
 ```
 
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 

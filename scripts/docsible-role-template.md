@@ -210,7 +210,7 @@ Description: Not available.
 
 {% if role.meta.galaxy_info -%}
 ## Author Information
-{{ role.meta.galaxy_info.author or 'Unknown Author' }}
+{{ role.meta.galaxy_info.author or 'OpenShift Virtualization Migration Contributors' }}
 
 #### License
 

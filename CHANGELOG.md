@@ -1,6 +1,5 @@
 # CHANGELOG
 
-
 ## v1.21.2 (2025-09-22)
 
 ### Bug Fixes

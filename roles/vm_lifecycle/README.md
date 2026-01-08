@@ -37,13 +37,13 @@ Description: Management of the lifecycle activities of Virtual Machines.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [vm_lifecycle_vm_operations_request](defaults/main.yml#L6)   | list   | `[]` |  n/a  |   True  |  List of VMs to perform lifecycle operations |
-| [vm_lifecycle_kubevirt_api_version](defaults/main.yml#L17)   | str   | `kubevirt.io/v1` |  n/a  |   True  |  KubeVirt API Version |
-| [vm_lifecycle_openshift_host](defaults/main.yml#L21)   | str   | `{{ openshift_host }}` |  n/a  |   True  |  OpenShift host |
-| [vm_lifecycle_openshift_api_key](defaults/main.yml#L25)   | str   | `{{ openshift_api_key }}` |  n/a  |   True  |  OpenShift API Key |
-| [vm_lifecycle_openshift_verify_ssl](defaults/main.yml#L29)   | str   | `{{ openshift_verify_ssl }}` |  n/a  |   True  |  Enable SSL Verification |
-| [vm_lifecycle_verify_retries](defaults/main.yml#L34)   | int   | `100` |  n/a  |   True  |  Number of retries |
-| [vm_lifecycle_verify_delay](defaults/main.yml#L38)   | int   | `10` |  n/a  |   True  |  Number of delays |
+| [vm_lifecycle_vm_operations_request](defaults/main.yml#L6)   | list   | `[]` |  None  |   True  |  List of VMs to perform lifecycle operations |
+| [vm_lifecycle_kubevirt_api_version](defaults/main.yml#L17)   | str   | `kubevirt.io/v1` |  None  |   True  |  KubeVirt API Version |
+| [vm_lifecycle_openshift_host](defaults/main.yml#L21)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift host |
+| [vm_lifecycle_openshift_api_key](defaults/main.yml#L25)   | str   | `{{ openshift_api_key }}` |  None  |   True  |  OpenShift API Key |
+| [vm_lifecycle_openshift_verify_ssl](defaults/main.yml#L29)   | str   | `{{ openshift_verify_ssl }}` |  None  |   True  |  Enable SSL Verification |
+| [vm_lifecycle_verify_retries](defaults/main.yml#L34)   | int   | `100` |  None  |   True  |  Number of retries |
+| [vm_lifecycle_verify_delay](defaults/main.yml#L38)   | int   | `10` |  None  |   True  |  Number of delays |
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
 <b>vm_lifecycle_vm_operations_request:</b> List of VM Lifecycle Operation requests
@@ -71,7 +71,19 @@ Description: Management of the lifecycle activities of Virtual Machines.
 
 | Var          | Type         | Value       |
 |--------------|--------------|-------------|
-| [vm_lifecycle_valid_vm_operations](vars/main.yml#L2)   | dict   | `{'start': {'endpoint': 'start', 'status': 'Running', 'ready': True}, 'stop': {'endpoint': 'stop', 'status': 'Stopped'}, 'restart': {'endpoint': 'restart', 'status': 'Running', 'ready': True, 'idempotent': True}}` |    
+| [vm_lifecycle_valid_vm_operations](vars/main.yml#L2)   | dict   | `{}` |    
+| [vm_lifecycle_valid_vm_operations.start](vars/main.yml#L3)   | dict   | `{}` |    
+| [vm_lifecycle_valid_vm_operations.start.endpoint](vars/main.yml#L4)   | str   | `start` |    
+| [vm_lifecycle_valid_vm_operations.start.status](vars/main.yml#L5)   | str   | `Running` |    
+| [vm_lifecycle_valid_vm_operations.start.ready](vars/main.yml#L6)   | bool   | `True` |    
+| [vm_lifecycle_valid_vm_operations.stop](vars/main.yml#L7)   | dict   | `{}` |    
+| [vm_lifecycle_valid_vm_operations.stop.endpoint](vars/main.yml#L8)   | str   | `stop` |    
+| [vm_lifecycle_valid_vm_operations.stop.status](vars/main.yml#L9)   | str   | `Stopped` |    
+| [vm_lifecycle_valid_vm_operations.restart](vars/main.yml#L10)   | dict   | `{}` |    
+| [vm_lifecycle_valid_vm_operations.restart.endpoint](vars/main.yml#L11)   | str   | `restart` |    
+| [vm_lifecycle_valid_vm_operations.restart.status](vars/main.yml#L12)   | str   | `Running` |    
+| [vm_lifecycle_valid_vm_operations.restart.ready](vars/main.yml#L13)   | bool   | `True` |    
+| [vm_lifecycle_valid_vm_operations.restart.idempotent](vars/main.yml#L14)   | bool   | `True` |    
 
 
 ### Tasks
@@ -129,7 +141,9 @@ Description: Management of the lifecycle activities of Virtual Machines.
 
 ```
 
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 

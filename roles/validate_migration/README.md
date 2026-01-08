@@ -34,10 +34,54 @@ Description: Verification of an Ansible for OpenShift Virtualization Migration e
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [validate_migration_expected_provisioners](defaults/main.yml#L3)   | str   | `<list too long>` |  n/a  |   n/a  |  n/a |
-| [validate_migration_namespace](defaults/main.yml#L16)   | str   | `openshift-mtv` |  n/a  |   n/a  |  n/a |
-| [validate_migration_debug](defaults/main.yml#L18)   | bool   | `True` |  n/a  |   n/a  |  n/a |
-| [validate_migration_cluster_name](defaults/main.yml#L20)   | str   | `cluster01` |  n/a  |   n/a  |  n/a |
+| [validate_migration_expected_provisioners](defaults/main.yml#L3)   | list   | `[]` |  None  |   None  |  None |
+| [validate_migration_expected_provisioners.0](defaults/main.yml#L4)   | str   | `kubernetes.io/aws-ebs` |  None  |   None  |  None |
+| [validate_migration_expected_provisioners.1](defaults/main.yml#L5)   | str   | `kubernetes.io/azure-disk` |  None  |   None  |  None |
+| [validate_migration_expected_provisioners.2](defaults/main.yml#L6)   | str   | `kubernetes.io/azure-file` |  None  |   None  |  None |
+| [validate_migration_expected_provisioners.3](defaults/main.yml#L7)   | str   | `kubernetes.io/cinder` |  None  |   None  |  None |
+| [validate_migration_expected_provisioners.4](defaults/main.yml#L8)   | str   | `kubernetes.io/gce-pd` |  None  |   None  |  None |
+| [validate_migration_expected_provisioners.5](defaults/main.yml#L9)   | str   | `kubernetes.io/hostpath-provisioner` |  None  |   None  |  None |
+| [validate_migration_expected_provisioners.6](defaults/main.yml#L10)   | str   | `manila.csi.openstack.org` |  None  |   None  |  None |
+| [validate_migration_expected_provisioners.7](defaults/main.yml#L11)   | str   | `openshift-storage.cephfs.csi.ceph.com` |  None  |   None  |  None |
+| [validate_migration_expected_provisioners.8](defaults/main.yml#L12)   | str   | `openshift-storage.rbd.csi.ceph.com` |  None  |   None  |  None |
+| [validate_migration_expected_provisioners.9](defaults/main.yml#L13)   | str   | `kubernetes.io/rbd` |  None  |   None  |  None |
+| [validate_migration_expected_provisioners.10](defaults/main.yml#L14)   | str   | `kubernetes.io/vsphere-volume` |  None  |   None  |  None |
+| [validate_migration_namespace](defaults/main.yml#L16)   | str   | `openshift-mtv` |  None  |   None  |  None |
+| [validate_migration_debug](defaults/main.yml#L18)   | bool   | `True` |  None  |   None  |  None |
+| [validate_migration_cluster_name](defaults/main.yml#L20)   | str   | `cluster01` |  None  |   None  |  None |
+<summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
+<br>
+<b>validate_migration_expected_provisioners:</b> None
+<br>
+<b>validate_migration_expected_provisioners.0:</b> None
+<br>
+<b>validate_migration_expected_provisioners.1:</b> None
+<br>
+<b>validate_migration_expected_provisioners.2:</b> None
+<br>
+<b>validate_migration_expected_provisioners.3:</b> None
+<br>
+<b>validate_migration_expected_provisioners.4:</b> None
+<br>
+<b>validate_migration_expected_provisioners.5:</b> None
+<br>
+<b>validate_migration_expected_provisioners.6:</b> None
+<br>
+<b>validate_migration_expected_provisioners.7:</b> None
+<br>
+<b>validate_migration_expected_provisioners.8:</b> None
+<br>
+<b>validate_migration_expected_provisioners.9:</b> None
+<br>
+<b>validate_migration_expected_provisioners.10:</b> None
+<br>
+<b>validate_migration_namespace:</b> None
+<br>
+<b>validate_migration_debug:</b> None
+<br>
+<b>validate_migration_cluster_name:</b> None
+<br>
+<br>
 
 
 
@@ -110,7 +154,9 @@ Description: Verification of an Ansible for OpenShift Virtualization Migration e
 
 ```
 
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 

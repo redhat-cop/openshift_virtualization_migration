@@ -34,33 +34,33 @@ Description: Management of the Migration Toolkit for Virtualization (MTV).
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [mtv_management_namespace](defaults/main.yml#L7)   | str   | `openshift-mtv` |  n/a  |   True  |  Default MTV Namespace |
-| [mtv_management_provider_namespace](defaults/main.yml#L11)   | str   | `{{ mtv_management_namespace }}` |  n/a  |   True  |  MTV Provider Namespace |
-| [mtv_management_migration_namespace](defaults/main.yml#L15)   | str   | `{{ mtv_management_namespace }}` |  n/a  |   True  |  MTV Migration Namespace |
-| [mtv_management_map_providers](defaults/main.yml#L21)   | bool   | `True` |  n/a  |   False  |  Map Providers Boolean |
-| [mtv_management_map_storage](defaults/main.yml#L25)   | bool   | `True` |  n/a  |   False  |  Map Storage Boolean |
-| [mtv_management_map_networks](defaults/main.yml#L29)   | bool   | `True` |  n/a  |   False  |  Map Networks Boolean |
-| [mtv_management_inventory_url](defaults/main.yml#L35)   | str   | `` |  n/a  |   False  |  Inventory URL |
-| [mtv_management_inventory_route_name](defaults/main.yml#L39)   | str   | `forklift-inventory` |  n/a  |   True  |  Inventory Route Name |
-| [mtv_management_inventory_retrieval_method](defaults/main.yml#L45)   | str   | `exec` |  n/a  |   True  |  n/a |
-| [mtv_management_migration_targets](defaults/main.yml#L51)   | list   | `[]` |  n/a  |   False  |  MTV Migration Targets |
-| [mtv_management_vmware_provider_default_name](defaults/main.yml#L72)   | str   | `vmware` |  n/a  |   True  |  MTV VMware Provider Name |
-| [mtv_management_vmware_provider_default_sdk_endpoint](defaults/main.yml#L76)   | str   | `/sdk` |  n/a  |   True  |  MTV SDK Endpoint |
-| [mtv_management_ovirt_provider_default_name](defaults/main.yml#L80)   | str   | `ovirt` |  n/a  |   True  |  MTV Ovirt Provider Name |
-| [mtv_management_ovirt_provider_default_sdk_endpoint](defaults/main.yml#L84)   | str   | `/ovirt-engine/api` |  n/a  |   True  |  MTV SDK Endpoint |
-| [mtv_management_vmware_provider_insecure_skip_tls_verify](defaults/main.yml#L88)   | bool   | `True` |  n/a  |   False  |  MTV Skip TLS |
-| [mtv_management_default_storage_class](defaults/main.yml#L92)   | str   | `` |  n/a  |   False  |  MTV Default StorageClass |
-| [mtv_management_source_target](defaults/main.yml#L98)   | str   | `vmware` |  n/a  |   True  |  MTV Source Target |
-| [mtv_management_destination_target](defaults/main.yml#L102)   | str   | `host` |  n/a  |   True  |  MTV Destination Target |
-| [mtv_management_nad_source_portgroup_annotation](defaults/main.yml#L107)   | str   | `infra.openshift-virtualization-migration/source-portgroup` |  n/a  |   True  |  MTV NAD Source Portgroup Annotation |
-| [mtv_management_vmware_vddk_secret_name](defaults/main.yml#L112)   | str   | `{{ mtv_management_source_target }}-vddk` |  n/a  |   True  |  VDDK Secret Name |
-| [mtv_management_vmware_vddk_init_image](defaults/main.yml#L117)   | str   | `` |  n/a  |   False  |  MTV VDDK Image |
-| [mtv_management_vmware_vddk_init_image_username](defaults/main.yml#L122)   | str   | `` |  n/a  |   False  |  VDDK Image Username |
-| [mtv_management_vmware_vddk_init_image_password](defaults/main.yml#L127)   | str   | `` |  n/a  |   False  |  VDDK Image Password |
-| [mtv_management_vmware_vddk_init_image_credentials_secret](defaults/main.yml#L132)   | str   | `` |  n/a  |   False  |  VDDK Credentials Secret |
-| [mtv_management_vmware_vddk_init_image_service_account](defaults/main.yml#L137)   | str   | `default` |  n/a  |   False  |  VDDK Service Account |
-| [mtv_management_storage_map_overrides](defaults/main.yml#L143)   | list   | `[]` |  n/a  |   False  |  MTV Storage Map Override |
-| [mtv_management_network_map_overrides](defaults/main.yml#L153)   | list   | `[]` |  n/a  |   False  |  MTV Network Map Overrides |
+| [mtv_management_namespace](defaults/main.yml#L7)   | str   | `openshift-mtv` |  None  |   True  |  Default MTV Namespace |
+| [mtv_management_provider_namespace](defaults/main.yml#L11)   | str   | `{{ mtv_management_namespace }}` |  None  |   True  |  MTV Provider Namespace |
+| [mtv_management_migration_namespace](defaults/main.yml#L15)   | str   | `{{ mtv_management_namespace }}` |  None  |   True  |  MTV Migration Namespace |
+| [mtv_management_map_providers](defaults/main.yml#L21)   | bool   | `True` |  None  |   False  |  Map Providers Boolean |
+| [mtv_management_map_storage](defaults/main.yml#L25)   | bool   | `True` |  None  |   False  |  Map Storage Boolean |
+| [mtv_management_map_networks](defaults/main.yml#L29)   | bool   | `True` |  None  |   False  |  Map Networks Boolean |
+| [mtv_management_inventory_url](defaults/main.yml#L35)   | str   | `` |  None  |   False  |  Inventory URL |
+| [mtv_management_inventory_route_name](defaults/main.yml#L39)   | str   | `forklift-inventory` |  None  |   True  |  Inventory Route Name |
+| [mtv_management_inventory_retrieval_method](defaults/main.yml#L45)   | str   | `exec` |  None  |   True  |  None |
+| [mtv_management_migration_targets](defaults/main.yml#L51)   | list   | `[]` |  None  |   False  |  MTV Migration Targets |
+| [mtv_management_vmware_provider_default_name](defaults/main.yml#L72)   | str   | `vmware` |  None  |   True  |  MTV VMware Provider Name |
+| [mtv_management_vmware_provider_default_sdk_endpoint](defaults/main.yml#L76)   | str   | `/sdk` |  None  |   True  |  MTV SDK Endpoint |
+| [mtv_management_ovirt_provider_default_name](defaults/main.yml#L80)   | str   | `ovirt` |  None  |   True  |  MTV Ovirt Provider Name |
+| [mtv_management_ovirt_provider_default_sdk_endpoint](defaults/main.yml#L84)   | str   | `/ovirt-engine/api` |  None  |   True  |  MTV SDK Endpoint |
+| [mtv_management_vmware_provider_insecure_skip_tls_verify](defaults/main.yml#L88)   | bool   | `True` |  None  |   False  |  MTV Skip TLS |
+| [mtv_management_default_storage_class](defaults/main.yml#L92)   | str   | `` |  None  |   False  |  MTV Default StorageClass |
+| [mtv_management_source_target](defaults/main.yml#L98)   | str   | `vmware` |  None  |   True  |  MTV Source Target |
+| [mtv_management_destination_target](defaults/main.yml#L102)   | str   | `host` |  None  |   True  |  MTV Destination Target |
+| [mtv_management_nad_source_portgroup_annotation](defaults/main.yml#L107)   | str   | `infra.openshift-virtualization-migration/source-portgroup` |  None  |   True  |  MTV NAD Source Portgroup Annotation |
+| [mtv_management_vmware_vddk_secret_name](defaults/main.yml#L112)   | str   | `{{ mtv_management_source_target }}-vddk` |  None  |   True  |  VDDK Secret Name |
+| [mtv_management_vmware_vddk_init_image](defaults/main.yml#L117)   | str   | `` |  None  |   False  |  MTV VDDK Image |
+| [mtv_management_vmware_vddk_init_image_username](defaults/main.yml#L122)   | str   | `` |  None  |   False  |  VDDK Image Username |
+| [mtv_management_vmware_vddk_init_image_password](defaults/main.yml#L127)   | str   | `` |  None  |   False  |  VDDK Image Password |
+| [mtv_management_vmware_vddk_init_image_credentials_secret](defaults/main.yml#L132)   | str   | `` |  None  |   False  |  VDDK Credentials Secret |
+| [mtv_management_vmware_vddk_init_image_service_account](defaults/main.yml#L137)   | str   | `default` |  None  |   False  |  VDDK Service Account |
+| [mtv_management_storage_map_overrides](defaults/main.yml#L143)   | list   | `[]` |  None  |   False  |  MTV Storage Map Override |
+| [mtv_management_network_map_overrides](defaults/main.yml#L153)   | list   | `[]` |  None  |   False  |  MTV Network Map Overrides |
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
 <b>mtv_management_namespace:</b> The default namespace to use if not specified
@@ -78,6 +78,10 @@ Description: Management of the Migration Toolkit for Virtualization (MTV).
 <b>mtv_management_inventory_url:</b> Inventory URL
 <br>
 <b>mtv_management_inventory_route_name:</b> Inventory Route Name
+<br>
+<b>mtv_management_inventory_retrieval_method:</b> None
+<br>
+<b>mtv_management_migration_targets:</b> None
 <br>
 <b>mtv_management_vmware_provider_default_name:</b> Default name for VMware provider
 <br>
@@ -287,7 +291,9 @@ Description: Management of the Migration Toolkit for Virtualization (MTV).
 
 ```
 
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 

@@ -35,9 +35,9 @@ Description: Management of Machine Credentials.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [aap_machine_credentials_request](defaults/main.yml#L7)   | list   | `[]` |  n/a  |   True  |  List of AAP Credentials |
-| [aap_machine_credentials_organization](defaults/main.yml#L15)   | str   | `{{ aap_project ¦ default('OpenShift Virtualization Migration', true) }}` |  n/a  |   True  |  Organization name in AAP host |
-| [aap_machine_credentials_cac_credentials_role](defaults/main.yml#L20)   | str   | `{{ 'infra.controller_configuration.credentials' if aap_version is defined and aap_version is version('2.5', '<') else 'infra.aap_configuration.controller_credentials' }}` |  n/a  |   True  |  Ansible Automation Platform configuration collection credentials role |
+| [aap_machine_credentials_request](defaults/main.yml#L7)   | list   | `[]` |  None  |   True  |  List of AAP Credentials |
+| [aap_machine_credentials_organization](defaults/main.yml#L15)   | str   | `{{ aap_project ¦ default('OpenShift Virtualization Migration', true) }}` |  None  |   True  |  Organization name in AAP host |
+| [aap_machine_credentials_cac_credentials_role](defaults/main.yml#L20)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  Ansible Automation Platform configuration collection credentials role |
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
 <b>aap_machine_credentials_request:</b> List of credentials to access AAP provided by _process_machine_credential.yml
@@ -57,9 +57,34 @@ Description: Management of Machine Credentials.
 
 | Var          | Type         | Value       |
 |--------------|--------------|-------------|
-| [aap_machine_credentials_input_keys](vars/main.yml#L3)   | list   | `['username', 'password', 'ssh_key_data', 'ssh_public_key_data', 'ssh_key_unlock', 'become_method', 'become_username', 'become_password', 'state']` |    
-| [aap_machine_credentials_base_keys](vars/main.yml#L14)   | list   | `[{'name': 'name'}, {'name': 'description'}, {'name': 'organization', 'default': '{{ aap_machine_credentials_organization }}'}, {'name': 'credential_type', 'default': 'Machine'}]` |    
-| [aap_machine_credentials_input_maps](vars/main.yml#L22)   | list   | `[{'src': 'ssh_key_data_path', 'dest': 'ssh_key_data'}, {'src': 'ssh_public_key_data_path', 'dest': 'ssh_public_key_data'}]` |    
+| [aap_machine_credentials_input_keys](vars/main.yml#L3)   | list   | `[]` |    
+| [aap_machine_credentials_input_keys.0](vars/main.yml#L4)   | str   | `username` |    
+| [aap_machine_credentials_input_keys.1](vars/main.yml#L5)   | str   | `password` |    
+| [aap_machine_credentials_input_keys.2](vars/main.yml#L6)   | str   | `ssh_key_data` |    
+| [aap_machine_credentials_input_keys.3](vars/main.yml#L7)   | str   | `ssh_public_key_data` |    
+| [aap_machine_credentials_input_keys.4](vars/main.yml#L8)   | str   | `ssh_key_unlock` |    
+| [aap_machine_credentials_input_keys.5](vars/main.yml#L9)   | str   | `become_method` |    
+| [aap_machine_credentials_input_keys.6](vars/main.yml#L10)   | str   | `become_username` |    
+| [aap_machine_credentials_input_keys.7](vars/main.yml#L11)   | str   | `become_password` |    
+| [aap_machine_credentials_input_keys.8](vars/main.yml#L12)   | str   | `state` |    
+| [aap_machine_credentials_base_keys](vars/main.yml#L14)   | list   | `[]` |    
+| [aap_machine_credentials_base_keys.0](vars/main.yml#L15)   | dict   | `{}` |    
+| [aap_machine_credentials_base_keys.0.name](vars/main.yml#L15)   | str   | `name` |    
+| [aap_machine_credentials_base_keys.1](vars/main.yml#L16)   | dict   | `{}` |    
+| [aap_machine_credentials_base_keys.1.name](vars/main.yml#L16)   | str   | `description` |    
+| [aap_machine_credentials_base_keys.2](vars/main.yml#L17)   | dict   | `{}` |    
+| [aap_machine_credentials_base_keys.2.name](vars/main.yml#L17)   | str   | `organization` |    
+| [aap_machine_credentials_base_keys.2.default](vars/main.yml#L18)   | str   | `{{ aap_machine_credentials_organization }}` |    
+| [aap_machine_credentials_base_keys.3](vars/main.yml#L19)   | dict   | `{}` |    
+| [aap_machine_credentials_base_keys.3.name](vars/main.yml#L19)   | str   | `credential_type` |    
+| [aap_machine_credentials_base_keys.3.default](vars/main.yml#L20)   | str   | `Machine` |    
+| [aap_machine_credentials_input_maps](vars/main.yml#L22)   | list   | `[]` |    
+| [aap_machine_credentials_input_maps.0](vars/main.yml#L23)   | dict   | `{}` |    
+| [aap_machine_credentials_input_maps.0.src](vars/main.yml#L23)   | str   | `ssh_key_data_path` |    
+| [aap_machine_credentials_input_maps.0.dest](vars/main.yml#L24)   | str   | `ssh_key_data` |    
+| [aap_machine_credentials_input_maps.1](vars/main.yml#L25)   | dict   | `{}` |    
+| [aap_machine_credentials_input_maps.1.src](vars/main.yml#L25)   | str   | `ssh_public_key_data_path` |    
+| [aap_machine_credentials_input_maps.1.dest](vars/main.yml#L26)   | str   | `ssh_public_key_data` |    
 
 
 ### Tasks
@@ -110,7 +135,9 @@ Description: Management of Machine Credentials.
 
 ```
 
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 

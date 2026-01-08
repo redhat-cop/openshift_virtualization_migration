@@ -34,23 +34,60 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [bootstrap_user](defaults/main.yml#L6)   | str   | `ansible` |  n/a  |   true  |  This is the bootstrap user with sudo that should already exist on the bootsrap host |
-| [bootstrap_public_keys](defaults/main.yml#L10)   | list   | `[]` |  n/a  |   false  |  Add a list of SSH public keys to be added to authorized_keys on the bootstrap VM |
-| [bootstrap_aap_setup_working_dir](defaults/main.yml#L14)   | str   | `/home/ansible/bootstrap_dir` |  n/a  |   true  |  Working direcotry on the bootstrap host |
-| [bootstrap_rh_username](defaults/main.yml#L18)   | str   | `{{ rh_username }}` |  n/a  |   true  |  Red Hat account login (this is used to attach your subs to controller) |
-| [bootstrap_rh_password](defaults/main.yml#L22)   | str   | `{{ rh_password }}` |  n/a  |   true  |  Red Hat account password |
-| [bootstrap_rh_pool_id](defaults/main.yml#L26)   | str   | `` |  n/a  |   true  |  Red Hat pool ID |
-| [bootstrap_rh_filter_product_name](defaults/main.yml#L30)   | str   | `Red Hat Ansible Automation Platform` |  n/a  |   false  |  Red Hat subscription product name |
-| [bootstrap_rh_filter_support_level](defaults/main.yml#L34)   | str   | `Self-Support` |  n/a  |   false  |  Red Hat subscription support level |
-| [bootstrap_controller_password](defaults/main.yml#L38)   | str   | `{{ controller_password }}` |  n/a  |   true  |  The admin password for the controller |
-| [bootstrap_aap_setup_inst_verbosity](defaults/main.yml#L42)   | int   | `1` |  n/a  |   false  |  Level from 0 - 5 for verbosity |
-| [bootstrap_aap_license_manifest](defaults/main.yml#L46)   | str   | `` |  n/a  |   false  |  Location of the AAP license manifest file |
-| [bootstrap_controller_hostname](defaults/main.yml#L55)   | str   | `{{ controller_hostname ¦ default(ansible_host) }}` |  n/a  |   false  |  Bootstrap controller hostname |
-| [bootstrap_controller_username](defaults/main.yml#L59)   | str   | `admin` |  n/a  |   false  |  Bootstrap controller username |
-| [bootstrap_aap_version](defaults/main.yml#L63)   | str   | `{{ aap_version ¦ default(2.5) }}` |  n/a  |   false  |  Bootstrap AAP Version |
-| [bootstrap_controller_validate_certs](defaults/main.yml#L67)   | str   | `{{ controller_validate_certs ¦ default(false) }}` |  n/a  |   false  |  Validate Controller SSL certificates |
-| [bootstrap_license_file_submission_retries](defaults/main.yml#L73)   | int   | `25` |  n/a  |   True  |  License File Submission Retries |
-| [bootstrap_license_file_submission_delay](defaults/main.yml#L79)   | int   | `10` |  n/a  |   True  |  License File Submission Delay |
+| [bootstrap_user](defaults/main.yml#L6)   | str   | `ansible` |  None  |   true  |  This is the bootstrap user with sudo that should already exist on the bootsrap host |
+| [bootstrap_public_keys](defaults/main.yml#L10)   | list   | `[]` |  None  |   false  |  Add a list of SSH public keys to be added to authorized_keys on the bootstrap VM |
+| [bootstrap_aap_setup_working_dir](defaults/main.yml#L14)   | str   | `/home/ansible/bootstrap_dir` |  None  |   true  |  Working direcotry on the bootstrap host |
+| [bootstrap_rh_username](defaults/main.yml#L18)   | str   | `{{ rh_username }}` |  None  |   true  |  Red Hat account login (this is used to attach your subs to controller) |
+| [bootstrap_rh_password](defaults/main.yml#L22)   | str   | `{{ rh_password }}` |  None  |   true  |  Red Hat account password |
+| [bootstrap_rh_pool_id](defaults/main.yml#L26)   | str   | `` |  None  |   true  |  Red Hat pool ID |
+| [bootstrap_rh_filter_product_name](defaults/main.yml#L30)   | str   | `Red Hat Ansible Automation Platform` |  None  |   false  |  Red Hat subscription product name |
+| [bootstrap_rh_filter_support_level](defaults/main.yml#L34)   | str   | `Self-Support` |  None  |   false  |  Red Hat subscription support level |
+| [bootstrap_controller_password](defaults/main.yml#L38)   | str   | `{{ controller_password }}` |  None  |   true  |  The admin password for the controller |
+| [bootstrap_aap_setup_inst_verbosity](defaults/main.yml#L42)   | int   | `1` |  None  |   false  |  Level from 0 - 5 for verbosity |
+| [bootstrap_aap_license_manifest](defaults/main.yml#L46)   | str   | `` |  None  |   false  |  Location of the AAP license manifest file |
+| [bootstrap_controller_hostname](defaults/main.yml#L55)   | str   | `{{ controller_hostname ¦ default(ansible_host) }}` |  None  |   false  |  Bootstrap controller hostname |
+| [bootstrap_controller_username](defaults/main.yml#L59)   | str   | `admin` |  None  |   false  |  Bootstrap controller username |
+| [bootstrap_aap_version](defaults/main.yml#L63)   | str   | `{{ aap_version ¦ default(2.5) }}` |  None  |   false  |  Bootstrap AAP Version |
+| [bootstrap_controller_validate_certs](defaults/main.yml#L67)   | str   | `{{ controller_validate_certs ¦ default(false) }}` |  None  |   false  |  Validate Controller SSL certificates |
+| [bootstrap_license_file_submission_retries](defaults/main.yml#L73)   | int   | `25` |  None  |   True  |  License File Submission Retries |
+| [bootstrap_license_file_submission_delay](defaults/main.yml#L79)   | int   | `10` |  None  |   True  |  License File Submission Delay |
+<summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
+<br>
+<b>bootstrap_user:</b> None
+<br>
+<b>bootstrap_public_keys:</b> None
+<br>
+<b>bootstrap_aap_setup_working_dir:</b> None
+<br>
+<b>bootstrap_rh_username:</b> None
+<br>
+<b>bootstrap_rh_password:</b> None
+<br>
+<b>bootstrap_rh_pool_id:</b> None
+<br>
+<b>bootstrap_rh_filter_product_name:</b> None
+<br>
+<b>bootstrap_rh_filter_support_level:</b> None
+<br>
+<b>bootstrap_controller_password:</b> None
+<br>
+<b>bootstrap_aap_setup_inst_verbosity:</b> None
+<br>
+<b>bootstrap_aap_license_manifest:</b> None
+<br>
+<b>bootstrap_controller_hostname:</b> None
+<br>
+<b>bootstrap_controller_username:</b> None
+<br>
+<b>bootstrap_aap_version:</b> None
+<br>
+<b>bootstrap_controller_validate_certs:</b> None
+<br>
+<b>bootstrap_license_file_submission_retries:</b> None
+<br>
+<b>bootstrap_license_file_submission_delay:</b> None
+<br>
+<br>
 
 
 
@@ -117,7 +154,9 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 
 ```
 
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 

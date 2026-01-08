@@ -35,8 +35,15 @@ Description: Collection of Migration Toolkit for Virtualization inventory inform
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [vm_collect_obj_default_api_version](defaults/main.yml#L4)   | str   | `kubevirt.io/v1` |  n/a  |   n/a  |  n/a |
-| [vm_collect_obj_default_kind](defaults/main.yml#L5)   | str   | `VirtualMachine` |  n/a  |   n/a  |  n/a |
+| [vm_collect_obj_default_api_version](defaults/main.yml#L4)   | str   | `kubevirt.io/v1` |  None  |   None  |  None |
+| [vm_collect_obj_default_kind](defaults/main.yml#L5)   | str   | `VirtualMachine` |  None  |   None  |  None |
+<summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
+<br>
+<b>vm_collect_obj_default_api_version:</b> None
+<br>
+<b>vm_collect_obj_default_kind:</b> None
+<br>
+<br>
 
 
 
@@ -75,7 +82,9 @@ Description: Collection of Migration Toolkit for Virtualization inventory inform
 
 ```
 
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 

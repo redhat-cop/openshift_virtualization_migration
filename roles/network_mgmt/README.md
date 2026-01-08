@@ -34,24 +34,28 @@ Description: Management of network related components.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [network_mgmt_openshift_node_network_ports](defaults/main.yml#L5)   | list   | `[]` |  n/a  |   True  |  OpenShift Node Network Ports |
-| [network_mgmt_port_is_existing_bond](defaults/main.yml#L10)   | bool   | `False` |  n/a  |   True  |  Define Bond |
-| [network_mgmt_vcenter_dvswitch](defaults/main.yml#L16)   | str   | `` |  n/a  |   True  |  vCenter DVSwitch |
-| [network_mgmt_vcenter_datacenter](defaults/main.yml#L21)   | str   | `` |  n/a  |   True  |  vCenter Data Center |
-| [network_mgmt_openshift_network_bridge_mode](defaults/main.yml#L26)   | str   | `linux-bridge` |  n/a  |   True  |  OpenShift Network Bridge Mode |
-| [network_mgmt_use_default_ovn_bridge](defaults/main.yml#L31)   | bool   | `False` |  n/a  |   True  |  OVN Bridge |
-| [network_mgmt_openshift_network_bond_mode](defaults/main.yml#L40)   | str   | `802.3ad` |  n/a  |   True  |  OpenShift Network Bond Mode |
-| [network_mgmt_openshift_network_supported_bond_modes](defaults/main.yml#L46)   | list   | `['802.3ad', 'active-backup', 'balance-xor']` |  n/a  |   True  |  Supported Bond Modes |
-| [network_mgmt_nncp_max_unavailable](defaults/main.yml#L54)   | int   | `3` |  n/a  |   True  |  NNCP Max Unavailability |
-| [network_mgmt_nncp_nodeselector](defaults/main.yml#L62)   | dict   | `{'node-role.kubernetes.io/worker': ''}` |  n/a  |   True  |  NNCP NodeSelector |
-| [network_mgmt_nncp_name_prefix](defaults/main.yml#L68)   | str   | `vs-` |  n/a  |   True  |  NNCP Name Prefix |
-| [network_mgmt_nad_namespace](defaults/main.yml#L73)   | str   | `default` |  n/a  |   True  |  NAD Namespace |
-| [network_mgmt_nad_auto_bridge_name](defaults/main.yml#L78)   | str   | `` |  n/a  |   n/a  |  n/a |
-| [network_mgmt_nad_name_prefix](defaults/main.yml#L85)   | str   | `net-` |  n/a  |   True  |  NAD Name Prefix |
-| [network_mgmt_manual_bond_name](defaults/main.yml#L90)   | str   | `` |  n/a  |   True  |  Bond Name in Manual Mode |
-| [network_mgmt_manual_bridge_name](defaults/main.yml#L95)   | str   | `vm-bridge` |  n/a  |   True  |  Bridge Name in Manual Mode |
-| [network_mgmt_manual_localnet_name](defaults/main.yml#L100)   | str   | `` |  n/a  |   True  |  Local Network Name in Manual Mode |
-| [network_mgmt_manual_nad_list](defaults/main.yml#L105)   | list   | `[]` |  n/a  |   True  |  NAD List in Manual Mode |
+| [network_mgmt_openshift_node_network_ports](defaults/main.yml#L5)   | list   | `[]` |  None  |   True  |  OpenShift Node Network Ports |
+| [network_mgmt_port_is_existing_bond](defaults/main.yml#L10)   | bool   | `False` |  None  |   True  |  Define Bond |
+| [network_mgmt_vcenter_dvswitch](defaults/main.yml#L16)   | str   | `` |  None  |   True  |  vCenter DVSwitch |
+| [network_mgmt_vcenter_datacenter](defaults/main.yml#L21)   | str   | `` |  None  |   True  |  vCenter Data Center |
+| [network_mgmt_openshift_network_bridge_mode](defaults/main.yml#L26)   | str   | `linux-bridge` |  None  |   True  |  OpenShift Network Bridge Mode |
+| [network_mgmt_use_default_ovn_bridge](defaults/main.yml#L31)   | bool   | `False` |  None  |   True  |  OVN Bridge |
+| [network_mgmt_openshift_network_bond_mode](defaults/main.yml#L40)   | str   | `802.3ad` |  None  |   True  |  OpenShift Network Bond Mode |
+| [network_mgmt_openshift_network_supported_bond_modes](defaults/main.yml#L46)   | list   | `[]` |  None  |   True  |  Supported Bond Modes |
+| [network_mgmt_openshift_network_supported_bond_modes.0](defaults/main.yml#L47)   | str   | `802.3ad` |  None  |   None  |  None |
+| [network_mgmt_openshift_network_supported_bond_modes.1](defaults/main.yml#L48)   | str   | `active-backup` |  None  |   None  |  None |
+| [network_mgmt_openshift_network_supported_bond_modes.2](defaults/main.yml#L49)   | str   | `balance-xor` |  None  |   None  |  None |
+| [network_mgmt_nncp_max_unavailable](defaults/main.yml#L54)   | int   | `3` |  None  |   True  |  NNCP Max Unavailability |
+| [network_mgmt_nncp_nodeselector](defaults/main.yml#L62)   | dict   | `{}` |  None  |   True  |  NNCP NodeSelector |
+| [network_mgmt_nncp_nodeselector.node-role.kubernetes.io/worker](defaults/main.yml#L63)   | str   | `` |  None  |   None  |  None |
+| [network_mgmt_nncp_name_prefix](defaults/main.yml#L68)   | str   | `vs-` |  None  |   True  |  NNCP Name Prefix |
+| [network_mgmt_nad_namespace](defaults/main.yml#L73)   | str   | `default` |  None  |   True  |  NAD Namespace |
+| [network_mgmt_nad_auto_bridge_name](defaults/main.yml#L78)   | str   | `` |  None  |   None  |  None |
+| [network_mgmt_nad_name_prefix](defaults/main.yml#L85)   | str   | `net-` |  None  |   True  |  NAD Name Prefix |
+| [network_mgmt_manual_bond_name](defaults/main.yml#L90)   | str   | `` |  None  |   True  |  Bond Name in Manual Mode |
+| [network_mgmt_manual_bridge_name](defaults/main.yml#L95)   | str   | `vm-bridge` |  None  |   True  |  Bridge Name in Manual Mode |
+| [network_mgmt_manual_localnet_name](defaults/main.yml#L100)   | str   | `` |  None  |   True  |  Local Network Name in Manual Mode |
+| [network_mgmt_manual_nad_list](defaults/main.yml#L105)   | list   | `[]` |  None  |   True  |  NAD List in Manual Mode |
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
 <b>network_mgmt_openshift_node_network_ports:</b> List of Node Network Ports
@@ -70,13 +74,23 @@ Description: Management of network related components.
 <br>
 <b>network_mgmt_openshift_network_supported_bond_modes:</b> List of supported bond modes
 <br>
+<b>network_mgmt_openshift_network_supported_bond_modes.0:</b> None
+<br>
+<b>network_mgmt_openshift_network_supported_bond_modes.1:</b> None
+<br>
+<b>network_mgmt_openshift_network_supported_bond_modes.2:</b> None
+<br>
 <b>network_mgmt_nncp_max_unavailable:</b> Maximum number of times NNCP can be unavailable
 <br>
 <b>network_mgmt_nncp_nodeselector:</b> NNCP NodeSelector on the OpenShift cluster
 <br>
+<b>network_mgmt_nncp_nodeselector.node-role.kubernetes.io/worker:</b> None
+<br>
 <b>network_mgmt_nncp_name_prefix:</b> NNCP Name Prefix
 <br>
 <b>network_mgmt_nad_namespace:</b> NAD Namespace
+<br>
+<b>network_mgmt_nad_auto_bridge_name:</b> None
 <br>
 <b>network_mgmt_nad_name_prefix:</b> NAD Name Prefix
 <br>
@@ -176,7 +190,9 @@ Description: Management of network related components.
 
 ```
 
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 

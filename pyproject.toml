@@ -28,14 +28,14 @@ prerelease = false
 
 [tool.semantic_release.changelog]
 exclude_commit_patterns = ['test', 'ci']
-mode = "init"
-insertion_flag = "<!-- version list -->"
+mode = "update"
+insertion_flag = "# CHANGELOG"
 template_dir = "templates"
 
 [tool.semantic_release.changelog.default_templates]
 changelog_file = "CHANGELOG.md"
 output_format = "md"
-mask_initial_release = false
+mask_initial_release = true
 
 [tool.semantic_release.commit_author]
 env = "SEMANTIC_RELEASE_AUTHOR"

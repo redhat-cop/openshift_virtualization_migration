@@ -35,12 +35,13 @@ Description: Management of SSH keys for Virtual Machines in OpenShift.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [vm_ssh_request](defaults/main.yml#L7)   | dict   | `{}` |  n/a  |   True  |  SSH Requests |
-| [vm_ssh_openshift_host](defaults/main.yml#L26)   | str   | `{{ openshift_host }}` |  n/a  |   True  |  OpenShift host |
-| [vm_ssh_openshift_api_key](defaults/main.yml#L31)   | str   | `{{ openshift_api_key }}` |  n/a  |   True  |  OpenShift API Key |
-| [vm_ssh_openshift_verify_ssl](defaults/main.yml#L36)   | str   | `{{ openshift_verify_ssl }}` |  n/a  |   True  |  Verify SSL Certificate |
-| [vm_ssh_default_users](defaults/main.yml#L41)   | list   | `['root']` |  n/a  |   True  |  List of default SSH users |
-| [vm_ssh_kubevirt_api_version](defaults/main.yml#L47)   | str   | `kubevirt.io/v1` |  n/a  |   True  |  KubeVirt API Version |
+| [vm_ssh_request](defaults/main.yml#L7)   | dict   | `{}` |  None  |   True  |  SSH Requests |
+| [vm_ssh_openshift_host](defaults/main.yml#L26)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift host |
+| [vm_ssh_openshift_api_key](defaults/main.yml#L31)   | str   | `{{ openshift_api_key }}` |  None  |   True  |  OpenShift API Key |
+| [vm_ssh_openshift_verify_ssl](defaults/main.yml#L36)   | str   | `{{ openshift_verify_ssl }}` |  None  |   True  |  Verify SSL Certificate |
+| [vm_ssh_default_users](defaults/main.yml#L41)   | list   | `[]` |  None  |   True  |  List of default SSH users |
+| [vm_ssh_default_users.0](defaults/main.yml#L42)   | str   | `root` |  None  |   None  |  None |
+| [vm_ssh_kubevirt_api_version](defaults/main.yml#L47)   | str   | `kubevirt.io/v1` |  None  |   True  |  KubeVirt API Version |
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
 <b>vm_ssh_request:</b> SSH Requests
@@ -52,6 +53,8 @@ Description: Management of SSH keys for Virtual Machines in OpenShift.
 <b>vm_ssh_openshift_verify_ssl:</b> Variable to enable SSL verification
 <br>
 <b>vm_ssh_default_users:</b> List of default SSH users (default user: root)
+<br>
+<b>vm_ssh_default_users.0:</b> None
 <br>
 <b>vm_ssh_kubevirt_api_version:</b> KubeVirt API Version
 <br>
@@ -129,7 +132,9 @@ Description: Management of SSH keys for Virtual Machines in OpenShift.
 
 ```
 
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 

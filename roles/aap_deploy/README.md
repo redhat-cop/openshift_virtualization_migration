@@ -34,14 +34,17 @@ Description: Deploys an instance of Ansible Automation Platform.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [aap_deploy_aap_install](defaults/main.yml#L7)   | bool   | `True` |  n/a  |   True  |  Boolean to allow AAP instalation and subscription attachment |
-| [aap_deploy_controller_username](defaults/main.yml#L18)   | str   | `{{ controller_username ¦ default('admin', true) }}` |  n/a  |   True  |  Username for AAP Controller authentication |
-| [aap_deploy_openshift_host](defaults/main.yml#L23)   | str   | `{{ openshift_host }}` |  n/a  |   True  |  OpenShift cluster hostname |
-| [aap_deploy_openshift_api_key](defaults/main.yml#L28)   | str   | `{{ openshift_api_key }}` |  n/a  |   False  |  OpenShift API authentication key |
-| [aap_deploy_openshift_verify_ssl](defaults/main.yml#L33)   | str   | `{{ openshift_verify_ssl }}` |  n/a  |   False  |  Verify SSL certificates for OpenShift connection |
-| [aap_deploy_validate_components](defaults/main.yml#L38)   | list   | `["{{ aap_instance_name + '-controller-task' if aap_version is not defined or aap_version is version('2.5', '>=') else aap_instance_name + '-web' }}", "{{ aap_instance_name + '-controller-task' if aap_version is not defined or aap_version is version('2.5', '>=') else aap_instance_name + '-task' }}", "{{ aap_instance_name + '-gateway' if aap_version is not defined or aap_version is version('2.5', '>=') else '' }}"]` |  n/a  |   True  |  Ansible Automation Platform component validation |
-| [aap_deploy_cac_collection](defaults/main.yml#L49)   | str   | `{{ 'infra.controller_configuration' if aap_version is defined and aap_version is version('2.5', '<') else 'infra.aap_configuration' }}` |  n/a  |   True  |  Ansible Automation Platform configuration collection |
-| [aap_deploy_aap_channel](defaults/main.yml#L53)   | str   | `{{ aap_channel ¦ default('stable-2.5') }}` |  n/a  |   n/a  |  n/a |
+| [aap_deploy_aap_install](defaults/main.yml#L7)   | bool   | `True` |  None  |   True  |  Boolean to allow AAP instalation and subscription attachment |
+| [aap_deploy_controller_username](defaults/main.yml#L18)   | str   | `{{ controller_username ¦ default('admin', true) }}` |  None  |   True  |  Username for AAP Controller authentication |
+| [aap_deploy_openshift_host](defaults/main.yml#L23)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift cluster hostname |
+| [aap_deploy_openshift_api_key](defaults/main.yml#L28)   | str   | `{{ openshift_api_key }}` |  None  |   False  |  OpenShift API authentication key |
+| [aap_deploy_openshift_verify_ssl](defaults/main.yml#L33)   | str   | `{{ openshift_verify_ssl }}` |  None  |   False  |  Verify SSL certificates for OpenShift connection |
+| [aap_deploy_validate_components](defaults/main.yml#L38)   | list   | `[]` |  None  |   True  |  Ansible Automation Platform component validation |
+| [aap_deploy_validate_components.0](defaults/main.yml#L38)   | str   | `{{ aap_instance_name + '-controller-task' if aap_version is not defined or aap_version is version('2.5', '>=') else aap_instance_name + '-web' }}` |  None  |   True  |  Ansible Automation Platform component validation |
+| [aap_deploy_validate_components.1](defaults/main.yml#L38)   | str   | `{{ aap_instance_name + '-controller-task' if aap_version is not defined or aap_version is version('2.5', '>=') else aap_instance_name + '-task' }}` |  None  |   True  |  Ansible Automation Platform component validation |
+| [aap_deploy_validate_components.2](defaults/main.yml#L38)   | str   | `{{ aap_instance_name + '-gateway' if aap_version is not defined or aap_version is version('2.5', '>=') else '' }}` |  None  |   True  |  Ansible Automation Platform component validation |
+| [aap_deploy_cac_collection](defaults/main.yml#L49)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  Ansible Automation Platform configuration collection |
+| [aap_deploy_aap_channel](defaults/main.yml#L53)   | str   | `{{ aap_channel ¦ default('stable-2.5') }}` |  None  |   None  |  None |
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
 <b>aap_deploy_aap_install:</b> Setting this variable to true will install AAP and attach a valid subscription based on your account.
@@ -56,7 +59,15 @@ Description: Deploys an instance of Ansible Automation Platform.
 <br>
 <b>aap_deploy_validate_components:</b> The names of the components to verify is running after installation.
 <br>
+<b>aap_deploy_validate_components.0:</b> The names of the components to verify is running after installation.
+<br>
+<b>aap_deploy_validate_components.1:</b> The names of the components to verify is running after installation.
+<br>
+<b>aap_deploy_validate_components.2:</b> The names of the components to verify is running after installation.
+<br>
 <b>aap_deploy_cac_collection:</b> Determines which collection to use for configuring AAP based on the version.
+<br>
+<b>aap_deploy_aap_channel:</b> None
 <br>
 <br>
 
@@ -119,7 +130,9 @@ Description: Deploys an instance of Ansible Automation Platform.
 
 ```
 
+
 ## Author Information
+OpenShift Virtualization Migration Contributors
 
 #### License
 
