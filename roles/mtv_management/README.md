@@ -126,68 +126,6 @@ Description: Management of the Migration Toolkit for Virtualization (MTV).
 ### Tasks
 
 
-#### File: tasks/_mtv_network_map.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _mtv_network_map ¦ Initialize data structures | ansible.builtin.set_fact | False |
-| _mtv_network_map ¦ Verify Network Map Overrides do not contain both includes and excludes | ansible.builtin.fail | True |
-| _mtv_network_map ¦ Query for VMWare Networks from Source Provider | ansible.builtin.include_tasks | True |
-| _mtv_network_map ¦ Query for Ovirt Networks from Source Provider | ansible.builtin.include_tasks | True |
-| _mtv_network_map ¦ Query for NetworkAttachmentDefinitions from Destination Provider | ansible.builtin.include_tasks | False |
-| _mtv_network_map ¦ Process VMware Networks | ansible.builtin.include_tasks | True |
-| _mtv_network_map ¦ Process Ovirt Networks | ansible.builtin.include_tasks | True |
-| _mtv_network_map ¦ Template NetworkMap Map | ansible.builtin.set_fact | False |
-| _mtv_network_map ¦ Create Network Map | redhat.openshift.k8s | False |
-
-#### File: tasks/_mtv_network_map_process_network.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _mtv_network_map_process_network ¦ Set VMware NetworkMap Variables | ansible.builtin.set_fact | True |
-| _mtv_network_map_process_network ¦ Set Ovirt NetworkMap Variables | ansible.builtin.set_fact | True |
-| _mtv_network_map_process_network ¦ Locate VMware NetworkAttachmentDefinition | ansible.builtin.set_fact | True |
-| _mtv_network_map_process_network ¦ Locate Ovirt NetworkAttachmentDefinition | ansible.builtin.set_fact | True |
-| _mtv_network_map_process_network ¦ Validate Found VMware NetworkAttachmentDefinitions | ansible.builtin.assert | True |
-| _mtv_network_map_process_network ¦ Validate Found Ovirt NetworkAttachmentDefinitions | ansible.builtin.assert | True |
-| _mtv_network_map_process_network ¦ Template NetworkMap Map | ansible.builtin.set_fact | False |
-| _mtv_network_map_process_network ¦ Add VMWare NetworkMaps Map to Dict | ansible.builtin.set_fact | True |
-| _mtv_network_map_process_network ¦ Add Ovirt NetworkMaps Map to Dict | ansible.builtin.set_fact | True |
-
-#### File: tasks/_mtv_provider_ovirt.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _mtv_provider_ovirt ¦ Verify credential name provided when more than one credential specified | ansible.builtin.assert | True |
-| _mtv_provider_ovirt ¦ Set provider name | ansible.builtin.set_fact | False |
-| _mtv_provider_ovirt ¦ Validate required Ovirt provider Properties | ansible.builtin.assert | False |
-| _mtv_provider_ovirt ¦ Set Ovirt Provider URL | ansible.builtin.set_fact | False |
-| _mtv_provider_ovirt ¦ MTV Certificate | block | True |
-| _mtv_provider_ovirt ¦ Retrieve Remote Ovirt Provider Certificate | community.crypto.get_certificate | False |
-| _mtv_provider_ovirt ¦ Set Ovirt Provider Certificate | ansible.builtin.set_fact | False |
-| _mtv_provider_ovirt ¦ Set Provider Secret Name/Namespace (Configuration) | ansible.builtin.set_fact | True |
-| _mtv_provider_ovirt ¦ Configure Provider Secret | block | True |
-| _mtv_provider_ovirt ¦ Set Provider Secret Name/Namespace (Generated) | ansible.builtin.set_fact | True |
-| _mtv_provider_ovirt ¦ Create Ovirt credentials secret | redhat.openshift.k8s | True |
-| _mtv_provider_ovirt ¦ Create Ovirt Provider resource | redhat.openshift.k8s | False |
-
-#### File: tasks/_mtv_provider_vmware.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _mtv_provider_vmware ¦ Verify credential name provided when more than one credential specified | ansible.builtin.assert | True |
-| _mtv_provider_vmware ¦ Set provider name | ansible.builtin.set_fact | False |
-| _mtv_provider_vmware ¦ Validate required VMware provider Properties | ansible.builtin.assert | False |
-| _mtv_provider_vmware ¦ Set VMware Provider URL | ansible.builtin.set_fact | False |
-| _mtv_provider_vmware ¦ MTV Certificate | block | True |
-| _mtv_provider_vmware ¦ Retrieve Remote VMware Provider Certificate | community.crypto.get_certificate | False |
-| _mtv_provider_vmware ¦ Set VMware Provider Certificate | ansible.builtin.set_fact | False |
-| _mtv_provider_vmware ¦ Set Provider Secret Name/Namespace (Configuration) | ansible.builtin.set_fact | True |
-| _mtv_provider_vmware ¦ Configure Provider Secret | block | True |
-| _mtv_provider_vmware ¦ Set Provider Secret Name/Namespace (Generated) | ansible.builtin.set_fact | True |
-| _mtv_provider_vmware ¦ Create VMware credentials secret | redhat.openshift.k8s | True |
-| _mtv_provider_vmware ¦ Create VMware Provider resource | redhat.openshift.k8s | False |
-
 #### File: tasks/_mtv_storage_map.yml
 
 | Name | Module | Has Conditions |
@@ -202,38 +140,6 @@ Description: Management of the Migration Toolkit for Virtualization (MTV).
 | _mtv_storage_map ¦ Process Ovirt Datastores | ansible.builtin.include_tasks | True |
 | _mtv_storage_map ¦ Template StorageMap Map | ansible.builtin.set_fact | False |
 | _mtv_storage_map ¦ Create Storage Map | redhat.openshift.k8s | False |
-
-#### File: tasks/_mtv_storage_map_process_datastore.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _mtv_storage_map_process_datastore ¦ Set VMware StorageMap Variables | ansible.builtin.set_fact | True |
-| _mtv_storage_map_process_datastore ¦ Set Ovirt StorageMap Variables | ansible.builtin.set_fact | True |
-| _mtv_storage_map_process_datastore ¦ Set VMware StorageMap StorageClass from Overrides | ansible.builtin.set_fact | True |
-| _mtv_storage_map_process_datastore ¦ Set Ovirt StorageMap StorageClass from Overrides | ansible.builtin.set_fact | True |
-| _mtv_storage_map_process_datastore ¦ Verify VMWare Destination Storage Class | ansible.builtin.assert | True |
-| _mtv_storage_map_process_datastore ¦ Verify Ovirt Destination Storage Class | ansible.builtin.assert | True |
-| _mtv_storage_map_process_datastore ¦ Template StorageMap Map | ansible.builtin.set_fact | False |
-| _mtv_storage_map_process_datastore ¦ Add VMware StorageMap Map to Dict | ansible.builtin.set_fact | True |
-| _mtv_storage_map_process_datastore ¦ Add Ovirt StorageMap Map to Dict | ansible.builtin.set_fact | True |
-
-#### File: tasks/main.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| Configure MTV Providers | ansible.builtin.include_tasks | True |
-| Configure MTV Maps | ansible.builtin.include_tasks | True |
-
-#### File: tasks/mtv_maps.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| mtv_maps ¦ Retrieve Configured providers | ansible.builtin.include_tasks | False |
-| mtv_maps ¦ Verify VMWare Source Provider Exists | ansible.builtin.assert | True |
-| mtv_maps ¦ Verify Ovirt Source Provider Exists | ansible.builtin.assert | True |
-| mtv_maps ¦ Destination OpenShift Destination Provider Exists | ansible.builtin.assert | False |
-| mtv_maps ¦ Configure MTV Storage Maps | ansible.builtin.include_tasks | True |
-| mtv_maps ¦ Configure MTV Network Map | ansible.builtin.include_tasks | True |
 
 #### File: tasks/mtv_providers.yml
 
@@ -261,6 +167,51 @@ Description: Management of the Migration Toolkit for Virtualization (MTV).
 | mtv_query_inventory ¦ Execute Query (rest) | ansible.builtin.uri | False |
 | mtv_query_inventory ¦ Set Result Fact | ansible.builtin.set_fact | False |
 
+#### File: tasks/_mtv_network_map.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _mtv_network_map ¦ Initialize data structures | ansible.builtin.set_fact | False |
+| _mtv_network_map ¦ Verify Network Map Overrides do not contain both includes and excludes | ansible.builtin.fail | True |
+| _mtv_network_map ¦ Query for VMWare Networks from Source Provider | ansible.builtin.include_tasks | True |
+| _mtv_network_map ¦ Query for Ovirt Networks from Source Provider | ansible.builtin.include_tasks | True |
+| _mtv_network_map ¦ Query for NetworkAttachmentDefinitions from Destination Provider | ansible.builtin.include_tasks | False |
+| _mtv_network_map ¦ Process VMware Networks | ansible.builtin.include_tasks | True |
+| _mtv_network_map ¦ Process Ovirt Networks | ansible.builtin.include_tasks | True |
+| _mtv_network_map ¦ Template NetworkMap Map | ansible.builtin.set_fact | False |
+| _mtv_network_map ¦ Create Network Map | redhat.openshift.k8s | False |
+
+#### File: tasks/_mtv_provider_vmware.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _mtv_provider_vmware ¦ Verify credential name provided when more than one credential specified | ansible.builtin.assert | True |
+| _mtv_provider_vmware ¦ Set provider name | ansible.builtin.set_fact | False |
+| _mtv_provider_vmware ¦ Validate required VMware provider Properties | ansible.builtin.assert | False |
+| _mtv_provider_vmware ¦ Set VMware Provider URL | ansible.builtin.set_fact | False |
+| _mtv_provider_vmware ¦ MTV Certificate | block | True |
+| _mtv_provider_vmware ¦ Retrieve Remote VMware Provider Certificate | community.crypto.get_certificate | False |
+| _mtv_provider_vmware ¦ Set VMware Provider Certificate | ansible.builtin.set_fact | False |
+| _mtv_provider_vmware ¦ Set Provider Secret Name/Namespace (Configuration) | ansible.builtin.set_fact | True |
+| _mtv_provider_vmware ¦ Configure Provider Secret | block | True |
+| _mtv_provider_vmware ¦ Set Provider Secret Name/Namespace (Generated) | ansible.builtin.set_fact | True |
+| _mtv_provider_vmware ¦ Create VMware credentials secret | redhat.openshift.k8s | True |
+| _mtv_provider_vmware ¦ Create VMware Provider resource | redhat.openshift.k8s | False |
+
+#### File: tasks/_mtv_storage_map_process_datastore.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _mtv_storage_map_process_datastore ¦ Set VMware StorageMap Variables | ansible.builtin.set_fact | True |
+| _mtv_storage_map_process_datastore ¦ Set Ovirt StorageMap Variables | ansible.builtin.set_fact | True |
+| _mtv_storage_map_process_datastore ¦ Set VMware StorageMap StorageClass from Overrides | ansible.builtin.set_fact | True |
+| _mtv_storage_map_process_datastore ¦ Set Ovirt StorageMap StorageClass from Overrides | ansible.builtin.set_fact | True |
+| _mtv_storage_map_process_datastore ¦ Verify VMWare Destination Storage Class | ansible.builtin.assert | True |
+| _mtv_storage_map_process_datastore ¦ Verify Ovirt Destination Storage Class | ansible.builtin.assert | True |
+| _mtv_storage_map_process_datastore ¦ Template StorageMap Map | ansible.builtin.set_fact | False |
+| _mtv_storage_map_process_datastore ¦ Add VMware StorageMap Map to Dict | ansible.builtin.set_fact | True |
+| _mtv_storage_map_process_datastore ¦ Add Ovirt StorageMap Map to Dict | ansible.builtin.set_fact | True |
+
 #### File: tasks/mtv_vddk.yml
 
 | Name | Module | Has Conditions |
@@ -274,6 +225,55 @@ Description: Management of the Migration Toolkit for Virtualization (MTV).
 | mtv_vddk ¦ Update Pull Secret Name for Provided Credential | ansible.builtin.set_fact | False |
 | mtv_vddk ¦ Retrieve VDDK Service Account | kubernetes.core.k8s_info | False |
 | mtv_vddk ¦ Patch Service Account with VDDK pull secret | kubernetes.core.k8s_json_patch | True |
+
+#### File: tasks/_mtv_provider_ovirt.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _mtv_provider_ovirt ¦ Verify credential name provided when more than one credential specified | ansible.builtin.assert | True |
+| _mtv_provider_ovirt ¦ Set provider name | ansible.builtin.set_fact | False |
+| _mtv_provider_ovirt ¦ Validate required Ovirt provider Properties | ansible.builtin.assert | False |
+| _mtv_provider_ovirt ¦ Set Ovirt Provider URL | ansible.builtin.set_fact | False |
+| _mtv_provider_ovirt ¦ MTV Certificate | block | True |
+| _mtv_provider_ovirt ¦ Retrieve Remote Ovirt Provider Certificate | community.crypto.get_certificate | False |
+| _mtv_provider_ovirt ¦ Set Ovirt Provider Certificate | ansible.builtin.set_fact | False |
+| _mtv_provider_ovirt ¦ Set Provider Secret Name/Namespace (Configuration) | ansible.builtin.set_fact | True |
+| _mtv_provider_ovirt ¦ Configure Provider Secret | block | True |
+| _mtv_provider_ovirt ¦ Set Provider Secret Name/Namespace (Generated) | ansible.builtin.set_fact | True |
+| _mtv_provider_ovirt ¦ Create Ovirt credentials secret | redhat.openshift.k8s | True |
+| _mtv_provider_ovirt ¦ Create Ovirt Provider resource | redhat.openshift.k8s | False |
+
+#### File: tasks/_mtv_network_map_process_network.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _mtv_network_map_process_network ¦ Set VMware NetworkMap Variables | ansible.builtin.set_fact | True |
+| _mtv_network_map_process_network ¦ Set Ovirt NetworkMap Variables | ansible.builtin.set_fact | True |
+| _mtv_network_map_process_network ¦ Locate VMware NetworkAttachmentDefinition | ansible.builtin.set_fact | True |
+| _mtv_network_map_process_network ¦ Locate Ovirt NetworkAttachmentDefinition | ansible.builtin.set_fact | True |
+| _mtv_network_map_process_network ¦ Validate Found VMware NetworkAttachmentDefinitions | ansible.builtin.assert | True |
+| _mtv_network_map_process_network ¦ Validate Found Ovirt NetworkAttachmentDefinitions | ansible.builtin.assert | True |
+| _mtv_network_map_process_network ¦ Template NetworkMap Map | ansible.builtin.set_fact | False |
+| _mtv_network_map_process_network ¦ Add VMWare NetworkMaps Map to Dict | ansible.builtin.set_fact | True |
+| _mtv_network_map_process_network ¦ Add Ovirt NetworkMaps Map to Dict | ansible.builtin.set_fact | True |
+
+#### File: tasks/mtv_maps.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| mtv_maps ¦ Retrieve Configured providers | ansible.builtin.include_tasks | False |
+| mtv_maps ¦ Verify VMWare Source Provider Exists | ansible.builtin.assert | True |
+| mtv_maps ¦ Verify Ovirt Source Provider Exists | ansible.builtin.assert | True |
+| mtv_maps ¦ Destination OpenShift Destination Provider Exists | ansible.builtin.assert | False |
+| mtv_maps ¦ Configure MTV Storage Maps | ansible.builtin.include_tasks | True |
+| mtv_maps ¦ Configure MTV Network Map | ansible.builtin.include_tasks | True |
+
+#### File: tasks/main.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| Configure MTV Providers | ansible.builtin.include_tasks | True |
+| Configure MTV Maps | ansible.builtin.include_tasks | True |
 
 
 

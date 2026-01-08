@@ -93,14 +93,6 @@ Description: Virtual Machine backup and restore capabilities.
 ### Tasks
 
 
-#### File: tasks/_restore_vm.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _restore_vm ¦ Stop Virtual Machine | redhat.openshift_virtualization.kubevirt_vm | False |
-| _restore_vm ¦ Create Restore | redhat.openshift.k8s | False |
-| _restore_vm ¦ Start Virtual Machine | redhat.openshift_virtualization.kubevirt_vm | True |
-
 #### File: tasks/_snapshot_vm.yml
 
 | Name | Module | Has Conditions |
@@ -116,6 +108,14 @@ Description: Virtual Machine backup and restore capabilities.
 | vm_backup ¦ Initialize Variables | ansible.builtin.set_fact | False |
 | vm_backup ¦ Invoke Collect VM Role | ansible.builtin.include_role | False |
 | vm_backup ¦ Snapshot VMs' | ansible.builtin.include_tasks | False |
+
+#### File: tasks/_restore_vm.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _restore_vm ¦ Stop Virtual Machine | redhat.openshift_virtualization.kubevirt_vm | False |
+| _restore_vm ¦ Create Restore | redhat.openshift.k8s | False |
+| _restore_vm ¦ Start Virtual Machine | redhat.openshift_virtualization.kubevirt_vm | True |
 
 #### File: tasks/vm_restore.yml
 

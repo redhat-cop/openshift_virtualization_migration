@@ -90,14 +90,6 @@ Description: Management of Virtual Machine MAC Addresses.
 ### Tasks
 
 
-#### File: tasks/_compute_patch.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _compute_patch ¦ Verify Valid MAC Address Provided | ansible.builtin.assert | False |
-| _compute_patch ¦ Locate Interface Index | ansible.builtin.set_fact | False |
-| _compute_patch ¦ Create Patch Item | ansible.builtin.set_fact | True |
-
 #### File: tasks/_process_vm.yml
 
 | Name | Module | Has Conditions |
@@ -115,6 +107,14 @@ Description: Management of Virtual Machine MAC Addresses.
 | Verify vm_mac_address_request Variable Provided | ansible.builtin.assert | False |
 | Verify Required Properties Provided | ansible.builtin.assert | False |
 | Process MAC Address VM | ansible.builtin.include_tasks | False |
+
+#### File: tasks/_compute_patch.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _compute_patch ¦ Verify Valid MAC Address Provided | ansible.builtin.assert | False |
+| _compute_patch ¦ Locate Interface Index | ansible.builtin.set_fact | False |
+| _compute_patch ¦ Create Patch Item | ansible.builtin.set_fact | True |
 
 
 

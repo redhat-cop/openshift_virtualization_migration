@@ -100,19 +100,19 @@ Description: Deploys an instance of Ansible Automation Platform.
 | install ¦ Set controller stats if not bootstrap mode | ansible.builtin.set_stats | False |
 | install ¦ Display retrieved password for non-bootstrap mode | ansible.builtin.debug | False |
 
-#### File: tasks/main.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| Install AAP | ansible.builtin.include_tasks | True |
-| Attach AAP Subscriptions | ansible.builtin.include_tasks | True |
-
 #### File: tasks/subscribe.yml
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
 | subscribe ¦ Call bootstrap role to subscribe | ansible.builtin.import_role | True |
 | subscribe ¦ Call bootstrap role to subscribe | ansible.builtin.import_role | True |
+
+#### File: tasks/main.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| Install AAP | ansible.builtin.include_tasks | True |
+| Attach AAP Subscriptions | ansible.builtin.include_tasks | True |
 
 
 

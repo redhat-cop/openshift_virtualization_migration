@@ -89,25 +89,6 @@ Description: Management of the lifecycle activities of Virtual Machines.
 ### Tasks
 
 
-#### File: tasks/_collect_vms.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _collect_vms ¦ Verify Valid VM Operation | ansible.builtin.assert | False |
-| _collect_vms ¦ Verify Namespace Provided When Name Specified | ansible.builtin.assert | True |
-| _collect_vms ¦ Query VM's Without Label Selector | block | True |
-| _collect_vms ¦ Query VM's (Without Label Selector) | kubernetes.core.k8s_info | False |
-| _collect_vms ¦ Add VM's (Without Label Selector) | ansible.builtin.set_fact | True |
-| _collect_vms ¦ Query VM's Using Label Selector | block | True |
-| _collect_vms ¦ Query VM's (With Label Selector) | kubernetes.core.k8s_info | False |
-| _collect_vms ¦ Add VM's (With Label Selector) | ansible.builtin.set_fact | True |
-
-#### File: tasks/_perform_operation.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _perform_operation ¦ Perform VM Operation | ansible.builtin.uri | False |
-
 #### File: tasks/_verify_operation.yml
 
 | Name | Module | Has Conditions |
@@ -124,6 +105,25 @@ Description: Management of the lifecycle activities of Virtual Machines.
 | vm_operations ¦ Print VM's | ansible.builtin.debug | False |
 | vm_operations ¦ Perform VM Operations | ansible.builtin.include_tasks | False |
 | vm_operations ¦ Verify VMs | ansible.builtin.include_tasks | False |
+
+#### File: tasks/_perform_operation.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _perform_operation ¦ Perform VM Operation | ansible.builtin.uri | False |
+
+#### File: tasks/_collect_vms.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _collect_vms ¦ Verify Valid VM Operation | ansible.builtin.assert | False |
+| _collect_vms ¦ Verify Namespace Provided When Name Specified | ansible.builtin.assert | True |
+| _collect_vms ¦ Query VM's Without Label Selector | block | True |
+| _collect_vms ¦ Query VM's (Without Label Selector) | kubernetes.core.k8s_info | False |
+| _collect_vms ¦ Add VM's (Without Label Selector) | ansible.builtin.set_fact | True |
+| _collect_vms ¦ Query VM's Using Label Selector | block | True |
+| _collect_vms ¦ Query VM's (With Label Selector) | kubernetes.core.k8s_info | False |
+| _collect_vms ¦ Add VM's (With Label Selector) | ansible.builtin.set_fact | True |
 
 
 

@@ -90,15 +90,6 @@ Description: Verification of an Ansible for OpenShift Virtualization Migration e
 ### Tasks
 
 
-#### File: tasks/main.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| Include ocp_version tasks | ansible.builtin.include_tasks | False |
-| Include ocp_operators tasks | ansible.builtin.include_tasks | False |
-| Include ocp_storage_support tasks | ansible.builtin.include_tasks | False |
-| Include vmware_firewall_rules tasks | ansible.builtin.include_tasks | False |
-
 #### File: tasks/ocp_operators.yml
 
 | Name | Module | Has Conditions |
@@ -113,15 +104,14 @@ Description: Verification of an Ansible for OpenShift Virtualization Migration e
 | ocp_operators ¦ Verify Subscription exists | kubernetes.core.k8s_info | False |
 | ocp_operators ¦ Debug Task (Runs if Subscription Exists) | ansible.builtin.debug | False |
 
-#### File: tasks/ocp_storage_support.yml
+#### File: tasks/main.yml
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| ocp_storage_support ¦ Get StorageClass resources | kubernetes.core.k8s_info | False |
-| ocp_storage_support ¦ Available Storageclasses within OpenShift Cluster and Provisioner Status | ansible.builtin.debug | False |
-| ocp_storage_support ¦ Get PersistentVolumes | kubernetes.core.k8s_info | False |
-| ocp_storage_support ¦ Check validate_migration_ocp_pvs for block storage with EXT4 | ansible.builtin.set_fact | True |
-| ocp_storage_support ¦ Print PVs for block storage with EXT4 | ansible.builtin.debug | True |
+| Include ocp_version tasks | ansible.builtin.include_tasks | False |
+| Include ocp_operators tasks | ansible.builtin.include_tasks | False |
+| Include ocp_storage_support tasks | ansible.builtin.include_tasks | False |
+| Include vmware_firewall_rules tasks | ansible.builtin.include_tasks | False |
 
 #### File: tasks/ocp_version.yml
 
@@ -137,6 +127,16 @@ Description: Verification of an Ansible for OpenShift Virtualization Migration e
 | vmware_firewall_rules ¦ Build a list of all the clusters | vmware.vmware_rest.vcenter_cluster_info | False |
 | vmware_firewall_rules ¦ Gather firewall info about all ESXi Host in given Cluster | community.vmware.vmware_host_firewall_info | False |
 | vmware_firewall_rules ¦ Debug firewall details | ansible.builtin.debug | True |
+
+#### File: tasks/ocp_storage_support.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| ocp_storage_support ¦ Get StorageClass resources | kubernetes.core.k8s_info | False |
+| ocp_storage_support ¦ Available Storageclasses within OpenShift Cluster and Provisioner Status | ansible.builtin.debug | False |
+| ocp_storage_support ¦ Get PersistentVolumes | kubernetes.core.k8s_info | False |
+| ocp_storage_support ¦ Check validate_migration_ocp_pvs for block storage with EXT4 | ansible.builtin.set_fact | True |
+| ocp_storage_support ¦ Print PVs for block storage with EXT4 | ansible.builtin.debug | True |
 
 
 

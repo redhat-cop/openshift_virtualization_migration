@@ -96,6 +96,25 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 ### Tasks
 
 
+#### File: tasks/main.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| Subscribe AAP | ansible.builtin.include_tasks | False |
+
+#### File: tasks/prep.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| prep ¦ Register to Red Hat with provided credentials | community.general.redhat_subscription | False |
+| prep ¦ Setup new user | ansible.builtin.user | False |
+| prep ¦ Allow passwordless sudo for '{{ bootstrap_user }}' | ansible.builtin.copy | False |
+| prep ¦ Create SSH folder | ansible.builtin.file | False |
+| prep ¦ Generate an OpenSSH keypair with the default values | community.crypto.openssh_keypair | False |
+| prep ¦ Set authorized key taken from file | ansible.posix.authorized_key | False |
+| prep ¦ Set SSH config for this host to enable automated install | ansible.builtin.copy | False |
+| prep ¦ Create working directory | ansible.builtin.file | False |
+
 #### File: tasks/aap_subscription.yml
 
 | Name | Module | Has Conditions |
@@ -118,25 +137,6 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 | create_mf_aap_token ¦ Retrieve Migration Factory AAP Service Account API key | kubernetes.core.k8s_info | False |
 | create_mf_aap_token ¦ Set fact with Service Account API key | ansible.builtin.set_fact | False |
 | create_mf_aap_token ¦ Print Migration Factory AAP Service Account API key | ansible.builtin.debug | False |
-
-#### File: tasks/main.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| Subscribe AAP | ansible.builtin.include_tasks | False |
-
-#### File: tasks/prep.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| prep ¦ Register to Red Hat with provided credentials | community.general.redhat_subscription | False |
-| prep ¦ Setup new user | ansible.builtin.user | False |
-| prep ¦ Allow passwordless sudo for '{{ bootstrap_user }}' | ansible.builtin.copy | False |
-| prep ¦ Create SSH folder | ansible.builtin.file | False |
-| prep ¦ Generate an OpenSSH keypair with the default values | community.crypto.openssh_keypair | False |
-| prep ¦ Set authorized key taken from file | ansible.posix.authorized_key | False |
-| prep ¦ Set SSH config for this host to enable automated install | ansible.builtin.copy | False |
-| prep ¦ Create working directory | ansible.builtin.file | False |
 
 
 

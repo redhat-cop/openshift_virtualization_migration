@@ -1102,6 +1102,13 @@ Description: Populates an Ansible Automation Platform instance.
 | _build_credentials ¦ Build Migration Factory CaC Credential for {{ _mf_host }} | ansible.builtin.set_fact | True |
 | _build_credentials ¦ Build kubeconfig for {{ _mf_host }} | ansible.builtin.set_fact | False |
 
+#### File: tasks/_mtv_job_templates.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _mtv_job_templates ¦ Configure VMWare MTV Job Template | ansible.builtin.set_fact | True |
+| _mtv_job_templates ¦ Configure Ovirt MTV Job Template | ansible.builtin.set_fact | True |
+
 #### File: tasks/_build_job_templates.yml
 
 | Name | Module | Has Conditions |
@@ -1113,13 +1120,6 @@ Description: Populates an Ansible Automation Platform instance.
 | _build_job_templates ¦ Build Operator Job Template | ansible.builtin.set_fact | False |
 | _build_job_templates ¦ Build MTV Job Templates | ansible.builtin.include_tasks | True |
 
-#### File: tasks/_mtv_job_templates.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _mtv_job_templates ¦ Configure VMWare MTV Job Template | ansible.builtin.set_fact | True |
-| _mtv_job_templates ¦ Configure Ovirt MTV Job Template | ansible.builtin.set_fact | True |
-
 #### File: tasks/_mtv_workflow_job_templates.yml
 
 | Name | Module | Has Conditions |
@@ -1127,6 +1127,13 @@ Description: Populates an Ansible Automation Platform instance.
 | _mtv_workflow_job_templates ¦ Build MTV Target Workflows for {{ _mf_host }} | ansible.builtin.set_fact | False |
 | _mtv_workflow_job_templates ¦ Get list of MTV Target workflow names | ansible.builtin.set_fact | False |
 | _mtv_workflow_job_templates ¦ Build MTV workflow | ansible.builtin.set_fact | False |
+
+#### File: tasks/job_templates.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| job_templates ¦ Set templates variable | ansible.builtin.set_fact | False |
+| job_templates ¦ Build Operator Install Job Templates | ansible.builtin.include_tasks | False |
 
 #### File: tasks/credentials.yml
 
@@ -1140,13 +1147,6 @@ Description: Populates an Ansible Automation Platform instance.
 | credentials ¦ Build Operator Management Credentials | block | True |
 | credentials ¦ Build Migration Target Credentials | ansible.builtin.set_fact | True |
 | credentials ¦ Build required credentials | ansible.builtin.include_tasks | False |
-
-#### File: tasks/job_templates.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| job_templates ¦ Set templates variable | ansible.builtin.set_fact | False |
-| job_templates ¦ Build Operator Install Job Templates | ansible.builtin.include_tasks | False |
 
 #### File: tasks/main.yml
 

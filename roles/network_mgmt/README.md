@@ -111,6 +111,19 @@ Description: Management of network related components.
 ### Tasks
 
 
+#### File: tasks/manual.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| manual ¦ Validate network_mgmt_manual_nad_list | ansible.builtin.assert | False |
+| manual ¦ Validate supported bonding mode if also creating bond | ansible.builtin.assert | True |
+| manual ¦ Validate ovs-bridge mode | ansible.builtin.assert | True |
+| manual ¦ Validate linux-bridge | ansible.builtin.assert | False |
+| manual ¦ Apply NodeNetworkConfigurationPolicy | redhat.openshift.k8s | True |
+| manual ¦ Validate access port | ansible.builtin.assert | True |
+| manual ¦ Validate trunk ports | ansible.builtin.assert | True |
+| manual ¦ Apply NetworkAttachmentDefinitions | redhat.openshift.k8s | False |
+
 #### File: tasks/automatic.yml
 
 | Name | Module | Has Conditions |
@@ -120,11 +133,12 @@ Description: Management of network related components.
 | automatic ¦ Include tasks from automatic_nncp.yml | ansible.builtin.include_tasks | True |
 | automatic ¦ Include tasks from automatic_nad.yml | ansible.builtin.include_tasks | True |
 
-#### File: tasks/automatic_nad.yml
+#### File: tasks/create_nncp.yml
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| automatic_nad ¦ Include tasks from create_nad.yml | ansible.builtin.include_tasks | False |
+| create_nncp ¦ DEBUG nncp Template | ansible.builtin.debug | True |
+| create_nncp ¦ Apply NodeNetworkConfigurationPolicy | redhat.openshift.k8s | True |
 
 #### File: tasks/automatic_nncp.yml
 
@@ -133,19 +147,18 @@ Description: Management of network related components.
 | automatic_nncp ¦ Validate supported bonding mode | ansible.builtin.assert | True |
 | automatic_nncp ¦ Include tasks from create_nncp.yml | ansible.builtin.include_tasks | False |
 
+#### File: tasks/automatic_nad.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| automatic_nad ¦ Include tasks from create_nad.yml | ansible.builtin.include_tasks | False |
+
 #### File: tasks/create_nad.yml
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
 | create_nad ¦ "DEBUG nad Template" | ansible.builtin.debug | True |
 | create_nad ¦ Apply NetworkAttachmentDefinitions | redhat.openshift.k8s | True |
-
-#### File: tasks/create_nncp.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| create_nncp ¦ DEBUG nncp Template | ansible.builtin.debug | True |
-| create_nncp ¦ Apply NodeNetworkConfigurationPolicy | redhat.openshift.k8s | True |
 
 #### File: tasks/gather_networks.yml
 
@@ -160,19 +173,6 @@ Description: Management of network related components.
 | ---- | ------ | --------- |
 | Use automatic mode | ansible.builtin.include_tasks | True |
 | Use manual mode | ansible.builtin.include_tasks | True |
-
-#### File: tasks/manual.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| manual ¦ Validate network_mgmt_manual_nad_list | ansible.builtin.assert | False |
-| manual ¦ Validate supported bonding mode if also creating bond | ansible.builtin.assert | True |
-| manual ¦ Validate ovs-bridge mode | ansible.builtin.assert | True |
-| manual ¦ Validate linux-bridge | ansible.builtin.assert | False |
-| manual ¦ Apply NodeNetworkConfigurationPolicy | redhat.openshift.k8s | True |
-| manual ¦ Validate access port | ansible.builtin.assert | True |
-| manual ¦ Validate trunk ports | ansible.builtin.assert | True |
-| manual ¦ Apply NetworkAttachmentDefinitions | redhat.openshift.k8s | False |
 
 
 

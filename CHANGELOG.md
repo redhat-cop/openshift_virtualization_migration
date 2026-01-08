@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v1.21.3 (2026-01-08)
+
+### Bug Fixes
+
+- Add default authors for roles and keep changelogs
+  ([`5b99bc8`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/5b99bc864b07dc5a502480c2e3cc9c7607931226))
+
+
 ## v1.21.2 (2025-09-22)
 
 ### Bug Fixes

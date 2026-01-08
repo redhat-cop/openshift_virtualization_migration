@@ -458,14 +458,13 @@ Description: Migration of Virtual Machines from Source to Destination.
 ### Tasks
 
 
-#### File: tasks/_migrations.yml
+#### File: tasks/_process_plans.yml
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| _migrations ¦ Template Migrations | ansible.builtin.set_fact | False |
-| _migrations ¦ Create Migrations | redhat.openshift.k8s | False |
-| _migrations ¦ Wait for Migrations | block | True |
-| _migrations ¦ Check on Migrations | kubernetes.core.k8s_info | False |
+| _process_plans ¦ Set Plan Name | ansible.builtin.set_fact | False |
+| _process_plans ¦ Update Plan Content | ansible.builtin.set_fact | False |
+| _process_plans ¦ Add Plan | ansible.builtin.set_fact | False |
 
 #### File: tasks/_plans.yml
 
@@ -494,6 +493,20 @@ Description: Migration of Virtual Machines from Source to Destination.
 | _plans ¦ Set Created Plans to Migrate | ansible.builtin.set_fact | True |
 | _plans ¦ Display Plans (Dry Run) | ansible.builtin.debug | True |
 
+#### File: tasks/_process_vm.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _process_vm ¦ Initialize VM Variables | ansible.builtin.set_fact | False |
+| _process_vm ¦ Verify Name or ID or Path specified for VM | ansible.builtin.assert | False |
+| _process_vm ¦ Locate VM by name | ansible.builtin.set_fact | True |
+| _process_vm ¦ Locate VM by id | ansible.builtin.set_fact | True |
+| _process_vm ¦ Locate VM by path | ansible.builtin.set_fact | True |
+| _process_vm ¦ Verify single VM found | ansible.builtin.assert | False |
+| _process_vm ¦ Set VM to Process | ansible.builtin.set_fact | False |
+| _process_vm ¦ Add VM to Migration Dict | ansible.builtin.set_fact | True |
+| _process_vm ¦ Clear VM Variables | ansible.builtin.set_fact | False |
+
 #### File: tasks/_process_folder.yml
 
 | Name | Module | Has Conditions |
@@ -509,27 +522,14 @@ Description: Migration of Virtual Machines from Source to Destination.
 | _process_folder ¦ Process Folder VM's | ansible.builtin.include_tasks | True |
 | _process_folder ¦ Process Subfolders | ansible.builtin.include_tasks | True |
 
-#### File: tasks/_process_plans.yml
+#### File: tasks/_migrations.yml
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| _process_plans ¦ Set Plan Name | ansible.builtin.set_fact | False |
-| _process_plans ¦ Update Plan Content | ansible.builtin.set_fact | False |
-| _process_plans ¦ Add Plan | ansible.builtin.set_fact | False |
-
-#### File: tasks/_process_vm.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _process_vm ¦ Initialize VM Variables | ansible.builtin.set_fact | False |
-| _process_vm ¦ Verify Name or ID or Path specified for VM | ansible.builtin.assert | False |
-| _process_vm ¦ Locate VM by name | ansible.builtin.set_fact | True |
-| _process_vm ¦ Locate VM by id | ansible.builtin.set_fact | True |
-| _process_vm ¦ Locate VM by path | ansible.builtin.set_fact | True |
-| _process_vm ¦ Verify single VM found | ansible.builtin.assert | False |
-| _process_vm ¦ Set VM to Process | ansible.builtin.set_fact | False |
-| _process_vm ¦ Add VM to Migration Dict | ansible.builtin.set_fact | True |
-| _process_vm ¦ Clear VM Variables | ansible.builtin.set_fact | False |
+| _migrations ¦ Template Migrations | ansible.builtin.set_fact | False |
+| _migrations ¦ Create Migrations | redhat.openshift.k8s | False |
+| _migrations ¦ Wait for Migrations | block | True |
+| _migrations ¦ Check on Migrations | kubernetes.core.k8s_info | False |
 
 #### File: tasks/main.yml
 

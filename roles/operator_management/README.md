@@ -489,13 +489,6 @@ Description: Management of OpenShift Operators.
 ### Tasks
 
 
-#### File: tasks/_operator_catalog_source_item.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _operator_catalog_source_item ¦ Set Fact: {{ _catalogsource_item.key }} | ansible.builtin.set_fact | False |
-| _operator_catalog_source_item ¦ Apply Resource {{ _catalogsource_item.key }} | redhat.openshift.k8s | False |
-
 #### File: tasks/_operator_config_item.yml
 
 | Name | Module | Has Conditions |
@@ -503,6 +496,13 @@ Description: Management of OpenShift Operators.
 | _operator_config_item ¦ Retrieve Operator name | ansible.builtin.set_fact | False |
 | _operator_config_item ¦ Configure Resources | ansible.builtin.include_tasks | True |
 | _operator_config_item ¦ Apply Extra Resources | redhat.openshift.k8s | True |
+
+#### File: tasks/_operator_catalog_source_item.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _operator_catalog_source_item ¦ Set Fact: {{ _catalogsource_item.key }} | ansible.builtin.set_fact | False |
+| _operator_catalog_source_item ¦ Apply Resource {{ _catalogsource_item.key }} | redhat.openshift.k8s | False |
 
 #### File: tasks/_operator_resource_item.yml
 

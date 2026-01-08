@@ -71,6 +71,12 @@ Description: Hot Plug Virtual Machine resources.
 | _compute ¦ Verify Instance Type does not exist on VM | ansible.builtin.assert | True |
 | _compute ¦ Patch VM with Compute Modifications | kubernetes.core.k8s_json_patch | False |
 
+#### File: tasks/_storage.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _storage ¦ Perform VM Storage Operation | ansible.builtin.uri | True |
+
 #### File: tasks/_process_vm.yml
 
 | Name | Module | Has Conditions |
@@ -82,12 +88,6 @@ Description: Hot Plug Virtual Machine resources.
 | _process_vm ¦ Restart the machine | block | True |
 | _process_vm ¦ Restart the VirtualMachine | ansible.builtin.include_role | False |
 | _process_vm ¦ Verify the VirtualMachine restarted | ansible.builtin.include_role | False |
-
-#### File: tasks/_storage.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _storage ¦ Perform VM Storage Operation | ansible.builtin.uri | True |
 
 #### File: tasks/main.yml
 
