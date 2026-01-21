@@ -1,0 +1,30 @@
+name: CI-External
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    branches: [ "main" ]
+
+concurrency:
+  group: external-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  external-approval:
+    if: github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    environment: external-ci  # Enforce manual gate
+    steps:
+      - run: echo "Approval received, starting CI..."
+
+  external-ci:
+    needs: external-approval
+    uses: redhat-cop/openshift_virtualization_migration_ci/.github/workflows/ci-ansible-collection.yml@main
+    permissions:
+      contents: write
+      packages: write
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+      repo: ${{ github.event.pull_request.head.repo.full_name }}
+    secrets:
+      automation_hub_token: ${{ secrets.AUTOMATION_HUB_TOKEN }}
