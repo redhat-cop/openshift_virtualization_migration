@@ -27,6 +27,8 @@ repos:
     rev: v0.20.0
     hooks:
       - id: markdownlint-cli2
+        # Only run on the generated READMEs
+        files: ^.*README\.md$
 
   - repo: "https://github.com/ansible/ansible-lint"
     rev: v25.12.2

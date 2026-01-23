@@ -55,51 +55,60 @@ Description: Not available.
 {%- endif %}
 {%- endif %}
 
-{% macro render_arguments_list(arguments, level=0) %}
-{% for arg, details in arguments.items() %}
+{%- macro render_arguments_list(arguments, level=0) %}
+{%- for arg, details in arguments.items() %}
   {%- set indent = '  ' * level %}
-  {{ indent }}- **{{ arg }}**
-  {{ indent }}  - **Required**: {{ details.required | default('false') }}
-  {{ indent }}  - **Type**: {{ details.type }}
-  {{ indent }}  - **Default**: {{ details.default | default('none') }}
-  {{ indent }}  - **Description**: {{ details.description | default('No description provided') }}
-  {% if details.choices is defined %}
-    {{ indent }}  - **Choices**:
-    {% for choice in details.choices %}
-      {{ indent }}    - {{ choice }}
-    {% endfor %}
-  {% endif %}
-  {% if details.aliases is defined %}
-    {{ indent }}  - **Aliases**:
-    {% for alias in details.aliases %}
-      {{ indent }}    - {{ alias }}
-    {% endfor %}
-  {% endif %}
-  {% if details.type == 'dict' and details.options %}
-    {{ render_arguments_list(details.options, level + 1) }}
-  {% elif details.type == 'list' and details.elements == 'dict' %}
-    {% for elem in details.default %}
-      {% if elem is mapping %}
+  {{ indent }}* **{{ arg }}**:
+  {{ indent }}  * **Required**: {{ details.required | default('false') }}
+  {{ indent }}  * **Type**: {{ details.type }}
+  {{ indent }}  * **Default**: {{ details.default | default('none') }}
+  {{ indent }}  * **Description**: {{ details.description | default('No description provided') }}
+  {%- if details.choices is defined %}
+  {{ indent }}  * **Choices**:
+  {%- for choice in details.choices %}
+  {{ indent }}    * {{ choice }}
+  {%- endfor %}
+  {%- endif %}
+  {%- if details.aliases is defined %}
+  {{ indent }}  * **Aliases**:
+  {%- for alias in details.aliases %}
+  {{ indent }}    * {{ alias }}
+  {%- endfor %}
+  {%- endif %}
+  {%- if details.type == 'dict' and details.options %}
+  {{ indent }}  * **Options**:
+    {{- render_arguments_list(details.options, level + 2) }}
+  {%- elif details.type == 'list' and details.elements == 'dict' %}
+    {%- for elem in details.default %}
+      {%- if elem is mapping %}
         {{ render_arguments_list(elem, level + 1) }}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-{% endfor %}
-{% endmacro %}
+      {%- endif %}
+    {%- endfor %}
+  {%- endif %}
+{%- endfor %}
+{%- endmacro %}
 
-{% if role.argument_specs %}
+{%- if role.argument_specs %}
+
+### Argument Specifications
+
 <details>
-<summary><b>🧩 Argument Specifications in meta/argument_specs</b></summary>
-{% for section, specs in role.argument_specs.argument_specs.items() %}
-#### Key: {{ section }}
-**Description**: {{ specs.description or specs.short_description or 'No description provided' }}
-{{ render_arguments_list(specs.options) }}
-{% endfor %}
-</details>
-{% else %}
-{% endif %}
+<summary><b>🧩 Argument Specifications in `meta/argument_specs`</b></summary>
+{%- for section, specs in role.argument_specs.argument_specs.items() %}
 
-{% if role.defaults|length > 0 -%}
+#### Key: {{ section }}
+
+* **Description**: {{ specs.description or specs.short_description or 'No description provided' }}
+* **Options**:
+{{- render_arguments_list(specs.options) }}
+{%- endfor %}
+
+</details>
+{%- else %}
+{%- endif %}
+
+{%- if role.defaults|length > 0 %}
+
 ### Defaults
 
 **These are static variables with lower priority**
@@ -117,7 +126,7 @@ Description: Not available.
 |--------------|--------------|-------------|{% if ns.details_choices %}-------------|{% endif %}{% if ns.details_required %}-------------|{% endif %}{% if ns.details_title %}-------------|{% endif %}
 {%- for key, details in defaultfile.data.items() %}
 {%- set var_type = details.value.__class__.__name__ %}
-| [{{ key }}](defaults/{{ defaultfile.file }}#L{{details.line}})   | {{ var_type }}   | `{{ details.value | replace('|', '¦') }}` | {% if ns.details_choices %} {{ details.choices | replace('|', '¦') }}  |{% endif %}  {% if ns.details_required %} {{ details.required }}  |{% endif %} {% if ns.details_title %} {{ details.title | replace('|', '¦') }} |{% endif %}
+| [`{{ key }}`](defaults/{{ defaultfile.file }}#L{{details.line}})   | {{ var_type }}   | `{{ details.value | replace('|', '¦') }}` | {% if ns.details_choices %} {{ details.choices | replace('|', '¦') }}  |{% endif %}  {% if ns.details_required %} {{ details.required }}  |{% endif %} {% if ns.details_title %} {{ details.title | replace('|', '¦') }} |{% endif %}
 {%- endfor %}
 {%- endfor %}
 
@@ -127,11 +136,12 @@ Description: Not available.
     {%- if details.description != "n/a" -%}{%- set ns.has_descriptions = true -%}{% endif -%}
 {%- endfor -%}
 {%- if ns.has_descriptions %}
+
 <summary><b>🖇️ Full descriptions for vars in defaults/{{ defaultfile.file }}</b></summary>
 <br>
 {%- for key, details in defaultfile.data.items() %}
     {%- if details.description != "n/a" %}
-<b>{{ key }}:</b> {{ details.description }}
+<b>`{{ key }}`:</b> {{ details.description }}
 <br>
     {%- endif %}
 {%- endfor %}
@@ -141,20 +151,22 @@ Description: Not available.
 {%- else %}
 {%- endif %}
 
+{%- if role.vars|length > 0 %}
 
-{% if role.vars|length > 0 -%}
 ### Vars
 
 **These are variables with higher priority**
+
 {%- for varsfile in role.vars %}
+
 #### File: vars/{{ varsfile.file }}
 {# Cycle used for deciding to set Title and Required Column #}
-{% set ns = namespace(details_required = false, details_title = false, details_choices = false) %}
+{%- set ns = namespace(details_required = false, details_title = false, details_choices = false) %}
 | Var          | Type         | Value       |{% if ns.details_choices %}Choices    |{% endif %}{% if ns.details_required %}Required    |{% endif %}{% if ns.details_title %} Title       |{% endif %}
 |--------------|--------------|-------------|{% if ns.details_choices %}-------------|{% endif %}{% if ns.details_required %}-------------|{% endif %}{% if ns.details_title %}-------------|{% endif %}
 {%- for key, details in varsfile.data.items() %}
 {%- set var_type = details.value.__class__.__name__ %}
-| [{{ key }}](vars/{{ varsfile.file }}#L{{details.line}})   | {{ var_type }}   | `{{ details.value | replace('|', '¦') }}` | {% if ns.details_choices %} {{ details.choices | replace('|', '¦') }}  |{% endif %}  {% if ns.details_required %} {{ details.required }}  |{% endif %} {% if ns.details_title %} {{ details.title | replace('|', '¦') }} |{% endif %}
+| [{{ key }}](vars/{{ varsfile.file }}#L{{details.line}})   | {{ var_type }}   | `{{ details.value | replace('|', '¦') }}` |{% if ns.details_choices %}{{ details.choices | replace('|', '¦') }}|{% endif %}{% if ns.details_required %}{{ details.required }}|{% endif %}{% if ns.details_title %}{{ details.title | replace('|', '¦') }}|{% endif %}
 {%- endfor %}
 {%- endfor %}
 
@@ -168,65 +180,82 @@ Description: Not available.
 {%- else %}
 {%- endif %}
 
-
 ### Tasks
 
-{% for taskfile in role.tasks %}
+{%- set main_file = role.tasks | selectattr('file', 'equalto', 'main.yml') | list %}
+{%- set other_files = role.tasks | rejectattr('file', 'equalto', 'main.yml') | sort(attribute='file') | list %}
+{%- set sorted_task_files = main_file + other_files %}
+{%- for taskfile in sorted_task_files %}
+
 #### File: tasks/{{ taskfile.file }}
-{% set ns = namespace (comments_required = false) %}{% for comment in taskfile['comments'] %}{% if comment != "" %}{% set ns.comments_required = true %}{% endif %}{% endfor %}
+
+{% set ns = namespace(comments_required = false) -%}
+{% for comment in taskfile.comments -%}
+  {% if comment.task_comments and comment.task_comments | trim != "" -%}
+    {% set ns.comments_required = true -%}
+  {% endif -%}
+{% endfor -%}
+
 | Name | Module | Has Conditions |{% if ns.comments_required %} Comments |{% endif %}
 | ---- | ------ | --------- |{% if ns.comments_required %}  -------- |{% endif %}
 {%- for task in taskfile.tasks %}
-| {{ task.name.replace("|", "¦") }} | {{ task.module }} | {{ 'True' if task.when else 'False' }} |{% if ns.comments_required %} {{ taskfile['comments'] | selectattr('task_name', 'equalto', task.name) | map(attribute='task_comments') | join }} |{% endif %}
+| {{ task.name | default('Unnamed Task') | replace("|", "¦") }} | `{{ task.module }}` | {{ 'True' if task.when else 'False' }} |{% if ns.comments_required %} {{ taskfile.comments | selectattr('task_name', 'equalto', task.name) | map(attribute='task_comments') | join('<br>') }} |{% endif %}
 {%- endfor %}
-{% endfor %}
 
-{% if mermaid_code_per_file -%}
+{%- endfor %}
+
+{%- if mermaid_code_per_file %}
+
 ## Task Flow Graphs
 
-{% for task_file, mermaid_code in mermaid_code_per_file.items() %}
+{%- for task_file, mermaid_code in mermaid_code_per_file.items() %}
 
 ### Graph for {{ task_file }}
 
 ```mermaid
 {{ mermaid_code }}
 ```
-{% endfor %}
+{%- endfor %}
 {%- endif %}
 
-{% if role.playbook.content -%}
+{%- if role.playbook.content %}
+
 ## Playbook
 
 ```yml
 {{ role.playbook.content }}
 ```
 {%- endif %}
-{% if role.playbook.graph -%}
+{%- if role.playbook.graph %}
+
 ## Playbook graph
+
 ```mermaid
 {{ role.playbook.graph }}
 ```
 {%- endif %}
 
-{% if role.meta.galaxy_info -%}
+{%- if role.meta.galaxy_info %}
+
 ## Author Information
+
 {{ role.meta.galaxy_info.author or 'OpenShift Virtualization Migration Contributors' }}
 
-#### License
+## License
 
 {{ role.meta.galaxy_info.license or 'No license specified.' }}
 
-#### Minimum Ansible Version
+## Minimum Ansible Version
 
 {{ role.meta.galaxy_info.min_ansible_version or 'No minimum version specified.' }}
 
-#### Platforms
+## Platforms
 
 {% if role.meta.galaxy_info.platforms -%}
 {% for platform in role.meta.galaxy_info.platforms -%}
-- **{{ platform.name }}**: {{ platform.versions }}
+* **{{ platform.name }}**: {{ platform.versions }}
 {% endfor -%}
-{%- else -%}
+{% else -%}
 No platforms specified.
-{%- endif %}
-{%- endif %}
+{% endif -%}
+{% endif -%}

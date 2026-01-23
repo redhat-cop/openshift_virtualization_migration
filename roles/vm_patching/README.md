@@ -24,36 +24,23 @@ Description: Patching related activities for Virtual Machines.
 |--------------------- |-----------------|
 | Readme update        | 18/03/2025 |
 
-
-
-
-
-
-
-
-
 ### Vars
 
 **These are variables with higher priority**
-#### File: vars/main.yml
 
+#### File: vars/main.yml
 
 | Var          | Type         | Value       |
 |--------------|--------------|-------------|
-| [vm_patching_package_list](vars/main.yml#L3)   | str   | `*` |    
-
+| [vm_patching_package_list](vars/main.yml#L3)   | str   | `*` |
 
 ### Tasks
-
 
 #### File: tasks/main.yml
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| Running sudo dnf update | ansible.builtin.dnf | False |
-
-
-
+| Running sudo dnf update | `ansible.builtin.dnf` | False |
 
 ## Playbook
 
@@ -68,19 +55,20 @@ Description: Patching related activities for Virtual Machines.
 
 ```
 
-
 ## Author Information
+
 OpenShift Virtualization Migration Contributors
 
-#### License
+## License
 
 GPL-3.0-only
 
-#### Minimum Ansible Version
+## Minimum Ansible Version
 
 2.15.0
 
-#### Platforms
+## Platforms
 
 No platforms specified.
+
 <!-- DOCSIBLE END -->

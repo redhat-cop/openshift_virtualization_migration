@@ -24,11 +24,6 @@ Description: Hot Plug Virtual Machine resources.
 |--------------------- |-----------------|
 | Readme update        | 18/03/2025 |
 
-
-
-
-
-
 ### Defaults
 
 **These are static variables with lower priority**
@@ -37,68 +32,61 @@ Description: Hot Plug Virtual Machine resources.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [vm_hot_plug_request](defaults/main.yml#L7)   | list   | `[]` |  None  |   True  |  Hot Plug Requests |
-| [vm_hot_plug_openshift_host](defaults/main.yml#L26)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift Host |
-| [vm_hot_plug_api_key](defaults/main.yml#L30)   | str   | `{{ openshift_api_key }}` |  None  |   True  |  OpenShift API Key |
-| [vm_hot_plug_openshift_verify_ssl](defaults/main.yml#L34)   | str   | `{{ openshift_verify_ssl }}` |  None  |   True  |  Verify SSL Certificate |
-| [vm_hot_plug_kubevirt_api_version](defaults/main.yml#L38)   | str   | `kubevirt.io/v1` |  None  |   True  |  KubeVirt API Version |
+| [`vm_hot_plug_request`](defaults/main.yml#L7)   | list   | `[]` |  None  |   True  |  Hot Plug Requests |
+| [`vm_hot_plug_openshift_host`](defaults/main.yml#L26)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift Host |
+| [`vm_hot_plug_api_key`](defaults/main.yml#L30)   | str   | `{{ openshift_api_key }}` |  None  |   True  |  OpenShift API Key |
+| [`vm_hot_plug_openshift_verify_ssl`](defaults/main.yml#L34)   | str   | `{{ openshift_verify_ssl }}` |  None  |   True  |  Verify SSL Certificate |
+| [`vm_hot_plug_kubevirt_api_version`](defaults/main.yml#L38)   | str   | `kubevirt.io/v1` |  None  |   True  |  KubeVirt API Version |
+
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
-<b>vm_hot_plug_request:</b> List of Hot Plug Requests
+<b>`vm_hot_plug_request`:</b> List of Hot Plug Requests
 <br>
-<b>vm_hot_plug_openshift_host:</b> OpenShift Host
+<b>`vm_hot_plug_openshift_host`:</b> OpenShift Host
 <br>
-<b>vm_hot_plug_api_key:</b> OpenShift API Key
+<b>`vm_hot_plug_api_key`:</b> OpenShift API Key
 <br>
-<b>vm_hot_plug_openshift_verify_ssl:</b> Verify SSL Certificate
+<b>`vm_hot_plug_openshift_verify_ssl`:</b> Verify SSL Certificate
 <br>
-<b>vm_hot_plug_kubevirt_api_version:</b> KubeVirt API Version
+<b>`vm_hot_plug_kubevirt_api_version`:</b> KubeVirt API Version
 <br>
 <br>
-
-
-
-
 
 ### Tasks
-
-
-#### File: tasks/_compute.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _compute ¦ Verify Instance Type exists on VM | ansible.builtin.assert | True |
-| _compute ¦ Verify Instance Type does not exist on VM | ansible.builtin.assert | True |
-| _compute ¦ Patch VM with Compute Modifications | kubernetes.core.k8s_json_patch | False |
-
-#### File: tasks/_storage.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _storage ¦ Perform VM Storage Operation | ansible.builtin.uri | True |
-
-#### File: tasks/_process_vm.yml
-
-| Name | Module | Has Conditions |
-| ---- | ------ | --------- |
-| _process_vm ¦ Process Compute Hot Plug | ansible.builtin.include_tasks | True |
-| _process_vm ¦ Process Compute Hot Plug | ansible.builtin.include_tasks | True |
-| _process_vm ¦ Manage restarting VM | block | True |
-| _process_vm ¦ Query VM for Updated Configuration | kubernetes.core.k8s_info | False |
-| _process_vm ¦ Restart the machine | block | True |
-| _process_vm ¦ Restart the VirtualMachine | ansible.builtin.include_role | False |
-| _process_vm ¦ Verify the VirtualMachine restarted | ansible.builtin.include_role | False |
 
 #### File: tasks/main.yml
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| Initialize Variables | ansible.builtin.set_fact | False |
-| Invoke Collect VM Role | ansible.builtin.include_role | False |
-| Process Hot Plug VM | ansible.builtin.include_tasks | False |
+| Initialize Variables | `ansible.builtin.set_fact` | False |
+| Invoke Collect VM Role | `ansible.builtin.include_role` | False |
+| Process Hot Plug VM | `ansible.builtin.include_tasks` | False |
 
+#### File: tasks/_compute.yml
 
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _compute ¦ Verify Instance Type exists on VM | `ansible.builtin.assert` | True |
+| _compute ¦ Verify Instance Type does not exist on VM | `ansible.builtin.assert` | True |
+| _compute ¦ Patch VM with Compute Modifications | `kubernetes.core.k8s_json_patch` | False |
 
+#### File: tasks/_process_vm.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _process_vm ¦ Process Compute Hot Plug | `ansible.builtin.include_tasks` | True |
+| _process_vm ¦ Process Compute Hot Plug | `ansible.builtin.include_tasks` | True |
+| _process_vm ¦ Manage restarting VM | `block` | True |
+| _process_vm ¦ Query VM for Updated Configuration | `kubernetes.core.k8s_info` | False |
+| _process_vm ¦ Restart the machine | `block` | True |
+| _process_vm ¦ Restart the VirtualMachine | `ansible.builtin.include_role` | False |
+| _process_vm ¦ Verify the VirtualMachine restarted | `ansible.builtin.include_role` | False |
+
+#### File: tasks/_storage.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| _storage ¦ Perform VM Storage Operation | `ansible.builtin.uri` | True |
 
 ## Playbook
 
@@ -113,19 +101,20 @@ Description: Hot Plug Virtual Machine resources.
 
 ```
 
-
 ## Author Information
+
 OpenShift Virtualization Migration Contributors
 
-#### License
+## License
 
 GPL-3.0-only
 
-#### Minimum Ansible Version
+## Minimum Ansible Version
 
 2.15.0
 
-#### Platforms
+## Platforms
 
 No platforms specified.
+
 <!-- DOCSIBLE END -->
