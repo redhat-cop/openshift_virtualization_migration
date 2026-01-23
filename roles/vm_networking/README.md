@@ -22,22 +22,7 @@ Description: Management of Virtual Machine networking.
 |--------------------- |-----------------|
 | Readme update        | 18/03/2025 |
 
-
-
-
-
-
-
-
-
-
-
-
 ### Tasks
-
-
-
-
 
 ## Playbook
 
@@ -52,19 +37,20 @@ Description: Management of Virtual Machine networking.
 
 ```
 
-
 ## Author Information
+
 OpenShift Virtualization Migration Contributors
 
-#### License
+## License
 
 GPL-3.0-only
 
-#### Minimum Ansible Version
+## Minimum Ansible Version
 
 2.15.0
 
-#### Platforms
+## Platforms
 
 No platforms specified.
+
 <!-- DOCSIBLE END -->

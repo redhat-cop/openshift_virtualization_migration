@@ -2,14 +2,14 @@ apiVersion: nmstate.io/v1
 kind: NodeNetworkConfigurationPolicy
 metadata:
   name: {{ vswitch.name | infra.openshift_virtualization_migration.rfc1123(network_mgmt_nncp_name_prefix) }}
-  annotations: 
+  annotations:
     infra.openshift-virtualization-migration/source-switch: {{ vswitch.name }}
     infra.openshift-virtualization-migration/provider-hostname: {{ network_mgmt_vcenter_hostname }}
-    infra.openshift-virtualization-migration/provider-type: vmware 
+    infra.openshift-virtualization-migration/provider-type: vmware
 spec:
   desiredState:
     interfaces:
-{% if not network_mgmt_port_is_existing_bond %}    
+{% if not network_mgmt_port_is_existing_bond %}
       - ipv4:
           enabled: false
         ipv6:
@@ -27,7 +27,7 @@ spec:
             stp:
               enabled: false
           port:
-{% if not network_mgmt_port_is_existing_bond %}  
+{% if not network_mgmt_port_is_existing_bond %}
             - name: {{ (vswitch.name | infra.openshift_virtualization_migration.rfc1123(network_mgmt_nncp_name_prefix))[:12]  }}-up
 {% else %}
             - name: {{ network_mgmt_openshift_node_network_ports[0] }}
@@ -41,7 +41,7 @@ spec:
         state: up
         type: linux-bridge
 {% for port in network_mgmt_openshift_node_network_ports %}
-      - ipv4:  
+      - ipv4:
           enabled: false
         ipv6:
           enabled: false
@@ -50,7 +50,7 @@ spec:
         state: up
         type: ethernet
 {% endfor %}
-  maxUnavailable: {{ network_mgmt_nncp_max_unavailable }} 
+  maxUnavailable: {{ network_mgmt_nncp_max_unavailable }}
   nodeSelector:
     {{ network_mgmt_nncp_nodeselector }}
 
