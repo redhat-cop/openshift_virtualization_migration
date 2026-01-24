@@ -7,6 +7,19 @@ Openshift Virtualization Migration Release Notes
 v1.21.3
 =======
 
+Minor Changes
+-------------
+
+- Enable PR contribution from forks [skip ci]
+- Merge pull request #3 from redhat-cop/fix-linting
+- Semantic Release - Tag 1.21.3
+- add ci workflow
+
+Bugfixes
+--------
+
+- fix: add default authors for roles and keep changelogs
+
 v1.21.2
 =======
 

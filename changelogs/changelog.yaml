@@ -279,4 +279,18 @@ releases:
   1.21.2:
     release_date: '2025-09-22'
   1.21.3:
-    release_date: '2026-01-08'
+    changes:
+      bugfixes:
+        - 'fix: add default authors for roles and keep changelogs'
+      minor_changes:
+        - Enable PR contribution from forks [skip ci]
+        - 'Merge pull request #3 from redhat-cop/fix-linting'
+        - Semantic Release - Tag 1.21.3
+        - add ci workflow
+    fragments:
+      - 1.21.3_EnablePRcontributionfromforkss.yml
+      - 1.21.3_Mergepullrequest3fromredhatcop.yml
+      - 1.21.3_SemanticReleaseTag1213.yml
+      - 1.21.3_addciworkflow.yml
+      - 1.21.3_fixadddefaultauthorsforrolesan.yml
+    release_date: '2026-01-24'
