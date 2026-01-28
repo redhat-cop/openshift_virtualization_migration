@@ -12,13 +12,11 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.3
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Initialization of the Ansible for OpenShift Virtualization Migration environment.
-
-| Field                | Value           |
-|--------------------- |-----------------|
-| Readme update        | 18/03/2025 |
 
 ### Defaults
 
@@ -128,6 +126,100 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 | prep ¦ Set SSH config for this host to enable automated install | `ansible.builtin.copy` | False |
 | prep ¦ Create working directory | `ansible.builtin.file` | False |
 
+## Task Flow Graphs
+
+### Graph for aap_subscription.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Block Start| aap_subscription___Get_subscriptions_with_a_filter0_block_start_0[[aap subscription   get subscriptions with a filter<br>When: **bootstrap rh pool id   default     true    trim  <br>length    0 and bootstrap aap license manifest  <br>default     true    trim   length    0**]]:::block
+  aap_subscription___Get_subscriptions_with_a_filter0_block_start_0-->|Task| aap_subscription___Query_Subscription0[aap subscription   query subscription]:::task
+  aap_subscription___Query_Subscription0-->|Task| aap_subscription___Set_pool_based_on_bootstrap_subscription1[aap subscription   set pool based on bootstrap<br>subscription]:::task
+  aap_subscription___Set_pool_based_on_bootstrap_subscription1-->|Task| aap_subscription___Attach_to_a_pool2[aap subscription   attach to a pool]:::task
+  aap_subscription___Attach_to_a_pool2-.->|End of Block| aap_subscription___Get_subscriptions_with_a_filter0_block_start_0
+  aap_subscription___Attach_to_a_pool2-->|Block Start| aap_subscription___Verify_License_Manifest_Exists1_block_start_0[[aap subscription   verify license manifest exists<br>When: **bootstrap aap license manifest   default     true <br>  trim   length   0**]]:::block
+  aap_subscription___Verify_License_Manifest_Exists1_block_start_0-->|Task| aap_subscription___Check_if_license_file_exists0[aap subscription   check if license file exists]:::task
+  aap_subscription___Check_if_license_file_exists0-->|Task| aap_subscription___Verify_license_file_exists1[aap subscription   verify license file exists]:::task
+  aap_subscription___Verify_license_file_exists1-->|Task| aap_subscription___Read_the_License_file2[aap subscription   read the license file]:::task
+  aap_subscription___Read_the_License_file2-->|Task| aap_subscription___Apply_license_to_AAP3[aap subscription   apply license to aap]:::task
+  aap_subscription___Apply_license_to_AAP3-.->|End of Block| aap_subscription___Verify_License_Manifest_Exists1_block_start_0
+  aap_subscription___Apply_license_to_AAP3-->End
+```
+
+### Graph for create_mf_aap_token.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| create_mf_aap_token___Create_API_key_for_Migration_Factory_AAP0[create mf aap token   create api key for migration<br>factory aap]:::task
+  create_mf_aap_token___Create_API_key_for_Migration_Factory_AAP0-->|Task| create_mf_aap_token___Retrieve_Migration_Factory_AAP_Service_Account_API_key1[create mf aap token   retrieve migration factory<br>aap service account api key]:::task
+  create_mf_aap_token___Retrieve_Migration_Factory_AAP_Service_Account_API_key1-->|Task| create_mf_aap_token___Set_fact_with_Service_Account_API_key2[create mf aap token   set fact with service<br>account api key]:::task
+  create_mf_aap_token___Set_fact_with_Service_Account_API_key2-->|Task| create_mf_aap_token___Print_Migration_Factory_AAP_Service_Account_API_key3[create mf aap token   print migration factory aap<br>service account api key]:::task
+  create_mf_aap_token___Print_Migration_Factory_AAP_Service_Account_API_key3-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Include task| Subscribe_AAP_aap_subscription_yml_0[subscribe aap<br>include_task: aap subscription yml]:::includeTasks
+  Subscribe_AAP_aap_subscription_yml_0-->End
+```
+
+### Graph for prep.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| prep___Register_to_Red_Hat_with_provided_credentials0[prep   register to red hat with provided<br>credentials]:::task
+  prep___Register_to_Red_Hat_with_provided_credentials0-->|Task| prep___Setup_new_user1[prep   setup new user]:::task
+  prep___Setup_new_user1-->|Task| prep___Allow_passwordless_sudo_for__bootstrap_user_2[prep   allow passwordless sudo for  bootstrap user<br>]:::task
+  prep___Allow_passwordless_sudo_for__bootstrap_user_2-->|Task| prep___Create_SSH_folder3[prep   create ssh folder]:::task
+  prep___Create_SSH_folder3-->|Task| prep___Generate_an_OpenSSH_keypair_with_the_default_values4[prep   generate an openssh keypair with the<br>default values]:::task
+  prep___Generate_an_OpenSSH_keypair_with_the_default_values4-->|Task| prep___Set_authorized_key_taken_from_file5[prep   set authorized key taken from file]:::task
+  prep___Set_authorized_key_taken_from_file5-->|Task| prep___Set_SSH_config_for_this_host_to_enable_automated_install6[prep   set ssh config for this host to enable<br>automated install]:::task
+  prep___Set_SSH_config_for_this_host_to_enable_automated_install6-->|Task| prep___Create_working_directory7[prep   create working directory]:::task
+  prep___Create_working_directory7-->End
+```
+
 ## Playbook
 
 ```yml
@@ -139,6 +231,13 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
     - bootstrap
 ...
 
+```
+
+## Playbook graph
+
+```mermaid
+flowchart TD
+  hosts[localhost]-->|Role| bootstrap[bootstrap]
 ```
 
 ## Author Information

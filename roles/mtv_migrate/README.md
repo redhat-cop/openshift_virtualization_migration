@@ -12,13 +12,11 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.3
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Migration of Virtual Machines from Source to Destination.
-
-| Field                | Value           |
-|--------------------- |-----------------|
-| Readme update        | 18/03/2025 |
 
 ### Argument Specifications
 
@@ -389,6 +387,170 @@ Description: Migration of Virtual Machines from Source to Destination.
 | _process_vm ¦ Add VM to Migration Dict | `ansible.builtin.set_fact` | True |
 | _process_vm ¦ Clear VM Variables | `ansible.builtin.set_fact` | False |
 
+## Task Flow Graphs
+
+### Graph for _migrations.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _migrations___Template_Migrations0[ migrations   template migrations]:::task
+  _migrations___Template_Migrations0-->|Task| _migrations___Create_Migrations1[ migrations   create migrations]:::task
+  _migrations___Create_Migrations1-->|Block Start| _migrations___Wait_for_Migrations2_block_start_0[[ migrations   wait for migrations<br>When: **mtv verify migrations complete bool**]]:::block
+  _migrations___Wait_for_Migrations2_block_start_0-->|Task| _migrations___Check_on_Migrations0[ migrations   check on migrations]:::task
+  _migrations___Check_on_Migrations0-.->|End of Block| _migrations___Wait_for_Migrations2_block_start_0
+  _migrations___Check_on_Migrations0-->End
+```
+
+### Graph for _plans.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _plans___Set_Plan_Base_Name0[ plans   set plan base name]:::task
+  _plans___Set_Plan_Base_Name0-->|Include role| _plans___Retrieve_Configured_providers_mtv_management_1( plans   retrieve configured providers<br>include_role: mtv management):::includeRole
+  _plans___Retrieve_Configured_providers_mtv_management_1-->|Task| _plans___Verify_Source_Provider2[ plans   verify source provider]:::task
+  _plans___Verify_Source_Provider2-->|Task| _plans___Verify_Destination_Providers3[ plans   verify destination providers]:::task
+  _plans___Verify_Destination_Providers3-->|Task| _plans___Retrieve_StorageMaps4[ plans   retrieve storagemaps]:::task
+  _plans___Retrieve_StorageMaps4-->|Task| _plans___Verify_StorageMap5[ plans   verify storagemap]:::task
+  _plans___Verify_StorageMap5-->|Task| _plans___Retrieve_NetworkMap6[ plans   retrieve networkmap]:::task
+  _plans___Retrieve_NetworkMap6-->|Task| _plans___Verify_NetworkMap7[ plans   verify networkmap]:::task
+  _plans___Verify_NetworkMap7-->|Task| _plans___Process_Plan_Skeleton8[ plans   process plan skeleton]:::task
+  _plans___Process_Plan_Skeleton8-->|Include role| _plans___Get_Inventory_vms_mtv_management_9( plans   get inventory vms<br>include_role: mtv management):::includeRole
+  _plans___Get_Inventory_vms_mtv_management_9-->|Block Start| _plans___Manage_specified_folders10_block_start_0[[ plans   manage specified folders<br>When: **folders  in mtv migrate migration request and<br>folder to process  exclude   is not defined or <br>exclude  in folder to process and not folder to<br>process  exclude   bool**]]:::block
+  _plans___Manage_specified_folders10_block_start_0-->|Include role| _plans___Get_Inventory_folders_mtv_management_0( plans   get inventory folders<br>include_role: mtv management):::includeRole
+  _plans___Get_Inventory_folders_mtv_management_0-->|Include task| _plans___Manage_specified_Folders__process_folder_yml_1[ plans   manage specified folders<br>include_task:  process folder yml]:::includeTasks
+  _plans___Manage_specified_Folders__process_folder_yml_1-.->|End of Block| _plans___Manage_specified_folders10_block_start_0
+  _plans___Manage_specified_Folders__process_folder_yml_1-->|Include task| _plans___Manage_specified_VM_s__process_vm_yml_11[ plans   manage specified vm s<br>When: **vms  in mtv migrate migration request and vm to<br>process  exclude   is not defined or  exclude  in<br>vm to process and not vm to process  exclude  <br>bool**<br>include_task:  process vm yml]:::includeTasks
+  _plans___Manage_specified_VM_s__process_vm_yml_11-->|Task| _plans___Flatten_VM_s_to_Migrate12[ plans   flatten vm s to migrate]:::task
+  _plans___Flatten_VM_s_to_Migrate12-->|Task| _plans___Verify_Plan_has_VMs13[ plans   verify plan has vms]:::task
+  _plans___Verify_Plan_has_VMs13-->|Include task| _plans___Process_Plans__process_plans_yml_14[ plans   process plans<br>include_task:  process plans yml]:::includeTasks
+  _plans___Process_Plans__process_plans_yml_14-->|Block Start| _plans___Create_and_Verify_Plans15_block_start_0[[ plans   create and verify plans<br>When: **not  mtv dry run bool**]]:::block
+  _plans___Create_and_Verify_Plans15_block_start_0-->|Task| _plans___Create_Plans0[ plans   create plans]:::task
+  _plans___Create_Plans0-->|Task| _plans___Verify_Plans_Ready1[ plans   verify plans ready<br>When: **mtv verify plans ready bool**]:::task
+  _plans___Verify_Plans_Ready1-->|Task| _plans___Set_Created_Plans_to_Migrate2[ plans   set created plans to migrate<br>When: **mtv start migration bool**]:::task
+  _plans___Set_Created_Plans_to_Migrate2-.->|End of Block| _plans___Create_and_Verify_Plans15_block_start_0
+  _plans___Set_Created_Plans_to_Migrate2-->|Task| _plans___Display_Plans__Dry_Run_16[ plans   display plans  dry run <br>When: **mtv dry run bool**]:::task
+  _plans___Display_Plans__Dry_Run_16-->End
+```
+
+### Graph for _process_folder.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _process_folder___Initialize_Folder_Variables0[ process folder   initialize folder variables]:::task
+  _process_folder___Initialize_Folder_Variables0-->|Task| _process_folder___Verify_Name_or_ID_or_Path_specified_for_Folder1[ process folder   verify name or id or path<br>specified for folder]:::task
+  _process_folder___Verify_Name_or_ID_or_Path_specified_for_Folder1-->|Task| _process_folder___Locate_Folder_by_name2[ process folder   locate folder by name<br>When: **name  in folder to process and  id  not in folder<br>to process and  path  not in folder to process**]:::task
+  _process_folder___Locate_Folder_by_name2-->|Task| _process_folder___Locate_Folder_by_id3[ process folder   locate folder by id<br>When: **id  in folder to process and  name  not in folder<br>to process and  path  not in folder to process**]:::task
+  _process_folder___Locate_Folder_by_id3-->|Task| _process_folder___Locate_VM_by_path4[ process folder   locate vm by path<br>When: **path  in folder to process and  id  not in folder<br>to process and  name  not in folder to process**]:::task
+  _process_folder___Locate_VM_by_path4-->|Task| _process_folder___Verify_single_Folder_found5[ process folder   verify single folder found]:::task
+  _process_folder___Verify_single_Folder_found5-->|Task| _process_folder___Set_Folder_to_Process6[ process folder   set folder to process]:::task
+  _process_folder___Set_Folder_to_Process6-->|Block Start| _process_folder___Check_Excludes7_block_start_0[[ process folder   check excludes<br>When: **mtv migrate migration request  folders     default<br>      selectattr  exclude    defined    <br>selectattr  exclude    equalto   true   <br>selectattr  name    defined     selectattr  name  <br> equalto    mtv migrate folder to process  name   <br>  list   length    0 and mtv migrate migration<br>request  folders     default       selectattr <br>exclude    defined     selectattr  exclude   <br>equalto   true    selectattr  id    defined    <br>selectattr  id    equalto    mtv migrate folder to<br>process  id      list   length    0 and mtv<br>migrate migration request  folders     default    <br>  selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  path   <br>defined     selectattr  path    equalto    mtv<br>migrate folder to process  path      list   length<br>   0**]]:::block
+  _process_folder___Check_Excludes7_block_start_0-->|Include task| _process_folder___Process_Folder_VM_s__process_vm_yml_0[ process folder   process folder vm s<br>When: **children  in  mtv migrate folder to process**<br>include_task:  process vm yml]:::includeTasks
+  _process_folder___Process_Folder_VM_s__process_vm_yml_0-->|Include task| _process_folder___Process_Subfolders__process_folder_yml_1[ process folder   process subfolders<br>When: **children  in  mtv migrate folder to process**<br>include_task:  process folder yml]:::includeTasks
+  _process_folder___Process_Subfolders__process_folder_yml_1-.->|End of Block| _process_folder___Check_Excludes7_block_start_0
+  _process_folder___Process_Subfolders__process_folder_yml_1-->End
+```
+
+### Graph for _process_plans.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _process_plans___Set_Plan_Name0[ process plans   set plan name]:::task
+  _process_plans___Set_Plan_Name0-->|Task| _process_plans___Update_Plan_Content1[ process plans   update plan content]:::task
+  _process_plans___Update_Plan_Content1-->|Task| _process_plans___Add_Plan2[ process plans   add plan]:::task
+  _process_plans___Add_Plan2-->End
+```
+
+### Graph for _process_vm.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _process_vm___Initialize_VM_Variables0[ process vm   initialize vm variables]:::task
+  _process_vm___Initialize_VM_Variables0-->|Task| _process_vm___Verify_Name_or_ID_or_Path_specified_for_VM1[ process vm   verify name or id or path specified<br>for vm]:::task
+  _process_vm___Verify_Name_or_ID_or_Path_specified_for_VM1-->|Task| _process_vm___Locate_VM_by_name2[ process vm   locate vm by name<br>When: **name  in vm to process and  id  not in vm to<br>process and  path  not in vm to process**]:::task
+  _process_vm___Locate_VM_by_name2-->|Task| _process_vm___Locate_VM_by_id3[ process vm   locate vm by id<br>When: **id  in vm to process and  name  not in vm to<br>process and  path  not in vm to process**]:::task
+  _process_vm___Locate_VM_by_id3-->|Task| _process_vm___Locate_VM_by_path4[ process vm   locate vm by path<br>When: **path  in vm to process and  id  not in vm to<br>process and  name  not in vm to process**]:::task
+  _process_vm___Locate_VM_by_path4-->|Task| _process_vm___Verify_single_VM_found5[ process vm   verify single vm found]:::task
+  _process_vm___Verify_single_VM_found5-->|Task| _process_vm___Set_VM_to_Process6[ process vm   set vm to process]:::task
+  _process_vm___Set_VM_to_Process6-->|Task| _process_vm___Add_VM_to_Migration_Dict7[ process vm   add vm to migration dict<br>When: **mtv migrate migration request  vms     default    <br>  selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  name   <br>defined     selectattr  name    equalto    vm to<br>process  name      list   length    0 and mtv<br>migrate migration request  vms     default      <br>selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  id   <br>defined     selectattr  id    equalto    vm to<br>process  id      list   length    0 and mtv<br>migrate migration request  vms     default      <br>selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  path   <br>defined     selectattr  path    equalto    vm to<br>process  path      list   length    0 and not  vm<br>to process  istemplate     default false**]:::task
+  _process_vm___Add_VM_to_Migration_Dict7-->|Task| _process_vm___Clear_VM_Variables8[ process vm   clear vm variables]:::task
+  _process_vm___Clear_VM_Variables8-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| Verify_Request_Provided0[verify request provided]:::task
+  Verify_Request_Provided0-->|Task| Initialize_Data_Structures1[initialize data structures]:::task
+  Initialize_Data_Structures1-->|Task| Process_Request__MTV_Namespace_2[process request  mtv namespace ]:::task
+  Process_Request__MTV_Namespace_2-->|Task| Process_Request__Baseline_3[process request  baseline ]:::task
+  Process_Request__Baseline_3-->|Task| Process_Request__Maps_4[process request  maps ]:::task
+  Process_Request__Maps_4-->|Task| Verify_Split_Plan_Value_is_Positive5[verify split plan value is positive<br>When: **mtv split plans   bool**]:::task
+  Verify_Split_Plan_Value_is_Positive5-->|Include task| Generate_Plans__plans_yml_6[generate plans<br>When: **mtv migrate migration request  vms     default   <br>   mtv migrate migration request  folders    <br>default        length   0**<br>include_task:  plans yml]:::includeTasks
+  Generate_Plans__plans_yml_6-->|Include task| Manage_Migrations__migrations_yml_7[manage migrations<br>When: **mtv start migration bool and not  mtv dry run bool<br>and  mtv migrate mtv plans to migrate   default   <br>   length   0**<br>include_task:  migrations yml]:::includeTasks
+  Manage_Migrations__migrations_yml_7-->End
+```
+
 ## Playbook
 
 ```yml
@@ -400,6 +562,13 @@ Description: Migration of Virtual Machines from Source to Destination.
     - mtv_migrate
 ...
 
+```
+
+## Playbook graph
+
+```mermaid
+flowchart TD
+  hosts[localhost]-->|Role| mtv_migrate[mtv migrate]
 ```
 
 ## Author Information

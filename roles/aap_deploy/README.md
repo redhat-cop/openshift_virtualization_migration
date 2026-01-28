@@ -12,13 +12,11 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.3
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Deploys an instance of Ansible Automation Platform.
-
-| Field                | Value           |
-|--------------------- |-----------------|
-| Readme update        | 18/03/2025 |
 
 ### Defaults
 
@@ -104,6 +102,82 @@ Description: Deploys an instance of Ansible Automation Platform.
 | subscribe ¦ Call bootstrap role to subscribe | `ansible.builtin.import_role` | True |
 | subscribe ¦ Call bootstrap role to subscribe | `ansible.builtin.import_role` | True |
 
+## Task Flow Graphs
+
+### Graph for install.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| install___Validate_OpenShift_bearer_token0[install   validate openshift bearer token]:::task
+  install___Validate_OpenShift_bearer_token0-->|Task| install___Set_Platform_variables__2_5__1[install   set platform variables  2 5  <br>When: **aap version is not defined  or aap version is<br>defined and aap version is version  2 5**]:::task
+  install___Set_Platform_variables__2_5__1-->|Task| install___Set_Platform_variables___2_5_2[install   set platform variables   2 5 <br>When: **aap version is defined and aap version is version <br>2 5**]:::task
+  install___Set_Platform_variables___2_5_2-->|Import role| install___Call_aap_ocp_install_role_infra_aap_utilities_aap_ocp_install_3([install   call aap ocp install role<br>import_role: infra aap utilities aap ocp install]):::importRole
+  install___Call_aap_ocp_install_role_infra_aap_utilities_aap_ocp_install_3-->|Task| install___Verify_AAP_Components_are_running4[install   verify aap components are running<br>When: **component   default     true    length   0**]:::task
+  install___Verify_AAP_Components_are_running4-->|Block Start| install___Bootstrap_block5_block_start_0[[install   bootstrap block<br>When: **bootstrap aap   default true    bool**]]:::block
+  install___Bootstrap_block5_block_start_0-->|Task| install___Set_controller_username_fact_for_Bootstrap_mode0[install   set controller username fact for<br>bootstrap mode]:::task
+  install___Set_controller_username_fact_for_Bootstrap_mode0-->|Task| install___Retrieve_Migration_Factory_AAP_admin_credential_for_Bootstrap_mode1[install   retrieve migration factory aap admin<br>credential for bootstrap mode]:::task
+  install___Retrieve_Migration_Factory_AAP_admin_credential_for_Bootstrap_mode1-->|Task| install___Set_controller_facts_for_bootstrap_mode2[install   set controller facts for bootstrap mode]:::task
+  install___Set_controller_facts_for_bootstrap_mode2-->|Task| install___Set_controller_stats_for_bootstrap_mode3[install   set controller stats for bootstrap mode]:::task
+  install___Set_controller_stats_for_bootstrap_mode3-->|Include role| install___Call_credential_config_as_code_role_on_Bootstrap_AAP____aap_deploy_cac_collection____credentials_4(install   call credential config as code role on<br>bootstrap aap<br>include_role:    aap deploy cac collection    credentials):::includeRole
+  install___Call_credential_config_as_code_role_on_Bootstrap_AAP____aap_deploy_cac_collection____credentials_4-.->|End of Block| install___Bootstrap_block5_block_start_0
+  install___Call_credential_config_as_code_role_on_Bootstrap_AAP____aap_deploy_cac_collection____credentials_4-->|Block Start| install___Non_bootstrap_block6_block_start_0[[install   non bootstrap block<br>When: **not bootstrap aap   default true    bool**]]:::block
+  install___Non_bootstrap_block6_block_start_0-->|Task| install___Set_controller_username_fact_for_non_bootstrap_mode0[install   set controller username fact for non<br>bootstrap mode]:::task
+  install___Set_controller_username_fact_for_non_bootstrap_mode0-->|Task| install___Retrieve_Migration_Factory_AAP_admin_credential_for_non_bootstrap_mode1[install   retrieve migration factory aap admin<br>credential for non bootstrap mode]:::task
+  install___Retrieve_Migration_Factory_AAP_admin_credential_for_non_bootstrap_mode1-->|Task| install___Set_controller_facts_if_not_bootstrap_mode2[install   set controller facts if not bootstrap<br>mode]:::task
+  install___Set_controller_facts_if_not_bootstrap_mode2-->|Task| install___Set_controller_stats_if_not_bootstrap_mode3[install   set controller stats if not bootstrap<br>mode]:::task
+  install___Set_controller_stats_if_not_bootstrap_mode3-->|Task| install___Display_retrieved_password_for_non_bootstrap_mode4[install   display retrieved password for non<br>bootstrap mode]:::task
+  install___Display_retrieved_password_for_non_bootstrap_mode4-.->|End of Block| install___Non_bootstrap_block6_block_start_0
+  install___Display_retrieved_password_for_non_bootstrap_mode4-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Include task| Install_AAP_install_yml_0[install aap<br>When: **aap deploy aap install   bool**<br>include_task: install yml]:::includeTasks
+  Install_AAP_install_yml_0-->|Include task| Attach_AAP_Subscriptions_subscribe_yml_1[attach aap subscriptions<br>When: **aap deploy aap install   bool**<br>include_task: subscribe yml]:::includeTasks
+  Attach_AAP_Subscriptions_subscribe_yml_1-->End
+```
+
+### Graph for subscribe.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0([subscribe   call bootstrap role to subscribe<br>When: **bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
+  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1([subscribe   call bootstrap role to subscribe<br>When: **not bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
+  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1-->End
+```
+
 ## Playbook
 
 ```yml
@@ -115,6 +189,13 @@ Description: Deploys an instance of Ansible Automation Platform.
     - aap_deploy
 ...
 
+```
+
+## Playbook graph
+
+```mermaid
+flowchart TD
+  hosts[localhost]-->|Role| aap_deploy[aap deploy]
 ```
 
 ## Author Information

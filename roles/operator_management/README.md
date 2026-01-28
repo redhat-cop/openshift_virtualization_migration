@@ -14,13 +14,11 @@ This role manages the lifecycle of operators for OpenShift Virtualization
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.3
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Management of OpenShift Operators.
-
-| Field                | Value           |
-|--------------------- |-----------------|
-| Readme update        | 18/03/2025 |
 
 ### Defaults
 
@@ -530,6 +528,119 @@ Description: Management of OpenShift Operators.
 | node-health-check ¦ Create node-health-check operator subscription | `redhat.openshift.k8s` | False |
 | node-health-check ¦ Create Self Node Remediation subscription | `redhat.openshift.k8s` | False |
 
+## Task Flow Graphs
+
+### Graph for _operator_catalog_source_item.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _operator_catalog_source_item___Set_Fact______catalogsource_item_key___0[ operator catalog source item   set fact     <br>catalogsource item key   ]:::task
+  _operator_catalog_source_item___Set_Fact______catalogsource_item_key___0-->|Task| _operator_catalog_source_item___Apply_Resource_____catalogsource_item_key___1[ operator catalog source item   apply resource    <br>catalogsource item key   ]:::task
+  _operator_catalog_source_item___Apply_Resource_____catalogsource_item_key___1-->End
+```
+
+### Graph for _operator_config_item.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _operator_config_item___Retrieve_Operator_name0[ operator config item   retrieve operator name]:::task
+  _operator_config_item___Retrieve_Operator_name0-->|Include task| _operator_config_item___Configure_Resources__operator_resource_item_yml_1[ operator config item   configure resources<br>When: **operator management operator  operator resource<br>name  is defined**<br>include_task:  operator resource item yml]:::includeTasks
+  _operator_config_item___Configure_Resources__operator_resource_item_yml_1-->|Task| _operator_config_item___Apply_Extra_Resources2[ operator config item   apply extra resources<br>When: **operator management operator  extra resources  <br>is defined**]:::task
+  _operator_config_item___Apply_Extra_Resources2-->End
+```
+
+### Graph for _operator_resource_item.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _operator_resource_item___Set_Fact______operator_resource_name___capitalize___0[ operator resource item   set fact      operator<br>resource name   capitalize   ]:::task
+  _operator_resource_item___Set_Fact______operator_resource_name___capitalize___0-->|Block Start| _operator_resource_item___Configure_Operator_Subscription1_block_start_0[[ operator resource item   configure operator<br>subscription<br>When: **operator resource name     subscription**]]:::block
+  _operator_resource_item___Configure_Operator_Subscription1_block_start_0-->|Task| _operator_resource_item___Verify_Operator_Exists0[ operator resource item   verify operator exists]:::task
+  _operator_resource_item___Verify_Operator_Exists0-->|Task| _operator_resource_item___Verify_Operator_Channel_Exists1[ operator resource item   verify operator channel<br>exists<br>When: **operator management resource spec is defined and <br>operator management resource spec channel is<br>defined**]:::task
+  _operator_resource_item___Verify_Operator_Channel_Exists1-->|Task| _operator_resource_item___Set_Operator_channel_when_not_defined2[ operator resource item   set operator channel<br>when not defined]:::task
+  _operator_resource_item___Set_Operator_channel_when_not_defined2-.->|End of Block| _operator_resource_item___Configure_Operator_Subscription1_block_start_0
+  _operator_resource_item___Set_Operator_channel_when_not_defined2-->|Task| _operator_resource_item___Apply_Resource_____operator_resource_name___capitalize___2[ operator resource item   apply resource    <br>operator resource name   capitalize   ]:::task
+  _operator_resource_item___Apply_Resource_____operator_resource_name___capitalize___2-->|Block Start| _operator_resource_item___Operator_Installation_Management3_block_start_0[[ operator resource item   operator installation<br>management<br>When: **operator resource name     subscription**]]:::block
+  _operator_resource_item___Operator_Installation_Management3_block_start_0-->|Task| _operator_resource_item___Obtain_Related_CSV_Name0[ operator resource item   obtain related csv name]:::task
+  _operator_resource_item___Obtain_Related_CSV_Name0-->|Task| _operator_resource_item___Wait_until_InstallPlan_created_______operator_management_resource_spec_name____1[ operator resource item   wait until installplan<br>created       operator management resource spec<br>name    ]:::task
+  _operator_resource_item___Wait_until_InstallPlan_created_______operator_management_resource_spec_name____1-->|Task| _operator_resource_item___Get_Installed_CSV_______operator_management_resource_spec_name____2[ operator resource item   get installed csv      <br>operator management resource spec name    ]:::task
+  _operator_resource_item___Get_Installed_CSV_______operator_management_resource_spec_name____2-->|Task| _operator_resource_item___Wait_until_CSV_is_installed_______operator_management_resource_spec_name____3[ operator resource item   wait until csv is<br>installed       operator management resource spec<br>name    ]:::task
+  _operator_resource_item___Wait_until_CSV_is_installed_______operator_management_resource_spec_name____3-.->|End of Block| _operator_resource_item___Operator_Installation_Management3_block_start_0
+  _operator_resource_item___Wait_until_CSV_is_installed_______operator_management_resource_spec_name____3-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| Obtain_List_of_PackageManifests0[obtain list of packagemanifests<br>When: **operator management operators   default operator<br>management default operators    length   0**]:::task
+  Obtain_List_of_PackageManifests0-->|Task| Disable_default_CatalogSources1[disable default catalogsources<br>When: **disabledefaultoperatorsources is defined**]:::task
+  Disable_default_CatalogSources1-->|Include task| Configure_CatalogSources__operator_catalog_source_item_yml_2[configure catalogsources<br>include_task:  operator catalog source item yml]:::includeTasks
+  Configure_CatalogSources__operator_catalog_source_item_yml_2-->|Include task| Configure_Operators__operator_config_item_yml_3[configure operators<br>include_task:  operator config item yml]:::includeTasks
+  Configure_Operators__operator_config_item_yml_3-->End
+```
+
+### Graph for node-health-check.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| node_health_check___Create_node_health_check_operator_namespace0[node health check   create node health check<br>operator namespace]:::task
+  node_health_check___Create_node_health_check_operator_namespace0-->|Task| node_health_check___Create_node_health_check_operator_group1[node health check   create node health check<br>operator group]:::task
+  node_health_check___Create_node_health_check_operator_group1-->|Task| node_health_check___Create_node_health_check_operator_subscription2[node health check   create node health check<br>operator subscription]:::task
+  node_health_check___Create_node_health_check_operator_subscription2-->|Task| node_health_check___Create_Self_Node_Remediation_subscription3[node health check   create self node remediation<br>subscription]:::task
+  node_health_check___Create_Self_Node_Remediation_subscription3-->End
+```
+
 ## Playbook
 
 ```yml
@@ -541,6 +652,13 @@ Description: Management of OpenShift Operators.
     - operator_management
 ...
 
+```
+
+## Playbook graph
+
+```mermaid
+flowchart TD
+  hosts[localhost]-->|Role| operator_management[operator management]
 ```
 
 ## Author Information
