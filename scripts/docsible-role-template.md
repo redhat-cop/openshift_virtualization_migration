@@ -1,17 +1,22 @@
 ## {{ role.name }}
 
+{% if role.belongs_to_collection -%}
 ```
-Role belongs to infra/openshift_virtualization_migration
-Namespace - infra
-Collection - openshift_virtualization_migration
+Role belongs to {{ role.belongs_to_collection.namespace }}/{{ role.belongs_to_collection.name }}
+Namespace - {{ role.belongs_to_collection.namespace }}
+Collection - {{ role.belongs_to_collection.name }}
+Version - {{ role.belongs_to_collection.version }}
+Repository - {{ role.belongs_to_collection.repository }}
 ```
+{%- endif %}
 
 {% if role.meta and role.meta.galaxy_info -%}
 Description: {{ role.meta.galaxy_info.description or 'Not available.' }}
-{% else %}
+{%- else %}
 Description: Not available.
 {%- endif %}
-{% if role.docsible -%}
+{%- if role.docsible %}
+
 | Field                | Value           |
 |--------------------- |-----------------|
 {%- if role.docsible.description %}
