@@ -14,7 +14,7 @@ This role manages SSH access to virtual machines on OpenShift cluster.
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.3
+Version - 1.21.4
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 

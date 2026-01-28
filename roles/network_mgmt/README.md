@@ -13,7 +13,7 @@ This role performs network management in two modes: Manual and Automatic. It per
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.3
+Version - 1.21.4
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -165,6 +165,31 @@ Description: Management of network related components.
 
 ## Task Flow Graphs
 
+### Graph for manual.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| manual___Validate_network_mgmt_manual_nad_list0[manual   validate network mgmt manual nad list]:::task
+  manual___Validate_network_mgmt_manual_nad_list0-->|Task| manual___Validate_supported_bonding_mode_if_also_creating_bond1[manual   validate supported bonding mode if also<br>creating bond<br>When: **not  network mgmt override openshift supported<br>bond mode   default false   and  network mgmt<br>openshift node network ports   default      <br>length     0**]:::task
+  manual___Validate_supported_bonding_mode_if_also_creating_bond1-->|Task| manual___Validate_ovs_bridge_mode2[manual   validate ovs bridge mode<br>When: **network mgmt openshift network bridge mode     ovs<br>bridge**]:::task
+  manual___Validate_ovs_bridge_mode2-->|Task| manual___Validate_linux_bridge3[manual   validate linux bridge]:::task
+  manual___Validate_linux_bridge3-->|Task| manual___Apply_NodeNetworkConfigurationPolicy4[manual   apply nodenetworkconfigurationpolicy<br>When: **network mgmt manual bridge name   default      <br>length   0 and network mgmt manual bond name  <br>default       length   0 and network mgmt<br>openshift network bridge mode     linux bridge**]:::task
+  manual___Apply_NodeNetworkConfigurationPolicy4-->|Task| manual___Validate_access_port5[manual   validate access port<br>When: **trunk  not in nad  or  not nad trunk**]:::task
+  manual___Validate_access_port5-->|Task| manual___Validate_trunk_ports6[manual   validate trunk ports<br>When: **trunk  in nad and nad trunk**]:::task
+  manual___Validate_trunk_ports6-->|Task| manual___Apply_NetworkAttachmentDefinitions7[manual   apply networkattachmentdefinitions]:::task
+  manual___Apply_NetworkAttachmentDefinitions7-->End
+```
+
 ### Graph for automatic.yml
 
 ```mermaid
@@ -186,7 +211,7 @@ classDef rescue stroke:#665352,stroke-width:2px;
   automatic___Include_tasks_from_automatic_nad_yml_automatic_nad_yml_3-->End
 ```
 
-### Graph for automatic_nad.yml
+### Graph for create_nncp.yml
 
 ```mermaid
 flowchart TD
@@ -200,8 +225,9 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Include task| automatic_nad___Include_tasks_from_create_nad_yml_create_nad_yml_0[automatic nad   include tasks from create nad yml<br>include_task: create nad yml]:::includeTasks
-  automatic_nad___Include_tasks_from_create_nad_yml_create_nad_yml_0-->End
+  Start-->|Task| create_nncp___DEBUG_nncp_Template0[create nncp   debug nncp template<br>When: **vswitch name    network mgmt vcenter dvswitch**]:::task
+  create_nncp___DEBUG_nncp_Template0-->|Task| create_nncp___Apply_NodeNetworkConfigurationPolicy1[create nncp   apply nodenetworkconfigurationpolicy<br>When: **vswitch name    network mgmt vcenter dvswitch**]:::task
+  create_nncp___Apply_NodeNetworkConfigurationPolicy1-->End
 ```
 
 ### Graph for automatic_nncp.yml
@@ -223,6 +249,24 @@ classDef rescue stroke:#665352,stroke-width:2px;
   automatic_nncp___Include_tasks_from_create_nncp_yml_create_nncp_yml_1-->End
 ```
 
+### Graph for automatic_nad.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Include task| automatic_nad___Include_tasks_from_create_nad_yml_create_nad_yml_0[automatic nad   include tasks from create nad yml<br>include_task: create nad yml]:::includeTasks
+  automatic_nad___Include_tasks_from_create_nad_yml_create_nad_yml_0-->End
+```
+
 ### Graph for create_nad.yml
 
 ```mermaid
@@ -240,25 +284,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Start-->|Task| create_nad____DEBUG_nad_Template_0[create nad    debug nad template <br>When: **portgroup uplinks   0 and not  portgroup vlan<br>trunk and  network mgmt openshift network bridge<br>mode     ovs bridge    and portgroup switch   <br>network mgmt vcenter dvswitch**]:::task
   create_nad____DEBUG_nad_Template_0-->|Task| create_nad___Apply_NetworkAttachmentDefinitions1[create nad   apply networkattachmentdefinitions<br>When: **portgroup uplinks   0 and not  portgroup vlan<br>trunk and  network mgmt openshift network bridge<br>mode     ovs bridge    and portgroup switch   <br>network mgmt vcenter dvswitch**]:::task
   create_nad___Apply_NetworkAttachmentDefinitions1-->End
-```
-
-### Graph for create_nncp.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| create_nncp___DEBUG_nncp_Template0[create nncp   debug nncp template<br>When: **vswitch name    network mgmt vcenter dvswitch**]:::task
-  create_nncp___DEBUG_nncp_Template0-->|Task| create_nncp___Apply_NodeNetworkConfigurationPolicy1[create nncp   apply nodenetworkconfigurationpolicy<br>When: **vswitch name    network mgmt vcenter dvswitch**]:::task
-  create_nncp___Apply_NodeNetworkConfigurationPolicy1-->End
 ```
 
 ### Graph for gather_networks.yml
@@ -297,31 +322,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Start-->|Include task| Use_automatic_mode_automatic_yml_0[use automatic mode<br>When: **network mgmt manual nad list   default      <br>length     0**<br>include_task: automatic yml]:::includeTasks
   Use_automatic_mode_automatic_yml_0-->|Include task| Use_manual_mode_manual_yml_1[use manual mode<br>When: **network mgmt manual nad list   default      is<br>iterable and  network mgmt manual nad list  <br>length    0**<br>include_task: manual yml]:::includeTasks
   Use_manual_mode_manual_yml_1-->End
-```
-
-### Graph for manual.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| manual___Validate_network_mgmt_manual_nad_list0[manual   validate network mgmt manual nad list]:::task
-  manual___Validate_network_mgmt_manual_nad_list0-->|Task| manual___Validate_supported_bonding_mode_if_also_creating_bond1[manual   validate supported bonding mode if also<br>creating bond<br>When: **not  network mgmt override openshift supported<br>bond mode   default false   and  network mgmt<br>openshift node network ports   default      <br>length     0**]:::task
-  manual___Validate_supported_bonding_mode_if_also_creating_bond1-->|Task| manual___Validate_ovs_bridge_mode2[manual   validate ovs bridge mode<br>When: **network mgmt openshift network bridge mode     ovs<br>bridge**]:::task
-  manual___Validate_ovs_bridge_mode2-->|Task| manual___Validate_linux_bridge3[manual   validate linux bridge]:::task
-  manual___Validate_linux_bridge3-->|Task| manual___Apply_NodeNetworkConfigurationPolicy4[manual   apply nodenetworkconfigurationpolicy<br>When: **network mgmt manual bridge name   default      <br>length   0 and network mgmt manual bond name  <br>default       length   0 and network mgmt<br>openshift network bridge mode     linux bridge**]:::task
-  manual___Apply_NodeNetworkConfigurationPolicy4-->|Task| manual___Validate_access_port5[manual   validate access port<br>When: **trunk  not in nad  or  not nad trunk**]:::task
-  manual___Validate_access_port5-->|Task| manual___Validate_trunk_ports6[manual   validate trunk ports<br>When: **trunk  in nad and nad trunk**]:::task
-  manual___Validate_trunk_ports6-->|Task| manual___Apply_NetworkAttachmentDefinitions7[manual   apply networkattachmentdefinitions]:::task
-  manual___Apply_NetworkAttachmentDefinitions7-->End
 ```
 
 ## Playbook

@@ -12,7 +12,7 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.3
+Version - 1.21.4
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -389,7 +389,7 @@ Description: Migration of Virtual Machines from Source to Destination.
 
 ## Task Flow Graphs
 
-### Graph for _migrations.yml
+### Graph for _process_plans.yml
 
 ```mermaid
 flowchart TD
@@ -403,12 +403,10 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| _migrations___Template_Migrations0[ migrations   template migrations]:::task
-  _migrations___Template_Migrations0-->|Task| _migrations___Create_Migrations1[ migrations   create migrations]:::task
-  _migrations___Create_Migrations1-->|Block Start| _migrations___Wait_for_Migrations2_block_start_0[[ migrations   wait for migrations<br>When: **mtv verify migrations complete bool**]]:::block
-  _migrations___Wait_for_Migrations2_block_start_0-->|Task| _migrations___Check_on_Migrations0[ migrations   check on migrations]:::task
-  _migrations___Check_on_Migrations0-.->|End of Block| _migrations___Wait_for_Migrations2_block_start_0
-  _migrations___Check_on_Migrations0-->End
+  Start-->|Task| _process_plans___Set_Plan_Name0[ process plans   set plan name]:::task
+  _process_plans___Set_Plan_Name0-->|Task| _process_plans___Update_Plan_Content1[ process plans   update plan content]:::task
+  _process_plans___Update_Plan_Content1-->|Task| _process_plans___Add_Plan2[ process plans   add plan]:::task
+  _process_plans___Add_Plan2-->End
 ```
 
 ### Graph for _plans.yml
@@ -452,6 +450,32 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _plans___Display_Plans__Dry_Run_16-->End
 ```
 
+### Graph for _process_vm.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _process_vm___Initialize_VM_Variables0[ process vm   initialize vm variables]:::task
+  _process_vm___Initialize_VM_Variables0-->|Task| _process_vm___Verify_Name_or_ID_or_Path_specified_for_VM1[ process vm   verify name or id or path specified<br>for vm]:::task
+  _process_vm___Verify_Name_or_ID_or_Path_specified_for_VM1-->|Task| _process_vm___Locate_VM_by_name2[ process vm   locate vm by name<br>When: **name  in vm to process and  id  not in vm to<br>process and  path  not in vm to process**]:::task
+  _process_vm___Locate_VM_by_name2-->|Task| _process_vm___Locate_VM_by_id3[ process vm   locate vm by id<br>When: **id  in vm to process and  name  not in vm to<br>process and  path  not in vm to process**]:::task
+  _process_vm___Locate_VM_by_id3-->|Task| _process_vm___Locate_VM_by_path4[ process vm   locate vm by path<br>When: **path  in vm to process and  id  not in vm to<br>process and  name  not in vm to process**]:::task
+  _process_vm___Locate_VM_by_path4-->|Task| _process_vm___Verify_single_VM_found5[ process vm   verify single vm found]:::task
+  _process_vm___Verify_single_VM_found5-->|Task| _process_vm___Set_VM_to_Process6[ process vm   set vm to process]:::task
+  _process_vm___Set_VM_to_Process6-->|Task| _process_vm___Add_VM_to_Migration_Dict7[ process vm   add vm to migration dict<br>When: **mtv migrate migration request  vms     default    <br>  selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  name   <br>defined     selectattr  name    equalto    vm to<br>process  name      list   length    0 and mtv<br>migrate migration request  vms     default      <br>selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  id   <br>defined     selectattr  id    equalto    vm to<br>process  id      list   length    0 and mtv<br>migrate migration request  vms     default      <br>selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  path   <br>defined     selectattr  path    equalto    vm to<br>process  path      list   length    0 and not  vm<br>to process  istemplate     default false**]:::task
+  _process_vm___Add_VM_to_Migration_Dict7-->|Task| _process_vm___Clear_VM_Variables8[ process vm   clear vm variables]:::task
+  _process_vm___Clear_VM_Variables8-->End
+```
+
 ### Graph for _process_folder.yml
 
 ```mermaid
@@ -480,7 +504,7 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _process_folder___Process_Subfolders__process_folder_yml_1-->End
 ```
 
-### Graph for _process_plans.yml
+### Graph for _migrations.yml
 
 ```mermaid
 flowchart TD
@@ -494,36 +518,12 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| _process_plans___Set_Plan_Name0[ process plans   set plan name]:::task
-  _process_plans___Set_Plan_Name0-->|Task| _process_plans___Update_Plan_Content1[ process plans   update plan content]:::task
-  _process_plans___Update_Plan_Content1-->|Task| _process_plans___Add_Plan2[ process plans   add plan]:::task
-  _process_plans___Add_Plan2-->End
-```
-
-### Graph for _process_vm.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _process_vm___Initialize_VM_Variables0[ process vm   initialize vm variables]:::task
-  _process_vm___Initialize_VM_Variables0-->|Task| _process_vm___Verify_Name_or_ID_or_Path_specified_for_VM1[ process vm   verify name or id or path specified<br>for vm]:::task
-  _process_vm___Verify_Name_or_ID_or_Path_specified_for_VM1-->|Task| _process_vm___Locate_VM_by_name2[ process vm   locate vm by name<br>When: **name  in vm to process and  id  not in vm to<br>process and  path  not in vm to process**]:::task
-  _process_vm___Locate_VM_by_name2-->|Task| _process_vm___Locate_VM_by_id3[ process vm   locate vm by id<br>When: **id  in vm to process and  name  not in vm to<br>process and  path  not in vm to process**]:::task
-  _process_vm___Locate_VM_by_id3-->|Task| _process_vm___Locate_VM_by_path4[ process vm   locate vm by path<br>When: **path  in vm to process and  id  not in vm to<br>process and  name  not in vm to process**]:::task
-  _process_vm___Locate_VM_by_path4-->|Task| _process_vm___Verify_single_VM_found5[ process vm   verify single vm found]:::task
-  _process_vm___Verify_single_VM_found5-->|Task| _process_vm___Set_VM_to_Process6[ process vm   set vm to process]:::task
-  _process_vm___Set_VM_to_Process6-->|Task| _process_vm___Add_VM_to_Migration_Dict7[ process vm   add vm to migration dict<br>When: **mtv migrate migration request  vms     default    <br>  selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  name   <br>defined     selectattr  name    equalto    vm to<br>process  name      list   length    0 and mtv<br>migrate migration request  vms     default      <br>selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  id   <br>defined     selectattr  id    equalto    vm to<br>process  id      list   length    0 and mtv<br>migrate migration request  vms     default      <br>selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  path   <br>defined     selectattr  path    equalto    vm to<br>process  path      list   length    0 and not  vm<br>to process  istemplate     default false**]:::task
-  _process_vm___Add_VM_to_Migration_Dict7-->|Task| _process_vm___Clear_VM_Variables8[ process vm   clear vm variables]:::task
-  _process_vm___Clear_VM_Variables8-->End
+  Start-->|Task| _migrations___Template_Migrations0[ migrations   template migrations]:::task
+  _migrations___Template_Migrations0-->|Task| _migrations___Create_Migrations1[ migrations   create migrations]:::task
+  _migrations___Create_Migrations1-->|Block Start| _migrations___Wait_for_Migrations2_block_start_0[[ migrations   wait for migrations<br>When: **mtv verify migrations complete bool**]]:::block
+  _migrations___Wait_for_Migrations2_block_start_0-->|Task| _migrations___Check_on_Migrations0[ migrations   check on migrations]:::task
+  _migrations___Check_on_Migrations0-.->|End of Block| _migrations___Wait_for_Migrations2_block_start_0
+  _migrations___Check_on_Migrations0-->End
 ```
 
 ### Graph for main.yml

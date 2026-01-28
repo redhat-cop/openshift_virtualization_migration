@@ -1,8 +1,0 @@
-release_summary: "Migration of code to GitHub for public access"
-
-bugfixes:
-  - fix ansible lint errors
-
-doc_changes:
-  - add default authors for roles
-  - automate changelogs fragments from PRs

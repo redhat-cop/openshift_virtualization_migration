@@ -14,7 +14,7 @@ This role defines the initial configuration and setup of the Ansible Automation 
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.3
+Version - 1.21.4
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -1186,6 +1186,25 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _build_credentials___Build_kubeconfig_for__mf_host4-->End
 ```
 
+### Graph for _mtv_job_templates.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _mtv_job_templates___Configure_VMWare_MTV_Job_Template0[ mtv job templates   configure vmware mtv job<br>template<br>When: **target type     vmware  and   mtv job template  <br>trim   length    0**]:::task
+  _mtv_job_templates___Configure_VMWare_MTV_Job_Template0-->|Task| _mtv_job_templates___Configure_Ovirt_MTV_Job_Template1[ mtv job templates   configure ovirt mtv job<br>template<br>When: **target type     ovirt  and   mtv job template  <br>trim   length    0**]:::task
+  _mtv_job_templates___Configure_Ovirt_MTV_Job_Template1-->End
+```
+
 ### Graph for _build_job_templates.yml
 
 ```mermaid
@@ -1210,25 +1229,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _build_job_templates___Build_MTV_Job_Templates__mtv_job_templates_yml_2-->End
 ```
 
-### Graph for _mtv_job_templates.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _mtv_job_templates___Configure_VMWare_MTV_Job_Template0[ mtv job templates   configure vmware mtv job<br>template<br>When: **target type     vmware  and   mtv job template  <br>trim   length    0**]:::task
-  _mtv_job_templates___Configure_VMWare_MTV_Job_Template0-->|Task| _mtv_job_templates___Configure_Ovirt_MTV_Job_Template1[ mtv job templates   configure ovirt mtv job<br>template<br>When: **target type     ovirt  and   mtv job template  <br>trim   length    0**]:::task
-  _mtv_job_templates___Configure_Ovirt_MTV_Job_Template1-->End
-```
-
 ### Graph for _mtv_workflow_job_templates.yml
 
 ```mermaid
@@ -1247,6 +1247,25 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _mtv_workflow_job_templates___Build_MTV_Target_Workflows_for__mf_host0-->|Task| _mtv_workflow_job_templates___Get_list_of_MTV_Target_workflow_names1[ mtv workflow job templates   get list of mtv<br>target workflow names]:::task
   _mtv_workflow_job_templates___Get_list_of_MTV_Target_workflow_names1-->|Task| _mtv_workflow_job_templates___Build_MTV_workflow2[ mtv workflow job templates   build mtv workflow]:::task
   _mtv_workflow_job_templates___Build_MTV_workflow2-->End
+```
+
+### Graph for job_templates.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| job_templates___Set_templates_variable0[job templates   set templates variable]:::task
+  job_templates___Set_templates_variable0-->|Include task| job_templates___Build_Operator_Install_Job_Templates__build_job_templates_yml_1[job templates   build operator install job<br>templates<br>include_task:  build job templates yml]:::includeTasks
+  job_templates___Build_Operator_Install_Job_Templates__build_job_templates_yml_1-->End
 ```
 
 ### Graph for credentials.yml
@@ -1273,25 +1292,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   credentials___Build_Migration_Target_Credentials0-->|Include task| credentials___Build_required_credentials__build_credentials_yml_1[credentials   build required credentials<br>include_task:  build credentials yml]:::includeTasks
   credentials___Build_required_credentials__build_credentials_yml_1-.->|End of Block| credentials___Build_Operator_Management_Credentials5_block_start_0
   credentials___Build_required_credentials__build_credentials_yml_1-->End
-```
-
-### Graph for job_templates.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| job_templates___Set_templates_variable0[job templates   set templates variable]:::task
-  job_templates___Set_templates_variable0-->|Include task| job_templates___Build_Operator_Install_Job_Templates__build_job_templates_yml_1[job templates   build operator install job<br>templates<br>include_task:  build job templates yml]:::includeTasks
-  job_templates___Build_Operator_Install_Job_Templates__build_job_templates_yml_1-->End
 ```
 
 ### Graph for main.yml

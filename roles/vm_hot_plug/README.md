@@ -16,7 +16,7 @@ This role performs hot plugging in a virtual machine.
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.3
+Version - 1.21.4
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -108,6 +108,24 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _compute___Patch_VM_with_Compute_Modifications2-->End
 ```
 
+### Graph for _storage.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _storage___Perform_VM_Storage_Operation0[ storage   perform vm storage operation<br>When: **state  in vm hot plug storage instance and  <br>vm hot plug storage instance state     absent  and<br>  vm hot plug vm response obj spec template spec<br>domain devices disks     default        <br>selectattr  name    equalto   vm hot plug storage<br>instance name    list   length   0   or           <br>state  not in vm hot plug storage instance or     <br>state  in vm hot plug storage instance and     vm<br>hot plug storage instance state     absent     <br>and   vm hot plug vm response obj spec template<br>spec domain devices disks     default        <br>selectattr  name    equalto   vm hot plug storage<br>instance name    list   length    0**]:::task
+  _storage___Perform_VM_Storage_Operation0-->End
+```
+
 ### Graph for _process_vm.yml
 
 ```mermaid
@@ -132,24 +150,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _process_vm___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1-.->|End of Block| _process_vm___Restart_the_machine1_block_start_1
   _process_vm___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1-.->|End of Block| _process_vm___Manage_restarting_VM2_block_start_0
   _process_vm___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1-->End
-```
-
-### Graph for _storage.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _storage___Perform_VM_Storage_Operation0[ storage   perform vm storage operation<br>When: **state  in vm hot plug storage instance and  <br>vm hot plug storage instance state     absent  and<br>  vm hot plug vm response obj spec template spec<br>domain devices disks     default        <br>selectattr  name    equalto   vm hot plug storage<br>instance name    list   length   0   or           <br>state  not in vm hot plug storage instance or     <br>state  in vm hot plug storage instance and     vm<br>hot plug storage instance state     absent     <br>and   vm hot plug vm response obj spec template<br>spec domain devices disks     default        <br>selectattr  name    equalto   vm hot plug storage<br>instance name    list   length    0**]:::task
-  _storage___Perform_VM_Storage_Operation0-->End
 ```
 
 ### Graph for main.yml

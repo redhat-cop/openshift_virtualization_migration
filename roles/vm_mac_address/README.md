@@ -12,7 +12,7 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.3
+Version - 1.21.4
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -76,26 +76,6 @@ Description: Management of Virtual Machine MAC Addresses.
 
 ## Task Flow Graphs
 
-### Graph for _compute_patch.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _compute_patch___Verify_Valid_MAC_Address_Provided0[ compute patch   verify valid mac address provided]:::task
-  _compute_patch___Verify_Valid_MAC_Address_Provided0-->|Task| _compute_patch___Locate_Interface_Index1[ compute patch   locate interface index]:::task
-  _compute_patch___Locate_Interface_Index1-->|Task| _compute_patch___Create_Patch_Item2[ compute patch   create patch item<br>When: **vm mac address interface idx   length   0 and <br>macaddress  not in  vm mac address vm interfaces <br>vm mac address interface idx 0   or     <br>macaddress  in  vm mac address vm interfaces  vm<br>mac address interface idx 0   and    vm mac<br>address vm interfaces  vm mac address interface<br>idx 0   macaddress       vm mac address interface<br>macaddress**]:::task
-  _compute_patch___Create_Patch_Item2-->End
-```
-
 ### Graph for _process_vm.yml
 
 ```mermaid
@@ -136,6 +116,26 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Verify_vm_mac_address_request_Variable_Provided0-->|Task| Verify_Required_Properties_Provided1[verify required properties provided]:::task
   Verify_Required_Properties_Provided1-->|Include task| Process_MAC_Address_VM__process_vm_yml_2[process mac address vm<br>include_task:  process vm yml]:::includeTasks
   Process_MAC_Address_VM__process_vm_yml_2-->End
+```
+
+### Graph for _compute_patch.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _compute_patch___Verify_Valid_MAC_Address_Provided0[ compute patch   verify valid mac address provided]:::task
+  _compute_patch___Verify_Valid_MAC_Address_Provided0-->|Task| _compute_patch___Locate_Interface_Index1[ compute patch   locate interface index]:::task
+  _compute_patch___Locate_Interface_Index1-->|Task| _compute_patch___Create_Patch_Item2[ compute patch   create patch item<br>When: **vm mac address interface idx   length   0 and <br>macaddress  not in  vm mac address vm interfaces <br>vm mac address interface idx 0   or     <br>macaddress  in  vm mac address vm interfaces  vm<br>mac address interface idx 0   and    vm mac<br>address vm interfaces  vm mac address interface<br>idx 0   macaddress       vm mac address interface<br>macaddress**]:::task
+  _compute_patch___Create_Patch_Item2-->End
 ```
 
 ## Playbook

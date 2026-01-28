@@ -294,3 +294,22 @@ releases:
       - 1.21.3_addciworkflow.yml
       - 1.21.3_fixadddefaultauthorsforrolesan.yml
     release_date: '2026-01-24'
+  1.21.4:
+    changes:
+      bugfixes:
+        - fix ansible lint errors
+      doc_changes:
+        - add badges to collection README  (#6)
+        - add default authors for roles
+        - add mermaid graphs to documentation  (#4)
+        - add release notes (#7)
+        - automate changelogs fragments from PRs
+        - fix markdown lint issues  (#5)
+      release_summary: Migration of code to GitHub for public access
+    fragments:
+      - 1.21.4_docs_addbadgestocollectionREADME6.yml
+      - 1.21.4_docs_addmermaidgraphstodocumentatio.yml
+      - 1.21.4_docs_addreleasenotes7.yml
+      - 1.21.4_docs_fixmarkdownlintissues5.yml
+      - release-notes.yml
+    release_date: '2026-01-28'

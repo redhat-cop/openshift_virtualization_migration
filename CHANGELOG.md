@@ -1,5 +1,43 @@
 # CHANGELOG
 
+## v1.21.4 (2026-01-28)
+
+### Chores
+
+- Add gitleaks and fix dependencies for ansible-lint in pre-commit hooks
+  ([`51bd0ee`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/51bd0eeedb2d2c3bc71ac3083000f0582f49fb25))
+
+- Fix lint issues
+  ([`db14d48`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/db14d485eb1cae3b2549b23645fdfc173906c47e))
+
+- Fix markdown lint issues
+  ([`05ca15c`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/05ca15c66d11dc57898f1cd1f152621440c69569))
+
+- Upgrade ansible-lint and ansible-core dependencies
+  ([`d0dd1c6`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/d0dd1c6b01102b0280a55f1cfcc63ec43cfb03af))
+
+- Workflow refactoring
+  ([#4](https://github.com/redhat-cop/openshift_virtualization_migration/pull/4),
+  [`47749a5`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/47749a53783699ca88bf27ce3eff0b4d37f7aa44))
+
+### Documentation
+
+- Add badges to collection README [skip ci]
+  ([#6](https://github.com/redhat-cop/openshift_virtualization_migration/pull/6),
+  [`b5a7313`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/b5a731356df2a0f82ce1636e4a2c027fb3727306))
+
+- Add mermaid graphs to documentation [skip ci]
+  ([#4](https://github.com/redhat-cop/openshift_virtualization_migration/pull/4),
+  [`47749a5`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/47749a53783699ca88bf27ce3eff0b4d37f7aa44))
+
+- Add release notes ([#7](https://github.com/redhat-cop/openshift_virtualization_migration/pull/7),
+  [`1c21d8c`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/1c21d8c0a7b9322819db951d931ec7a6fbe28392))
+
+- Fix markdown lint issues [skip ci]
+  ([#5](https://github.com/redhat-cop/openshift_virtualization_migration/pull/5),
+  [`ee33924`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/ee339244f0e56b8bd9a1e7731ea118d4f85e80e7))
+
+
 ## v1.21.3 (2026-01-08)
 
 ### Bug Fixes

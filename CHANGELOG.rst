@@ -4,6 +4,29 @@ Openshift Virtualization Migration Release Notes
 
 .. contents:: Topics
 
+v1.21.4
+=======
+
+Release Summary
+---------------
+
+Migration of code to GitHub for public access
+
+Bugfixes
+--------
+
+- fix ansible lint errors
+
+Documentation Changes
+---------------------
+
+- add badges to collection README  (#6)
+- add default authors for roles
+- add mermaid graphs to documentation  (#4)
+- add release notes (#7)
+- automate changelogs fragments from PRs
+- fix markdown lint issues  (#5)
+
 v1.21.3
 =======
 
