@@ -12,13 +12,11 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.3
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Management of the Migration Toolkit for Virtualization (MTV).
-
-| Field                | Value           |
-|--------------------- |-----------------|
-| Readme update        | 18/03/2025 |
 
 ### Defaults
 
@@ -265,6 +263,296 @@ Description: Management of the Migration Toolkit for Virtualization (MTV).
 | mtv_vddk ¦ Retrieve VDDK Service Account | `kubernetes.core.k8s_info` | False |
 | mtv_vddk ¦ Patch Service Account with VDDK pull secret | `kubernetes.core.k8s_json_patch` | True |
 
+## Task Flow Graphs
+
+### Graph for _mtv_network_map.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _mtv_network_map___Initialize_data_structures0[ mtv network map   initialize data structures]:::task
+  _mtv_network_map___Initialize_data_structures0-->|Task| _mtv_network_map___Verify_Network_Map_Overrides_do_not_contain_both_includes_and_excludes1[ mtv network map   verify network map overrides do<br>not contain both includes and excludes<br>When: **mtv management network map overrides is defined<br>and mtv management network map overrides  <br>selectattr  include    defined     list   length  <br>0 and mtv management network map overrides  <br>selectattr  exclude    defined     list   length  <br>0**]:::task
+  _mtv_network_map___Verify_Network_Map_Overrides_do_not_contain_both_includes_and_excludes1-->|Include task| _mtv_network_map___Query_for_VMWare_Networks_from_Source_Provider_mtv_query_inventory_yml_2[ mtv network map   query for vmware networks from<br>source provider<br>When: **vsphere  in provider**<br>include_task: mtv query inventory yml]:::includeTasks
+  _mtv_network_map___Query_for_VMWare_Networks_from_Source_Provider_mtv_query_inventory_yml_2-->|Include task| _mtv_network_map___Query_for_Ovirt_Networks_from_Source_Provider_mtv_query_inventory_yml_3[ mtv network map   query for ovirt networks from<br>source provider<br>When: **ovirt  in provider**<br>include_task: mtv query inventory yml]:::includeTasks
+  _mtv_network_map___Query_for_Ovirt_Networks_from_Source_Provider_mtv_query_inventory_yml_3-->|Include task| _mtv_network_map___Query_for_NetworkAttachmentDefinitions_from_Destination_Provider_mtv_query_inventory_yml_4[ mtv network map   query for<br>networkattachmentdefinitions from destination<br>provider<br>include_task: mtv query inventory yml]:::includeTasks
+  _mtv_network_map___Query_for_NetworkAttachmentDefinitions_from_Destination_Provider_mtv_query_inventory_yml_4-->|Include task| _mtv_network_map___Process_VMware_Networks__mtv_network_map_process_network_yml_5[ mtv network map   process vmware networks<br>When: **vsphere  in provider and mtv networks is defined<br>and mtv networks   length   0**<br>include_task:  mtv network map process network yml]:::includeTasks
+  _mtv_network_map___Process_VMware_Networks__mtv_network_map_process_network_yml_5-->|Include task| _mtv_network_map___Process_Ovirt_Networks__mtv_network_map_process_network_yml_6[ mtv network map   process ovirt networks<br>When: **ovirt  in provider and mtv networks is defined<br>and mtv networks   length   0**<br>include_task:  mtv network map process network yml]:::includeTasks
+  _mtv_network_map___Process_Ovirt_Networks__mtv_network_map_process_network_yml_6-->|Task| _mtv_network_map___Template_NetworkMap_Map7[ mtv network map   template networkmap map]:::task
+  _mtv_network_map___Template_NetworkMap_Map7-->|Task| _mtv_network_map___Create_Network_Map8[ mtv network map   create network map]:::task
+  _mtv_network_map___Create_Network_Map8-->End
+```
+
+### Graph for _mtv_network_map_process_network.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _mtv_network_map_process_network___Set_VMware_NetworkMap_Variables0[ mtv network map process network   set vmware<br>networkmap variables<br>When: **mtv vmware network is defined**]:::task
+  _mtv_network_map_process_network___Set_VMware_NetworkMap_Variables0-->|Task| _mtv_network_map_process_network___Set_Ovirt_NetworkMap_Variables1[ mtv network map process network   set ovirt<br>networkmap variables<br>When: **mtv ovirt network is defined**]:::task
+  _mtv_network_map_process_network___Set_Ovirt_NetworkMap_Variables1-->|Task| _mtv_network_map_process_network___Locate_VMware_NetworkAttachmentDefinition2[ mtv network map process network   locate vmware<br>networkattachmentdefinition<br>When: **mtv vmware network is defined**]:::task
+  _mtv_network_map_process_network___Locate_VMware_NetworkAttachmentDefinition2-->|Task| _mtv_network_map_process_network___Locate_Ovirt_NetworkAttachmentDefinition3[ mtv network map process network   locate ovirt<br>networkattachmentdefinition<br>When: **mtv ovirt network is defined**]:::task
+  _mtv_network_map_process_network___Locate_Ovirt_NetworkAttachmentDefinition3-->|Task| _mtv_network_map_process_network___Validate_Found_VMware_NetworkAttachmentDefinitions4[ mtv network map process network   validate found<br>vmware networkattachmentdefinitions<br>When: **mtv vmware network is defined**]:::task
+  _mtv_network_map_process_network___Validate_Found_VMware_NetworkAttachmentDefinitions4-->|Task| _mtv_network_map_process_network___Validate_Found_Ovirt_NetworkAttachmentDefinitions5[ mtv network map process network   validate found<br>ovirt networkattachmentdefinitions<br>When: **mtv ovirt network is defined**]:::task
+  _mtv_network_map_process_network___Validate_Found_Ovirt_NetworkAttachmentDefinitions5-->|Task| _mtv_network_map_process_network___Template_NetworkMap_Map6[ mtv network map process network   template<br>networkmap map]:::task
+  _mtv_network_map_process_network___Template_NetworkMap_Map6-->|Task| _mtv_network_map_process_network___Add_VMWare_NetworkMaps_Map_to_Dict7[ mtv network map process network   add vmware<br>networkmaps map to dict<br>When: **mtv vmware network is defined and    include  in<br>mtv management mtv vmware network overrides and<br>mtv management network map overrides   selectattr <br>include    defined     list   length   0  or  mtv<br>management network map overrides   selectattr <br>include    defined     list   length    0 and mtv<br>management network map overrides   selectattr <br>exclude    defined     list   length    0   or  <br>exclude  not in mtv management mtv vmware network<br>overrides and mtv management network map overrides<br>  selectattr  exclude    defined     list   length<br>  0**]:::task
+  _mtv_network_map_process_network___Add_VMWare_NetworkMaps_Map_to_Dict7-->|Task| _mtv_network_map_process_network___Add_Ovirt_NetworkMaps_Map_to_Dict8[ mtv network map process network   add ovirt<br>networkmaps map to dict<br>When: **mtv ovirt network is defined and    include  in<br>mtv management mtv ovirt network overrides and mtv<br>management network map overrides   selectattr <br>include    defined     list   length   0  or  mtv<br>management network map overrides   selectattr <br>include    defined     list   length    0 and mtv<br>management network map overrides   selectattr <br>exclude    defined     list   length    0   or  <br>exclude  not in mtv management mtv ovirt network<br>overrides and mtv management network map overrides<br>  selectattr  exclude    defined     list   length<br>  0**]:::task
+  _mtv_network_map_process_network___Add_Ovirt_NetworkMaps_Map_to_Dict8-->End
+```
+
+### Graph for _mtv_provider_ovirt.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _mtv_provider_ovirt___Verify_credential_name_provided_when_more_than_one_credential_specified0[ mtv provider ovirt   verify credential name<br>provided when more than one credential specified<br>When: **not single ovirt target**]:::task
+  _mtv_provider_ovirt___Verify_credential_name_provided_when_more_than_one_credential_specified0-->|Task| _mtv_provider_ovirt___Set_provider_name1[ mtv provider ovirt   set provider name]:::task
+  _mtv_provider_ovirt___Set_provider_name1-->|Task| _mtv_provider_ovirt___Validate_required_Ovirt_provider_Properties2[ mtv provider ovirt   validate required ovirt<br>provider properties]:::task
+  _mtv_provider_ovirt___Validate_required_Ovirt_provider_Properties2-->|Task| _mtv_provider_ovirt___Set_Ovirt_Provider_URL3[ mtv provider ovirt   set ovirt provider url]:::task
+  _mtv_provider_ovirt___Set_Ovirt_Provider_URL3-->|Block Start| _mtv_provider_ovirt___MTV_Certificate4_block_start_0[[ mtv provider ovirt   mtv certificate<br>When: **certificate  not in mtv management populated<br>ovirt target or  mtv management populated ovirt<br>target  certificate     default       trim  <br>length    0**]]:::block
+  _mtv_provider_ovirt___MTV_Certificate4_block_start_0-->|Task| _mtv_provider_ovirt___Retrieve_Remote_Ovirt_Provider_Certificate0[ mtv provider ovirt   retrieve remote ovirt<br>provider certificate]:::task
+  _mtv_provider_ovirt___Retrieve_Remote_Ovirt_Provider_Certificate0-->|Task| _mtv_provider_ovirt___Set_Ovirt_Provider_Certificate1[ mtv provider ovirt   set ovirt provider<br>certificate]:::task
+  _mtv_provider_ovirt___Set_Ovirt_Provider_Certificate1-.->|End of Block| _mtv_provider_ovirt___MTV_Certificate4_block_start_0
+  _mtv_provider_ovirt___Set_Ovirt_Provider_Certificate1-->|Task| _mtv_provider_ovirt___Set_Provider_Secret_Name_Namespace__Configuration_5[ mtv provider ovirt   set provider secret name<br>namespace  configuration <br>When: **credentialssecretref  in mtv management populated<br>ovirt target and  mtv management populated ovirt<br>target  credentialssecretref     default      <br>trim   length   0**]:::task
+  _mtv_provider_ovirt___Set_Provider_Secret_Name_Namespace__Configuration_5-->|Block Start| _mtv_provider_ovirt___Configure_Provider_Secret6_block_start_0[[ mtv provider ovirt   configure provider secret<br>When: **credentialssecretref  not in mtv management<br>populated ovirt target or  mtv management<br>populated ovirt target  credentialssecretref    <br>default       trim   length    0**]]:::block
+  _mtv_provider_ovirt___Configure_Provider_Secret6_block_start_0-->|Task| _mtv_provider_ovirt___Set_Provider_Secret_Name_Namespace__Generated_0[ mtv provider ovirt   set provider secret name<br>namespace  generated <br>When: **credentialssecretref  not in mtv management<br>populated ovirt target or  mtv management<br>populated ovirt target  credentialssecretref    <br>default       trim   length    0**]:::task
+  _mtv_provider_ovirt___Set_Provider_Secret_Name_Namespace__Generated_0-->|Task| _mtv_provider_ovirt___Create_Ovirt_credentials_secret1[ mtv provider ovirt   create ovirt credentials<br>secret<br>When: **credentialssecretref  not in mtv management<br>populated ovirt target or  mtv management<br>populated ovirt target  credentialssecretref    <br>default       trim   length    0**]:::task
+  _mtv_provider_ovirt___Create_Ovirt_credentials_secret1-.->|End of Block| _mtv_provider_ovirt___Configure_Provider_Secret6_block_start_0
+  _mtv_provider_ovirt___Create_Ovirt_credentials_secret1-->|Task| _mtv_provider_ovirt___Create_Ovirt_Provider_resource7[ mtv provider ovirt   create ovirt provider<br>resource]:::task
+  _mtv_provider_ovirt___Create_Ovirt_Provider_resource7-->End
+```
+
+### Graph for _mtv_provider_vmware.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _mtv_provider_vmware___Verify_credential_name_provided_when_more_than_one_credential_specified0[ mtv provider vmware   verify credential name<br>provided when more than one credential specified<br>When: **not single vmware target**]:::task
+  _mtv_provider_vmware___Verify_credential_name_provided_when_more_than_one_credential_specified0-->|Task| _mtv_provider_vmware___Set_provider_name1[ mtv provider vmware   set provider name]:::task
+  _mtv_provider_vmware___Set_provider_name1-->|Task| _mtv_provider_vmware___Validate_required_VMware_provider_Properties2[ mtv provider vmware   validate required vmware<br>provider properties]:::task
+  _mtv_provider_vmware___Validate_required_VMware_provider_Properties2-->|Task| _mtv_provider_vmware___Set_VMware_Provider_URL3[ mtv provider vmware   set vmware provider url]:::task
+  _mtv_provider_vmware___Set_VMware_Provider_URL3-->|Block Start| _mtv_provider_vmware___MTV_Certificate4_block_start_0[[ mtv provider vmware   mtv certificate<br>When: **certificate  not in mtv management populated<br>vmware target or  mtv management populated vmware<br>target  certificate     default       trim  <br>length    0**]]:::block
+  _mtv_provider_vmware___MTV_Certificate4_block_start_0-->|Task| _mtv_provider_vmware___Retrieve_Remote_VMware_Provider_Certificate0[ mtv provider vmware   retrieve remote vmware<br>provider certificate]:::task
+  _mtv_provider_vmware___Retrieve_Remote_VMware_Provider_Certificate0-->|Task| _mtv_provider_vmware___Set_VMware_Provider_Certificate1[ mtv provider vmware   set vmware provider<br>certificate]:::task
+  _mtv_provider_vmware___Set_VMware_Provider_Certificate1-.->|End of Block| _mtv_provider_vmware___MTV_Certificate4_block_start_0
+  _mtv_provider_vmware___Set_VMware_Provider_Certificate1-->|Task| _mtv_provider_vmware___Set_Provider_Secret_Name_Namespace__Configuration_5[ mtv provider vmware   set provider secret name<br>namespace  configuration <br>When: **credentialssecretref  in mtv management populated<br>vmware target and  mtv management populated vmware<br>target  credentialssecretref     default      <br>trim   length   0**]:::task
+  _mtv_provider_vmware___Set_Provider_Secret_Name_Namespace__Configuration_5-->|Block Start| _mtv_provider_vmware___Configure_Provider_Secret6_block_start_0[[ mtv provider vmware   configure provider secret<br>When: **credentialssecretref  not in mtv management<br>populated vmware target or  mtv management<br>populated vmware target  credentialssecretref    <br>default       trim   length    0**]]:::block
+  _mtv_provider_vmware___Configure_Provider_Secret6_block_start_0-->|Task| _mtv_provider_vmware___Set_Provider_Secret_Name_Namespace__Generated_0[ mtv provider vmware   set provider secret name<br>namespace  generated <br>When: **credentialssecretref  not in mtv management<br>populated vmware target or  mtv management<br>populated vmware target  credentialssecretref    <br>default       trim   length    0**]:::task
+  _mtv_provider_vmware___Set_Provider_Secret_Name_Namespace__Generated_0-->|Task| _mtv_provider_vmware___Create_VMware_credentials_secret1[ mtv provider vmware   create vmware credentials<br>secret<br>When: **credentialssecretref  not in mtv management<br>populated vmware target or  mtv management<br>populated vmware target  credentialssecretref    <br>default       trim   length    0**]:::task
+  _mtv_provider_vmware___Create_VMware_credentials_secret1-.->|End of Block| _mtv_provider_vmware___Configure_Provider_Secret6_block_start_0
+  _mtv_provider_vmware___Create_VMware_credentials_secret1-->|Task| _mtv_provider_vmware___Create_VMware_Provider_resource7[ mtv provider vmware   create vmware provider<br>resource]:::task
+  _mtv_provider_vmware___Create_VMware_Provider_resource7-->End
+```
+
+### Graph for _mtv_storage_map.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _mtv_storage_map___Initialize_data_structures0[ mtv storage map   initialize data structures]:::task
+  _mtv_storage_map___Initialize_data_structures0-->|Task| _mtv_storage_map___Verify_Storage_Map_Overrides_do_not_contain_both_includes_and_excludes1[ mtv storage map   verify storage map overrides do<br>not contain both includes and excludes<br>When: **mtv management storage map overrides is defined<br>and mtv management storage map overrides  <br>selectattr  include    defined     list   length  <br>0 and mtv management storage map overrides  <br>selectattr  exclude    defined     list   length  <br>0**]:::task
+  _mtv_storage_map___Verify_Storage_Map_Overrides_do_not_contain_both_includes_and_excludes1-->|Include task| _mtv_storage_map___Query_for_Storage_Classes_from_Destination_Provider_mtv_query_inventory_yml_2[ mtv storage map   query for storage classes from<br>destination provider<br>include_task: mtv query inventory yml]:::includeTasks
+  _mtv_storage_map___Query_for_Storage_Classes_from_Destination_Provider_mtv_query_inventory_yml_2-->|Task| _mtv_storage_map___Determine_Destination_Storage_Class3[ mtv storage map   determine destination storage<br>class<br>When: **mtv management default storage class is not<br>defined or mtv management default storage class  <br>default     true    trim   length    0 and item<br>object metadata annotations is defined and   item<br>object metadata annotations  storageclass<br>kubernetes io is default class     default  false <br>   string   lower      true**]:::task
+  _mtv_storage_map___Determine_Destination_Storage_Class3-->|Include task| _mtv_storage_map___Query_for_Datastores_from_Destination_Provider_mtv_query_inventory_yml_4[ mtv storage map   query for datastores from<br>destination provider<br>When: **ovirt  in provider**<br>include_task: mtv query inventory yml]:::includeTasks
+  _mtv_storage_map___Query_for_Datastores_from_Destination_Provider_mtv_query_inventory_yml_4-->|Include task| _mtv_storage_map___Query_for_Datastores_from_Destination_Provider_mtv_query_inventory_yml_5[ mtv storage map   query for datastores from<br>destination provider<br>When: **vsphere  in provider**<br>include_task: mtv query inventory yml]:::includeTasks
+  _mtv_storage_map___Query_for_Datastores_from_Destination_Provider_mtv_query_inventory_yml_5-->|Include task| _mtv_storage_map___Process_VMware_Datastores__mtv_storage_map_process_datastore_yml_6[ mtv storage map   process vmware datastores<br>When: **vsphere  in provider and mtv destination<br>datastores is defined and mtv destination<br>datastores   length   0**<br>include_task:  mtv storage map process datastore yml]:::includeTasks
+  _mtv_storage_map___Process_VMware_Datastores__mtv_storage_map_process_datastore_yml_6-->|Include task| _mtv_storage_map___Process_Ovirt_Datastores__mtv_storage_map_process_datastore_yml_7[ mtv storage map   process ovirt datastores<br>When: **ovirt  in provider and mtv destination datastores<br>is defined and mtv destination datastores   length<br>  0**<br>include_task:  mtv storage map process datastore yml]:::includeTasks
+  _mtv_storage_map___Process_Ovirt_Datastores__mtv_storage_map_process_datastore_yml_7-->|Task| _mtv_storage_map___Template_StorageMap_Map8[ mtv storage map   template storagemap map]:::task
+  _mtv_storage_map___Template_StorageMap_Map8-->|Task| _mtv_storage_map___Create_Storage_Map9[ mtv storage map   create storage map]:::task
+  _mtv_storage_map___Create_Storage_Map9-->End
+```
+
+### Graph for _mtv_storage_map_process_datastore.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _mtv_storage_map_process_datastore___Set_VMware_StorageMap_Variables0[ mtv storage map process datastore   set vmware<br>storagemap variables<br>When: **mtv vmware datastore is defined**]:::task
+  _mtv_storage_map_process_datastore___Set_VMware_StorageMap_Variables0-->|Task| _mtv_storage_map_process_datastore___Set_Ovirt_StorageMap_Variables1[ mtv storage map process datastore   set ovirt<br>storagemap variables<br>When: **mtv ovirt datastore is defined**]:::task
+  _mtv_storage_map_process_datastore___Set_Ovirt_StorageMap_Variables1-->|Task| _mtv_storage_map_process_datastore___Set_VMware_StorageMap_StorageClass_from_Overrides2[ mtv storage map process datastore   set vmware<br>storagemap storageclass from overrides<br>When: **mtv vmware datastore is defined and  storageclass <br>in mtv management mtv vmware datastore overrides<br>and mtv management mtv vmware datastore overrides<br>storageclass   default     true    trim   length  <br>0**]:::task
+  _mtv_storage_map_process_datastore___Set_VMware_StorageMap_StorageClass_from_Overrides2-->|Task| _mtv_storage_map_process_datastore___Set_Ovirt_StorageMap_StorageClass_from_Overrides3[ mtv storage map process datastore   set ovirt<br>storagemap storageclass from overrides<br>When: **mtv ovirt datastore is defined and  storageclass <br>in mtv management mtv ovirt datastore overrides<br>and mtv management mtv ovirt datastore overrides<br>storageclass   default     true    trim   length  <br>0**]:::task
+  _mtv_storage_map_process_datastore___Set_Ovirt_StorageMap_StorageClass_from_Overrides3-->|Task| _mtv_storage_map_process_datastore___Verify_VMWare_Destination_Storage_Class4[ mtv storage map process datastore   verify vmware<br>destination storage class<br>When: **mtv vmware datastore is defined**]:::task
+  _mtv_storage_map_process_datastore___Verify_VMWare_Destination_Storage_Class4-->|Task| _mtv_storage_map_process_datastore___Verify_Ovirt_Destination_Storage_Class5[ mtv storage map process datastore   verify ovirt<br>destination storage class<br>When: **mtv ovirt datastore is defined**]:::task
+  _mtv_storage_map_process_datastore___Verify_Ovirt_Destination_Storage_Class5-->|Task| _mtv_storage_map_process_datastore___Template_StorageMap_Map6[ mtv storage map process datastore   template<br>storagemap map]:::task
+  _mtv_storage_map_process_datastore___Template_StorageMap_Map6-->|Task| _mtv_storage_map_process_datastore___Add_VMware_StorageMap_Map_to_Dict7[ mtv storage map process datastore   add vmware<br>storagemap map to dict<br>When: **mtv vmware datastore is defined and    include  in<br>mtv management mtv vmware datastore overrides and<br>mtv management storage map overrides   selectattr <br>include    defined     list   length   0  or  mtv<br>management storage map overrides   selectattr <br>include    defined     list   length    0 and mtv<br>management storage map overrides   selectattr <br>exclude    defined     list   length    0   or  <br>exclude  not in mtv management mtv vmware<br>datastore overrides and mtv management storage map<br>overrides   selectattr  exclude    defined    <br>list   length   0**]:::task
+  _mtv_storage_map_process_datastore___Add_VMware_StorageMap_Map_to_Dict7-->|Task| _mtv_storage_map_process_datastore___Add_Ovirt_StorageMap_Map_to_Dict8[ mtv storage map process datastore   add ovirt<br>storagemap map to dict<br>When: **mtv ovirt datastore is defined and    include  in<br>mtv management mtv ovirt datastore overrides and<br>mtv management storage map overrides   selectattr <br>include    defined     list   length   0  or  mtv<br>management storage map overrides   selectattr <br>include    defined     list   length    0 and mtv<br>management storage map overrides   selectattr <br>exclude    defined     list   length    0   or  <br>exclude  not in mtv management mtv ovirt datastore<br>overrides and mtv management storage map overrides<br>  selectattr  exclude    defined     list   length<br>  0**]:::task
+  _mtv_storage_map_process_datastore___Add_Ovirt_StorageMap_Map_to_Dict8-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Include task| Configure_MTV_Providers_mtv_providers_yml_0[configure mtv providers<br>When: **mtv management map providers is defined and mtv<br>management map providers   bool**<br>include_task: mtv providers yml]:::includeTasks
+  Configure_MTV_Providers_mtv_providers_yml_0-->|Include task| Configure_MTV_Maps_mtv_maps_yml_1[configure mtv maps<br>When: **mtv management map storage is defined and mtv<br>management map storage   bool  or  mtv management<br>map networks is defined and mtv management map<br>networks   bool**<br>include_task: mtv maps yml]:::includeTasks
+  Configure_MTV_Maps_mtv_maps_yml_1-->End
+```
+
+### Graph for mtv_maps.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Include task| mtv_maps___Retrieve_Configured_providers_mtv_query_inventory_yml_0[mtv maps   retrieve configured providers<br>include_task: mtv query inventory yml]:::includeTasks
+  mtv_maps___Retrieve_Configured_providers_mtv_query_inventory_yml_0-->|Task| mtv_maps___Verify_VMWare_Source_Provider_Exists1[mtv maps   verify vmware source provider exists<br>When: **vsphere  in provider**]:::task
+  mtv_maps___Verify_VMWare_Source_Provider_Exists1-->|Task| mtv_maps___Verify_Ovirt_Source_Provider_Exists2[mtv maps   verify ovirt source provider exists<br>When: **ovirt  in provider**]:::task
+  mtv_maps___Verify_Ovirt_Source_Provider_Exists2-->|Task| mtv_maps___Destination_OpenShift_Destination_Provider_Exists3[mtv maps   destination openshift destination<br>provider exists]:::task
+  mtv_maps___Destination_OpenShift_Destination_Provider_Exists3-->|Include task| mtv_maps___Configure_MTV_Storage_Maps__mtv_storage_map_yml_4[mtv maps   configure mtv storage maps<br>When: **mtv management map storage is defined and mtv<br>management map storage   bool**<br>include_task:  mtv storage map yml]:::includeTasks
+  mtv_maps___Configure_MTV_Storage_Maps__mtv_storage_map_yml_4-->|Include task| mtv_maps___Configure_MTV_Network_Map__mtv_network_map_yml_5[mtv maps   configure mtv network map<br>When: **mtv management map networks is defined and mtv<br>management map networks   bool**<br>include_task:  mtv network map yml]:::includeTasks
+  mtv_maps___Configure_MTV_Network_Map__mtv_network_map_yml_5-->End
+```
+
+### Graph for mtv_providers.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| mtv_providers___Verify_ForkliftController_status0[mtv providers   verify forkliftcontroller status<br>When: **mtv management migration targets   default      <br>length   0**]:::task
+  mtv_providers___Verify_ForkliftController_status0-->|Task| mtv_providers___Debug1[mtv providers   debug]:::task
+  mtv_providers___Debug1-->|Include task| mtv_providers___Configure_vmware_providers__mtv_provider_vmware_yml_2[mtv providers   configure vmware providers<br>When: **mtv management migration targets is defined and<br>mtv management migration targets   selectattr <br>type    equalto    vmware     list   length   0**<br>include_task:  mtv provider vmware yml]:::includeTasks
+  mtv_providers___Configure_vmware_providers__mtv_provider_vmware_yml_2-->|Include task| mtv_providers___Configure_ovirt_providers__mtv_provider_ovirt_yml_3[mtv providers   configure ovirt providers<br>When: **mtv management migration targets is defined and<br>mtv management migration targets   selectattr <br>type    equalto    ovirt     list   length   0**<br>include_task:  mtv provider ovirt yml]:::includeTasks
+  mtv_providers___Configure_ovirt_providers__mtv_provider_ovirt_yml_3-->End
+```
+
+### Graph for mtv_query_inventory.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| mtv_query_inventory___Verify_valid_inventory_query_retrieval_method0[mtv query inventory   verify valid inventory query<br>retrieval method]:::task
+  mtv_query_inventory___Verify_valid_inventory_query_retrieval_method0-->|Task| mtv_query_inventory___Verify_valid_query_parameters1[mtv query inventory   verify valid query<br>parameters]:::task
+  mtv_query_inventory___Verify_valid_query_parameters1-->|Block Start| mtv_query_inventory___Exec_inventory_retrieval_method2_block_start_0[[mtv query inventory   exec inventory retrieval<br>method<br>When: **mtv management inventory retrieval method     exec<br>**]]:::block
+  mtv_query_inventory___Exec_inventory_retrieval_method2_block_start_0-->|Task| mtv_query_inventory___Obtain_the_name_of_a_Running_Forklift_Inventory_Pod0[mtv query inventory   obtain the name of a running<br>forklift inventory pod]:::task
+  mtv_query_inventory___Obtain_the_name_of_a_Running_Forklift_Inventory_Pod0-->|Task| mtv_query_inventory___Set_name_of_the_MTV_Inventory_Pod1[mtv query inventory   set name of the mtv<br>inventory pod]:::task
+  mtv_query_inventory___Set_name_of_the_MTV_Inventory_Pod1-->|Task| mtv_query_inventory___Execute_Query__exec_2[mtv query inventory   execute query  exec ]:::task
+  mtv_query_inventory___Execute_Query__exec_2-->|Task| mtv_query_inventory___Set_Result_Fact3[mtv query inventory   set result fact]:::task
+  mtv_query_inventory___Set_Result_Fact3-.->|End of Block| mtv_query_inventory___Exec_inventory_retrieval_method2_block_start_0
+  mtv_query_inventory___Set_Result_Fact3-->|Block Start| mtv_query_inventory___Rest_inventory_retrieval_method3_block_start_0[[mtv query inventory   rest inventory retrieval<br>method<br>When: **mtv management inventory retrieval method     rest<br>**]]:::block
+  mtv_query_inventory___Rest_inventory_retrieval_method3_block_start_0-->|Task| mtv_query_inventory___Locate_MTV_Route0[mtv query inventory   locate mtv route<br>When: **forklift inventory url   default     true   <br>length    0**]:::task
+  mtv_query_inventory___Locate_MTV_Route0-->|Task| mtv_query_inventory___Verify_route_found1[mtv query inventory   verify route found]:::task
+  mtv_query_inventory___Verify_route_found1-->|Task| mtv_query_inventory___Execute_Query__rest_2[mtv query inventory   execute query  rest ]:::task
+  mtv_query_inventory___Execute_Query__rest_2-->|Task| mtv_query_inventory___Set_Result_Fact3[mtv query inventory   set result fact]:::task
+  mtv_query_inventory___Set_Result_Fact3-.->|End of Block| mtv_query_inventory___Rest_inventory_retrieval_method3_block_start_0
+  mtv_query_inventory___Set_Result_Fact3-->End
+```
+
+### Graph for mtv_vddk.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| mtv_vddk___Verify_VDDK_Secret_Parameters_Provided0[mtv vddk   verify vddk secret parameters provided]:::task
+  mtv_vddk___Verify_VDDK_Secret_Parameters_Provided0-->|Task| mtv_vddk___Verify_VDDK_Image_Parameters_Provided1[mtv vddk   verify vddk image parameters provided]:::task
+  mtv_vddk___Verify_VDDK_Image_Parameters_Provided1-->|Task| mtv_vddk___Create_VDDK_Pull_Secret2[mtv vddk   create vddk pull secret]:::task
+  mtv_vddk___Create_VDDK_Pull_Secret2-->|Block Start| mtv_vddk___Manage_VDDK_Provided_Credentials3_block_start_0[[mtv vddk   manage vddk provided credentials<br>When: **mtv management vmware vddk init image credentials<br>secret   default     true    length   0**]]:::block
+  mtv_vddk___Manage_VDDK_Provided_Credentials3_block_start_0-->|Task| mtv_vddk___Retrieve_Provided_VDDK_Credentials_Secret0[mtv vddk   retrieve provided vddk credentials<br>secret]:::task
+  mtv_vddk___Retrieve_Provided_VDDK_Credentials_Secret0-->|Task| mtv_vddk___Verify_Provided_VDDK_Credentials_Secret1[mtv vddk   verify provided vddk credentials secret]:::task
+  mtv_vddk___Verify_Provided_VDDK_Credentials_Secret1-->|Task| mtv_vddk___Update_Pull_Secret_Name_for_Provided_Credential2[mtv vddk   update pull secret name for provided<br>credential]:::task
+  mtv_vddk___Update_Pull_Secret_Name_for_Provided_Credential2-.->|End of Block| mtv_vddk___Manage_VDDK_Provided_Credentials3_block_start_0
+  mtv_vddk___Update_Pull_Secret_Name_for_Provided_Credential2-->|Task| mtv_vddk___Retrieve_VDDK_Service_Account4[mtv vddk   retrieve vddk service account]:::task
+  mtv_vddk___Retrieve_VDDK_Service_Account4-->|Task| mtv_vddk___Patch_Service_Account_with_VDDK_pull_secret5[mtv vddk   patch service account with vddk pull<br>secret<br>When: **resources  in mtv management vmware vddk service<br>account result and mtv management vmware vddk<br>service account result resources   length   0 and <br>imagepullsecrets  in mtv management vmware vddk<br>service account result resources 0  and mtv<br>management vmware vddk service account result<br>resources 0  imagepullsecrets   selectattr  name  <br> equalto   mtv management vmware vddk secret name <br>  length    0**]:::task
+  mtv_vddk___Patch_Service_Account_with_VDDK_pull_secret5-->End
+```
+
 ## Playbook
 
 ```yml
@@ -276,6 +564,13 @@ Description: Management of the Migration Toolkit for Virtualization (MTV).
     - mtv_management
 ...
 
+```
+
+## Playbook graph
+
+```mermaid
+flowchart TD
+  hosts[localhost]-->|Role| mtv_management[mtv management]
 ```
 
 ## Author Information

@@ -16,13 +16,11 @@ This role performs patching related activities for Virtual Machines.
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.3
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Patching related activities for Virtual Machines.
-
-| Field                | Value           |
-|--------------------- |-----------------|
-| Readme update        | 18/03/2025 |
 
 ### Vars
 
@@ -42,6 +40,26 @@ Description: Patching related activities for Virtual Machines.
 | ---- | ------ | --------- |
 | Running sudo dnf update | `ansible.builtin.dnf` | False |
 
+## Task Flow Graphs
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| Running_sudo_dnf_update0[running sudo dnf update]:::task
+  Running_sudo_dnf_update0-->End
+```
+
 ## Playbook
 
 ```yml
@@ -53,6 +71,13 @@ Description: Patching related activities for Virtual Machines.
     - vm_patching
 ...
 
+```
+
+## Playbook graph
+
+```mermaid
+flowchart TD
+  hosts[localhost]-->|Role| vm_patching[vm patching]
 ```
 
 ## Author Information

@@ -14,13 +14,11 @@ This role enables the management of Ansible Automation Platform _Credentials_.
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.3
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Management of Machine Credentials.
-
-| Field                | Value           |
-|--------------------- |-----------------|
-| Readme update        | 18/03/2025 |
 
 ### Defaults
 
@@ -111,6 +109,73 @@ Description: Management of Machine Credentials.
 | _process_machine_credential ¦ Map Credential File Contents | `ansible.builtin.include_tasks` | True |
 | _process_machine_credential ¦ Render Machine Credential | `ansible.builtin.set_fact` | False |
 
+## Task Flow Graphs
+
+### Graph for _map_key_content.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _map_key_content___Verify_required_variables_provided0[ map key content   verify required variables<br>provided]:::task
+  _map_key_content___Verify_required_variables_provided0-->|Task| _map_key_content___Check_source_path_content1[ map key content   check source path content]:::task
+  _map_key_content___Check_source_path_content1-->|Task| _map_key_content___Verify_source_path_exists2[ map key content   verify source path exists]:::task
+  _map_key_content___Verify_source_path_exists2-->|Task| _map_key_content___Map_Variables3[ map key content   map variables]:::task
+  _map_key_content___Map_Variables3-->End
+```
+
+### Graph for _process_machine_credential.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _process_machine_credential___Initialize_Dynamic_Map_Variable0[ process machine credential   initialize dynamic<br>map variable]:::task
+  _process_machine_credential___Initialize_Dynamic_Map_Variable0-->|Include task| _process_machine_credential___Map_Credential_File_Contents__map_key_content_yml_1[ process machine credential   map credential file<br>contents<br>When: **aap machine credentials input map  src   in aap<br>machine credential**<br>include_task:  map key content yml]:::includeTasks
+  _process_machine_credential___Map_Credential_File_Contents__map_key_content_yml_1-->|Task| _process_machine_credential___Render_Machine_Credential2[ process machine credential   render machine<br>credential]:::task
+  _process_machine_credential___Render_Machine_Credential2-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| Initialize_Variables0[initialize variables]:::task
+  Initialize_Variables0-->|Include task| Process_Machine_Credentials__process_machine_credential_yml_1[process machine credentials<br>include_task:  process machine credential yml]:::includeTasks
+  Process_Machine_Credentials__process_machine_credential_yml_1-->|Block Start| Manage_Credentials2_block_start_0[[manage credentials]]:::block
+  Manage_Credentials2_block_start_0-->|Task| Verify_Config_as_Code_parameters_required__for_AAP_2_5_and_below_0[verify config as code parameters required  for aap<br>2 5 and below <br>When: **aap version is defined and aap version is version <br>2 5**]:::task
+  Verify_Config_as_Code_parameters_required__for_AAP_2_5_and_below_0-->|Task| Verify_Config_as_Code_parameters_required__for_AAP_2_4_and_below_1[verify config as code parameters required  for aap<br>2 4 and below <br>When: **aap version is not defined or aap version is<br>version  2 5**]:::task
+  Verify_Config_as_Code_parameters_required__for_AAP_2_4_and_below_1-.->|End of Block| Manage_Credentials2_block_start_0
+  Verify_Config_as_Code_parameters_required__for_AAP_2_4_and_below_1-->|Include role| Call_credential_config_as_code_role____aap_machine_credentials_cac_credentials_role____3(call credential config as code role<br>When: **aap machine credentials controller credentials  <br>length   0**<br>include_role:    aap machine credentials cac credentials role   ):::includeRole
+  Call_credential_config_as_code_role____aap_machine_credentials_cac_credentials_role____3-->End
+```
+
 ## Playbook
 
 ```yml
@@ -123,6 +188,13 @@ Description: Management of Machine Credentials.
 
 ...
 
+```
+
+## Playbook graph
+
+```mermaid
+flowchart TD
+  hosts[localhost]-->|Role| aap_machine_credentials[aap machine credentials]
 ```
 
 ## Author Information

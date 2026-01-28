@@ -14,13 +14,11 @@ This role defines the initial configuration and setup of the Ansible Automation 
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.3
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Populates an Ansible Automation Platform instance.
-
-| Field                | Value           |
-|--------------------- |-----------------|
-| Readme update        | 18/03/2025 |
 
 ### Defaults
 
@@ -1163,6 +1161,186 @@ Description: Populates an Ansible Automation Platform instance.
 | workflows ¦ Build MTV Target Workflows | `ansible.builtin.include_tasks` | False |
 | workflows ¦ Build MTV Worklfow | `ansible.builtin.set_fact` | False |
 | workflows ¦ Build Migration Factory Worklfow | `ansible.builtin.set_fact` | False |
+
+## Task Flow Graphs
+
+### Graph for _build_credentials.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Include role| _build_credentials___Create_migration_factory_api_token_for__mf_host_infra_openshift_virtualization_migration_create_mf_aap_token_0( build credentials   create migration factory api<br>token for  mf host<br>When: **hostvars  mf host   openshift api key   is<br>undefined**<br>include_role: infra openshift virtualization migration create mf<br>aap token):::includeRole
+  _build_credentials___Create_migration_factory_api_token_for__mf_host_infra_openshift_virtualization_migration_create_mf_aap_token_0-->|Task| _build_credentials___Set_openshift_api_key_var_on__mf_host1[ build credentials   set openshift api key var on <br>mf host<br>When: **hostvars  mf host   openshift api key   is<br>undefined**]:::task
+  _build_credentials___Set_openshift_api_key_var_on__mf_host1-->|Task| _build_credentials___Build_migration_targets2[ build credentials   build migration targets<br>When: **mf host in groups  migration spoke**]:::task
+  _build_credentials___Build_migration_targets2-->|Task| _build_credentials___Build_Migration_Factory_CaC_Credential_for__mf_host3[ build credentials   build migration factory cac<br>credential for  mf host<br>When: **mf host in groups  migration spoke**]:::task
+  _build_credentials___Build_Migration_Factory_CaC_Credential_for__mf_host3-->|Task| _build_credentials___Build_kubeconfig_for__mf_host4[ build credentials   build kubeconfig for  mf host]:::task
+  _build_credentials___Build_kubeconfig_for__mf_host4-->End
+```
+
+### Graph for _build_job_templates.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Block Start| _build_job_templates___Build_list_of_operators_to_install0_block_start_0[[ build job templates   build list of operators to<br>install]]:::block
+  _build_job_templates___Build_list_of_operators_to_install0_block_start_0-->|Task| _build_job_templates___Clear_operator_list0[ build job templates   clear operator list]:::task
+  _build_job_templates___Clear_operator_list0-->|Task| _build_job_templates___Add_hub_operators1[ build job templates   add hub operators<br>When: **mf host in groups  migration hub**]:::task
+  _build_job_templates___Add_hub_operators1-->|Task| _build_job_templates___Add_spoke_operators2[ build job templates   add spoke operators<br>When: **mf host in groups  migration spoke**]:::task
+  _build_job_templates___Add_spoke_operators2-.->|End of Block| _build_job_templates___Build_list_of_operators_to_install0_block_start_0
+  _build_job_templates___Add_spoke_operators2-->|Task| _build_job_templates___Build_Operator_Job_Template1[ build job templates   build operator job template]:::task
+  _build_job_templates___Build_Operator_Job_Template1-->|Include task| _build_job_templates___Build_MTV_Job_Templates__mtv_job_templates_yml_2[ build job templates   build mtv job templates<br>When: **mf host in groups  migration spoke**<br>include_task:  mtv job templates yml]:::includeTasks
+  _build_job_templates___Build_MTV_Job_Templates__mtv_job_templates_yml_2-->End
+```
+
+### Graph for _mtv_job_templates.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _mtv_job_templates___Configure_VMWare_MTV_Job_Template0[ mtv job templates   configure vmware mtv job<br>template<br>When: **target type     vmware  and   mtv job template  <br>trim   length    0**]:::task
+  _mtv_job_templates___Configure_VMWare_MTV_Job_Template0-->|Task| _mtv_job_templates___Configure_Ovirt_MTV_Job_Template1[ mtv job templates   configure ovirt mtv job<br>template<br>When: **target type     ovirt  and   mtv job template  <br>trim   length    0**]:::task
+  _mtv_job_templates___Configure_Ovirt_MTV_Job_Template1-->End
+```
+
+### Graph for _mtv_workflow_job_templates.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _mtv_workflow_job_templates___Build_MTV_Target_Workflows_for__mf_host0[ mtv workflow job templates   build mtv target<br>workflows for  mf host]:::task
+  _mtv_workflow_job_templates___Build_MTV_Target_Workflows_for__mf_host0-->|Task| _mtv_workflow_job_templates___Get_list_of_MTV_Target_workflow_names1[ mtv workflow job templates   get list of mtv<br>target workflow names]:::task
+  _mtv_workflow_job_templates___Get_list_of_MTV_Target_workflow_names1-->|Task| _mtv_workflow_job_templates___Build_MTV_workflow2[ mtv workflow job templates   build mtv workflow]:::task
+  _mtv_workflow_job_templates___Build_MTV_workflow2-->End
+```
+
+### Graph for credentials.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| credentials___Set_credentials_variable0[credentials   set credentials variable]:::task
+  credentials___Set_credentials_variable0-->|Task| credentials___Build_AAP_Credential1[credentials   build aap credential<br>When: **aap seed aap credentials create   default true**]:::task
+  credentials___Build_AAP_Credential1-->|Task| credentials___Build_Automation_Hub_Credentials2[credentials   build automation hub credentials<br>When: **aap seed automation hub credentials create  <br>default true**]:::task
+  credentials___Build_Automation_Hub_Credentials2-->|Task| credentials___Build_Project_Credential3[credentials   build project credential<br>When: **aap seed project credentials create   default true<br>**]:::task
+  credentials___Build_Project_Credential3-->|Task| credentials___Build_Container_Registry_Credential4[credentials   build container registry credential<br>When: **aap seed container registry credentials create  <br>default true**]:::task
+  credentials___Build_Container_Registry_Credential4-->|Block Start| credentials___Build_Operator_Management_Credentials5_block_start_0[[credentials   build operator management<br>credentials<br>When: **aap seed migration targets credentials create  <br>default true**]]:::block
+  credentials___Build_Operator_Management_Credentials5_block_start_0-->|Task| credentials___Build_Migration_Target_Credentials0[credentials   build migration target credentials<br>When: **groups  migration spoke     length   0 and<br>hostvars groups  migration spoke   0    migration<br>targets     default       length   0**]:::task
+  credentials___Build_Migration_Target_Credentials0-->|Include task| credentials___Build_required_credentials__build_credentials_yml_1[credentials   build required credentials<br>include_task:  build credentials yml]:::includeTasks
+  credentials___Build_required_credentials__build_credentials_yml_1-.->|End of Block| credentials___Build_Operator_Management_Credentials5_block_start_0
+  credentials___Build_required_credentials__build_credentials_yml_1-->End
+```
+
+### Graph for job_templates.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| job_templates___Set_templates_variable0[job templates   set templates variable]:::task
+  job_templates___Set_templates_variable0-->|Include task| job_templates___Build_Operator_Install_Job_Templates__build_job_templates_yml_1[job templates   build operator install job<br>templates<br>include_task:  build job templates yml]:::includeTasks
+  job_templates___Build_Operator_Install_Job_Templates__build_job_templates_yml_1-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| Set_controller_configuration_vars0[set controller configuration vars]:::task
+  Set_controller_configuration_vars0-->|Include task| Build_Credentials_credentials_yml_1[build credentials<br>include_task: credentials yml]:::includeTasks
+  Build_Credentials_credentials_yml_1-->|Include task| Build_Job_Templates_job_templates_yml_2[build job templates<br>When: **aap seed job templates create   default true   <br>bool**<br>include_task: job templates yml]:::includeTasks
+  Build_Job_Templates_job_templates_yml_2-->|Include task| Build_Workflows_workflows_yml_3[build workflows<br>When: **aap seed workflow job templates create   default<br>true    bool**<br>include_task: workflows yml]:::includeTasks
+  Build_Workflows_workflows_yml_3-->|Task| Ensure_AAP_API_credentials_are_set4[ensure aap api credentials are set]:::task
+  Ensure_AAP_API_credentials_are_set4-->|Task| Check_if_both_username_password_and_token_are_defined5[check if both username password and token are<br>defined<br>When: **aap seed controller username   default     true   <br>trim   length   0 and aap seed controller password<br>  default     true    trim   length   0 and aap<br>seed controller token   default     true    trim  <br>length   0**]:::task
+  Check_if_both_username_password_and_token_are_defined5-->|Task| Wait_for_API_to_become_available_using_username_and_password6[wait for api to become available using username<br>and password<br>When: **aap seed controller token   default     true   <br>length   0**]:::task
+  Wait_for_API_to_become_available_using_username_and_password6-->|Task| Wait_for_API_to_become_available_using_token7[wait for api to become available using token<br>When: **aap seed controller token   default     true   <br>length   0**]:::task
+  Wait_for_API_to_become_available_using_token7-->|Include role| Call_dispatch_role____aap_seed_cac_collection____dispatch_8(call dispatch role<br>include_role:    aap seed cac collection    dispatch):::includeRole
+  Call_dispatch_role____aap_seed_cac_collection____dispatch_8-->End
+```
+
+### Graph for workflows.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| workflows___Set_workflow_variables0[workflows   set workflow variables]:::task
+  workflows___Set_workflow_variables0-->|Task| workflows___Build_Operator_Workflows1[workflows   build operator workflows]:::task
+  workflows___Build_Operator_Workflows1-->|Include task| workflows___Build_MTV_Target_Workflows__mtv_workflow_job_templates_yml_2[workflows   build mtv target workflows<br>include_task:  mtv workflow job templates yml]:::includeTasks
+  workflows___Build_MTV_Target_Workflows__mtv_workflow_job_templates_yml_2-->|Task| workflows___Build_MTV_Worklfow3[workflows   build mtv worklfow]:::task
+  workflows___Build_MTV_Worklfow3-->|Task| workflows___Build_Migration_Factory_Worklfow4[workflows   build migration factory worklfow]:::task
+  workflows___Build_Migration_Factory_Worklfow4-->End
+```
 
 ## Author Information
 

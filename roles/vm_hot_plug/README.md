@@ -16,13 +16,11 @@ This role performs hot plugging in a virtual machine.
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.3
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Hot Plug Virtual Machine resources.
-
-| Field                | Value           |
-|--------------------- |-----------------|
-| Readme update        | 18/03/2025 |
 
 ### Defaults
 
@@ -88,6 +86,92 @@ Description: Hot Plug Virtual Machine resources.
 | ---- | ------ | --------- |
 | _storage ¦ Perform VM Storage Operation | `ansible.builtin.uri` | True |
 
+## Task Flow Graphs
+
+### Graph for _compute.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _compute___Verify_Instance_Type_exists_on_VM0[ compute   verify instance type exists on vm<br>When: **instancetype  in vm hot plug vm compute**]:::task
+  _compute___Verify_Instance_Type_exists_on_VM0-->|Task| _compute___Verify_Instance_Type_does_not_exist_on_VM1[ compute   verify instance type does not exist on<br>vm<br>When: **cpu  in vm hot plug vm compute or  memory  in vm<br>hot plug vm compute**]:::task
+  _compute___Verify_Instance_Type_does_not_exist_on_VM1-->|Task| _compute___Patch_VM_with_Compute_Modifications2[ compute   patch vm with compute modifications]:::task
+  _compute___Patch_VM_with_Compute_Modifications2-->End
+```
+
+### Graph for _process_vm.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Include task| _process_vm___Process_Compute_Hot_Plug__compute_yml_0[ process vm   process compute hot plug<br>When: **compute  in vm hot plug vm**<br>include_task:  compute yml]:::includeTasks
+  _process_vm___Process_Compute_Hot_Plug__compute_yml_0-->|Include task| _process_vm___Process_Compute_Hot_Plug__storage_yml_1[ process vm   process compute hot plug<br>When: **storage  in vm hot plug vm and  volumes  in vm<br>hot plug vm storage**<br>include_task:  storage yml]:::includeTasks
+  _process_vm___Process_Compute_Hot_Plug__storage_yml_1-->|Block Start| _process_vm___Manage_restarting_VM2_block_start_0[[ process vm   manage restarting vm<br>When: **restartifrequired  in vm hot plug vm and vm hot<br>plug vm restartifrequired   bool**]]:::block
+  _process_vm___Manage_restarting_VM2_block_start_0-->|Task| _process_vm___Query_VM_for_Updated_Configuration0[ process vm   query vm for updated configuration]:::task
+  _process_vm___Query_VM_for_Updated_Configuration0-->|Block Start| _process_vm___Restart_the_machine1_block_start_1[[ process vm   restart the machine<br>When: **resources  in vm hot plug update response and vm<br>hot plug update response   length   0  and  status<br> in vm hot plug update response resources 0  and <br>conditions  in vm hot plug update response<br>resources 0  status and vm hot plug update<br>response resources 0  status conditions  <br>selectattr  type    equalto    restartrequired    <br>list   length   0**]]:::block
+  _process_vm___Restart_the_machine1_block_start_1-->|Include role| _process_vm___Restart_the_VirtualMachine_infra_openshift_virtualization_migration_vm_lifecycle_0( process vm   restart the virtualmachine<br>include_role: infra openshift virtualization migration vm<br>lifecycle):::includeRole
+  _process_vm___Restart_the_VirtualMachine_infra_openshift_virtualization_migration_vm_lifecycle_0-->|Include role| _process_vm___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1( process vm   verify the virtualmachine restarted<br>include_role: infra openshift virtualization migration vm<br>lifecycle):::includeRole
+  _process_vm___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1-.->|End of Block| _process_vm___Restart_the_machine1_block_start_1
+  _process_vm___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1-.->|End of Block| _process_vm___Manage_restarting_VM2_block_start_0
+  _process_vm___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1-->End
+```
+
+### Graph for _storage.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _storage___Perform_VM_Storage_Operation0[ storage   perform vm storage operation<br>When: **state  in vm hot plug storage instance and  <br>vm hot plug storage instance state     absent  and<br>  vm hot plug vm response obj spec template spec<br>domain devices disks     default        <br>selectattr  name    equalto   vm hot plug storage<br>instance name    list   length   0   or           <br>state  not in vm hot plug storage instance or     <br>state  in vm hot plug storage instance and     vm<br>hot plug storage instance state     absent     <br>and   vm hot plug vm response obj spec template<br>spec domain devices disks     default        <br>selectattr  name    equalto   vm hot plug storage<br>instance name    list   length    0**]:::task
+  _storage___Perform_VM_Storage_Operation0-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| Initialize_Variables0[initialize variables]:::task
+  Initialize_Variables0-->|Include role| Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1(invoke collect vm role<br>include_role: infra openshift virtualization migration vm<br>collect):::includeRole
+  Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1-->|Include task| Process_Hot_Plug_VM__process_vm_yml_2[process hot plug vm<br>include_task:  process vm yml]:::includeTasks
+  Process_Hot_Plug_VM__process_vm_yml_2-->End
+```
+
 ## Playbook
 
 ```yml
@@ -99,6 +183,13 @@ Description: Hot Plug Virtual Machine resources.
     - vm_hot_plug
 ...
 
+```
+
+## Playbook graph
+
+```mermaid
+flowchart TD
+  hosts[localhost]-->|Role| vm_hot_plug[vm hot plug]
 ```
 
 ## Author Information
