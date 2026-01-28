@@ -15,6 +15,7 @@ exclude_paths:
   - .ansible # Avoid linting other collections
   - changelogs/.plugin-cache.yaml # Not ansible
   - plugins/ # Not yaml
+  - scripts/ # Not ansible
 
 loop_var_prefix: ^(__|{role}_)
 
@@ -43,5 +44,4 @@ kinds:
   - yaml: "**/*.yaml-too"
 
 task_name_prefix: "{stem} | "
-
 ...

@@ -6,6 +6,7 @@ __pycache__/
 
 .ansible/.lock
 .ansible/**
+
 *.log
 *.json
 !.vscode/extensions.json
@@ -183,7 +184,5 @@ cython_debug/
 
 # Code climate reports
 *.sarif
-gl-code-quality-report.*
 
-# Don't include local .ansible folder
-.ansible/*
+**tar.gz
