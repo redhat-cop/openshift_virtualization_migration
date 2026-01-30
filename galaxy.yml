@@ -42,19 +42,26 @@ dependencies:
 repository: >-
   https://github.com/redhat-cop/openshift_virtualization_migration
 
-manifest:
-  directives:
-    - include meta/*.yml README.md inventory.yml CHANGELOG.md CODEOWNERS LICENSE MANIFEST.json FILES.json
-    - include requirements-dev.yml
-    - recursive-include docs **.rst **.yml **.yaml **.json **.j2 **.txt
-    - recursive-include roles **.yml **.yaml **.json **.j2 **.md
-    - recursive-include playbooks **.yml **.yaml **.json
-    - recursive-include changelogs **.yml **.yaml
-    - recursive-include plugins *
-    - recursive-include tests **.yml **.yaml **.py
-    - exclude infra-openshift_virtualization_migration-*.tar.gz
-    - recursive-exclude tests/output **
-    - global-exclude /.* /__pycache__
-    - include .ansible-lint .yamllint tox* pyproject.toml config.yml
-  omit_default_directives: true
+build_ignore:
+  - .ansible
+  - .ansible-lint
+  - .git
+  - .gitattributes
+  - .github
+  - .gitignore
+  - .isort.cfg
+  - .markdownlint-cli2.yaml
+  - .pre-commit-config.yaml
+  - .prettierignore
+  - .tox
+  - .yamllint
+  - collection-build.log
+  - pyproject.toml
+  - requirements-dev.txt
+  - requirements-ci.txt
+  - scripts
+  - test-requirements.txt
+  - tox-ansible.ini
+  - tox.ini
+  - "*.sarif"
 ...
