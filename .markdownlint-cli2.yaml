@@ -8,7 +8,8 @@ config:
   code-block-style:                 # MD046
     style: "fenced"
   emphasis-style: false             # MD049
-  header-style:                     # MD003
+  fenced-code-language: false       # MD040
+  heading-style:                    # MD003
     style: "atx"
   hr-style:                         # MD035
     style: "---"
@@ -22,60 +23,62 @@ config:
     siblings_only: true
   no-emphasis-as-heading: false     # MD036
   no-inline-html: false             # MD033
+  no-space-in-emphasis: false       # MD037
   no-trailing-punctuation:          # MD026
     punctuation: ".,;:!。，；：！？"
   no-trailing-spaces: false         # MD009
-  reference-links-images: false     # MD052
-  ul-style:                         # MD004
-    style: "asterisk"
-
   # Disable this rule in the CLI project, because 1. 1. 1. 1. numbering
   # is rendered verbatim in CLI output
   ol-prefix: false                  # MD029
+  reference-links-images: false     # MD052
+  table-column-style: false         # MD060
+  ul-style:                         # MD004
+    style: "asterisk"
 
   # Keep this item last due to length
-  proper-names:                     # MD044
-    code_blocks: false
-    html_elements: false
-    names: [
-      "Ansible",
-      "Ansible Automation Platform",
-      "Ansible Automation Hub",
-      "API",
-      "CentOS",
-      "Git",
-      "GitHub",
-      "GitLab Pages",
-      "GitLab Runner",
-      "GitLab",
-      "ID",
-      "IP",
-      "Jira",
-      "Jira Cloud",
-      "Jira Server",
-      "JSON",
-      "Kerberos",
-      "Kubernetes",
-      "LDAP",
-      "Markdown",
-      "Microsoft",
-      "OAuth",
-      "OAuth 2",
-      "OpenID",
-      "OpenShift",
-      "Python",
-      "Red Hat Enterprise Linux",
-      "RHEL",
-      "Fedora",
-      "SAML",
-      "Slack",
-      "SSH",
-      "TOML",
-      "URL",
-      "VMware",
-      "VMware vSphere",
-      "YAML",
-    ]
+  proper-names: false
+  # proper-names:                     # MD044
+  #   code_blocks: false
+  #   html_elements: false
+  #   names: [
+  #     "Ansible",
+  #     "Ansible Automation Platform",
+  #     "Ansible Automation Hub",
+  #     "API",
+  #     "CentOS",
+  #     "Git",
+  #     "GitHub",
+  #     "GitLab Pages",
+  #     "GitLab Runner",
+  #     "GitLab",
+  #     "ID",
+  #     "IP",
+  #     "Jira",
+  #     "Jira Cloud",
+  #     "Jira Server",
+  #     "JSON",
+  #     "Kerberos",
+  #     "Kubernetes",
+  #     "LDAP",
+  #     "Markdown",
+  #     "Microsoft",
+  #     "OAuth",
+  #     "OAuth 2",
+  #     "OpenID",
+  #     "OpenShift",
+  #     "Python",
+  #     "Red Hat Enterprise Linux",
+  #     "RHEL",
+  #     "Fedora",
+  #     "SAML",
+  #     "Slack",
+  #     "SSH",
+  #     "TOML",
+  #     "URL",
+  #     "VMware",
+  #     "VMware vSphere",
+  #     "YAML",
+  #   ]
 ignores:
   - "docs/source"
 ...
