@@ -4,18 +4,17 @@
 profile: production
 
 exclude_paths:
-  - .cache/ # implicit unless exclude_paths is defined in config
-  - collections # location that pytest installs required collections
-  - changelogs/ # checked by antsibull-changelog lint
+  - .ansible # Avoid linting other collections 
+   - .cache/ # implicit unless exclude_paths is defined in config
   - .github/ # Not ansible
-  - devfile.yaml # Not ansible
+  - changelogs/ # checked by antsibull-changelog lint
+  - collections/ # location that pytest installs required collections
   - docs/ # Not ansible
-  - .pre-commit-config.yaml # Not ansible
-  - .markdownlint-cli2.yaml # Not ansible
-  - .ansible # Avoid linting other collections
-  - changelogs/.plugin-cache.yaml # Not ansible
   - plugins/ # Not yaml
   - scripts/ # Not ansible
+  - .pre-commit-config.yaml # Not ansible
+  - .markdownlint-cli2.yaml # Not ansible 
+  - devfile.yaml # Not ansible
 
 loop_var_prefix: ^(__|{role}_)
 
