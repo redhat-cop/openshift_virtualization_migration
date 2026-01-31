@@ -2,16 +2,16 @@ apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
   name: {{ portgroup.name | infra.openshift_virtualization_migration.rfc1123(network_mgmt_nad_name_prefix, "^[\d]+") }}
-  namespace: {{ network_mgmt_nad_namespace }} 
-  annotations: 
+  namespace: {{ network_mgmt_nad_namespace }}
+  annotations:
     infra.openshift-virtualization-migration/source-portgroup: {{ portgroup.name | infra.openshift_virtualization_migration.rfc1123(network_mgmt_nad_name_prefix, "^[\d]+") }}
     infra.openshift-virtualization-migration/source-switch: {{ portgroup.switch }}
     infra.openshift-virtualization-migration/provider-hostname: {{ network_mgmt_vcenter_hostname }}
-    infra.openshift-virtualization-migration/provider-type: vmware 
+    infra.openshift-virtualization-migration/provider-type: vmware
     k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/{{ (portgroup.switch | infra.openshift_virtualization_migration.rfc1123(network_mgmt_nncp_name_prefix))[:15]  }}
 
 spec:
-  config: | 
+  config: |
     {"name":"{{ portgroup.name | infra.openshift_virtualization_migration.rfc1123(network_mgmt_nad_name_prefix, '^[\d]+')  }}",
      "type":"cnv-bridge",
      "cniVersion":"0.3.1",
@@ -30,11 +30,10 @@ spec:
      {"minID": {{ (vlan | split("-"))[0] }}, "maxID": {{ (vlan | split("-"))[1] }} }{{ "," if not loop.last }}
 {% else %}
      {"id": {{ vlan | int }} }{{ "," if not loop.last }}
-{% endif %}  
+{% endif %}
 {% endfor %}
      ]
 {% else %}
      "vlan": {{ portgroup.vlan.vlan_id | int }}
 {% endif %}
      }
-

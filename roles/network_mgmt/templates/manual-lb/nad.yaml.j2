@@ -2,8 +2,8 @@ apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
   name: {{ nad.name }}
-  namespace: {{ nad.namespace | default(network_mgmt_nad_namespace) }} 
-  annotations: 
+  namespace: {{ nad.namespace | default(network_mgmt_nad_namespace) }}
+  annotations:
     infra.openshift-virtualization-migration/provider-type: manual
 {% if 'portgroup' in nad and nad['portgroup'] | default("", true) | length > 0   %}
     infra.openshift-virtualization-migration/source-portgroup: {{ nad.portgroup }}
@@ -11,7 +11,7 @@ metadata:
 {% if network_mgmt_openshift_network_bridge_mode == 'linux-bridge' %}
     k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/{{ network_mgmt_manual_bridge_name  }}
 spec:
-  config: | 
+  config: |
     {"name":"{{ nad.name  }}",
      "type":"cnv-bridge",
      "cniVersion":"0.3.1",
@@ -26,7 +26,7 @@ spec:
      {"minID": {{ (vlan | split("-"))[0] }}, "maxID": {{ (vlan | split("-"))[1] }} }{{ "," if not loop.last }}
 {% else %}
      {"id": {{ vlan | int }} }{{ "," if not loop.last }}
-{% endif %}  
+{% endif %}
 {% endfor %}
      ]
 {% else %}
@@ -47,4 +47,3 @@ spec:
      "netAttachDefName": "{{ nad.namespace | default(network_mgmt_nad_namespace) }}/{{ nad.name }}"
     }
 {% endif %}
-

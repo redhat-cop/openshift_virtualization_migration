@@ -3,7 +3,7 @@ organization: "{{ aap_seed_aap_org_name }}"
 project: "{{ aap_seed_aap_project }}"
 job_type: run
 ask_variables_on_launch: true
-extra_vars: 
+extra_vars:
   {{ aap_seed_aap_job_template_extra_vars| to_yaml | indent(2) }}
 playbook: playbooks/mtv_migrate.yml
 inventory: "{{ aap_seed_aap_inventory }}"
