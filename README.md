@@ -1,5 +1,10 @@
 # Ansible for OpenShift Virtualization Migration
 
+![GitHub Release](https://img.shields.io/github/v/release/redhat-cop/openshift_virtualization_migration?include_prereleases&style=flat-square)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/redhat-cop/openshift_virtualization_migration/ci.yml?style=flat-square&label=release)](https://github.com/redhat-cop/openshift_virtualization_migration/actions)
+[![Semantic Versioning](https://img.shields.io/badge/semver-2.0.0-blue?style=flat-square)](https://semver.org/)
+[![License](https://img.shields.io/github/license/redhat-cop/openshift_virtualization_migration?style=flat-square)](LICENSE)
+
 Ansible collection for OpenShift Virtualization Migration
 
 ## Description
