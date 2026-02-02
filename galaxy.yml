@@ -7,7 +7,8 @@ namespace: infra
 name: openshift_virtualization_migration
 version: 1.21.2
 readme: README.md
-authors: []
+authors:
+  - OpenShift Virtualization Migration Contributors
 
 description: "This collection enables the migration journey of Virtual Machine (VM) workloads
   from existing hypervisors to Red Hat OpenShift Virtualization using Ansible Automation Platform.
