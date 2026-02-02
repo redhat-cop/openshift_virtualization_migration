@@ -14,6 +14,8 @@ This role defines the initial configuration and setup of the Ansible Automation 
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.2
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Populates an Ansible Automation Platform instance.

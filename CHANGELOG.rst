@@ -4,6 +4,21 @@ Openshift Virtualization Migration Release Notes
 
 .. contents:: Topics
 
+v1.21.2
+=======
+
+Bugfixes
+--------
+
+- resolve lint errors
+- resolve markdown lint errors
+- set collection authors
+
+Documentation Changes
+---------------------
+
+- add badges to README
+
 v1.21.1
 =======
 

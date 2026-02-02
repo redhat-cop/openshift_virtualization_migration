@@ -276,3 +276,17 @@ releases:
     fragments:
       - bugfix -jmespath-parsing-error.yaml
     release_date: '2025-07-30'
+  1.21.2:
+    changes:
+      bugfixes:
+        - resolve lint errors
+        - resolve markdown lint errors
+        - set collection authors
+      doc_changes:
+        - add badges to README
+    fragments:
+      - 1.21.2_docs_addbadgestoREADME.yml
+      - 1.21.2_fix_resolvelinterrors.yml
+      - 1.21.2_fix_resolvemarkdownlinterrors.yml
+      - 1.21.2_fix_setcollectionauthors.yml
+    release_date: '2026-02-02'

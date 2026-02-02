@@ -16,6 +16,8 @@ This role performs patching related activities for Virtual Machines.
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.2
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Patching related activities for Virtual Machines.

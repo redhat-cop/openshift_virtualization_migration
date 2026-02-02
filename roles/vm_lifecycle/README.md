@@ -16,6 +16,8 @@ This role performs and manages the lifecycle operations (start/stop/restart) of 
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.2
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Management of the lifecycle activities of Virtual Machines.

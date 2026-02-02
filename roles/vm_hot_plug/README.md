@@ -16,6 +16,8 @@ This role performs hot plugging in a virtual machine.
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.2
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Hot Plug Virtual Machine resources.

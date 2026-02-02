@@ -13,6 +13,8 @@ This role performs network management in two modes: Manual and Automatic. It per
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
+Version - 1.21.2
+Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
 Description: Management of network related components.

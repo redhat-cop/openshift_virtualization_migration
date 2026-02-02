@@ -1,5 +1,38 @@
 # CHANGELOG
 
+## v1.21.2 (2026-02-02)
+
+### Bug Fixes
+
+- Resolve lint errors
+  ([`68daa03`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/68daa038eb13efc7b4f0e57556404bc51070206f))
+
+- Resolve markdown lint errors
+  ([`95b340e`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/95b340eec640eaffce8f4dee121df72a25df6613))
+
+- Set collection authors
+  ([`cd40aec`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/cd40aece64c1df23b0690992d7a9bc6ebf664448))
+
+### Chores
+
+- Add PR template
+  ([`ad283fd`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/ad283fd36dbae527fb93dbe3dc0809de0f8bff69))
+
+- Resolve changelogs issues
+  ([`9c9e6ac`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/9c9e6ac7b3fb203ea19ea1ff91502e38fb0abaf9))
+
+- Revise build scripts
+  ([`75de825`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/75de8257a17c5f31df023ee2891951cd73a06efe))
+
+- Revise configs, pre-commit hooks
+  ([`c7e00dd`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/c7e00dd0a9fe28fe9ed04345e3a8d71bd28677b2))
+
+### Documentation
+
+- Add badges to README
+  ([`5c5aa00`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/5c5aa00092ca5726a4bb8ceb4f897e727e11e586))
+
+
 ## v1.21.1 (2025-07-30)
 
 ### Bug Fixes
