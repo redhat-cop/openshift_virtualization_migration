@@ -149,7 +149,7 @@ migration_spoke:
       #   insecureSkipTlsVerify: <value> # defaults to `true` if not specified
       #   credentialsSecretRef: <reference> # Namespaced name (<namespace>/<name>) or just <name> if in
       #     <mtv_namespace> containing MTV provider details
-      #   nmstate: <configurations applied as merged extra variables to the job template to configure networking>
+      #   network: <configurations applied as merged extra variables to the job template to configure networking>
       #   mapping: <configurations applied as merged extra variables to the job template to configure MTV mapping
       #     storage and networking>
 

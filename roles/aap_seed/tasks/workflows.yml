@@ -15,13 +15,13 @@
   loop_control:
     loop_var: _mf_host
 
-- name: workflows | Build MTV Worklfow
+- name: workflows | Build MTV Workflow
   ansible.builtin.set_fact:
     aap_seed_controller_workflows: >-
       {{ aap_seed_controller_workflows + [lookup('template', 'mtv_workflow.yml.j2')
       | ansible.builtin.from_yaml] }}
 
-- name: workflows | Build Migration Factory Worklfow
+- name: workflows | Build Migration Factory Workflow
   ansible.builtin.set_fact:
     aap_seed_controller_workflows: >-
       {{ aap_seed_controller_workflows + [lookup('template', 'migration_factory_configuration_workflow.yml.j2')

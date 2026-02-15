@@ -19,7 +19,7 @@
     _mf_cac_credential: "openshift_virtualization_migration_cac - {{ _mf_host }}"
     _mtv_job_template: "{{ (lookup('ansible.builtin.template', _target_type ~ '/' ~ _job_template)) }}"
 
-- name: _mtv_job_templates | Configure Ovirt MTV Job Template
+- name: _mtv_job_templates | Configure oVirt MTV Job Template
   when:
     - _target_type == 'ovirt'
     - (_mtv_job_template | trim | length) > 0
