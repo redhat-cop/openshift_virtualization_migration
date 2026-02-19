@@ -2,7 +2,7 @@ apiVersion: forklift.konveyor.io/v1beta1
 kind: Plan
 metadata:
   name: ""
-  namespace: "{{ _mtv_namespace }}"
+  namespace: "{{ _mtv_migrate_mtv_namespace }}"
   labels:
     "{{ mtv_migrate_plan_base_name_annotation }}": "{{ _mtv_migrate_mtv_plan_base_name }}"
 spec:
