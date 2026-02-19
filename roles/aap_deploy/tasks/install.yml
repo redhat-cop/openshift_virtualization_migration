@@ -1,11 +1,11 @@
 ---
 - name: install | Validate OpenShift bearer token
   ansible.builtin.uri:
-    url: "{{ openshift_host | default(lookup('ansible.builtin.env', 'K8S_AUTH_HOST')) }}/version"
+    url: "{{ aap_deploy_openshift_host | default(lookup('ansible.builtin.env', 'K8S_AUTH_HOST')) }}"
     method: GET
-    validate_certs: "{{ openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) | bool }}"
+    validate_certs: "{{ aap_deploy_openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) | bool }}"
     headers:
-      Authorization: Bearer {{ openshift_api_key | default(lookup('ansible.builtin.env', 'K8S_AUTH_API_KEY')) }}
+      Authorization: Bearer {{ aap_deploy_openshift_api_key | default(lookup('ansible.builtin.env', 'K8S_AUTH_API_KEY')) }}
 
 - name: install | Set Platform variables (2.5+)
   ansible.builtin.set_fact:
@@ -27,9 +27,9 @@
     name: infra.aap_utilities.aap_ocp_install
   vars:
     aap_ocp_install_connection:
-      host: "{{ openshift_host | default(lookup('ansible.builtin.env', 'K8S_AUTH_HOST')) }}"
-      api_key: "{{ openshift_api_key | default(lookup('ansible.builtin.env', 'K8S_AUTH_API_KEY')) }}"
-      validate_certs: "{{ openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) }}"
+      host: "{{ aap_deploy_openshift_host | default(lookup('ansible.builtin.env', 'K8S_AUTH_HOST')) }}"
+      api_key: "{{ aap_deploy_openshift_api_key | default(lookup('ansible.builtin.env', 'K8S_AUTH_API_KEY')) }}"
+      validate_certs: "{{ aap_deploy_openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) }}"
     aap_ocp_install_namespace: "{{ aap_namespace }}"
     aap_ocp_install_operator:
       channel: "{{ aap_deploy_aap_channel }}"
@@ -37,15 +37,15 @@
       install: false
     aap_ocp_install_controller: "{{ _aap_deploy_aap_ocp_install_controller }}"
     aap_ocp_install_platform: >-
-      "{{ _aap_deploy_aap_ocp_install_platform if _aap_deploy_aap_ocp_install_platform is defined else omit }}"
+      {{ _aap_deploy_aap_ocp_install_platform if _aap_deploy_aap_ocp_install_platform is defined else omit }}
 
 - name: install | Verify AAP Components are running
   when: component | default("", true) | length > 0
   kubernetes.core.k8s_info:
     api_version: apps/v1
-    host: "{{ openshift_host | default(lookup('ansible.builtin.env', 'K8S_AUTH_HOST')) }}"
-    api_key: "{{ openshift_api_key | default(lookup('ansible.builtin.env', 'K8S_AUTH_API_KEY')) }}"
-    validate_certs: "{{ openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) }}"
+    host: "{{ aap_deploy_openshift_host | default(lookup('ansible.builtin.env', 'K8S_AUTH_HOST')) }}"
+    api_key: "{{ aap_deploy_openshift_api_key | default(lookup('ansible.builtin.env', 'K8S_AUTH_API_KEY')) }}"
+    validate_certs: "{{ aap_deploy_openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) }}"
     namespace: "{{ aap_namespace }}"
     kind: Deployment
     name: "{{ component }}"
@@ -75,7 +75,7 @@
       kubernetes.core.k8s_info:
         api_version: v1
         kind: Secret
-        name: "{{ aap_instance_name }}-{{ controller_username }}-password"
+        name: "{{ aap_instance_name }}-{{ aap_deploy_controller_username }}-password"
         namespace: "{{ aap_namespace }}"
       register: aap_deploy_mf_aap_secret
 
@@ -111,7 +111,7 @@
             inputs:
               host: "{{ aap_deploy_mf_controller_hostname }}"
               password: "{{ aap_deploy_mf_controller_password }}"
-              username: "{{ controller_username }}"
+              username: "{{ aap_deploy_controller_username }}"
               verify_ssl: "{{ controller_validate_certs }}"
 
 - name: install | Non-bootstrap block
@@ -125,12 +125,12 @@
 
     - name: install | Retrieve Migration Factory AAP admin credential for non-bootstrap mode
       kubernetes.core.k8s_info:
-        host: "{{ openshift_host }}"
-        api_key: "{{ openshift_api_key }}"
-        verify_ssl: "{{ openshift_verify_ssl }}"
+        host: "{{ aap_deploy_openshift_host }}"
+        api_key: "{{ aap_deploy_openshift_api_key }}"
+        verify_ssl: "{{ aap_deploy_openshift_verify_ssl }}"
         api_version: v1
         kind: Secret
-        name: "{{ aap_instance_name }}-{{ controller_username }}-password"
+        name: "{{ aap_instance_name }}-{{ aap_deploy_controller_username }}-password"
         namespace: "{{ aap_namespace }}"
       register: aap_deploy_mf_aap_secret
 
@@ -154,7 +154,7 @@
       ansible.builtin.debug:
         msg:
           - "INFO: The following AAP instance is now running on OpenShift:"
-          - "  URL: {{ controller_hostname }}"
-          - "  username: {{ controller_username }}"
-          - "  password: {{ controller_password }}"
+          - "  URL: {{ aap_deploy_controller_hostname }}"
+          - "  username: {{ aap_deploy_controller_username }}"
+          - "  password: {{ aap_deploy_controller_password }}"
 ...

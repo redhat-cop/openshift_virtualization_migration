@@ -1,7 +1,7 @@
 ---
 # defaults file for aap_deploy
 
-# title: Boolean to allow AAP instalation and subscription attachment
+# title: Boolean to allow AAP installation and subscription attachment
 # required: True
 # description: Setting this variable to true will install AAP and attach a valid subscription based on your account.
 aap_deploy_aap_install: true
