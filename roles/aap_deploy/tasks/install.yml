@@ -68,14 +68,14 @@
 
     - name: install | Set controller username fact for Bootstrap mode
       ansible.builtin.set_fact:
-        aap_deploy_controller_username: "{{ lookup('ansible.builtin.env', 'CONTROLLER_USERNAME') }}"
-        aap_deploy_aap_username: "{{ lookup('ansible.builtin.env', 'CONTROLLER_USERNAME') }}"
+        controller_username: "{{ lookup('ansible.builtin.env', 'CONTROLLER_USERNAME') }}"
+        aap_username: "{{ lookup('ansible.builtin.env', 'CONTROLLER_USERNAME') }}"
 
     - name: install | Retrieve Migration Factory AAP admin credential for Bootstrap mode
       kubernetes.core.k8s_info:
         api_version: v1
         kind: Secret
-        name: "{{ aap_instance_name }}-{{ aap_deploy_controller_username }}-password"
+        name: "{{ aap_instance_name }}-{{ controller_username }}-password"
         namespace: "{{ aap_namespace }}"
       register: aap_deploy_mf_aap_secret
 
@@ -111,7 +111,7 @@
             inputs:
               host: "{{ aap_deploy_mf_controller_hostname }}"
               password: "{{ aap_deploy_mf_controller_password }}"
-              username: "{{ aap_deploy_controller_username }}"
+              username: "{{ controller_username }}"
               verify_ssl: "{{ controller_validate_certs }}"
 
 - name: install | Non-bootstrap block
@@ -120,8 +120,8 @@
 
     - name: install | Set controller username fact for non-bootstrap mode
       ansible.builtin.set_fact:
-        aap_deploy_controller_username: "{{ aap_deploy_controller_username }}"
-        aap_deploy_aap_username: "{{ aap_deploy_controller_username }}"
+        controller_username: "{{ aap_deploy_controller_username }}"
+        aap_username: "{{ aap_deploy_controller_username }}"
 
     - name: install | Retrieve Migration Factory AAP admin credential for non-bootstrap mode
       kubernetes.core.k8s_info:
@@ -130,16 +130,16 @@
         verify_ssl: "{{ aap_deploy_openshift_verify_ssl }}"
         api_version: v1
         kind: Secret
-        name: "{{ aap_instance_name }}-{{ aap_deploy_controller_username }}-password"
+        name: "{{ aap_instance_name }}-{{ controller_username }}-password"
         namespace: "{{ aap_namespace }}"
       register: aap_deploy_mf_aap_secret
 
     - name: install | Set controller facts if not bootstrap mode
       ansible.builtin.set_fact:
-        aap_deploy_controller_hostname: "{{ (aap_ocp_install_platform_route if aap_version is not defined or aap_version is defined and aap_version is version('2.5', '>=') else aap_ocp_install_controller_route) | ansible.builtin.urlsplit('hostname') }}" # noqa: yaml[line-length]
-        aap_deploy_controller_password: "{{ aap_deploy_mf_aap_secret.resources[0].data.password | b64decode }}"
-        aap_deploy_aap_hostname: "{{ (aap_ocp_install_platform_route if aap_version is not defined or aap_version is defined and aap_version is version('2.5', '>=') else aap_ocp_install_controller_route) | ansible.builtin.urlsplit('hostname') }}" # noqa: yaml[line-length]
-        aap_deploy_aap_password: "{{ aap_deploy_mf_aap_secret.resources[0].data.password | b64decode }}"
+        controller_hostname: "{{ (aap_ocp_install_platform_route if aap_version is not defined or aap_version is defined and aap_version is version('2.5', '>=') else aap_ocp_install_controller_route) | ansible.builtin.urlsplit('hostname') }}" # noqa: yaml[line-length]
+        controller_password: "{{ aap_deploy_mf_aap_secret.resources[0].data.password | b64decode }}"
+        aap_hostname: "{{ (aap_ocp_install_platform_route if aap_version is not defined or aap_version is defined and aap_version is version('2.5', '>=') else aap_ocp_install_controller_route) | ansible.builtin.urlsplit('hostname') }}" # noqa: yaml[line-length]
+        aap_password: "{{ aap_deploy_mf_aap_secret.resources[0].data.password | b64decode }}"
 
     - name: install | Set controller stats if not bootstrap mode
       ansible.builtin.set_stats:
@@ -154,7 +154,7 @@
       ansible.builtin.debug:
         msg:
           - "INFO: The following AAP instance is now running on OpenShift:"
-          - "  URL: {{ aap_deploy_controller_hostname }}"
-          - "  username: {{ aap_deploy_controller_username }}"
-          - "  password: {{ aap_deploy_controller_password }}"
+          - "  URL: {{ controller_hostname }}"
+          - "  username: {{ controller_username }}"
+          - "  password: {{ controller_password }}"
 ...
