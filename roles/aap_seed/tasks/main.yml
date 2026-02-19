@@ -92,9 +92,14 @@
     controller_templates: "{{ aap_seed_controller_templates }}"
     controller_credentials: "{{ aap_seed_controller_credentials }}"
 
+- name: Set variables for {{ aap_seed_cac_collection }}
+  ansible.builtin.set_fact:
+    controller_configuration_secure_logging: false
+    controller_configuration_async_delay: 5
+    aap_configuration_secure_logging: false
+    aap_configuration_async_delay: 5
+
 - name: Call dispatch role
   ansible.builtin.include_role:
     name: "{{ aap_seed_cac_collection }}.dispatch"
-  vars:
-    controller_configuration_secure_logging: false # noqa: var-naming[no-role-prefix]
 ...
