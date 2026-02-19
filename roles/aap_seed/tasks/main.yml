@@ -16,7 +16,7 @@
       {{ aap_seed_controller_inventories if (aap_seed_inventories_create | default(true)
       | bool) else [] }}
     aap_seed_controller_hosts: >-
-      "{{ aap_seed_controller_hosts if (aap_seed_hosts_create | default(true) | bool) else [] }}"
+      {{ aap_seed_controller_hosts if (aap_seed_hosts_create | default(true) | bool) else [] }}
 
 - name: Build Credentials
   ansible.builtin.include_tasks:
