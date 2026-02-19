@@ -80,6 +80,18 @@
     body_format: json
     validate_certs: false
 
+- name: Set controller_configuration vars
+  ansible.builtin.set_fact:
+    controller_dependency_check: "{{ aap_seed_controller_dependency_check }}"
+    controller_projects: "{{ aap_seed_controller_projects }}"
+    controller_execution_environments: "{{ aap_seed_controller_execution_environments }}"
+    controller_credential_types: "{{ aap_seed_controller_credential_types }}"
+    controller_inventories: "{{ aap_seed_controller_inventories }}"
+    controller_hosts: "{{ aap_seed_controller_hosts }}"
+    controller_workflows: "{{ aap_seed_controller_workflows }}"
+    controller_templates: "{{ aap_seed_controller_templates }}"
+    controller_credentials: "{{ aap_seed_controller_credentials }}"
+
 - name: Call dispatch role
   ansible.builtin.include_role:
     name: "{{ aap_seed_cac_collection }}.dispatch"
