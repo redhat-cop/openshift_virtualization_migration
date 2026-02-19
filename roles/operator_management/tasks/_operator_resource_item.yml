@@ -5,7 +5,7 @@
       {{
         lookup('ansible.builtin.template', _operator_resource_name + '_skeleton.yml.j2')
         | from_yaml
-        | ansible.builtin.combine(_operator[_operator_resource_name], recursive=true)
+        | ansible.builtin.combine(_operator_management_operator[_operator_resource_name], recursive=true)
       }}
 
 - name: _operator_resource_item | Configure Operator Subscription
@@ -15,7 +15,7 @@
       ansible.builtin.assert:
         that:
           - >-
-            operator_management_resource.spec is defined
+            _operator_management_resource.spec is defined
             and _operator_management_resource.spec.name is defined
             and _operator_management_resource.spec.source is defined
           - >-
