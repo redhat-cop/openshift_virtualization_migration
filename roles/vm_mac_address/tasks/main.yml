@@ -23,8 +23,8 @@
   loop_control:
     loop_var: _vm_mac_address
     label: >-
-      "Namespace: {{ _vm_mac_address['namespace']
+      Namespace: {{ _vm_mac_address['namespace']
       if 'namespace' in _vm_mac_address else '<undefined>' }}
       - Name: {{ _vm_mac_address['name']
-      if 'name' in _vm_mac_address else '<undefined>' }}"
+      if 'name' in _vm_mac_address else '<undefined>' }}
 ...

@@ -45,8 +45,8 @@
             | length == 1
         quiet: true
         fail_msg: >-
-          "Unable to locate Operator Channel '{{ _operator_management_resource.spec.channel }}' in operator
-          '{{ _operator_management_resource.spec.name }}' in catalog '{{ _operator_management_resource.spec.source }}'"
+          Unable to locate Operator Channel '{{ _operator_management_resource.spec.channel }}' in operator
+          '{{ _operator_management_resource.spec.name }}' in catalog '{{ _operator_management_resource.spec.source }}'
 
     - name: _operator_resource_item | Set Operator channel when not defined
       ansible.builtin.set_fact:

@@ -65,7 +65,7 @@
     - name: Set fact for temporary API key
       ansible.builtin.set_fact:
         _create_mf_aap_token_openshift_temporary_api_key: >-
-          "{{ create_mf_aap_token_r_openshift_auth.openshift_auth.api_key }}"
+          {{ create_mf_aap_token_r_openshift_auth.openshift_auth.api_key }}
       no_log: "{{ create_mf_aap_token_secure_logging }}"
 
 - name: Create Service Account api key

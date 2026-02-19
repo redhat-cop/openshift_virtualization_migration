@@ -3,7 +3,7 @@
 - name: _migrations | Template Migrations
   ansible.builtin.set_fact:
     _mtv_migrate_mtv_migrations: >-
-      "{{ _mtv_migrate_mtv_migrations | default([]) + [lookup('template', 'migration.yml.j2') | from_yaml] }}"
+      {{ _mtv_migrate_mtv_migrations | default([]) + [lookup('template', 'migration.yml.j2') | from_yaml] }}
   loop: "{{ _mtv_migrate_mtv_plans_to_migrate }}"
   loop_control:
     loop_var: _mtv_plan_to_migrate

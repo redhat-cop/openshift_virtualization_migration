@@ -62,8 +62,8 @@
       ansible.builtin.set_fact:
         vm_lifecycle_vm_operations_vms: "{{ vm_lifecycle_vm_operations_vms | default([]) + [{'operation': vm_operations_request_instance.operation, 'vm': vm_label_selectors_response}] }}" # noqa: yaml[line-length]
       loop: >-
-       "{{ vm_lifecycle_vm_label_selectors_responses['resources'] if 'resources'
-       in vm_lifecycle_vm_label_selectors_responses else [] }}"
+       {{ vm_lifecycle_vm_label_selectors_responses['resources'] if 'resources'
+       in vm_lifecycle_vm_label_selectors_responses else [] }}
       loop_control:
         loop_var: vm_label_selectors_response
         label: "Namespace: {{ vm_label_selectors_response.metadata.namespace }} - Name: {{ vm_label_selectors_response.metadata.name }}" # noqa: yaml[line-length]

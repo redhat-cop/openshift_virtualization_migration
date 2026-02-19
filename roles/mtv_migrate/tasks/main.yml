@@ -20,38 +20,38 @@
 - name: Process Request (MTV Namespace)
   ansible.builtin.set_fact:
     _mtv_migrate_mtv_namespace: >-
-      "{{ mtv_migrate_migration_request['mtv_namespace'] | default(mtv_migrate_default_namespace) }}"
+      {{ mtv_migrate_migration_request['mtv_namespace'] | default(mtv_migrate_default_namespace) }}
 
 - name: Process Request (Baseline)
   ansible.builtin.set_fact:
     _mtv_migrate_mtv_source_type: >-
-      "{{ mtv_migrate_migration_request['source_type'] | default(mtv_migrate_default_source_type) }}"
+      {{ mtv_migrate_migration_request['source_type'] | default(mtv_migrate_default_source_type) }}
     _mtv_migrate_mtv_source_target: >-
-      "{{ mtv_migrate_migration_request['source'] | default(mtv_migrate_default_source_target) }}"
+      {{ mtv_migrate_migration_request['source'] | default(mtv_migrate_default_source_target) }}
     _mtv_migrate_mtv_source_target_namespace: >-
-      "{{ mtv_migrate_migration_request['source_namespace'] | default(mtv_migrate_default_source_target_namespace) }}"
+      {{ mtv_migrate_migration_request['source_namespace'] | default(mtv_migrate_default_source_target_namespace) }}
     _mtv_migrate_mtv_destination_type: >-
-      "{{ mtv_migrate_migration_request['destination_type'] | default(mtv_migrate_default_destination_type) }}"
+      {{ mtv_migrate_migration_request['destination_type'] | default(mtv_migrate_default_destination_type) }}
     _mtv_migrate_mtv_destination_target: >-
-      "{{ mtv_migrate_migration_request['destination'] | default(mtv_migrate_default_destination_target) }}"
+      {{ mtv_migrate_migration_request['destination'] | default(mtv_migrate_default_destination_target) }}
     _mtv_migrate_mtv_destination_target_namespace: >-
-      "{{ mtv_migrate_migration_request['destination_namespace'] |
-      default(mtv_migrate_default_destination_target_namespace) }}" # noqa: yaml[line-length]
+      {{ mtv_migrate_migration_request['destination_namespace'] |
+      default(mtv_migrate_default_destination_target_namespace) }} # noqa: yaml[line-length]
     _mtv_migrate_mtv_split_plans: >-
-       "{{ mtv_migrate_migration_request['split_plans'] | default(mtv_migrate_default_split_plans) }}"
+       {{ mtv_migrate_migration_request['split_plans'] | default(mtv_migrate_default_split_plans) }}
     _mtv_migrate_mtv_vms_per_plan: >-
-       "{{ mtv_migrate_migration_request['vms_per_plan'] | default(mtv_migrate_default_vms_per_plan) }}"
+       {{ mtv_migrate_migration_request['vms_per_plan'] | default(mtv_migrate_default_vms_per_plan) }}
     _mtv_migrate_mtv_dry_run: >-
-      "{{ mtv_migrate_migration_request['dry_run'] | default(mtv_migrate_default_migrate_dry_run) }}"
+      {{ mtv_migrate_migration_request['dry_run'] | default(mtv_migrate_default_migrate_dry_run) }}
     _mtv_migrate_mtv_target_namespace: >-
-      "{{ mtv_migrate_migration_request['target_namespace'] | default(mtv_migrate_default_target_namespace) }}"
+      {{ mtv_migrate_migration_request['target_namespace'] | default(mtv_migrate_default_target_namespace) }}
     _mtv_migrate_mtv_verify_plans_ready: >-
-      "{{ mtv_migrate_migration_request['verify_plans_ready'] | default(mtv_migrate_default_verify_plans_ready) }}"
+      {{ mtv_migrate_migration_request['verify_plans_ready'] | default(mtv_migrate_default_verify_plans_ready) }}
     _mtv_migrate_mtv_verify_migrations_complete: >-
-      "{{ mtv_migrate_migration_request['verify_migrations_complete'] |
-      default(mtv_migrate_default_verify_migrations_complete) }}"
+      {{ mtv_migrate_migration_request['verify_migrations_complete'] |
+      default(mtv_migrate_default_verify_migrations_complete) }}
     _mtv_migrate_mtv_start_migration: >-
-      "{{ mtv_migrate_migration_request['start_migration'] | default(mtv_migrate_default_start_migration) }}"
+      {{ mtv_migrate_migration_request['start_migration'] | default(mtv_migrate_default_start_migration) }}
 
 - name: Process Request (Maps)
   ansible.builtin.set_fact:

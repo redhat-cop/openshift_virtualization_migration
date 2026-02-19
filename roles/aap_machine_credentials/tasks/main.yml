@@ -12,7 +12,7 @@
   loop_control:
     loop_var: aap_machine_credential
     label: >
-      "Machine Credential: {{ aap_machine_credential['name'] if 'name' in aap_machine_credential else '<undefined>' }}"
+      Machine Credential: {{ aap_machine_credential['name'] if 'name' in aap_machine_credential else '<undefined>' }}
 
 - name: Manage Credentials
   block:

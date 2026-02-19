@@ -109,8 +109,8 @@
     loop_var: _plan_vms
     index_var: _plan_vms_idx
   loop: >-
-    "{{ _mtv_migrate_final_mtv_vms_to_migrate |
-     batch(_mtv_vms_per_plan | int if _mtv_split_plans | bool else -1) }}"
+    {{ _mtv_migrate_final_mtv_vms_to_migrate |
+     batch(_mtv_vms_per_plan | int if _mtv_split_plans | bool else -1) }}
 
 - name: _plans | Create and Verify Plans
   when: not _mtv_dry_run|bool

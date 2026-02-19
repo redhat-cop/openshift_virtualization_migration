@@ -54,7 +54,7 @@
       when: "'credentialsSecretRef' not in mtv_management_populated_vmware_target or (mtv_management_populated_vmware_target['credentialsSecretRef'] | default('') | trim | length == 0)" # noqa: yaml[line-length]
       ansible.builtin.set_fact:
         mtv_management_vmware_provider_secret_name: >-
-          "vmware-{{ mtv_management_populated_vmware_target['name'] }}-credentials"
+          vmware-{{ mtv_management_populated_vmware_target['name'] }}-credentials
         mtv_management_vmware_provider_secret_namespace: "{{ mtv_management_provider_namespace }}"
 
     - name: _mtv_provider_vmware | Create VMware credentials secret

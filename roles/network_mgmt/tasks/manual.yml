@@ -10,8 +10,8 @@
 - name: manual | Validate supported bonding mode if also creating bond
   ansible.builtin.assert:
     fail_msg: >-
-      "{{ network_mgmt_openshift_network_bond_mode }} is not a supported bond mode.
-      Supported bond modes: {{  network_mgmt_openshift_network_supported_bond_modes | join(',') }}"
+      {{ network_mgmt_openshift_network_bond_mode }} is not a supported bond mode.
+      Supported bond modes: {{  network_mgmt_openshift_network_supported_bond_modes | join(',') }}
     that:
       - network_mgmt_openshift_network_bond_mode in network_mgmt_openshift_network_supported_bond_modes
   when:
