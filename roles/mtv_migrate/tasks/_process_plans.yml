@@ -6,9 +6,9 @@
 
 - name: _process_plans | Update Plan Content
   ansible.builtin.set_fact:
-    _mtv_migrate_plan_content: "{{ _mtv_migrate_mtv_plan_skeleton | ansible.builtin.combine({'metadata': {'name': _plan_name}, 'spec': {'vms': _mtv_migrate_plan_vms}}, recursive=true) }}" # noqa: yaml[line-length]
+    _mtv_migrate_plan_content: "{{ _mtv_migrate_mtv_plan_skeleton | ansible.builtin.combine({'metadata': {'name': _mtv_migrate_plan_name}, 'spec': {'vms': _mtv_migrate_plan_vms}}, recursive=true) }}" # noqa: yaml[line-length]
 
 - name: _process_plans | Add Plan
   ansible.builtin.set_fact:
-    _mtv_migrate_mtv_plans: "{{ _mtv_migrate_mtv_plans | default([]) + [_plan_content] }}"
+    _mtv_migrate_mtv_plans: "{{ _mtv_migrate_mtv_plans | default([]) + [_mtv_migrate_plan_content] }}"
 ...
