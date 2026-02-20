@@ -36,7 +36,7 @@
       {{ mtv_migrate_migration_request['destination'] | default(mtv_migrate_default_destination_target) }}
     _mtv_migrate_mtv_destination_target_namespace: >-
       {{ mtv_migrate_migration_request['destination_namespace'] |
-      default(mtv_migrate_default_destination_target_namespace) }} # noqa: yaml[line-length]
+      default(mtv_migrate_default_destination_target_namespace) }}
     _mtv_migrate_mtv_split_plans: >-
        {{ mtv_migrate_migration_request['split_plans'] | default(mtv_migrate_default_split_plans) }}
     _mtv_migrate_mtv_vms_per_plan: >-
