@@ -10,21 +10,21 @@
     tasks_from: mtv_query_inventory.yml
   vars:
     mtv_management_inventory_query_endpoint: /providers
-    mtv_management_inventory_query_result_var: _mtv_inventory_providers
+    mtv_management_inventory_query_result_var: _mtv_migrate_mtv_inventory_providers
 
 - name: _plans | Verify Source Provider
   ansible.builtin.assert:
     that:
-      - _mtv_inventory_providers[_mtv_source_type] | selectattr('name', 'equalto', _mtv_source_target) | selectattr('namespace', 'equalto', _mtv_source_target_namespace) | list | length == 1 # noqa: yaml[line-length]
+      - _mtv_migrate_mtv_inventory_providers[_mtv_migrate_mtv_source_type] | selectattr('name', 'equalto', _mtv_migrate_mtv_source_target) | selectattr('namespace', 'equalto', _mtv_migrate_mtv_source_target_namespace) | list | length == 1 # noqa: yaml[line-length]
     quiet: true
-    fail_msg: "Unable to locate Source Provider with name '{{ _mtv_source_target }}' in namespace '{{ _mtv_source_target_namespace }}'" # noqa: yaml[line-length]
+    fail_msg: "Unable to locate Source Provider with name '{{ _mtv_migrate_mtv_source_target }}' in namespace '{{ _mtv_migrate_mtv_source_target_namespace }}'" # noqa: yaml[line-length]
 
 - name: _plans | Verify Destination Providers
   ansible.builtin.assert:
     that:
-      - _mtv_inventory_providers[_mtv_destination_type] | selectattr('name', 'equalto', _mtv_destination_target) | selectattr('namespace', 'equalto', _mtv_destination_target_namespace) | list | length == 1 # noqa: yaml[line-length]
+      - _mtv_migrate_mtv_inventory_providers[_mtv_migrate_mtv_destination_type] | selectattr('name', 'equalto', _mtv_migrate_mtv_destination_target) | selectattr('namespace', 'equalto', _mtv_migrate_mtv_destination_target_namespace) | list | length == 1 # noqa: yaml[line-length]
     quiet: true
-    fail_msg: "Unable to locate Destination Provider with name '{{ _mtv_destination_target }}' in namespace '{{ _mtv_destination_target_namespace }}'" # noqa: yaml[line-length]
+    fail_msg: "Unable to locate Destination Provider with name '{{ _mtv_migrate_mtv_destination_target }}' in namespace '{{ _mtv_migrate_mtv_destination_target_namespace }}'" # noqa: yaml[line-length]
 
 - name: _plans | Retrieve StorageMaps
   kubernetes.core.k8s_info:
@@ -35,9 +35,9 @@
 - name: _plans | Verify StorageMap
   ansible.builtin.assert:
     that:
-      - mtv_migrate_storagemap_results.resources | selectattr('metadata.name', 'equalto', _mtv_storage_map_name) | selectattr('metadata.namespace', 'equalto', _mtv_storage_map_namespace) | list | length == 1 # noqa: yaml[line-length]
+      - mtv_migrate_storagemap_results.resources | selectattr('metadata.name', 'equalto', _mtv_migrate_mtv_storage_map_name) | selectattr('metadata.namespace', 'equalto', _mtv_migrate_mtv_storage_map_namespace) | list | length == 1 # noqa: yaml[line-length]
     quiet: true
-    fail_msg: "Unable to locate StorageMap with name '{{ _mtv_storage_map_name }}' in namespace '{{ _mtv_storage_map_namespace }}'" # noqa: yaml[line-length]
+    fail_msg: "Unable to locate StorageMap with name '{{ _mtv_migrate_mtv_storage_map_name }}' in namespace '{{ _mtv_migrate_mtv_storage_map_namespace }}'" # noqa: yaml[line-length]
 
 - name: _plans | Retrieve NetworkMap
   kubernetes.core.k8s_info:
@@ -48,9 +48,9 @@
 - name: _plans | Verify NetworkMap
   ansible.builtin.assert:
     that:
-      - mtv_migrate_networkmap_results.resources | selectattr('metadata.name', 'equalto', _mtv_network_map_name) | selectattr('metadata.namespace', 'equalto', _mtv_network_map_namespace) | list | length == 1 # noqa: yaml[line-length]
+      - mtv_migrate_networkmap_results.resources | selectattr('metadata.name', 'equalto', _mtv_migrate_mtv_network_map_name) | selectattr('metadata.namespace', 'equalto', _mtv_migrate_mtv_network_map_namespace) | list | length == 1 # noqa: yaml[line-length]
     quiet: true
-    fail_msg: "Unable to locate NetworkMap with name '{{ _mtv_network_map_name }}' in namespace '{{ _mtv_network_map_namespace }}'" # noqa: yaml[line-length]
+    fail_msg: "Unable to locate NetworkMap with name '{{ _mtv_migrate_mtv_network_map_name }}' in namespace '{{ _mtv_migrate_mtv_network_map_namespace }}'" # noqa: yaml[line-length]
 
 - name: _plans | Process Plan Skeleton
   ansible.builtin.set_fact:
@@ -61,8 +61,8 @@
     name: mtv_management
     tasks_from: mtv_query_inventory.yml
   vars:
-    mtv_management_inventory_query_endpoint: /providers/{{ _mtv_source_type }}/{{ (_mtv_inventory_providers[_mtv_source_type] | selectattr('name', 'equalto', _mtv_source_target) | selectattr('namespace', 'equalto', _mtv_source_target_namespace) | list | first).uid }}/vms?detail=4 # noqa: yaml[line-length]
-    mtv_management_inventory_query_result_var: _mtv_inventory_vms
+    mtv_management_inventory_query_endpoint: /providers/{{ _mtv_migrate_mtv_source_type }}/{{ (_mtv_migrate_mtv_inventory_providers[_mtv_migrate_mtv_source_type] | selectattr('name', 'equalto', _mtv_migrate_mtv_source_target) | selectattr('namespace', 'equalto', _mtv_migrate_mtv_source_target_namespace) | list | first).uid }}/vms?detail=4 # noqa: yaml[line-length]
+    mtv_management_inventory_query_result_var: _mtv_migrate_mtv_inventory_vms
 
 - name: _plans | Manage specified folders
   when:
@@ -74,8 +74,8 @@
         name: mtv_management
         tasks_from: mtv_query_inventory.yml
       vars:
-        mtv_management_inventory_query_endpoint: /providers/{{ _mtv_source_type }}/{{ (_mtv_inventory_providers[_mtv_source_type] | selectattr('name', 'equalto', _mtv_source_target) | selectattr('namespace', 'equalto', _mtv_source_target_namespace) | list | first).uid }}/folders?detail=4 # noqa: yaml[line-length]
-        mtv_management_inventory_query_result_var: _mtv_inventory_folders
+        mtv_management_inventory_query_endpoint: /providers/{{ _mtv_migrate_mtv_source_type }}/{{ (_mtv_migrate_mtv_inventory_providers[_mtv_migrate_mtv_source_type] | selectattr('name', 'equalto', _mtv_migrate_mtv_source_target) | selectattr('namespace', 'equalto', _mtv_migrate_mtv_source_target_namespace) | list | first).uid }}/folders?detail=4 # noqa: yaml[line-length]
+        mtv_management_inventory_query_result_var: _mtv_migrate_mtv_inventory_folders
 
     - name: _plans | Manage specified Folders
       ansible.builtin.include_tasks: _process_folder.yml
@@ -94,7 +94,7 @@
 
 - name: _plans | Flatten VM's to Migrate
   ansible.builtin.set_fact:
-    _mtv_migrate_final_mtv_vms_to_migrate: "{{ _mtv_vms_to_migrate | dict2items | map(attribute='value') | list }}"
+    _mtv_migrate_final_mtv_vms_to_migrate: "{{ _mtv_migrate_mtv_vms_to_migrate | dict2items | map(attribute='value') | list }}"
 
 - name: _plans | Verify Plan has VMs
   ansible.builtin.assert:
@@ -106,14 +106,14 @@
 - name: _plans | Process Plans
   ansible.builtin.include_tasks: _process_plans.yml
   loop_control:
-    loop_var: _plan_vms
-    index_var: _plan_vms_idx
+    loop_var: _mtv_migrate_plan_vms
+    index_var: _mtv_migrate_plan_vms_idx
   loop: >-
     {{ _mtv_migrate_final_mtv_vms_to_migrate |
-     batch(_mtv_vms_per_plan | int if _mtv_split_plans | bool else -1) }}
+     batch(_mtv_migrate_mtv_vms_per_plan | int if _mtv_migrate_mtv_split_plans | bool else -1) }}
 
 - name: _plans | Create and Verify Plans
-  when: not _mtv_dry_run|bool
+  when: not _mtv_migrate_mtv_dry_run|bool
   block:
     - name: _plans | Create Plans
       redhat.openshift.k8s:
@@ -132,7 +132,7 @@
       loop_control:
         loop_var: created_plan
       loop: "{{ mtv_migrate_plans_create_result.result.results if mtv_migrate_plans_create_result.result is defined and 'results' in mtv_migrate_plans_create_result.result else [mtv_migrate_plans_create_result] }}" # noqa: yaml[line-length]
-      when: _mtv_verify_plans_ready|bool
+      when: _mtv_migrate_mtv_verify_plans_ready|bool
       until:
         - mtv_migrate_created_plan_status is defined
         - "'resources' in mtv_migrate_created_plan_status"
@@ -149,10 +149,10 @@
       loop: "{{ mtv_migrate_plans_create_result.result.results | map(attribute='result') | list if mtv_migrate_plans_create_result.result is defined and 'results' in mtv_migrate_plans_create_result.result else [mtv_migrate_plans_create_result] }}" # noqa: yaml[line-length]
       loop_control:
         loop_var: created_plan
-      when: _mtv_start_migration|bool
+      when: _mtv_migrate_mtv_start_migration|bool
 
 - name: _plans | Display Plans (Dry Run)
   ansible.builtin.debug:
     msg: "{{ _mtv_migrate_mtv_plans }}"
-  when: _mtv_dry_run|bool
+  when: _mtv_migrate_mtv_dry_run|bool
 ...

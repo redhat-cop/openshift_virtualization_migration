@@ -15,19 +15,19 @@
 - name: _process_folder | Locate Folder by name
   ansible.builtin.set_fact:
     _mtv_migrate_folder_candidates: >-
-      {{ _mtv_inventory_folders | selectattr('name', 'equalto', folder_to_process['name']) | list }}
+      {{ _mtv_migrate_mtv_inventory_folders | selectattr('name', 'equalto', folder_to_process['name']) | list }}
   when: "'name' in folder_to_process and 'id' not in folder_to_process and 'path' not in folder_to_process"
 
 - name: _process_folder | Locate Folder by id
   ansible.builtin.set_fact:
     _mtv_migrate_folder_candidates: >-
-      {{ _mtv_inventory_folders | selectattr('id', 'equalto', folder_to_process['id']) | list }}
+      {{ _mtv_migrate_mtv_inventory_folders | selectattr('id', 'equalto', folder_to_process['id']) | list }}
   when: "'id' in folder_to_process and 'name' not in folder_to_process and 'path' not in folder_to_process"
 
 - name: _process_folder | Locate VM by path
   ansible.builtin.set_fact:
     _mtv_migrate_folder_candidates: >-
-      {{ _mtv_inventory_folders | selectattr('path', 'equalto', folder_to_process['path']) | list }}
+      {{ _mtv_migrate_mtv_inventory_folders | selectattr('path', 'equalto', folder_to_process['path']) | list }}
   when: "'path' in folder_to_process and 'id' not in folder_to_process and 'name' not in folder_to_process"
 
 - name: _process_folder | Verify single Folder found

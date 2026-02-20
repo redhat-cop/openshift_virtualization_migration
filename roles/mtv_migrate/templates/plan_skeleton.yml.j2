@@ -8,17 +8,17 @@ metadata:
 spec:
   map:
     network:
-      name: "{{ _mtv_network_map_name }}"
-      namespace: "{{ _mtv_network_map_namespace }}"
+      name: "{{ _mtv_migrate_mtv_network_map_name }}"
+      namespace: "{{ _mtv_migrate_mtv_network_map_namespace }}"
     storage:
-      name: "{{ _mtv_storage_map_name }}"
-      namespace: "{{ _mtv_storage_map_namespace }}"
+      name: "{{ _mtv_migrate_mtv_storage_map_name }}"
+      namespace: "{{ _mtv_migrate_mtv_storage_map_namespace }}"
   provider:
     destination:
-      name: "{{ _mtv_destination_target }}"
-      namespace: "{{ _mtv_destination_target_namespace }}"
+      name: "{{ _mtv_migrate_mtv_destination_target }}"
+      namespace: "{{ _mtv_migrate_mtv_destination_target_namespace }}"
     source:
-      name: "{{ _mtv_source_target }}"
-      namespace: "{{ _mtv_source_target_namespace }}"
-  targetNamespace: "{{ _mtv_target_namespace }}"
+      name: "{{ _mtv_migrate_mtv_source_target }}"
+      namespace: "{{ _mtv_migrate_mtv_source_target_namespace }}"
+  targetNamespace: "{{ _mtv_migrate_mtv_target_namespace }}"
   vms: []

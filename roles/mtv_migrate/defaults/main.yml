@@ -70,7 +70,7 @@ mtv_migrate_default_source_target: "vmware"
 # description_lines:
 # Default variable to use when migration request does not include a value for source_namespace
 # See example variable structure in defaults/main.yml under mtv_migrate_migration_request: {}
-mtv_migrate_default_source_target_namespace: "{{ _mtv_namespace }}"
+mtv_migrate_default_source_target_namespace: "{{ _mtv_migrate_mtv_namespace }}"
 # title: MTV Default Destination Type
 # required: True
 # description_lines:
@@ -88,7 +88,7 @@ mtv_migrate_default_destination_target: "host"
 # description_lines:
 # Default variable to use when migration request does not include a value for destination_namespace
 # See example variable structure in defaults/main.yml under mtv_migrate_migration_request: {}
-mtv_migrate_default_destination_target_namespace: "{{ _mtv_namespace }}"
+mtv_migrate_default_destination_target_namespace: "{{ _mtv_migrate_mtv_namespace }}"
 # title: MTV Default Split Plans
 # required: True
 # description_lines:
@@ -130,13 +130,13 @@ mtv_migrate_default_verify_migrations_complete: false
 # description_lines:
 # Default variable to use when migration request does not include a value for target_namespace
 # See example variable structure in defaults/main.yml under mtv_migrate_migration_request: {}
-mtv_migrate_default_target_namespace: "{{ _mtv_namespace }}"
+mtv_migrate_default_target_namespace: "{{ _mtv_migrate_mtv_namespace }}"
 # title: MTV Default Plan Base Name
 # required: True
 # description_lines:
 # Default variable to use when migration request does not include a value for plan_name
 # See example variable structure in defaults/main.yml under mtv_migrate_migration_request: {}
-mtv_migrate_default_plan_base_name: "{{ (_mtv_source_target + '-' + _mtv_destination_target) + '-' + lookup('pipe', 'date +%Y%m%d-%H%M') }}" # noqa: yaml[line-length]
+mtv_migrate_default_plan_base_name: "{{ (_mtv_migrate_mtv_source_target + '-' + _mtv_migrate_mtv_destination_target) + '-' + lookup('pipe', 'date +%Y%m%d-%H%M') }}" # noqa: yaml[line-length]
 
 # Maps
 # title: MTV Default Network Map Name
@@ -144,25 +144,25 @@ mtv_migrate_default_plan_base_name: "{{ (_mtv_source_target + '-' + _mtv_destina
 # description_lines:
 # Default variable to use when migration request does not include a value for network_map
 # See example variable structure in defaults/main.yml under mtv_migrate_migration_request: {}
-mtv_migrate_default_network_map_name: "{{ (_mtv_source_target + '-' + _mtv_destination_target) | infra.openshift_virtualization_migration.rfc1123 }}" # noqa: yaml[line-length]
+mtv_migrate_default_network_map_name: "{{ (_mtv_migrate_mtv_source_target + '-' + _mtv_migrate_mtv_destination_target) | infra.openshift_virtualization_migration.rfc1123 }}" # noqa: yaml[line-length]
 # title: MTV Default Network Map Namespace
 # required: True
 # description_lines:
 # Default variable to use when migration request does not include a value for network_map_namespace
 # See example variable structure in defaults/main.yml under mtv_migrate_migration_request: {}
-mtv_migrate_default_network_map_namespace: "{{ _mtv_namespace }}"
+mtv_migrate_default_network_map_namespace: "{{ _mtv_migrate_mtv_namespace }}"
 # title: MTV Default Storage Map Name
 # required: True
 # description_lines:
 # Default variable to use when migration request does not include a value for storage_map
 # See example variable structure in defaults/main.yml under mtv_migrate_migration_request: {}
-mtv_migrate_default_storage_map_name: "{{ (_mtv_source_target + '-' + _mtv_destination_target) | infra.openshift_virtualization_migration.rfc1123 }}" # noqa: yaml[line-length]
+mtv_migrate_default_storage_map_name: "{{ (_mtv_migrate_mtv_source_target + '-' + _mtv_migrate_mtv_destination_target) | infra.openshift_virtualization_migration.rfc1123 }}" # noqa: yaml[line-length]
 # title: MTV Default Storage Map Namespace
 # required: True
 # description_lines:
 # Default variable to use when migration request does not include a value for storage_map_namespace
 # See example variable structure in defaults/main.yml under mtv_migrate_migration_request: {}
-mtv_migrate_default_storage_map_namespace: "{{ _mtv_namespace }}"
+mtv_migrate_default_storage_map_namespace: "{{ _mtv_migrate_mtv_namespace }}"
 # title: MTV Migration Verify Plans Ready Retries
 # required: True
 # description_lines:

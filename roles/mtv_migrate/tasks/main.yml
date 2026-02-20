@@ -61,10 +61,10 @@
     _mtv_migrate_mtv_storage_map_namespace: "{{ mtv_migrate_migration_request['storage_map_namespace'] | default(mtv_migrate_default_storage_map_namespace) }}" # noqa: yaml[line-length]
 
 - name: Verify Split Plan Value is Positive
-  when: _mtv_split_plans | bool
+  when: _mtv_migrate_mtv_split_plans | bool
   ansible.builtin.assert:
     that:
-      - _mtv_vms_per_plan | int > 0
+      - _mtv_migrate_mtv_vms_per_plan | int > 0
     fail_msg: "Split plans are enabled but vms_per_plan is not set to a positive integer"
     quiet: true
 
@@ -78,6 +78,6 @@
 - name: Manage Migrations
   ansible.builtin.include_tasks: _migrations.yml
   when: >-
-    mtv_start_migration|bool and not _mtv_dry_run|bool and _mtv_migrate_mtv_plans_to_migrate |
+    mtv_start_migration|bool and not _mtv_migrate_mtv_dry_run|bool and _mtv_migrate_mtv_plans_to_migrate |
     default([]) | length > 0
 ...
