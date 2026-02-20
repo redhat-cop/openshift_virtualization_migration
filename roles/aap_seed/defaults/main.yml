@@ -254,7 +254,7 @@ aap_seed_container_verify_ssl: "{{ container_verify_ssl | default(false) }}"
 # title: AAP Job Template Variables
 # required: True
 # description: AAP Job Template Extra Variables
-aap_seed_aap_job_template_extra_vars: "{{ aap_job_template_extra_vars | default('{}') }}"
+aap_seed_aap_job_template_extra_vars: "{{ aap_job_template_extra_vars | default({}) }}"
 
 # title: Migration Targets
 # required: True
