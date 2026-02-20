@@ -56,7 +56,7 @@
 
 - name: _mtv_network_map_process_network | Add VMWare NetworkMaps Map to Dict
   ansible.builtin.set_fact:
-    mtv_management_mtv_management_mtv_networkmap_maps: >-
+    mtv_management_mtv_networkmap_maps: >-
       {{ mtv_management_mtv_networkmap_maps | default({}) |
       ansible.builtin.combine({mtv_vmware_network.selfLink: mtv_management_network_map_map},
       recursive=true) }}
