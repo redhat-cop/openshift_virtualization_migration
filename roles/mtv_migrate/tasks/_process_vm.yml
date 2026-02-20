@@ -14,17 +14,17 @@
 
 - name: _process_vm | Locate VM by name
   ansible.builtin.set_fact:
-    _mtv_migrate_vm_candidates: "{{ _mtv_migrate_mtv_inventory_vms | selectattr('name', 'equalto', vm_to_process['name']) | list }}"
+    _mtv_migrate_vm_candidates: "{{ _mtv_migrate_mtv_inventory_vms | selectattr('name', 'equalto', vm_to_process['name']) | list }}" # noqa: yaml[line-length]
   when: "'name' in vm_to_process and 'id' not in vm_to_process and 'path' not in vm_to_process"
 
 - name: _process_vm | Locate VM by id
   ansible.builtin.set_fact:
-    _mtv_migrate_vm_candidates: "{{ _mtv_migrate_mtv_inventory_vms | selectattr('id', 'equalto', vm_to_process['id']) | list }}"
+    _mtv_migrate_vm_candidates: "{{ _mtv_migrate_mtv_inventory_vms | selectattr('id', 'equalto', vm_to_process['id']) | list }}" # noqa: yaml[line-length]
   when: "'id' in vm_to_process and 'name' not in vm_to_process and 'path' not in vm_to_process"
 
 - name: _process_vm | Locate VM by path
   ansible.builtin.set_fact:
-    _mtv_migrate_vm_candidates: "{{ _mtv_migrate_mtv_inventory_vms | selectattr('path', 'equalto', vm_to_process['path']) | list }}"
+    _mtv_migrate_vm_candidates: "{{ _mtv_migrate_mtv_inventory_vms | selectattr('path', 'equalto', vm_to_process['path']) | list }}" # noqa: yaml[line-length]
   when: "'path' in vm_to_process and 'id' not in vm_to_process and 'name' not in vm_to_process"
 
 - name: _process_vm | Verify single VM found

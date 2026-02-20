@@ -82,22 +82,22 @@
 
 - name: Set controller_configuration vars
   ansible.builtin.set_fact:
-    controller_dependency_check: "{{ aap_seed_controller_dependency_check }}"
-    controller_projects: "{{ aap_seed_controller_projects }}"
-    controller_execution_environments: "{{ aap_seed_controller_execution_environments }}"
-    controller_credential_types: "{{ aap_seed_controller_credential_types }}"
-    controller_inventories: "{{ aap_seed_controller_inventories }}"
-    controller_hosts: "{{ aap_seed_controller_hosts }}"
-    controller_workflows: "{{ aap_seed_controller_workflows }}"
-    controller_templates: "{{ aap_seed_controller_templates }}"
-    controller_credentials: "{{ aap_seed_controller_credentials }}"
+    controller_dependency_check: "{{ aap_seed_controller_dependency_check }}" # noqa: var-naming[no-role-prefix]
+    controller_projects: "{{ aap_seed_controller_projects }}" # noqa: var-naming[no-role-prefix]
+    controller_execution_environments: "{{ aap_seed_controller_execution_environments }}" # noqa: var-naming[no-role-prefix] yaml[line-length]
+    controller_credential_types: "{{ aap_seed_controller_credential_types }}" # noqa: var-naming[no-role-prefix]
+    controller_inventories: "{{ aap_seed_controller_inventories }}" # noqa: var-naming[no-role-prefix]
+    controller_hosts: "{{ aap_seed_controller_hosts }}" # noqa: var-naming[no-role-prefix]
+    controller_workflows: "{{ aap_seed_controller_workflows }}" # noqa: var-naming[no-role-prefix]
+    controller_templates: "{{ aap_seed_controller_templates }}" # noqa: var-naming[no-role-prefix]
+    controller_credentials: "{{ aap_seed_controller_credentials }}" # noqa: var-naming[no-role-prefix]
 
 - name: Set variables for {{ aap_seed_cac_collection }}
   ansible.builtin.set_fact:
-    controller_configuration_secure_logging: false
-    controller_configuration_async_delay: 5
-    aap_configuration_secure_logging: false
-    aap_configuration_async_delay: 5
+    controller_configuration_secure_logging: false # noqa: var-naming[no-role-prefix]
+    controller_configuration_async_delay: 5 # noqa: var-naming[no-role-prefix]
+    aap_configuration_secure_logging: false # noqa: var-naming[no-role-prefix]
+    aap_configuration_async_delay: 5 # noqa: var-naming[no-role-prefix]
 
 - name: Call dispatch role
   ansible.builtin.include_role:

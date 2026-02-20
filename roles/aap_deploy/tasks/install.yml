@@ -3,9 +3,9 @@
   ansible.builtin.uri:
     url: "{{ aap_deploy_openshift_host | default(lookup('ansible.builtin.env', 'K8S_AUTH_HOST')) }}"
     method: GET
-    validate_certs: "{{ aap_deploy_openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) | bool }}"
+    validate_certs: "{{ aap_deploy_openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) | bool }}" # noqa: yaml[line-length]
     headers:
-      Authorization: Bearer {{ aap_deploy_openshift_api_key | default(lookup('ansible.builtin.env', 'K8S_AUTH_API_KEY')) }}
+      Authorization: Bearer {{ aap_deploy_openshift_api_key | default(lookup('ansible.builtin.env', 'K8S_AUTH_API_KEY')) }} # noqa: yaml[line-length]
 
 - name: install | Set Platform variables (2.5+)
   ansible.builtin.set_fact:
@@ -29,7 +29,7 @@
     aap_ocp_install_connection:
       host: "{{ aap_deploy_openshift_host | default(lookup('ansible.builtin.env', 'K8S_AUTH_HOST')) }}"
       api_key: "{{ aap_deploy_openshift_api_key | default(lookup('ansible.builtin.env', 'K8S_AUTH_API_KEY')) }}"
-      validate_certs: "{{ aap_deploy_openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) }}"
+      validate_certs: "{{ aap_deploy_openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) }}" # noqa: yaml[line-length]
     aap_ocp_install_namespace: "{{ aap_namespace }}"
     aap_ocp_install_operator:
       channel: "{{ aap_deploy_aap_channel }}"
@@ -45,7 +45,7 @@
     api_version: apps/v1
     host: "{{ aap_deploy_openshift_host | default(lookup('ansible.builtin.env', 'K8S_AUTH_HOST')) }}"
     api_key: "{{ aap_deploy_openshift_api_key | default(lookup('ansible.builtin.env', 'K8S_AUTH_API_KEY')) }}"
-    validate_certs: "{{ aap_deploy_openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) }}"
+    validate_certs: "{{ aap_deploy_openshift_verify_ssl | default(lookup('ansible.builtin.env', 'K8S_AUTH_VERIFY_SSL')) }}" # noqa: yaml[line-length]
     namespace: "{{ aap_namespace }}"
     kind: Deployment
     name: "{{ component }}"
@@ -68,8 +68,8 @@
 
     - name: install | Set controller username fact for Bootstrap mode
       ansible.builtin.set_fact:
-        controller_username: "{{ lookup('ansible.builtin.env', 'CONTROLLER_USERNAME') }}"
-        aap_username: "{{ lookup('ansible.builtin.env', 'CONTROLLER_USERNAME') }}"
+        controller_username: "{{ lookup('ansible.builtin.env', 'CONTROLLER_USERNAME') }}" # noqa: var-naming[no-role-prefix] yaml[line-length]
+        aap_username: "{{ lookup('ansible.builtin.env', 'CONTROLLER_USERNAME') }}" # noqa: var-naming[no-role-prefix]
 
     - name: install | Retrieve Migration Factory AAP admin credential for Bootstrap mode
       kubernetes.core.k8s_info:
@@ -120,8 +120,8 @@
 
     - name: install | Set controller username fact for non-bootstrap mode
       ansible.builtin.set_fact:
-        controller_username: "{{ aap_deploy_controller_username }}"
-        aap_username: "{{ aap_deploy_controller_username }}"
+        controller_username: "{{ aap_deploy_controller_username }}" # noqa: var-naming[no-role-prefix]
+        aap_username: "{{ aap_deploy_controller_username }}" # noqa: var-naming[no-role-prefix]
 
     - name: install | Retrieve Migration Factory AAP admin credential for non-bootstrap mode
       kubernetes.core.k8s_info:
@@ -136,10 +136,10 @@
 
     - name: install | Set controller facts if not bootstrap mode
       ansible.builtin.set_fact:
-        controller_hostname: "{{ (aap_ocp_install_platform_route if aap_version is not defined or aap_version is defined and aap_version is version('2.5', '>=') else aap_ocp_install_controller_route) | ansible.builtin.urlsplit('hostname') }}" # noqa: yaml[line-length]
-        controller_password: "{{ aap_deploy_mf_aap_secret.resources[0].data.password | b64decode }}"
-        aap_hostname: "{{ (aap_ocp_install_platform_route if aap_version is not defined or aap_version is defined and aap_version is version('2.5', '>=') else aap_ocp_install_controller_route) | ansible.builtin.urlsplit('hostname') }}" # noqa: yaml[line-length]
-        aap_password: "{{ aap_deploy_mf_aap_secret.resources[0].data.password | b64decode }}"
+        controller_hostname: "{{ (aap_ocp_install_platform_route if aap_version is not defined or aap_version is defined and aap_version is version('2.5', '>=') else aap_ocp_install_controller_route) | ansible.builtin.urlsplit('hostname') }}" # noqa: yaml[line-length] var-naming[no-role-prefix]
+        controller_password: "{{ aap_deploy_mf_aap_secret.resources[0].data.password | b64decode }}" # noqa: var-naming[no-role-prefix] yaml[line-length]
+        aap_hostname: "{{ (aap_ocp_install_platform_route if aap_version is not defined or aap_version is defined and aap_version is version('2.5', '>=') else aap_ocp_install_controller_route) | ansible.builtin.urlsplit('hostname') }}" # noqa: yaml[line-length] var-naming[no-role-prefix]
+        aap_password: "{{ aap_deploy_mf_aap_secret.resources[0].data.password | b64decode }}" # noqa: var-naming[no-role-prefix] yaml[line-length]
 
     - name: install | Set controller stats if not bootstrap mode
       ansible.builtin.set_stats:

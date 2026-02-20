@@ -103,7 +103,6 @@
 
     - name: Set fact with Service Account API key
       ansible.builtin.set_fact:
-        openshift_api_key: >-
-          {{ create_mf_aap_token_migration_factory_aap_sa_token.resources[0].data.token | b64decode }}
+        openshift_api_key: "{{ create_mf_aap_token_migration_factory_aap_sa_token.resources[0].data.token | b64decode }}" # noqa: var-naming[no-role-prefix] yaml[line-length]
       no_log: "{{ create_mf_aap_token_secure_logging }}"
 ...

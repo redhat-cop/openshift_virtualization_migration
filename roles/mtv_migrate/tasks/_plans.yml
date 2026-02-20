@@ -94,7 +94,7 @@
 
 - name: _plans | Flatten VM's to Migrate
   ansible.builtin.set_fact:
-    _mtv_migrate_final_mtv_vms_to_migrate: "{{ _mtv_migrate_mtv_vms_to_migrate | dict2items | map(attribute='value') | list }}"
+    _mtv_migrate_final_mtv_vms_to_migrate: "{{ _mtv_migrate_mtv_vms_to_migrate | dict2items | map(attribute='value') | list }}" # noqa: yaml[line-length]
 
 - name: _plans | Verify Plan has VMs
   ansible.builtin.assert:
