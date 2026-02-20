@@ -146,7 +146,7 @@
     - name: _plans | Set Created Plans to Migrate
       ansible.builtin.set_fact:
         _mtv_migrate_mtv_plans_to_migrate: "{{ _mtv_migrate_mtv_plans_to_migrate | default([]) + [created_plan] }}"
-      loop: "{{ mtv_migrate_plans_create_result.result.results | map(attribute='result') | list if mtv_migrate_plans_create_result.result is defined and 'results' in mtv_migrate_plans_create_result.result else [mtv_migrate_plans_create_result] }}" # noqa: yaml[line-length]
+      loop: "{{ mtv_migrate_plans_create_result.result.results | map(attribute='result') | list if mtv_migrate_plans_create_result.result is defined and 'results' in mtv_migrate_plans_create_result.result else [mtv_migrate_plans_create_result.result] }}" # noqa: yaml[line-length]
       loop_control:
         loop_var: created_plan
       when: _mtv_migrate_mtv_start_migration|bool
