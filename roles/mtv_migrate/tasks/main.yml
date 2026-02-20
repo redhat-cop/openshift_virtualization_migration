@@ -78,6 +78,6 @@
 - name: Manage Migrations
   ansible.builtin.include_tasks: _migrations.yml
   when: >-
-    mtv_start_migration|bool and not _mtv_migrate_mtv_dry_run|bool and _mtv_migrate_mtv_plans_to_migrate |
+    _mtv_migrate_mtv_start_migration|bool and not _mtv_migrate_mtv_dry_run|bool and _mtv_migrate_mtv_plans_to_migrate |
     default([]) | length > 0
 ...
