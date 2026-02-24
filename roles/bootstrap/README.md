@@ -29,7 +29,7 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 | [`bootstrap_aap_setup_working_dir`](defaults/main.yml#L14)   | str   | `/home/ansible/bootstrap_dir` |  None  |   true  |  Working direcotry on the bootstrap host |
 | [`bootstrap_rh_username`](defaults/main.yml#L18)   | str   | `{{ rh_username }}` |  None  |   true  |  Red Hat account login (this is used to attach your subs to controller) |
 | [`bootstrap_rh_password`](defaults/main.yml#L22)   | str   | `{{ rh_password }}` |  None  |   true  |  Red Hat account password |
-| [`bootstrap_rh_pool_id`](defaults/main.yml#L26)   | str   | `` |  None  |   true  |  Red Hat pool ID |
+| [`bootstrap_rh_subscription_id`](defaults/main.yml#L26)   | str   | `` |  None  |   true  |  Red Hat subscription ID |
 | [`bootstrap_rh_filter_product_name`](defaults/main.yml#L30)   | str   | `Red Hat Ansible Automation Platform` |  None  |   false  |  Red Hat subscription product name |
 | [`bootstrap_rh_filter_support_level`](defaults/main.yml#L34)   | str   | `Self-Support` |  None  |   false  |  Red Hat subscription support level |
 | [`bootstrap_controller_password`](defaults/main.yml#L38)   | str   | `{{ controller_password }}` |  None  |   true  |  The admin password for the controller |
@@ -54,7 +54,7 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 <br>
 <b>`bootstrap_rh_password`:</b> None
 <br>
-<b>`bootstrap_rh_pool_id`:</b> None
+<b>`bootstrap_rh_subscription_id`:</b> None
 <br>
 <b>`bootstrap_rh_filter_product_name`:</b> None
 <br>

@@ -21,9 +21,9 @@ bootstrap_rh_username: "{{ rh_username }}"
 # required: true
 bootstrap_rh_password: "{{ rh_password }}"
 
-# title: Red Hat pool ID
+# title: Red Hat subscription ID
 # required: true
-bootstrap_rh_pool_id: ""
+bootstrap_rh_subscription_id: ""
 
 # title: Red Hat subscription product name
 # required: false

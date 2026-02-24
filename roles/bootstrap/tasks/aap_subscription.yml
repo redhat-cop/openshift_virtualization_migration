@@ -1,13 +1,13 @@
 ---
 - name: aap_subscription | Get subscriptions with a filter
   when:
-    - bootstrap_rh_pool_id | default('', true) | trim | length == 0
+    - bootstrap_rh_subscription_id | default('', true) | trim | length == 0
     - bootstrap_aap_license_manifest | default('', true) | trim | length == 0
   block:
     - name: aap_subscription | Query Subscription
       ansible.controller.subscriptions:
-        username: "{{ bootstrap_rh_username }}"
-        password: "{{ bootstrap_rh_password }}"
+        client_id: "{{ bootstrap_rh_username }}"
+        client_secret: "{{ bootstrap_rh_password }}"
         filters:
           product_name: "{{ bootstrap_rh_filter_product_name }}"
           support_level: "{{ bootstrap_rh_filter_support_level }}"
@@ -20,13 +20,13 @@
       delay: 5
       until: bootstrap_subscription is not failed
 
-    - name: aap_subscription | Set pool based on bootstrap_subscription
+    - name: aap_subscription | Set subscription ID based on bootstrap_subscription
       ansible.builtin.set_fact:
-        bootstrap_rh_pool_id: "{{ bootstrap_subscription.subscriptions[0].pool_id }}"
+        _rh_subscription_id: "{{ bootstrap_subscription.subscriptions[0].subscription_id }}"
 
-    - name: aap_subscription | Attach to a pool
+    - name: aap_subscription | Attach to a subscription
       ansible.controller.license:
-        pool_id: "{{ bootstrap_rh_pool_id | default(omit, true) }}"
+        subscription_id: "{{ _rh_subscription_id | default(omit, true) }}"
         manifest: "{{ bootstrap_aap_license_manifest | default(omit, true) }}"
         controller_host: "{{ bootstrap_controller_hostname }}"
         controller_username: "{{ bootstrap_controller_username }}"
