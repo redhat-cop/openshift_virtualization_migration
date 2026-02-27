@@ -22,11 +22,11 @@
 
     - name: aap_subscription | Set subscription ID based on bootstrap_subscription
       ansible.builtin.set_fact:
-        _rh_subscription_id: "{{ bootstrap_subscription.subscriptions[0].subscription_id }}"
+        _bootstrap_rh_subscription_id: "{{ bootstrap_subscription.subscriptions[0].subscription_id }}"
 
     - name: aap_subscription | Attach to a subscription
       ansible.controller.license:
-        subscription_id: "{{ _rh_subscription_id | default(omit, true) }}"
+        subscription_id: "{{ _bootstrap_rh_subscription_id | default(omit, true) }}"
         manifest: "{{ bootstrap_aap_license_manifest | default(omit, true) }}"
         controller_host: "{{ bootstrap_controller_hostname }}"
         controller_username: "{{ bootstrap_controller_username }}"
