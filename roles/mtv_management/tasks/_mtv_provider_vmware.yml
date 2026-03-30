@@ -71,7 +71,7 @@
             password: "{{ mtv_management_populated_vmware_target.password | b64encode }}"
             url: "{{ mtv_management_mtv_vmware_url | b64encode }}"
             user: "{{ mtv_management_populated_vmware_target.username | b64encode }}"
-            cacert: "{{ mtv_management_populated_vmware_target.certificate | b64encode if 'certificate' in mtv_management_populated_vmware_target | default(omit) }}" # noqa: yaml[line-length]
+            cacert: "{{ (mtv_management_populated_vmware_target.certificate | b64encode) if 'certificate' in mtv_management_populated_vmware_target else omit }}" # noqa: yaml[line-length]
         apply: true
 
 - name: _mtv_provider_vmware | Create VMware Provider resource
