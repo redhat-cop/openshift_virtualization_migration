@@ -4,8 +4,7 @@ pytest-xdist
 pytest-cov
 coverage
 molecule
-tox
-tox-ansible
+tox-ansible<26.2.2
 black
 jmespath
 ansible-core
