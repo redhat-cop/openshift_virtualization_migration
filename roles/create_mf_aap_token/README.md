@@ -12,7 +12,7 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.1
+Version - 1.22.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 

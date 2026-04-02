@@ -16,7 +16,7 @@ This role performs and manages the lifecycle operations (start/stop/restart) of 
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.1
+Version - 1.22.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -118,65 +118,6 @@ Description: Management of the lifecycle activities of Virtual Machines.
 
 ## Task Flow Graphs
 
-### Graph for _perform_operation.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _perform_operation___Perform_VM_Operation0[ perform operation   perform vm operation]:::task
-  _perform_operation___Perform_VM_Operation0-->End
-```
-
-### Graph for _verify_operation.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _verify_operation___Verify_VMs0[ verify operation   verify vms]:::task
-  _verify_operation___Verify_VMs0-->End
-```
-
-### Graph for vm_operations.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| vm_operations___Verify_OpenShift_Connectivity_Details_Provided0[vm operations   verify openshift connectivity<br>details provided]:::task
-  vm_operations___Verify_OpenShift_Connectivity_Details_Provided0-->|Task| vm_operations___Initialize_Variables1[vm operations   initialize variables]:::task
-  vm_operations___Initialize_Variables1-->|Include task| vm_operations___Collect_VM_s__collect_vms_yml_2[vm operations   collect vm s<br>include_task:  collect vms yml]:::includeTasks
-  vm_operations___Collect_VM_s__collect_vms_yml_2-->|Task| vm_operations___Print_VM_s3[vm operations   print vm s]:::task
-  vm_operations___Print_VM_s3-->|Include task| vm_operations___Perform_VM_Operations__perform_operation_yml_4[vm operations   perform vm operations<br>include_task:  perform operation yml]:::includeTasks
-  vm_operations___Perform_VM_Operations__perform_operation_yml_4-->|Include task| vm_operations___Verify_VMs__verify_operation_yml_5[vm operations   verify vms<br>include_task:  verify operation yml]:::includeTasks
-  vm_operations___Verify_VMs__verify_operation_yml_5-->End
-```
-
 ### Graph for _collect_vms.yml
 
 ```mermaid
@@ -202,6 +143,65 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _collect_vms___Query_VM_s__With_Label_Selector_0-->|Task| _collect_vms___Add_VM_s__With_Label_Selector_1[ collect vms   add vm s  with label selector <br>When: **vm lifecycle vm operations vms   default      <br>map attribute  vm     list    selectattr  metadata<br>namespace    equalto   vm label selectors response<br>metadata namespace    list   selectattr  metadata<br>name    equalto   vm label selectors response<br>metadata name    list   length    0 and  <br>idempotent  in vm lifecycle valid vm operations vm<br>operations request instance  operation    and vm<br>lifecycle valid vm operations vm operations<br>request instance  operation    idempotent bool  or<br>  status  in vm label selectors response and <br>printablestatus  in vm label selectors response<br>status and vm label selectors response status<br>printablestatus    vm lifecycle valid vm<br>operations vm operations request instance <br>operation    status**]:::task
   _collect_vms___Add_VM_s__With_Label_Selector_1-.->|End of Block| _collect_vms___Query_VM_s_Using_Label_Selector3_block_start_0
   _collect_vms___Add_VM_s__With_Label_Selector_1-->End
+```
+
+### Graph for vm_operations.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| vm_operations___Verify_OpenShift_Connectivity_Details_Provided0[vm operations   verify openshift connectivity<br>details provided]:::task
+  vm_operations___Verify_OpenShift_Connectivity_Details_Provided0-->|Task| vm_operations___Initialize_Variables1[vm operations   initialize variables]:::task
+  vm_operations___Initialize_Variables1-->|Include task| vm_operations___Collect_VM_s__collect_vms_yml_2[vm operations   collect vm s<br>include_task:  collect vms yml]:::includeTasks
+  vm_operations___Collect_VM_s__collect_vms_yml_2-->|Task| vm_operations___Print_VM_s3[vm operations   print vm s]:::task
+  vm_operations___Print_VM_s3-->|Include task| vm_operations___Perform_VM_Operations__perform_operation_yml_4[vm operations   perform vm operations<br>include_task:  perform operation yml]:::includeTasks
+  vm_operations___Perform_VM_Operations__perform_operation_yml_4-->|Include task| vm_operations___Verify_VMs__verify_operation_yml_5[vm operations   verify vms<br>include_task:  verify operation yml]:::includeTasks
+  vm_operations___Verify_VMs__verify_operation_yml_5-->End
+```
+
+### Graph for _verify_operation.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _verify_operation___Verify_VMs0[ verify operation   verify vms]:::task
+  _verify_operation___Verify_VMs0-->End
+```
+
+### Graph for _perform_operation.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _perform_operation___Perform_VM_Operation0[ perform operation   perform vm operation]:::task
+  _perform_operation___Perform_VM_Operation0-->End
 ```
 
 ## Playbook

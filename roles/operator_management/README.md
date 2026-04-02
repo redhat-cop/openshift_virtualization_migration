@@ -14,7 +14,7 @@ This role manages the lifecycle of operators for OpenShift Virtualization
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.1
+Version - 1.22.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -530,46 +530,6 @@ Description: Management of OpenShift Operators.
 
 ## Task Flow Graphs
 
-### Graph for node-health-check.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| node_health_check___Create_node_health_check_operator_namespace0[node health check   create node health check<br>operator namespace]:::task
-  node_health_check___Create_node_health_check_operator_namespace0-->|Task| node_health_check___Create_node_health_check_operator_group1[node health check   create node health check<br>operator group]:::task
-  node_health_check___Create_node_health_check_operator_group1-->|Task| node_health_check___Create_node_health_check_operator_subscription2[node health check   create node health check<br>operator subscription]:::task
-  node_health_check___Create_node_health_check_operator_subscription2-->|Task| node_health_check___Create_Self_Node_Remediation_subscription3[node health check   create self node remediation<br>subscription]:::task
-  node_health_check___Create_Self_Node_Remediation_subscription3-->End
-```
-
-### Graph for _operator_catalog_source_item.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _operator_catalog_source_item___Set_Fact______catalogsource_item_key___0[ operator catalog source item   set fact     <br>catalogsource item key   ]:::task
-  _operator_catalog_source_item___Set_Fact______catalogsource_item_key___0-->|Task| _operator_catalog_source_item___Apply_Resource_____catalogsource_item_key___1[ operator catalog source item   apply resource    <br>catalogsource item key   ]:::task
-  _operator_catalog_source_item___Apply_Resource_____catalogsource_item_key___1-->End
-```
-
 ### Graph for _operator_config_item.yml
 
 ```mermaid
@@ -639,6 +599,46 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _operator_resource_item___Get_Installed_CSV_______operator_management_resource_spec_name____2-->|Task| _operator_resource_item___Wait_until_CSV_is_installed_______operator_management_resource_spec_name____3[ operator resource item   wait until csv is<br>installed       operator management resource spec<br>name    ]:::task
   _operator_resource_item___Wait_until_CSV_is_installed_______operator_management_resource_spec_name____3-.->|End of Block| _operator_resource_item___Operator_Installation_Management3_block_start_0
   _operator_resource_item___Wait_until_CSV_is_installed_______operator_management_resource_spec_name____3-->End
+```
+
+### Graph for node-health-check.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| node_health_check___Create_node_health_check_operator_namespace0[node health check   create node health check<br>operator namespace]:::task
+  node_health_check___Create_node_health_check_operator_namespace0-->|Task| node_health_check___Create_node_health_check_operator_group1[node health check   create node health check<br>operator group]:::task
+  node_health_check___Create_node_health_check_operator_group1-->|Task| node_health_check___Create_node_health_check_operator_subscription2[node health check   create node health check<br>operator subscription]:::task
+  node_health_check___Create_node_health_check_operator_subscription2-->|Task| node_health_check___Create_Self_Node_Remediation_subscription3[node health check   create self node remediation<br>subscription]:::task
+  node_health_check___Create_Self_Node_Remediation_subscription3-->End
+```
+
+### Graph for _operator_catalog_source_item.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _operator_catalog_source_item___Set_Fact______catalogsource_item_key___0[ operator catalog source item   set fact     <br>catalogsource item key   ]:::task
+  _operator_catalog_source_item___Set_Fact______catalogsource_item_key___0-->|Task| _operator_catalog_source_item___Apply_Resource_____catalogsource_item_key___1[ operator catalog source item   apply resource    <br>catalogsource item key   ]:::task
+  _operator_catalog_source_item___Apply_Resource_____catalogsource_item_key___1-->End
 ```
 
 ## Playbook

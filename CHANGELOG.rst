@@ -4,6 +4,28 @@ Openshift Virtualization Migration Release Notes
 
 .. contents:: Topics
 
+v1.22.0
+=======
+
+Minor Changes
+-------------
+
+- Added retry attach subscription (#13)
+
+Bugfixes
+--------
+
+- Allow skipping VMware certificate validation  (#11)
+- correct bugs due to wrong variable names
+- resolve lint errors
+- resolve markdown lint errors
+- set collection authors
+
+Documentation Changes
+---------------------
+
+- add badges to README
+
 v1.21.1
 =======
 

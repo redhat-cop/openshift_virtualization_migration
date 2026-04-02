@@ -12,7 +12,7 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.1
+Version - 1.22.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -123,25 +123,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Attach_AAP_Subscriptions_subscribe_yml_1-->End
 ```
 
-### Graph for subscribe.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0([subscribe   call bootstrap role to subscribe<br>When: **bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
-  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1([subscribe   call bootstrap role to subscribe<br>When: **not bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
-  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1-->End
-```
-
 ### Graph for install.yml
 
 ```mermaid
@@ -176,6 +157,25 @@ classDef rescue stroke:#665352,stroke-width:2px;
   install___Set_controller_stats_if_not_bootstrap_mode3-->|Task| install___Display_retrieved_password_for_non_bootstrap_mode4[install   display retrieved password for non<br>bootstrap mode]:::task
   install___Display_retrieved_password_for_non_bootstrap_mode4-.->|End of Block| install___Non_bootstrap_block6_block_start_0
   install___Display_retrieved_password_for_non_bootstrap_mode4-->End
+```
+
+### Graph for subscribe.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0([subscribe   call bootstrap role to subscribe<br>When: **bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
+  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1([subscribe   call bootstrap role to subscribe<br>When: **not bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
+  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1-->End
 ```
 
 ## Playbook

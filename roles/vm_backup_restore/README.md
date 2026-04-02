@@ -19,7 +19,7 @@ This role performs a backup and restore of a virtual machine by using VM snapsho
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.1
+Version - 1.22.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -120,26 +120,6 @@ Description: Virtual Machine backup and restore capabilities.
 
 ## Task Flow Graphs
 
-### Graph for _restore_vm.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _restore_vm___Stop_Virtual_Machine0[ restore vm   stop virtual machine]:::task
-  _restore_vm___Stop_Virtual_Machine0-->|Task| _restore_vm___Create_Restore1[ restore vm   create restore]:::task
-  _restore_vm___Create_Restore1-->|Task| _restore_vm___Start_Virtual_Machine2[ restore vm   start virtual machine<br>When: **vm restore snapshot  start vm     default true   <br>bool**]:::task
-  _restore_vm___Start_Virtual_Machine2-->End
-```
-
 ### Graph for _snapshot_vm.yml
 
 ```mermaid
@@ -157,6 +137,27 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Start-->|Task| _snapshot_vm___Create_Snapshot0[ snapshot vm   create snapshot]:::task
   _snapshot_vm___Create_Snapshot0-->|Task| _snapshot_vm___Print_Snapshot_Name1[ snapshot vm   print snapshot name]:::task
   _snapshot_vm___Print_Snapshot_Name1-->End
+```
+
+### Graph for vm_restore.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| vm_restore___Verify_OpenShift_Connectivity_Details_Provided0[vm restore   verify openshift connectivity details<br>provided]:::task
+  vm_restore___Verify_OpenShift_Connectivity_Details_Provided0-->|Task| vm_restore___Initialize_Variables1[vm restore   initialize variables]:::task
+  vm_restore___Initialize_Variables1-->|Include role| vm_restore___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_2(vm restore   invoke collect vm role<br>include_role: infra openshift virtualization migration vm<br>collect):::includeRole
+  vm_restore___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_2-->|Include task| vm_restore___Restore_VM_Snapshots__restore_vm_yml_3[vm restore   restore vm snapshots<br>include_task:  restore vm yml]:::includeTasks
+  vm_restore___Restore_VM_Snapshots__restore_vm_yml_3-->End
 ```
 
 ### Graph for vm_backup.yml
@@ -180,7 +181,7 @@ classDef rescue stroke:#665352,stroke-width:2px;
   vm_backup___Snapshot_VMs___snapshot_vm_yml_3-->End
 ```
 
-### Graph for vm_restore.yml
+### Graph for _restore_vm.yml
 
 ```mermaid
 flowchart TD
@@ -194,11 +195,10 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| vm_restore___Verify_OpenShift_Connectivity_Details_Provided0[vm restore   verify openshift connectivity details<br>provided]:::task
-  vm_restore___Verify_OpenShift_Connectivity_Details_Provided0-->|Task| vm_restore___Initialize_Variables1[vm restore   initialize variables]:::task
-  vm_restore___Initialize_Variables1-->|Include role| vm_restore___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_2(vm restore   invoke collect vm role<br>include_role: infra openshift virtualization migration vm<br>collect):::includeRole
-  vm_restore___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_2-->|Include task| vm_restore___Restore_VM_Snapshots__restore_vm_yml_3[vm restore   restore vm snapshots<br>include_task:  restore vm yml]:::includeTasks
-  vm_restore___Restore_VM_Snapshots__restore_vm_yml_3-->End
+  Start-->|Task| _restore_vm___Stop_Virtual_Machine0[ restore vm   stop virtual machine]:::task
+  _restore_vm___Stop_Virtual_Machine0-->|Task| _restore_vm___Create_Restore1[ restore vm   create restore]:::task
+  _restore_vm___Create_Restore1-->|Task| _restore_vm___Start_Virtual_Machine2[ restore vm   start virtual machine<br>When: **vm restore snapshot  start vm     default true   <br>bool**]:::task
+  _restore_vm___Start_Virtual_Machine2-->End
 ```
 
 ## Playbook

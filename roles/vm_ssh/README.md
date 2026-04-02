@@ -14,7 +14,7 @@ This role manages SSH access to virtual machines on OpenShift cluster.
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.1
+Version - 1.22.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -107,6 +107,76 @@ Description: Management of SSH keys for Virtual Machines in OpenShift.
 
 ## Task Flow Graphs
 
+### Graph for _manage_secret_keys.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _manage_secret_keys___Verify_SSH_path_location_or_inline_content_provided0[ manage secret keys   verify ssh path location or<br>inline content provided]:::task
+  _manage_secret_keys___Verify_SSH_path_location_or_inline_content_provided0-->|Block Start| _manage_secret_keys___Process_Key_from_Path1_block_start_0[[ manage secret keys   process key from path<br>When: **path  in ssh key**]]:::block
+  _manage_secret_keys___Process_Key_from_Path1_block_start_0-->|Task| _manage_secret_keys___Get_SSH_Key_Path_information0[ manage secret keys   get ssh key path information]:::task
+  _manage_secret_keys___Get_SSH_Key_Path_information0-->|Task| _manage_secret_keys___Verify_SSH_Key_Path_Exists1[ manage secret keys   verify ssh key path exists]:::task
+  _manage_secret_keys___Verify_SSH_Key_Path_Exists1-->|Task| _manage_secret_keys___Add__path__Key_to_Dict2[ manage secret keys   add  path  key to dict]:::task
+  _manage_secret_keys___Add__path__Key_to_Dict2-.->|End of Block| _manage_secret_keys___Process_Key_from_Path1_block_start_0
+  _manage_secret_keys___Add__path__Key_to_Dict2-->|Block Start| _manage_secret_keys___Process_Key_from_Path2_block_start_0[[ manage secret keys   process key from path<br>When: **content  in ssh key**]]:::block
+  _manage_secret_keys___Process_Key_from_Path2_block_start_0-->|Task| _manage_secret_keys___Add__content__Key_to_Dict0[ manage secret keys   add  content  key to dict]:::task
+  _manage_secret_keys___Add__content__Key_to_Dict0-.->|End of Block| _manage_secret_keys___Process_Key_from_Path2_block_start_0
+  _manage_secret_keys___Add__content__Key_to_Dict0-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| Verify_OpenShift_Connectivity_Details_Provided0[verify openshift connectivity details provided]:::task
+  Verify_OpenShift_Connectivity_Details_Provided0-->|Block Start| Manage_Secrets1_block_start_0[[manage secrets<br>When: **secrets  in vm ssh request   default**]]:::block
+  Manage_Secrets1_block_start_0-->|Include task| Process_Secrets__manage_secrets_yml_0[process secrets<br>include_task:  manage secrets yml]:::includeTasks
+  Process_Secrets__manage_secrets_yml_0-.->|End of Block| Manage_Secrets1_block_start_0
+  Process_Secrets__manage_secrets_yml_0-->|Block Start| Manage_Targets2_block_start_0[[manage targets<br>When: **targets  in vm ssh request   default**]]:::block
+  Manage_Targets2_block_start_0-->|Include task| Process_Targets__manage_targets_yml_0[process targets<br>include_task:  manage targets yml]:::includeTasks
+  Process_Targets__manage_targets_yml_0-.->|End of Block| Manage_Targets2_block_start_0
+  Process_Targets__manage_targets_yml_0-->End
+```
+
+### Graph for _manage_targets.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _manage_targets___Verify_Namespace_and_Secret_Name_Provided0[ manage targets   verify namespace and secret name<br>provided]:::task
+  _manage_targets___Verify_Namespace_and_Secret_Name_Provided0-->|Include role| _manage_targets___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1( manage targets   invoke collect vm role<br>include_role: infra openshift virtualization migration vm<br>collect):::includeRole
+  _manage_targets___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1-->|Include task| _manage_targets___Update_VirtualMachine_with_SSH_Configurations__manage_target_yml_2[ manage targets   update virtualmachine with ssh<br>configurations<br>include_task:  manage target yml]:::includeTasks
+  _manage_targets___Update_VirtualMachine_with_SSH_Configurations__manage_target_yml_2-->End
+```
+
 ### Graph for _manage_secrets.yml
 
 ```mermaid
@@ -149,76 +219,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _manage_target___Restart_the_VirtualMachine_infra_openshift_virtualization_migration_vm_lifecycle_0-->|Include role| _manage_target___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1( manage target   verify the virtualmachine<br>restarted<br>include_role: infra openshift virtualization migration vm<br>lifecycle):::includeRole
   _manage_target___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1-.->|End of Block| _manage_target___Restart_the_machine2_block_start_0
   _manage_target___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1-->End
-```
-
-### Graph for _manage_targets.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _manage_targets___Verify_Namespace_and_Secret_Name_Provided0[ manage targets   verify namespace and secret name<br>provided]:::task
-  _manage_targets___Verify_Namespace_and_Secret_Name_Provided0-->|Include role| _manage_targets___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1( manage targets   invoke collect vm role<br>include_role: infra openshift virtualization migration vm<br>collect):::includeRole
-  _manage_targets___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1-->|Include task| _manage_targets___Update_VirtualMachine_with_SSH_Configurations__manage_target_yml_2[ manage targets   update virtualmachine with ssh<br>configurations<br>include_task:  manage target yml]:::includeTasks
-  _manage_targets___Update_VirtualMachine_with_SSH_Configurations__manage_target_yml_2-->End
-```
-
-### Graph for main.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| Verify_OpenShift_Connectivity_Details_Provided0[verify openshift connectivity details provided]:::task
-  Verify_OpenShift_Connectivity_Details_Provided0-->|Block Start| Manage_Secrets1_block_start_0[[manage secrets<br>When: **secrets  in vm ssh request   default**]]:::block
-  Manage_Secrets1_block_start_0-->|Include task| Process_Secrets__manage_secrets_yml_0[process secrets<br>include_task:  manage secrets yml]:::includeTasks
-  Process_Secrets__manage_secrets_yml_0-.->|End of Block| Manage_Secrets1_block_start_0
-  Process_Secrets__manage_secrets_yml_0-->|Block Start| Manage_Targets2_block_start_0[[manage targets<br>When: **targets  in vm ssh request   default**]]:::block
-  Manage_Targets2_block_start_0-->|Include task| Process_Targets__manage_targets_yml_0[process targets<br>include_task:  manage targets yml]:::includeTasks
-  Process_Targets__manage_targets_yml_0-.->|End of Block| Manage_Targets2_block_start_0
-  Process_Targets__manage_targets_yml_0-->End
-```
-
-### Graph for _manage_secret_keys.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _manage_secret_keys___Verify_SSH_path_location_or_inline_content_provided0[ manage secret keys   verify ssh path location or<br>inline content provided]:::task
-  _manage_secret_keys___Verify_SSH_path_location_or_inline_content_provided0-->|Block Start| _manage_secret_keys___Process_Key_from_Path1_block_start_0[[ manage secret keys   process key from path<br>When: **path  in ssh key**]]:::block
-  _manage_secret_keys___Process_Key_from_Path1_block_start_0-->|Task| _manage_secret_keys___Get_SSH_Key_Path_information0[ manage secret keys   get ssh key path information]:::task
-  _manage_secret_keys___Get_SSH_Key_Path_information0-->|Task| _manage_secret_keys___Verify_SSH_Key_Path_Exists1[ manage secret keys   verify ssh key path exists]:::task
-  _manage_secret_keys___Verify_SSH_Key_Path_Exists1-->|Task| _manage_secret_keys___Add__path__Key_to_Dict2[ manage secret keys   add  path  key to dict]:::task
-  _manage_secret_keys___Add__path__Key_to_Dict2-.->|End of Block| _manage_secret_keys___Process_Key_from_Path1_block_start_0
-  _manage_secret_keys___Add__path__Key_to_Dict2-->|Block Start| _manage_secret_keys___Process_Key_from_Path2_block_start_0[[ manage secret keys   process key from path<br>When: **content  in ssh key**]]:::block
-  _manage_secret_keys___Process_Key_from_Path2_block_start_0-->|Task| _manage_secret_keys___Add__content__Key_to_Dict0[ manage secret keys   add  content  key to dict]:::task
-  _manage_secret_keys___Add__content__Key_to_Dict0-.->|End of Block| _manage_secret_keys___Process_Key_from_Path2_block_start_0
-  _manage_secret_keys___Add__content__Key_to_Dict0-->End
 ```
 
 ## Playbook

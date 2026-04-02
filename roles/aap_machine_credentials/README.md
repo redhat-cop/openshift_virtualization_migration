@@ -14,7 +14,7 @@ This role enables the management of Ansible Automation Platform _Credentials_.
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.1
+Version - 1.22.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -111,27 +111,6 @@ Description: Management of Machine Credentials.
 
 ## Task Flow Graphs
 
-### Graph for _map_key_content.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _map_key_content___Verify_required_variables_provided0[ map key content   verify required variables<br>provided]:::task
-  _map_key_content___Verify_required_variables_provided0-->|Task| _map_key_content___Check_source_path_content1[ map key content   check source path content]:::task
-  _map_key_content___Check_source_path_content1-->|Task| _map_key_content___Verify_source_path_exists2[ map key content   verify source path exists]:::task
-  _map_key_content___Verify_source_path_exists2-->|Task| _map_key_content___Map_Variables3[ map key content   map variables]:::task
-  _map_key_content___Map_Variables3-->End
-```
-
 ### Graph for _process_machine_credential.yml
 
 ```mermaid
@@ -174,6 +153,27 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Verify_Config_as_Code_parameters_required__for_AAP_2_5_and_above_1-.->|End of Block| Manage_Credentials2_block_start_0
   Verify_Config_as_Code_parameters_required__for_AAP_2_5_and_above_1-->|Include role| Call_credential_config_as_code_role____aap_machine_credentials_cac_credentials_role____3(call credential config as code role<br>When: **aap machine credentials controller credentials  <br>length   0**<br>include_role:    aap machine credentials cac credentials role   ):::includeRole
   Call_credential_config_as_code_role____aap_machine_credentials_cac_credentials_role____3-->End
+```
+
+### Graph for _map_key_content.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _map_key_content___Verify_required_variables_provided0[ map key content   verify required variables<br>provided]:::task
+  _map_key_content___Verify_required_variables_provided0-->|Task| _map_key_content___Check_source_path_content1[ map key content   check source path content]:::task
+  _map_key_content___Check_source_path_content1-->|Task| _map_key_content___Verify_source_path_exists2[ map key content   verify source path exists]:::task
+  _map_key_content___Verify_source_path_exists2-->|Task| _map_key_content___Map_Variables3[ map key content   map variables]:::task
+  _map_key_content___Map_Variables3-->End
 ```
 
 ## Playbook

@@ -13,7 +13,7 @@ This role performs network management in two modes: Manual and Automatic. It per
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.1
+Version - 1.22.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -165,140 +165,6 @@ Description: Management of network related components.
 
 ## Task Flow Graphs
 
-### Graph for automatic_nad.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Include task| automatic_nad___Include_tasks_from_create_nad_yml_create_nad_yml_0[automatic nad   include tasks from create nad yml<br>include_task: create nad yml]:::includeTasks
-  automatic_nad___Include_tasks_from_create_nad_yml_create_nad_yml_0-->End
-```
-
-### Graph for main.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Include task| Use_automatic_mode_automatic_yml_0[use automatic mode<br>When: **network mgmt manual nad list   default      <br>length     0**<br>include_task: automatic yml]:::includeTasks
-  Use_automatic_mode_automatic_yml_0-->|Include task| Use_manual_mode_manual_yml_1[use manual mode<br>When: **network mgmt manual nad list   default      is<br>iterable and  network mgmt manual nad list  <br>length    0**<br>include_task: manual yml]:::includeTasks
-  Use_manual_mode_manual_yml_1-->End
-```
-
-### Graph for automatic.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Include task| automatic___Include_tasks_from_gather_networks_yml_gather_networks_yml_0[automatic   include tasks from gather networks yml<br>include_task: gather networks yml]:::includeTasks
-  automatic___Include_tasks_from_gather_networks_yml_gather_networks_yml_0-->|Task| automatic___Set_the_switches_and_portgroups_to_migrate1[automatic   set the switches and portgroups to<br>migrate]:::task
-  automatic___Set_the_switches_and_portgroups_to_migrate1-->|Include task| automatic___Include_tasks_from_automatic_nncp_yml_automatic_nncp_yml_2[automatic   include tasks from automatic nncp yml<br>When: **network mgmt openshift node network ports  <br>default       is iterable and  network mgmt<br>openshift node network ports   default       is<br>not string and network mgmt openshift node network<br>ports   default       length   0 and network mgmt<br>vcenter dvswitch   default     true    trim  <br>length   0 and network mgmt vcenter datacenter  <br>default     true    trim   length   0**<br>include_task: automatic nncp yml]:::includeTasks
-  automatic___Include_tasks_from_automatic_nncp_yml_automatic_nncp_yml_2-->|Include task| automatic___Include_tasks_from_automatic_nad_yml_automatic_nad_yml_3[automatic   include tasks from automatic nad yml<br>When: **network mgmt vcenter dvswitch   default     true  <br> trim   length   0 and network mgmt vcenter<br>datacenter   default     true    trim   length   0<br>and   network mgmt openshift node network ports  <br>default       is iterable and  network mgmt<br>openshift node network ports   default       is<br>not string and  network mgmt openshift node<br>network ports   default       length   0   or <br>network mgmt nad auto bridge name is defined and<br>network mgmt nad auto bridge name  length   0**<br>include_task: automatic nad yml]:::includeTasks
-  automatic___Include_tasks_from_automatic_nad_yml_automatic_nad_yml_3-->End
-```
-
-### Graph for create_nad.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| create_nad____DEBUG_nad_Template_0[create nad    debug nad template <br>When: **portgroup uplinks   0 and not  portgroup vlan<br>trunk and  network mgmt openshift network bridge<br>mode     ovs bridge    and portgroup switch   <br>network mgmt vcenter dvswitch**]:::task
-  create_nad____DEBUG_nad_Template_0-->|Task| create_nad___Apply_NetworkAttachmentDefinitions1[create nad   apply networkattachmentdefinitions<br>When: **portgroup uplinks   0 and not  portgroup vlan<br>trunk and  network mgmt openshift network bridge<br>mode     ovs bridge    and portgroup switch   <br>network mgmt vcenter dvswitch**]:::task
-  create_nad___Apply_NetworkAttachmentDefinitions1-->End
-```
-
-### Graph for create_nncp.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| create_nncp___DEBUG_nncp_Template0[create nncp   debug nncp template<br>When: **vswitch name    network mgmt vcenter dvswitch**]:::task
-  create_nncp___DEBUG_nncp_Template0-->|Task| create_nncp___Apply_NodeNetworkConfigurationPolicy1[create nncp   apply nodenetworkconfigurationpolicy<br>When: **vswitch name    network mgmt vcenter dvswitch**]:::task
-  create_nncp___Apply_NodeNetworkConfigurationPolicy1-->End
-```
-
-### Graph for gather_networks.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| gather_networks___Gather_all_registered_dvswitch0[gather networks   gather all registered dvswitch]:::task
-  gather_networks___Gather_all_registered_dvswitch0-->|Task| gather_networks___Get_info_for_all_dVSwitch_Port_Groups1[gather networks   get info for all dvswitch port<br>groups]:::task
-  gather_networks___Get_info_for_all_dVSwitch_Port_Groups1-->End
-```
-
-### Graph for automatic_nncp.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| automatic_nncp___Validate_supported_bonding_mode0[automatic nncp   validate supported bonding mode<br>When: **not  network mgmt override openshift supported<br>bond mode   default false**]:::task
-  automatic_nncp___Validate_supported_bonding_mode0-->|Include task| automatic_nncp___Include_tasks_from_create_nncp_yml_create_nncp_yml_1[automatic nncp   include tasks from create nncp<br>yml<br>include_task: create nncp yml]:::includeTasks
-  automatic_nncp___Include_tasks_from_create_nncp_yml_create_nncp_yml_1-->End
-```
-
 ### Graph for manual.yml
 
 ```mermaid
@@ -322,6 +188,140 @@ classDef rescue stroke:#665352,stroke-width:2px;
   manual___Validate_access_port5-->|Task| manual___Validate_trunk_ports6[manual   validate trunk ports<br>When: **trunk  in nad and nad trunk**]:::task
   manual___Validate_trunk_ports6-->|Task| manual___Apply_NetworkAttachmentDefinitions7[manual   apply networkattachmentdefinitions]:::task
   manual___Apply_NetworkAttachmentDefinitions7-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Include task| Use_automatic_mode_automatic_yml_0[use automatic mode<br>When: **network mgmt manual nad list   default      <br>length     0**<br>include_task: automatic yml]:::includeTasks
+  Use_automatic_mode_automatic_yml_0-->|Include task| Use_manual_mode_manual_yml_1[use manual mode<br>When: **network mgmt manual nad list   default      is<br>iterable and  network mgmt manual nad list  <br>length    0**<br>include_task: manual yml]:::includeTasks
+  Use_manual_mode_manual_yml_1-->End
+```
+
+### Graph for gather_networks.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| gather_networks___Gather_all_registered_dvswitch0[gather networks   gather all registered dvswitch]:::task
+  gather_networks___Gather_all_registered_dvswitch0-->|Task| gather_networks___Get_info_for_all_dVSwitch_Port_Groups1[gather networks   get info for all dvswitch port<br>groups]:::task
+  gather_networks___Get_info_for_all_dVSwitch_Port_Groups1-->End
+```
+
+### Graph for create_nad.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| create_nad____DEBUG_nad_Template_0[create nad    debug nad template <br>When: **portgroup uplinks   0 and not  portgroup vlan<br>trunk and  network mgmt openshift network bridge<br>mode     ovs bridge    and portgroup switch   <br>network mgmt vcenter dvswitch**]:::task
+  create_nad____DEBUG_nad_Template_0-->|Task| create_nad___Apply_NetworkAttachmentDefinitions1[create nad   apply networkattachmentdefinitions<br>When: **portgroup uplinks   0 and not  portgroup vlan<br>trunk and  network mgmt openshift network bridge<br>mode     ovs bridge    and portgroup switch   <br>network mgmt vcenter dvswitch**]:::task
+  create_nad___Apply_NetworkAttachmentDefinitions1-->End
+```
+
+### Graph for automatic_nncp.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| automatic_nncp___Validate_supported_bonding_mode0[automatic nncp   validate supported bonding mode<br>When: **not  network mgmt override openshift supported<br>bond mode   default false**]:::task
+  automatic_nncp___Validate_supported_bonding_mode0-->|Include task| automatic_nncp___Include_tasks_from_create_nncp_yml_create_nncp_yml_1[automatic nncp   include tasks from create nncp<br>yml<br>include_task: create nncp yml]:::includeTasks
+  automatic_nncp___Include_tasks_from_create_nncp_yml_create_nncp_yml_1-->End
+```
+
+### Graph for create_nncp.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| create_nncp___DEBUG_nncp_Template0[create nncp   debug nncp template<br>When: **vswitch name    network mgmt vcenter dvswitch**]:::task
+  create_nncp___DEBUG_nncp_Template0-->|Task| create_nncp___Apply_NodeNetworkConfigurationPolicy1[create nncp   apply nodenetworkconfigurationpolicy<br>When: **vswitch name    network mgmt vcenter dvswitch**]:::task
+  create_nncp___Apply_NodeNetworkConfigurationPolicy1-->End
+```
+
+### Graph for automatic_nad.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Include task| automatic_nad___Include_tasks_from_create_nad_yml_create_nad_yml_0[automatic nad   include tasks from create nad yml<br>include_task: create nad yml]:::includeTasks
+  automatic_nad___Include_tasks_from_create_nad_yml_create_nad_yml_0-->End
+```
+
+### Graph for automatic.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Include task| automatic___Include_tasks_from_gather_networks_yml_gather_networks_yml_0[automatic   include tasks from gather networks yml<br>include_task: gather networks yml]:::includeTasks
+  automatic___Include_tasks_from_gather_networks_yml_gather_networks_yml_0-->|Task| automatic___Set_the_switches_and_portgroups_to_migrate1[automatic   set the switches and portgroups to<br>migrate]:::task
+  automatic___Set_the_switches_and_portgroups_to_migrate1-->|Include task| automatic___Include_tasks_from_automatic_nncp_yml_automatic_nncp_yml_2[automatic   include tasks from automatic nncp yml<br>When: **network mgmt openshift node network ports  <br>default       is iterable and  network mgmt<br>openshift node network ports   default       is<br>not string and network mgmt openshift node network<br>ports   default       length   0 and network mgmt<br>vcenter dvswitch   default     true    trim  <br>length   0 and network mgmt vcenter datacenter  <br>default     true    trim   length   0**<br>include_task: automatic nncp yml]:::includeTasks
+  automatic___Include_tasks_from_automatic_nncp_yml_automatic_nncp_yml_2-->|Include task| automatic___Include_tasks_from_automatic_nad_yml_automatic_nad_yml_3[automatic   include tasks from automatic nad yml<br>When: **network mgmt vcenter dvswitch   default     true  <br> trim   length   0 and network mgmt vcenter<br>datacenter   default     true    trim   length   0<br>and   network mgmt openshift node network ports  <br>default       is iterable and  network mgmt<br>openshift node network ports   default       is<br>not string and  network mgmt openshift node<br>network ports   default       length   0   or <br>network mgmt nad auto bridge name is defined and<br>network mgmt nad auto bridge name  length   0**<br>include_task: automatic nad yml]:::includeTasks
+  automatic___Include_tasks_from_automatic_nad_yml_automatic_nad_yml_3-->End
 ```
 
 ## Playbook

@@ -12,7 +12,7 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.21.1
+Version - 1.22.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -128,6 +128,26 @@ Description: Verification of an Ansible for OpenShift Virtualization Migration e
 
 ## Task Flow Graphs
 
+### Graph for vmware_firewall_rules.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| vmware_firewall_rules___Build_a_list_of_all_the_clusters0[vmware firewall rules   build a list of all the<br>clusters]:::task
+  vmware_firewall_rules___Build_a_list_of_all_the_clusters0-->|Task| vmware_firewall_rules___Gather_firewall_info_about_all_ESXi_Host_in_given_Cluster1[vmware firewall rules   gather firewall info about<br>all esxi host in given cluster]:::task
+  vmware_firewall_rules___Gather_firewall_info_about_all_ESXi_Host_in_given_Cluster1-->|Task| vmware_firewall_rules___Debug_firewall_details2[vmware firewall rules   debug firewall details<br>When: **validate migration debug is defined and validate<br>migration debug**]:::task
+  vmware_firewall_rules___Debug_firewall_details2-->End
+```
+
 ### Graph for main.yml
 
 ```mermaid
@@ -226,26 +246,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Start-->|Task| ocp_version___Get_OCP_version_and_check_if_it_s_4_12_or_higher0[ocp version   get ocp version and check if it s 4<br>12 or higher]:::task
   ocp_version___Get_OCP_version_and_check_if_it_s_4_12_or_higher0-->|Task| ocp_version___Print_OCP_version1[ocp version   print ocp version]:::task
   ocp_version___Print_OCP_version1-->End
-```
-
-### Graph for vmware_firewall_rules.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| vmware_firewall_rules___Build_a_list_of_all_the_clusters0[vmware firewall rules   build a list of all the<br>clusters]:::task
-  vmware_firewall_rules___Build_a_list_of_all_the_clusters0-->|Task| vmware_firewall_rules___Gather_firewall_info_about_all_ESXi_Host_in_given_Cluster1[vmware firewall rules   gather firewall info about<br>all esxi host in given cluster]:::task
-  vmware_firewall_rules___Gather_firewall_info_about_all_ESXi_Host_in_given_Cluster1-->|Task| vmware_firewall_rules___Debug_firewall_details2[vmware firewall rules   debug firewall details<br>When: **validate migration debug is defined and validate<br>migration debug**]:::task
-  vmware_firewall_rules___Debug_firewall_details2-->End
 ```
 
 ## Playbook
