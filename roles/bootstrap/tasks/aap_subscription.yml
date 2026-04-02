@@ -32,6 +32,10 @@
         controller_username: "{{ bootstrap_controller_username }}"
         controller_password: "{{ bootstrap_controller_password }}"
         validate_certs: "{{ bootstrap_controller_validate_certs }}"
+      register: bootstrap_attach_subscription
+      retries: 10
+      delay: 5
+      until: bootstrap_attach_subscription is not failed
 
 - name: aap_subscription | Verify License Manifest Exists
   when:
