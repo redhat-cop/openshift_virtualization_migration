@@ -9,6 +9,9 @@ metadata:
       name: "{{ _mtv_migrate_mtv_plan_to_migrate.metadata.name }}"
       uid: "{{ _mtv_migrate_mtv_plan_to_migrate.metadata.uid }}"
 spec:
+{% if _mtv_migrate_mtv_warm | bool and _mtv_migrate_mtv_cutover | default('', true) | length > 0 %}
+  cutover: "{{ _mtv_migrate_mtv_cutover }}"
+{% endif %}
   plan:
     name: "{{ _mtv_migrate_mtv_plan_to_migrate.metadata.name }}"
     namespace: "{{ _mtv_migrate_mtv_plan_to_migrate.metadata.namespace }}"

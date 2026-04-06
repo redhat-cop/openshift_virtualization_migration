@@ -52,6 +52,10 @@
       default(mtv_migrate_default_verify_migrations_complete) }}
     _mtv_migrate_mtv_start_migration: >-
       {{ mtv_migrate_migration_request['start_migration'] | default(mtv_migrate_default_start_migration) }}
+    _mtv_migrate_mtv_warm: >-
+      {{ mtv_migrate_migration_request['warm'] | default(mtv_migrate_default_warm) }}
+    _mtv_migrate_mtv_cutover: >-
+      {{ mtv_migrate_migration_request['cutover'] | default('') }}
 
 - name: Process Request (Maps)
   ansible.builtin.set_fact:

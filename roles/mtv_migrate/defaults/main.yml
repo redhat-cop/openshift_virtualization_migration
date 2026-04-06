@@ -29,6 +29,9 @@ mtv_migrate_migration_request: {
 # network_map_namespace: openshift-mtv # Namespace containing the NetworkMap (defaults to the 'openshift-mtv' Namespace)
 # storage_map: vmware-host # name of the StorageMap to associate (defaults to <source_name>-<destination_name>)
 # storage_map_namespace: openshift-mtv # Namespace containing the StorageMap (defaults to the 'openshift-mtv' Namespace)
+# warm: false # Enable warm migration using Changed Block Tracking (defaults to false)
+# cutover: "" # ISO 8601 timestamp to schedule cutover for warm migrations \
+# (e.g., '2026-04-07T02:00:00Z'). If empty, cutover is triggered immediately after precopy completes.
 # start_migration: false # Creates Migration resources for the created Plans (defaults to false)
 # verify_plans_ready: false # Verifies Plans in a Ready state (defaults to false)
 # verify_migrations_complete: false # Waits until migrations are complete (defaults to false)
@@ -125,6 +128,12 @@ mtv_migrate_default_verify_plans_ready: false
 # Default variable to use when migration request does not include a value for verify_migrations_complete
 # See example variable structure in defaults/main.yml under mtv_migrate_migration_request: {}
 mtv_migrate_default_verify_migrations_complete: false
+# title: MTV Default Warm Migration
+# required: True
+# description_lines:
+# Default variable to use when migration request does not include a value for warm
+# See example variable structure in defaults/main.yml under mtv_migrate_migration_request: {}
+mtv_migrate_default_warm: false
 # title: MTV Default Target Namespace
 # required: True
 # description_lines:
