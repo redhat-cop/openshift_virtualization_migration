@@ -1,0 +1,65 @@
+# Gitleaks configuration for openshift_virtualization_migration
+# https://github.com/gitleaks/gitleaks
+
+title = "OpenShift Virtualization Migration Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+# Allowlist paths and patterns that contain placeholder credentials
+# (e.g., "changeme", example domains, template variables)
+[allowlist]
+description = "Global allowlist for placeholder values and template files"
+paths = [
+    '''\.gitleaks\.toml$''',
+]
+regexTarget = "line"
+regexes = [
+    # Placeholder values used in inventory and defaults
+    '''changeme''',
+    # Jinja2 template variables
+    '''\{\{.*\}\}''',
+    # Ansible Vault references
+    '''!vault''',
+    # Example/documentation values
+    '''example\.com''',
+    '''EXAMPLE''',
+    # YAML comments containing credential variable names
+    '''^\s*#.*''',
+]
+
+# Custom rules for Ansible-specific credential patterns
+[[rules]]
+id = "ansible-vault-password-file"
+description = "Ansible vault password file"
+regex = '''vault[_-]?pass(word)?[_-]?file\s*[:=]\s*['"]?([^\s'"]+)'''
+keywords = ["vault"]
+[rules.allowlist]
+regexes = ['''changeme''', '''\{\{.*\}\}''']
+
+[[rules]]
+id = "openshift-api-key"
+description = "OpenShift API key or token"
+regex = '''(?i)(openshift[_-]?(?:api[_-]?key|token|password))\s*[:=]\s*['"]?([^\s'"#}{]+)'''
+keywords = ["openshift"]
+[rules.allowlist]
+regexes = ['''changeme''', '''\{\{.*\}\}''', '''example''']
+paths = ['''defaults/main\.yml$''', '''inventory\.yml$''']
+
+[[rules]]
+id = "automation-hub-token"
+description = "Automation Hub token"
+regex = '''(?i)(automation[_-]?hub[_-]?(?:token|password))\s*[:=]\s*['"]?([^\s'"#}{]+)'''
+keywords = ["automation_hub", "automation-hub"]
+[rules.allowlist]
+regexes = ['''changeme''', '''\{\{.*\}\}''']
+paths = ['''defaults/main\.yml$''', '''inventory\.yml$''']
+
+[[rules]]
+id = "container-registry-password"
+description = "Container registry password"
+regex = '''(?i)(container[_-]?password|registry[_-]?password)\s*[:=]\s*['"]?([^\s'"#}{]+)'''
+keywords = ["container_password", "registry_password"]
+[rules.allowlist]
+regexes = ['''changeme''', '''\{\{.*\}\}''']
+paths = ['''defaults/main\.yml$''', '''inventory\.yml$''']
