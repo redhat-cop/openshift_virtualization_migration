@@ -1,0 +1,32 @@
+---
+# defaults file for vm_storage_labeling
+
+# title: Storage Volume Labeling Request
+# required: True
+# description: List of Storage Volume Labeling Requests
+vm_storage_labeling_request: []
+# -  namespace: <namespace> # Namespace containing storage volumes to label.
+#    names: # List of PVC/DataVolume names within a namespace. \
+#      Optional when using label_selectors.
+#    label_selectors: # Label selectors to match volumes. \
+#      Cannot be used with list of volume names.
+#      - <key>=<value>
+#    labels: # Labels to apply to matched volumes.
+#      <key>: <value>
+#    annotations: # Annotations to apply to matched volumes.
+#      <key>: <value>
+
+# title: OpenShift Host
+# required: True
+# description: OpenShift Host
+vm_storage_labeling_openshift_host: "{{ openshift_host }}"
+# title: OpenShift API Key
+# required: True
+# description: OpenShift API Key
+vm_storage_labeling_api_key: "{{ openshift_api_key }}"
+# title: Verify SSL Certificate
+# required: True
+# description: Verify SSL Certificate
+vm_storage_labeling_openshift_verify_ssl: "{{ openshift_verify_ssl }}"
+
+...
