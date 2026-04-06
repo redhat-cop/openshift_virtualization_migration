@@ -1,0 +1,69 @@
+---
+# Sensitive Inventory Variables — Ansible Vault Encrypted
+#
+# This file contains all credential values that should be encrypted
+# with Ansible Vault before use. Copy this file to inventory.vault.yml
+# and encrypt it:
+#
+#   cp inventory.vault.yml.example inventory.vault.yml
+#   # Edit inventory.vault.yml with real credential values
+#   ansible-vault encrypt inventory.vault.yml
+#
+# To edit an encrypted file:
+#   ansible-vault edit inventory.vault.yml
+#
+# To use with a playbook:
+#   ansible-playbook -e @inventory.vault.yml playbooks/bootstrap.yml --ask-vault-pass
+#
+# Or with a vault password file:
+#   ansible-playbook -e @inventory.vault.yml playbooks/bootstrap.yml --vault-password-file .vault-password
+#
+# IMPORTANT: Never commit this file unencrypted. The .gitignore is
+# configured to exclude *.vault.yml and vault-password* files.
+
+# Red Hat Account
+rh_username: ""
+rh_password: ""
+
+# Container Registry
+container_host: ""
+container_username: ""
+container_password: ""
+
+# Git Credentials
+git_username: ""
+git_password: ""
+# git_ssh_private_key: |
+#   -----BEGIN OPENSSH PRIVATE KEY-----
+#   ...
+#   -----END OPENSSH PRIVATE KEY-----
+# git_ssh_key_passphrase: ""
+
+# Automation Hub Tokens
+automation_hub_certified_token: ""
+automation_hub_validated_token: ""
+
+# OpenShift Cluster Credentials (Hub)
+# Use ONE of the following authentication methods:
+# hub_openshift_username: ""
+# hub_openshift_password: ""
+# hub_openshift_temporary_api_key: ""
+# hub_openshift_api_key: ""
+
+# OpenShift Cluster Credentials (Spoke)
+# Use ONE of the following authentication methods:
+# spoke_openshift_username: ""
+# spoke_openshift_password: ""
+# spoke_openshift_temporary_api_key: ""
+# spoke_openshift_api_key: ""
+
+# Migration Target Credentials
+# vmware_username: ""
+# vmware_password: ""
+# ovirt_username: ""
+# ovirt_password: ""
+
+# VDDK Registry Credentials
+# vddk_registry_username: ""
+# vddk_registry_password: ""
+...

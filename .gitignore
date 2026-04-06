@@ -11,6 +11,9 @@ __pycache__/
 *.json
 !.vscode/extensions.json
 secrets.yml
+*.vault.yml
+vault-password*
+.vault-password*
 inventory-rhdp.yml
 .lesshst
 .kube/*
