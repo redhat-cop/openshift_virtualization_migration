@@ -1,0 +1,83 @@
+---
+
+- name: post_migration_networks | Collect VirtualMachines for Network Validation
+  kubernetes.core.k8s_info:
+    api_version: "{{ validate_migration_kubevirt_api_version }}"
+    kind: VirtualMachine
+    namespace: "{{ validate_migration_post_namespace }}"
+    label_selectors: "{{ validate_migration_post_label_selectors | default(omit) }}"
+  register: validate_migration_net_vm_list
+
+- name: post_migration_networks | Validate VM Network Interfaces
+  ansible.builtin.assert:
+    that:
+      - >-
+        validate_migration_net_vm.spec.template.spec.domain.devices.interfaces
+        | default([]) | length > 0
+      - >-
+        validate_migration_net_vm.spec.template.spec.networks
+        | default([]) | length > 0
+    fail_msg: >-
+      VirtualMachine '{{ validate_migration_net_vm.metadata.name }}' has
+      incomplete network configuration
+    quiet: true
+  loop: "{{ validate_migration_net_vm_list.resources }}"
+  loop_control:
+    loop_var: validate_migration_net_vm
+    label: "{{ validate_migration_net_vm.metadata.name }}"
+
+- name: post_migration_networks | Verify Network-Interface Count Match
+  ansible.builtin.assert:
+    that:
+      - >-
+        (validate_migration_net_vm.spec.template.spec.domain.devices.interfaces | default([]) | length)
+        ==
+        (validate_migration_net_vm.spec.template.spec.networks | default([]) | length)
+    fail_msg: >-
+      VirtualMachine '{{ validate_migration_net_vm.metadata.name }}' has
+      mismatched interface/network count
+    quiet: true
+  loop: "{{ validate_migration_net_vm_list.resources }}"
+  loop_control:
+    loop_var: validate_migration_net_vm
+    label: "{{ validate_migration_net_vm.metadata.name }}"
+
+- name: post_migration_networks | Collect NetworkAttachmentDefinitions
+  kubernetes.core.k8s_info:
+    api_version: k8s.cni.cncf.io/v1
+    kind: NetworkAttachmentDefinition
+    namespace: "{{ validate_migration_post_namespace }}"
+  register: validate_migration_nad_list
+  failed_when: false
+
+- name: post_migration_networks | Report Network Attachment Definitions
+  when: validate_migration_nad_list.resources is defined
+  ansible.builtin.debug:
+    msg: >-
+      Found {{ validate_migration_nad_list.resources | length }}
+      NetworkAttachmentDefinition(s) in namespace
+      '{{ validate_migration_post_namespace }}'
+
+- name: post_migration_networks | Collect NetworkPolicies
+  kubernetes.core.k8s_info:
+    api_version: networking.k8s.io/v1
+    kind: NetworkPolicy
+    namespace: "{{ validate_migration_post_namespace }}"
+  register: validate_migration_netpol_list
+  failed_when: false
+
+- name: post_migration_networks | Report Network Policies
+  ansible.builtin.debug:
+    msg: >-
+      Found {{ validate_migration_netpol_list.resources | default([]) | length }}
+      NetworkPolicy(ies) in namespace '{{ validate_migration_post_namespace }}'
+
+- name: post_migration_networks | Report Network Validation Summary
+  ansible.builtin.debug:
+    msg: >-
+      Network Validation Complete:
+      {{ validate_migration_net_vm_list.resources | length }} VMs checked,
+      {{ validate_migration_nad_list.resources | default([]) | length }} NADs,
+      {{ validate_migration_netpol_list.resources | default([]) | length }} NetworkPolicies
+
+...

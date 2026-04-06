@@ -1,0 +1,88 @@
+---
+
+- name: _validate_vm | Verify VM Has Required Spec Fields
+  ansible.builtin.assert:
+    that:
+      - validate_migration_vm.spec is defined
+      - validate_migration_vm.spec.template is defined
+      - validate_migration_vm.spec.template.spec is defined
+      - validate_migration_vm.spec.template.spec.domain is defined
+    fail_msg: >-
+      VirtualMachine '{{ validate_migration_vm.metadata.name }}' is missing
+      required spec fields
+    quiet: true
+
+- name: _validate_vm | Verify VM Has CPU Configuration
+  ansible.builtin.assert:
+    that:
+      - >-
+        (validate_migration_vm.spec.template.spec.domain.cpu is defined) or
+        (validate_migration_vm.spec.instancetype is defined)
+    fail_msg: >-
+      VirtualMachine '{{ validate_migration_vm.metadata.name }}' has no CPU
+      configuration or instance type
+    quiet: true
+
+- name: _validate_vm | Verify VM Has Memory Configuration
+  ansible.builtin.assert:
+    that:
+      - >-
+        (validate_migration_vm.spec.template.spec.domain.resources is defined) or
+        (validate_migration_vm.spec.instancetype is defined)
+    fail_msg: >-
+      VirtualMachine '{{ validate_migration_vm.metadata.name }}' has no memory
+      configuration or instance type
+    quiet: true
+
+- name: _validate_vm | Verify VM Has Volumes Defined
+  ansible.builtin.assert:
+    that:
+      - validate_migration_vm.spec.template.spec.volumes | default([]) | length > 0
+    fail_msg: >-
+      VirtualMachine '{{ validate_migration_vm.metadata.name }}' has no volumes
+      defined
+    quiet: true
+
+- name: _validate_vm | Verify VM Has Network Interfaces
+  ansible.builtin.assert:
+    that:
+      - >-
+        validate_migration_vm.spec.template.spec.domain.devices.interfaces
+        | default([]) | length > 0
+    fail_msg: >-
+      VirtualMachine '{{ validate_migration_vm.metadata.name }}' has no network
+      interfaces defined
+    quiet: true
+
+- name: _validate_vm | Collect VirtualMachineInstance Status
+  when: validate_migration_check_vm_running | bool
+  kubernetes.core.k8s_info:
+    api_version: "{{ validate_migration_kubevirt_api_version }}"
+    kind: VirtualMachineInstance
+    namespace: "{{ validate_migration_vm.metadata.namespace }}"
+    name: "{{ validate_migration_vm.metadata.name }}"
+  register: validate_migration_vmi
+
+- name: _validate_vm | Verify VMI Is Running
+  when: validate_migration_check_vm_running | bool
+  ansible.builtin.assert:
+    that:
+      - validate_migration_vmi.resources | length > 0
+      - validate_migration_vmi.resources[0].status.phase == validate_migration_expected_vm_phase
+    fail_msg: >-
+      VirtualMachineInstance '{{ validate_migration_vm.metadata.name }}' is not
+      in '{{ validate_migration_expected_vm_phase }}' phase
+    quiet: true
+
+- name: _validate_vm | Record Successful Validation
+  ansible.builtin.set_fact:
+    validate_migration_vm_results: >-
+      {{ validate_migration_vm_results + [
+        {
+          'name': validate_migration_vm.metadata.name,
+          'namespace': validate_migration_vm.metadata.namespace,
+          'status': 'passed'
+        }
+      ] }}
+
+...

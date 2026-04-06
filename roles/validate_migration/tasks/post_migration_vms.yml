@@ -1,0 +1,38 @@
+---
+
+- name: post_migration_vms | Initialize VM Validation Results
+  ansible.builtin.set_fact:
+    validate_migration_vm_results: []
+
+- name: post_migration_vms | Collect VirtualMachines in Target Namespace
+  kubernetes.core.k8s_info:
+    api_version: "{{ validate_migration_kubevirt_api_version }}"
+    kind: VirtualMachine
+    namespace: "{{ validate_migration_post_namespace }}"
+    label_selectors: "{{ validate_migration_post_label_selectors | default(omit) }}"
+  register: validate_migration_vm_list
+
+- name: post_migration_vms | Verify VirtualMachines Exist
+  ansible.builtin.assert:
+    that:
+      - validate_migration_vm_list.resources | length > 0
+    fail_msg: >-
+      No VirtualMachines found in namespace '{{ validate_migration_post_namespace }}'
+    quiet: true
+
+- name: post_migration_vms | Validate Each VirtualMachine
+  ansible.builtin.include_tasks:
+    file: _validate_vm.yml
+  loop: "{{ validate_migration_vm_list.resources }}"
+  loop_control:
+    loop_var: validate_migration_vm
+    label: >-
+      {{ validate_migration_vm.metadata.namespace }}/{{ validate_migration_vm.metadata.name }}
+
+- name: post_migration_vms | Report VM Validation Summary
+  ansible.builtin.debug:
+    msg: >-
+      VM Validation Complete: {{ validate_migration_vm_list.resources | length }} VMs checked
+      in namespace '{{ validate_migration_post_namespace }}'
+
+...

@@ -1,0 +1,72 @@
+---
+
+- name: post_migration_data_volumes | Collect DataVolumes in Target Namespace
+  kubernetes.core.k8s_info:
+    api_version: cdi.kubevirt.io/v1beta1
+    kind: DataVolume
+    namespace: "{{ validate_migration_post_namespace }}"
+  register: validate_migration_dv_list
+
+- name: post_migration_data_volumes | Verify DataVolumes Exist
+  ansible.builtin.assert:
+    that:
+      - validate_migration_dv_list.resources | length > 0
+    fail_msg: >-
+      No DataVolumes found in namespace '{{ validate_migration_post_namespace }}'
+    quiet: true
+
+- name: post_migration_data_volumes | Verify DataVolume Status Is Succeeded
+  ansible.builtin.assert:
+    that:
+      - validate_migration_dv.status.phase | default('') == validate_migration_expected_dv_phase
+    fail_msg: >-
+      DataVolume '{{ validate_migration_dv.metadata.name }}' phase is
+      '{{ validate_migration_dv.status.phase | default("Unknown") }}'
+      (expected '{{ validate_migration_expected_dv_phase }}')
+    quiet: true
+  loop: "{{ validate_migration_dv_list.resources }}"
+  loop_control:
+    loop_var: validate_migration_dv
+    label: "{{ validate_migration_dv.metadata.name }}"
+
+- name: post_migration_data_volumes | Collect PVCs in Target Namespace
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: PersistentVolumeClaim
+    namespace: "{{ validate_migration_post_namespace }}"
+  register: validate_migration_pvc_list
+
+- name: post_migration_data_volumes | Verify PVCs Are Bound
+  ansible.builtin.assert:
+    that:
+      - validate_migration_pvc.status.phase == 'Bound'
+    fail_msg: >-
+      PVC '{{ validate_migration_pvc.metadata.name }}' is not Bound
+      (status: {{ validate_migration_pvc.status.phase | default('Unknown') }})
+    quiet: true
+  loop: "{{ validate_migration_pvc_list.resources }}"
+  loop_control:
+    loop_var: validate_migration_pvc
+    label: "{{ validate_migration_pvc.metadata.name }}"
+
+- name: post_migration_data_volumes | Verify DataVolume Storage Sizes
+  ansible.builtin.debug:
+    msg: >-
+      DataVolume '{{ validate_migration_dv.metadata.name }}'
+      size: {{ validate_migration_dv.spec.pvc.resources.requests.storage
+               | default(validate_migration_dv.spec.storage.resources.requests.storage
+               | default('N/A')) }}
+      status: {{ validate_migration_dv.status.phase | default('Unknown') }}
+  loop: "{{ validate_migration_dv_list.resources }}"
+  loop_control:
+    loop_var: validate_migration_dv
+    label: "{{ validate_migration_dv.metadata.name }}"
+
+- name: post_migration_data_volumes | Report Data Volume Summary
+  ansible.builtin.debug:
+    msg: >-
+      Data Volume Validation Complete:
+      {{ validate_migration_dv_list.resources | length }} DataVolumes,
+      {{ validate_migration_pvc_list.resources | length }} PVCs checked
+
+...
