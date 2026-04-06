@@ -18,4 +18,34 @@ validate_migration_namespace: openshift-mtv
 validate_migration_debug: true
 
 validate_migration_cluster_name: cluster01
+
+# Post-migration validation settings
+# title: Enable Post-Migration Validation
+# required: False
+# description: Enable post-migration validation checks
+validate_migration_post_enabled: false
+# title: Post-Migration Target Namespace
+# required: False
+# description: Namespace containing migrated VMs to validate
+validate_migration_post_namespace: ""
+# title: Post-Migration Label Selectors
+# required: False
+# description: Label selectors to filter VMs for validation
+validate_migration_post_label_selectors: []
+# title: Check VM Running Status
+# required: False
+# description: Verify VirtualMachineInstances are running
+validate_migration_check_vm_running: true
+# title: Expected VM Phase
+# required: False
+# description: Expected VirtualMachineInstance phase
+validate_migration_expected_vm_phase: "Running"
+# title: Expected DataVolume Phase
+# required: False
+# description: Expected DataVolume phase
+validate_migration_expected_dv_phase: "Succeeded"
+# title: KubeVirt API Version
+# required: False
+# description: KubeVirt API Version
+validate_migration_kubevirt_api_version: kubevirt.io/v1
 ...

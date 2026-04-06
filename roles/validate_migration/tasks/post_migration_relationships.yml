@@ -1,0 +1,67 @@
+---
+
+- name: post_migration_relationships | Collect VMs for Relationship Validation
+  kubernetes.core.k8s_info:
+    api_version: "{{ validate_migration_kubevirt_api_version }}"
+    kind: VirtualMachine
+    namespace: "{{ validate_migration_post_namespace }}"
+    label_selectors: "{{ validate_migration_post_label_selectors | default(omit) }}"
+  register: validate_migration_rel_vm_list
+
+- name: post_migration_relationships | Collect DataVolumes for Relationship Validation
+  kubernetes.core.k8s_info:
+    api_version: cdi.kubevirt.io/v1beta1
+    kind: DataVolume
+    namespace: "{{ validate_migration_post_namespace }}"
+  register: validate_migration_rel_dv_list
+
+- name: post_migration_relationships | Initialize Relationship Tracking
+  ansible.builtin.set_fact:
+    validate_migration_orphaned_dvs: []
+    validate_migration_missing_dvs: []
+
+- name: post_migration_relationships | Verify VM Volume References Exist
+  ansible.builtin.include_tasks:
+    file: _validate_vm_volumes.yml
+  loop: "{{ validate_migration_rel_vm_list.resources }}"
+  loop_control:
+    loop_var: validate_migration_rel_vm
+    label: "{{ validate_migration_rel_vm.metadata.name }}"
+
+- name: post_migration_relationships | Check for Orphaned DataVolumes
+  ansible.builtin.set_fact:
+    validate_migration_orphaned_dvs: >-
+      {{ validate_migration_orphaned_dvs + [validate_migration_rel_dv.metadata.name] }}
+  when: >-
+    validate_migration_rel_dv.metadata.ownerReferences | default([]) | length == 0
+  loop: "{{ validate_migration_rel_dv_list.resources }}"
+  loop_control:
+    loop_var: validate_migration_rel_dv
+    label: "{{ validate_migration_rel_dv.metadata.name }}"
+
+- name: post_migration_relationships | Warn About Orphaned DataVolumes
+  when: validate_migration_orphaned_dvs | length > 0
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: {{ validate_migration_orphaned_dvs | length }} orphaned
+      DataVolume(s) found without owner references:
+      {{ validate_migration_orphaned_dvs | join(', ') }}
+
+- name: post_migration_relationships | Report Missing DataVolumes
+  when: validate_migration_missing_dvs | length > 0
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: {{ validate_migration_missing_dvs | length }} DataVolume(s)
+      referenced by VMs but not found:
+      {{ validate_migration_missing_dvs | join(', ') }}
+
+- name: post_migration_relationships | Report Relationship Summary
+  ansible.builtin.debug:
+    msg: >-
+      Relationship Validation Complete:
+      {{ validate_migration_rel_vm_list.resources | length }} VMs,
+      {{ validate_migration_rel_dv_list.resources | length }} DataVolumes,
+      {{ validate_migration_orphaned_dvs | length }} orphaned DVs,
+      {{ validate_migration_missing_dvs | length }} missing DVs
+
+...

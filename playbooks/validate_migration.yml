@@ -1,0 +1,11 @@
+---
+
+- name: Validate Migration
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Invoke Validate Migration
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.validate_migration
+...
