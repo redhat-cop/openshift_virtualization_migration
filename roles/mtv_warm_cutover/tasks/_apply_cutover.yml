@@ -1,0 +1,69 @@
+---
+
+- name: _apply_cutover | Verify Migration Is a Warm Migration
+  ansible.builtin.assert:
+    that:
+      - >-
+        mtv_warm_cutover_migration.spec.cutover is not defined or
+        mtv_warm_cutover_migration.spec.cutover | default("", true) | length == 0
+    fail_msg: >-
+      Migration '{{ mtv_warm_cutover_migration.metadata.name }}' already has
+      a cutover timestamp set
+      ('{{ mtv_warm_cutover_migration.spec.cutover | default("") }}')
+    quiet: true
+
+- name: _apply_cutover | Patch Migration with Cutover Timestamp
+  kubernetes.core.k8s_json_patch:
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Migration
+    namespace: "{{ mtv_warm_cutover_migration.metadata.namespace }}"
+    name: "{{ mtv_warm_cutover_migration.metadata.name }}"
+    patch:
+      - op: add
+        path: /spec/cutover
+        value: "{{ mtv_warm_cutover_timestamp }}"
+  register: mtv_warm_cutover_patch_result
+
+- name: _apply_cutover | Report Cutover Triggered
+  ansible.builtin.debug:
+    msg: >-
+      Cutover triggered for Migration
+      '{{ mtv_warm_cutover_migration.metadata.name }}'
+      at {{ mtv_warm_cutover_timestamp }}
+
+- name: _apply_cutover | Wait for Migration to Complete
+  when: mtv_warm_cutover_verify_complete | bool
+  kubernetes.core.k8s_info:
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Migration
+    namespace: "{{ mtv_warm_cutover_migration.metadata.namespace }}"
+    name: "{{ mtv_warm_cutover_migration.metadata.name }}"
+  register: mtv_warm_cutover_status
+  until: >
+    mtv_warm_cutover_status is defined and
+    'resources' in mtv_warm_cutover_status and
+    mtv_warm_cutover_status.resources | length == 1 and
+    'status' in mtv_warm_cutover_status.resources | first and
+    'completed' in (mtv_warm_cutover_status.resources | first).status and
+    (mtv_warm_cutover_status.resources | first).status.completed
+    | trim | length > 0
+  retries: "{{ mtv_warm_cutover_verify_retries }}"
+  delay: "{{ mtv_warm_cutover_verify_delay }}"
+
+- name: _apply_cutover | Verify Migration Succeeded
+  when: mtv_warm_cutover_verify_complete | bool
+  ansible.builtin.assert:
+    that:
+      - >-
+        (mtv_warm_cutover_status.resources | first).status.conditions
+        | selectattr('type', 'defined')
+        | selectattr('status', 'defined')
+        | selectattr('type', 'equalto', 'Succeeded')
+        | selectattr('status', 'equalto', 'True')
+        | list | length == 1
+    fail_msg: >-
+      Migration '{{ mtv_warm_cutover_migration.metadata.name }}'
+      cutover did not succeed
+    quiet: true
+
+...
