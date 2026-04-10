@@ -21,6 +21,14 @@ bootstrap_rh_username: "{{ rh_username }}"
 # required: true
 bootstrap_rh_password: "{{ rh_password }}"
 
+# title: Red Hat Service Account Client ID
+# required: false
+bootstrap_rh_client_id: "{{ rh_client_id }}"
+
+# title: Red Hat Service Account Client Secret
+# required: false
+bootstrap_rh_client_secret: "{{ rh_client_secret }}"
+
 # title: Red Hat subscription ID
 # required: true
 bootstrap_rh_subscription_id: ""

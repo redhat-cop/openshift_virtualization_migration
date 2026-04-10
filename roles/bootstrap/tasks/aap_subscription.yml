@@ -6,8 +6,14 @@
   block:
     - name: aap_subscription | Query Subscription
       ansible.controller.subscriptions:
-        client_id: "{{ bootstrap_rh_username }}"
-        client_secret: "{{ bootstrap_rh_password }}"
+        client_id: "{{ bootstrap_rh_client_id | default(omit, true) }}"
+        client_secret: "{{ bootstrap_rh_client_secret | default(omit, true) }}"
+        username: >-
+          {{ bootstrap_rh_username if bootstrap_rh_client_id is not defined or bootstrap_rh_client_secret is not defined
+          else default(omit, true) }}
+        password: >-
+          {{ bootstrap_rh_password if bootstrap_rh_client_id is not defined or bootstrap_rh_client_secret is not defined
+          else default(omit, true) }}
         filters:
           product_name: "{{ bootstrap_rh_filter_product_name }}"
           support_level: "{{ bootstrap_rh_filter_support_level }}"
