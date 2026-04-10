@@ -21,4 +21,5 @@ spec:
       name: "{{ _mtv_migrate_mtv_source_target }}"
       namespace: "{{ _mtv_migrate_mtv_source_target_namespace }}"
   targetNamespace: "{{ _mtv_migrate_mtv_target_namespace }}"
+  warm: {{ _mtv_migrate_mtv_warm | bool | lower }}
   vms: []
