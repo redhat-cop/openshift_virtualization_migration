@@ -12,7 +12,7 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.22.0
+Version - 1.23.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -389,6 +389,31 @@ Description: Migration of Virtual Machines from Source to Destination.
 
 ## Task Flow Graphs
 
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| Verify_Request_Provided0[verify request provided]:::task
+  Verify_Request_Provided0-->|Task| Initialize_Data_Structures1[initialize data structures]:::task
+  Initialize_Data_Structures1-->|Task| Process_Request__MTV_Namespace_2[process request  mtv namespace ]:::task
+  Process_Request__MTV_Namespace_2-->|Task| Process_Request__Baseline_3[process request  baseline ]:::task
+  Process_Request__Baseline_3-->|Task| Process_Request__Maps_4[process request  maps ]:::task
+  Process_Request__Maps_4-->|Task| Verify_Split_Plan_Value_is_Positive5[verify split plan value is positive<br>When: **mtv migrate mtv split plans   bool**]:::task
+  Verify_Split_Plan_Value_is_Positive5-->|Include task| Generate_Plans__plans_yml_6[generate plans<br>When: **mtv migrate migration request  vms     default   <br>   mtv migrate migration request  folders    <br>default        length   0**<br>include_task:  plans yml]:::includeTasks
+  Generate_Plans__plans_yml_6-->|Include task| Manage_Migrations__migrations_yml_7[manage migrations<br>When: **mtv migrate mtv start migration bool and not  mtv<br>migrate mtv dry run bool and  mtv migrate mtv<br>plans to migrate   default       length   0**<br>include_task:  migrations yml]:::includeTasks
+  Manage_Migrations__migrations_yml_7-->End
+```
+
 ### Graph for _process_folder.yml
 
 ```mermaid
@@ -439,7 +464,7 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _migrations___Check_on_Migrations0-->End
 ```
 
-### Graph for main.yml
+### Graph for _process_plans.yml
 
 ```mermaid
 flowchart TD
@@ -453,15 +478,10 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| Verify_Request_Provided0[verify request provided]:::task
-  Verify_Request_Provided0-->|Task| Initialize_Data_Structures1[initialize data structures]:::task
-  Initialize_Data_Structures1-->|Task| Process_Request__MTV_Namespace_2[process request  mtv namespace ]:::task
-  Process_Request__MTV_Namespace_2-->|Task| Process_Request__Baseline_3[process request  baseline ]:::task
-  Process_Request__Baseline_3-->|Task| Process_Request__Maps_4[process request  maps ]:::task
-  Process_Request__Maps_4-->|Task| Verify_Split_Plan_Value_is_Positive5[verify split plan value is positive<br>When: **mtv migrate mtv split plans   bool**]:::task
-  Verify_Split_Plan_Value_is_Positive5-->|Include task| Generate_Plans__plans_yml_6[generate plans<br>When: **mtv migrate migration request  vms     default   <br>   mtv migrate migration request  folders    <br>default        length   0**<br>include_task:  plans yml]:::includeTasks
-  Generate_Plans__plans_yml_6-->|Include task| Manage_Migrations__migrations_yml_7[manage migrations<br>When: **mtv migrate mtv start migration bool and not  mtv<br>migrate mtv dry run bool and  mtv migrate mtv<br>plans to migrate   default       length   0**<br>include_task:  migrations yml]:::includeTasks
-  Manage_Migrations__migrations_yml_7-->End
+  Start-->|Task| _process_plans___Set_Plan_Name0[ process plans   set plan name]:::task
+  _process_plans___Set_Plan_Name0-->|Task| _process_plans___Update_Plan_Content1[ process plans   update plan content]:::task
+  _process_plans___Update_Plan_Content1-->|Task| _process_plans___Add_Plan2[ process plans   add plan]:::task
+  _process_plans___Add_Plan2-->End
 ```
 
 ### Graph for _process_vm.yml
@@ -488,26 +508,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _process_vm___Set_VM_to_Process6-->|Task| _process_vm___Add_VM_to_Migration_Dict7[ process vm   add vm to migration dict<br>When: **mtv migrate migration request  vms     default    <br>  selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  name   <br>defined     selectattr  name    equalto    mtv<br>migrate vm to process  name      list   length   <br>0 and mtv migrate migration request  vms    <br>default       selectattr  exclude    defined    <br>selectattr  exclude    equalto   true   <br>selectattr  id    defined     selectattr  id   <br>equalto    mtv migrate vm to process  id      list<br>  length    0 and mtv migrate migration request <br>vms     default       selectattr  exclude   <br>defined     selectattr  exclude    equalto   true <br>  selectattr  path    defined     selectattr  path<br>   equalto    mtv migrate vm to process  path     <br>list   length    0 and not  mtv migrate vm to<br>process  istemplate     default false**]:::task
   _process_vm___Add_VM_to_Migration_Dict7-->|Task| _process_vm___Clear_VM_Variables8[ process vm   clear vm variables]:::task
   _process_vm___Clear_VM_Variables8-->End
-```
-
-### Graph for _process_plans.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _process_plans___Set_Plan_Name0[ process plans   set plan name]:::task
-  _process_plans___Set_Plan_Name0-->|Task| _process_plans___Update_Plan_Content1[ process plans   update plan content]:::task
-  _process_plans___Update_Plan_Content1-->|Task| _process_plans___Add_Plan2[ process plans   add plan]:::task
-  _process_plans___Add_Plan2-->End
 ```
 
 ### Graph for _plans.yml

@@ -14,7 +14,7 @@ This role manages the lifecycle of operators for OpenShift Virtualization
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.22.0
+Version - 1.23.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -530,26 +530,6 @@ Description: Management of OpenShift Operators.
 
 ## Task Flow Graphs
 
-### Graph for _operator_config_item.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _operator_config_item___Retrieve_Operator_name0[ operator config item   retrieve operator name]:::task
-  _operator_config_item___Retrieve_Operator_name0-->|Include task| _operator_config_item___Configure_Resources__operator_resource_item_yml_1[ operator config item   configure resources<br>When: **operator management operator  operator resource<br>name  is defined**<br>include_task:  operator resource item yml]:::includeTasks
-  _operator_config_item___Configure_Resources__operator_resource_item_yml_1-->|Task| _operator_config_item___Apply_Extra_Resources2[ operator config item   apply extra resources<br>When: **operator management operator  extra resources  <br>is defined**]:::task
-  _operator_config_item___Apply_Extra_Resources2-->End
-```
-
 ### Graph for main.yml
 
 ```mermaid
@@ -601,6 +581,45 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _operator_resource_item___Wait_until_CSV_is_installed_______operator_management_resource_spec_name____3-->End
 ```
 
+### Graph for _operator_catalog_source_item.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _operator_catalog_source_item___Set_Fact______catalogsource_item_key___0[ operator catalog source item   set fact     <br>catalogsource item key   ]:::task
+  _operator_catalog_source_item___Set_Fact______catalogsource_item_key___0-->|Task| _operator_catalog_source_item___Apply_Resource_____catalogsource_item_key___1[ operator catalog source item   apply resource    <br>catalogsource item key   ]:::task
+  _operator_catalog_source_item___Apply_Resource_____catalogsource_item_key___1-->End
+```
+
+### Graph for _operator_config_item.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _operator_config_item___Retrieve_Operator_name0[ operator config item   retrieve operator name]:::task
+  _operator_config_item___Retrieve_Operator_name0-->|Include task| _operator_config_item___Configure_Resources__operator_resource_item_yml_1[ operator config item   configure resources<br>When: **operator management operator  operator resource<br>name  is defined**<br>include_task:  operator resource item yml]:::includeTasks
+  _operator_config_item___Configure_Resources__operator_resource_item_yml_1-->|Task| _operator_config_item___Apply_Extra_Resources2[ operator config item   apply extra resources<br>When: **operator management operator  extra resources  <br>is defined**]:::task
+  _operator_config_item___Apply_Extra_Resources2-->End
+```
+
 ### Graph for node-health-check.yml
 
 ```mermaid
@@ -620,25 +639,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   node_health_check___Create_node_health_check_operator_group1-->|Task| node_health_check___Create_node_health_check_operator_subscription2[node health check   create node health check<br>operator subscription]:::task
   node_health_check___Create_node_health_check_operator_subscription2-->|Task| node_health_check___Create_Self_Node_Remediation_subscription3[node health check   create self node remediation<br>subscription]:::task
   node_health_check___Create_Self_Node_Remediation_subscription3-->End
-```
-
-### Graph for _operator_catalog_source_item.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _operator_catalog_source_item___Set_Fact______catalogsource_item_key___0[ operator catalog source item   set fact     <br>catalogsource item key   ]:::task
-  _operator_catalog_source_item___Set_Fact______catalogsource_item_key___0-->|Task| _operator_catalog_source_item___Apply_Resource_____catalogsource_item_key___1[ operator catalog source item   apply resource    <br>catalogsource item key   ]:::task
-  _operator_catalog_source_item___Apply_Resource_____catalogsource_item_key___1-->End
 ```
 
 ## Playbook

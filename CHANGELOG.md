@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v1.23.0 (2026-04-10)
+
+### Features
+
+- Enhance properties for how AAP is subscribed
+  ([#14](https://github.com/redhat-cop/openshift_virtualization_migration/pull/14),
+  [`6ee3989`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/6ee3989c5d0ed93c2d1cf89edefd11170467dad2))
+
+
 ## v1.22.0 (2026-04-02)
 
 ### Bug Fixes

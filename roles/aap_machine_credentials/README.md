@@ -14,7 +14,7 @@ This role enables the management of Ansible Automation Platform _Credentials_.
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.22.0
+Version - 1.23.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -111,26 +111,6 @@ Description: Management of Machine Credentials.
 
 ## Task Flow Graphs
 
-### Graph for _process_machine_credential.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _process_machine_credential___Initialize_Dynamic_Map_Variable0[ process machine credential   initialize dynamic<br>map variable]:::task
-  _process_machine_credential___Initialize_Dynamic_Map_Variable0-->|Include task| _process_machine_credential___Map_Credential_File_Contents__map_key_content_yml_1[ process machine credential   map credential file<br>contents<br>When: **aap machine credentials input map  src   in aap<br>machine credential**<br>include_task:  map key content yml]:::includeTasks
-  _process_machine_credential___Map_Credential_File_Contents__map_key_content_yml_1-->|Task| _process_machine_credential___Render_Machine_Credential2[ process machine credential   render machine<br>credential]:::task
-  _process_machine_credential___Render_Machine_Credential2-->End
-```
-
 ### Graph for main.yml
 
 ```mermaid
@@ -174,6 +154,26 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _map_key_content___Check_source_path_content1-->|Task| _map_key_content___Verify_source_path_exists2[ map key content   verify source path exists]:::task
   _map_key_content___Verify_source_path_exists2-->|Task| _map_key_content___Map_Variables3[ map key content   map variables]:::task
   _map_key_content___Map_Variables3-->End
+```
+
+### Graph for _process_machine_credential.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _process_machine_credential___Initialize_Dynamic_Map_Variable0[ process machine credential   initialize dynamic<br>map variable]:::task
+  _process_machine_credential___Initialize_Dynamic_Map_Variable0-->|Include task| _process_machine_credential___Map_Credential_File_Contents__map_key_content_yml_1[ process machine credential   map credential file<br>contents<br>When: **aap machine credentials input map  src   in aap<br>machine credential**<br>include_task:  map key content yml]:::includeTasks
+  _process_machine_credential___Map_Credential_File_Contents__map_key_content_yml_1-->|Task| _process_machine_credential___Render_Machine_Credential2[ process machine credential   render machine<br>credential]:::task
+  _process_machine_credential___Render_Machine_Credential2-->End
 ```
 
 ## Playbook

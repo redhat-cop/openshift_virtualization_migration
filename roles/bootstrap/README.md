@@ -12,7 +12,7 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.22.0
+Version - 1.23.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -31,18 +31,20 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 | [`bootstrap_aap_setup_working_dir`](defaults/main.yml#L14)   | str   | `/home/ansible/bootstrap_dir` |  None  |   true  |  Working direcotry on the bootstrap host |
 | [`bootstrap_rh_username`](defaults/main.yml#L18)   | str   | `{{ rh_username }}` |  None  |   true  |  Red Hat account login (this is used to attach your subs to controller) |
 | [`bootstrap_rh_password`](defaults/main.yml#L22)   | str   | `{{ rh_password }}` |  None  |   true  |  Red Hat account password |
-| [`bootstrap_rh_subscription_id`](defaults/main.yml#L26)   | str   | `` |  None  |   true  |  Red Hat subscription ID |
-| [`bootstrap_rh_filter_product_name`](defaults/main.yml#L30)   | str   | `Red Hat Ansible Automation Platform` |  None  |   false  |  Red Hat subscription product name |
-| [`bootstrap_rh_filter_support_level`](defaults/main.yml#L34)   | str   | `Self-Support` |  None  |   false  |  Red Hat subscription support level |
-| [`bootstrap_controller_password`](defaults/main.yml#L38)   | str   | `{{ controller_password }}` |  None  |   true  |  The admin password for the controller |
-| [`bootstrap_aap_setup_inst_verbosity`](defaults/main.yml#L42)   | int   | `1` |  None  |   false  |  Level from 0 - 5 for verbosity |
-| [`bootstrap_aap_license_manifest`](defaults/main.yml#L46)   | str   | `` |  None  |   false  |  Location of the AAP license manifest file |
-| [`bootstrap_controller_hostname`](defaults/main.yml#L55)   | str   | `{{ controller_hostname ¦ default(ansible_host) }}` |  None  |   false  |  Bootstrap controller hostname |
-| [`bootstrap_controller_username`](defaults/main.yml#L59)   | str   | `admin` |  None  |   false  |  Bootstrap controller username |
-| [`bootstrap_aap_version`](defaults/main.yml#L63)   | str   | `{{ aap_version ¦ default(2.5) }}` |  None  |   false  |  Bootstrap AAP Version |
-| [`bootstrap_controller_validate_certs`](defaults/main.yml#L67)   | str   | `{{ controller_validate_certs ¦ default(false) }}` |  None  |   false  |  Validate Controller SSL certificates |
-| [`bootstrap_license_file_submission_retries`](defaults/main.yml#L73)   | int   | `25` |  None  |   True  |  License File Submission Retries |
-| [`bootstrap_license_file_submission_delay`](defaults/main.yml#L79)   | int   | `10` |  None  |   True  |  License File Submission Delay |
+| [`bootstrap_rh_client_id`](defaults/main.yml#L26)   | str   | `{{ rh_client_id }}` |  None  |   false  |  Red Hat Service Account Client ID |
+| [`bootstrap_rh_client_secret`](defaults/main.yml#L30)   | str   | `{{ rh_client_secret }}` |  None  |   false  |  Red Hat Service Account Client Secret |
+| [`bootstrap_rh_subscription_id`](defaults/main.yml#L34)   | str   | `` |  None  |   true  |  Red Hat subscription ID |
+| [`bootstrap_rh_filter_product_name`](defaults/main.yml#L38)   | str   | `Red Hat Ansible Automation Platform` |  None  |   false  |  Red Hat subscription product name |
+| [`bootstrap_rh_filter_support_level`](defaults/main.yml#L42)   | str   | `Self-Support` |  None  |   false  |  Red Hat subscription support level |
+| [`bootstrap_controller_password`](defaults/main.yml#L46)   | str   | `{{ controller_password }}` |  None  |   true  |  The admin password for the controller |
+| [`bootstrap_aap_setup_inst_verbosity`](defaults/main.yml#L50)   | int   | `1` |  None  |   false  |  Level from 0 - 5 for verbosity |
+| [`bootstrap_aap_license_manifest`](defaults/main.yml#L54)   | str   | `` |  None  |   false  |  Location of the AAP license manifest file |
+| [`bootstrap_controller_hostname`](defaults/main.yml#L63)   | str   | `{{ controller_hostname ¦ default(ansible_host) }}` |  None  |   false  |  Bootstrap controller hostname |
+| [`bootstrap_controller_username`](defaults/main.yml#L67)   | str   | `admin` |  None  |   false  |  Bootstrap controller username |
+| [`bootstrap_aap_version`](defaults/main.yml#L71)   | str   | `{{ aap_version ¦ default(2.5) }}` |  None  |   false  |  Bootstrap AAP Version |
+| [`bootstrap_controller_validate_certs`](defaults/main.yml#L75)   | str   | `{{ controller_validate_certs ¦ default(false) }}` |  None  |   false  |  Validate Controller SSL certificates |
+| [`bootstrap_license_file_submission_retries`](defaults/main.yml#L81)   | int   | `25` |  None  |   True  |  License File Submission Retries |
+| [`bootstrap_license_file_submission_delay`](defaults/main.yml#L87)   | int   | `10` |  None  |   True  |  License File Submission Delay |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
@@ -55,6 +57,10 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 <b>`bootstrap_rh_username`:</b> None
 <br>
 <b>`bootstrap_rh_password`:</b> None
+<br>
+<b>`bootstrap_rh_client_id`:</b> None
+<br>
+<b>`bootstrap_rh_client_secret`:</b> None
 <br>
 <b>`bootstrap_rh_subscription_id`:</b> None
 <br>
@@ -128,6 +134,24 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 
 ## Task Flow Graphs
 
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Include task| Subscribe_AAP_aap_subscription_yml_0[subscribe aap<br>include_task: aap subscription yml]:::includeTasks
+  Subscribe_AAP_aap_subscription_yml_0-->End
+```
+
 ### Graph for create_mf_aap_token.yml
 
 ```mermaid
@@ -147,6 +171,31 @@ classDef rescue stroke:#665352,stroke-width:2px;
   create_mf_aap_token___Retrieve_Migration_Factory_AAP_Service_Account_API_key1-->|Task| create_mf_aap_token___Set_fact_with_Service_Account_API_key2[create mf aap token   set fact with service<br>account api key]:::task
   create_mf_aap_token___Set_fact_with_Service_Account_API_key2-->|Task| create_mf_aap_token___Print_Migration_Factory_AAP_Service_Account_API_key3[create mf aap token   print migration factory aap<br>service account api key]:::task
   create_mf_aap_token___Print_Migration_Factory_AAP_Service_Account_API_key3-->End
+```
+
+### Graph for prep.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| prep___Register_to_Red_Hat_with_provided_credentials0[prep   register to red hat with provided<br>credentials]:::task
+  prep___Register_to_Red_Hat_with_provided_credentials0-->|Task| prep___Setup_new_user1[prep   setup new user]:::task
+  prep___Setup_new_user1-->|Task| prep___Allow_passwordless_sudo_for__bootstrap_user_2[prep   allow passwordless sudo for  bootstrap user<br>]:::task
+  prep___Allow_passwordless_sudo_for__bootstrap_user_2-->|Task| prep___Create_SSH_folder3[prep   create ssh folder]:::task
+  prep___Create_SSH_folder3-->|Task| prep___Generate_an_OpenSSH_keypair_with_the_default_values4[prep   generate an openssh keypair with the<br>default values]:::task
+  prep___Generate_an_OpenSSH_keypair_with_the_default_values4-->|Task| prep___Set_authorized_key_taken_from_file5[prep   set authorized key taken from file]:::task
+  prep___Set_authorized_key_taken_from_file5-->|Task| prep___Set_SSH_config_for_this_host_to_enable_automated_install6[prep   set ssh config for this host to enable<br>automated install]:::task
+  prep___Set_SSH_config_for_this_host_to_enable_automated_install6-->|Task| prep___Create_working_directory7[prep   create working directory]:::task
+  prep___Create_working_directory7-->End
 ```
 
 ### Graph for aap_subscription.yml
@@ -175,49 +224,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   aap_subscription___Read_the_License_file2-->|Task| aap_subscription___Apply_license_to_AAP3[aap subscription   apply license to aap]:::task
   aap_subscription___Apply_license_to_AAP3-.->|End of Block| aap_subscription___Verify_License_Manifest_Exists1_block_start_0
   aap_subscription___Apply_license_to_AAP3-->End
-```
-
-### Graph for main.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Include task| Subscribe_AAP_aap_subscription_yml_0[subscribe aap<br>include_task: aap subscription yml]:::includeTasks
-  Subscribe_AAP_aap_subscription_yml_0-->End
-```
-
-### Graph for prep.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| prep___Register_to_Red_Hat_with_provided_credentials0[prep   register to red hat with provided<br>credentials]:::task
-  prep___Register_to_Red_Hat_with_provided_credentials0-->|Task| prep___Setup_new_user1[prep   setup new user]:::task
-  prep___Setup_new_user1-->|Task| prep___Allow_passwordless_sudo_for__bootstrap_user_2[prep   allow passwordless sudo for  bootstrap user<br>]:::task
-  prep___Allow_passwordless_sudo_for__bootstrap_user_2-->|Task| prep___Create_SSH_folder3[prep   create ssh folder]:::task
-  prep___Create_SSH_folder3-->|Task| prep___Generate_an_OpenSSH_keypair_with_the_default_values4[prep   generate an openssh keypair with the<br>default values]:::task
-  prep___Generate_an_OpenSSH_keypair_with_the_default_values4-->|Task| prep___Set_authorized_key_taken_from_file5[prep   set authorized key taken from file]:::task
-  prep___Set_authorized_key_taken_from_file5-->|Task| prep___Set_SSH_config_for_this_host_to_enable_automated_install6[prep   set ssh config for this host to enable<br>automated install]:::task
-  prep___Set_SSH_config_for_this_host_to_enable_automated_install6-->|Task| prep___Create_working_directory7[prep   create working directory]:::task
-  prep___Create_working_directory7-->End
 ```
 
 ## Playbook

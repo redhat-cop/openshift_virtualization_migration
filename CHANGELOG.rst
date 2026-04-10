@@ -4,6 +4,14 @@ Openshift Virtualization Migration Release Notes
 
 .. contents:: Topics
 
+v1.23.0
+=======
+
+Minor Changes
+-------------
+
+- Enhance properties for how AAP is subscribed (#14)
+
 v1.22.0
 =======
 

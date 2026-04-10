@@ -14,7 +14,7 @@ This role defines the initial configuration and setup of the Ansible Automation 
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.22.0
+Version - 1.23.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -1166,70 +1166,6 @@ Description: Populates an Ansible Automation Platform instance.
 
 ## Task Flow Graphs
 
-### Graph for credentials.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| credentials___Set_credentials_variable0[credentials   set credentials variable]:::task
-  credentials___Set_credentials_variable0-->|Task| credentials___Build_AAP_Credential1[credentials   build aap credential<br>When: **aap seed aap credentials create   default true**]:::task
-  credentials___Build_AAP_Credential1-->|Task| credentials___Build_Automation_Hub_Credentials2[credentials   build automation hub credentials<br>When: **aap seed automation hub credentials create  <br>default true**]:::task
-  credentials___Build_Automation_Hub_Credentials2-->|Task| credentials___Build_Project_Credential3[credentials   build project credential<br>When: **aap seed project credentials create   default true<br>**]:::task
-  credentials___Build_Project_Credential3-->|Task| credentials___Build_Container_Registry_Credential4[credentials   build container registry credential<br>When: **aap seed container registry credentials create  <br>default true**]:::task
-  credentials___Build_Container_Registry_Credential4-->|Block Start| credentials___Build_Operator_Management_Credentials5_block_start_0[[credentials   build operator management<br>credentials<br>When: **aap seed migration targets credentials create  <br>default true**]]:::block
-  credentials___Build_Operator_Management_Credentials5_block_start_0-->|Task| credentials___Build_Migration_Target_Credentials0[credentials   build migration target credentials<br>When: **groups  migration spoke     length   0 and<br>hostvars groups  migration spoke   0    migration<br>targets     default       length   0**]:::task
-  credentials___Build_Migration_Target_Credentials0-->|Include task| credentials___Build_required_credentials__build_credentials_yml_1[credentials   build required credentials<br>include_task:  build credentials yml]:::includeTasks
-  credentials___Build_required_credentials__build_credentials_yml_1-.->|End of Block| credentials___Build_Operator_Management_Credentials5_block_start_0
-  credentials___Build_required_credentials__build_credentials_yml_1-->End
-```
-
-### Graph for job_templates.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| job_templates___Set_templates_variable0[job templates   set templates variable]:::task
-  job_templates___Set_templates_variable0-->|Include task| job_templates___Build_Operator_Install_Job_Templates__build_job_templates_yml_1[job templates   build operator install job<br>templates<br>include_task:  build job templates yml]:::includeTasks
-  job_templates___Build_Operator_Install_Job_Templates__build_job_templates_yml_1-->End
-```
-
-### Graph for _mtv_job_templates.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _mtv_job_templates___Configure_VMWare_MTV_Job_Template0[ mtv job templates   configure vmware mtv job<br>template<br>When: **target type     vmware  and   mtv job template  <br>trim   length    0**]:::task
-  _mtv_job_templates___Configure_VMWare_MTV_Job_Template0-->|Task| _mtv_job_templates___Configure_oVirt_MTV_Job_Template1[ mtv job templates   configure ovirt mtv job<br>template<br>When: **target type     ovirt  and   mtv job template  <br>trim   length    0**]:::task
-  _mtv_job_templates___Configure_oVirt_MTV_Job_Template1-->End
-```
-
 ### Graph for _build_job_templates.yml
 
 ```mermaid
@@ -1254,7 +1190,7 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _build_job_templates___Build_MTV_Job_Templates__mtv_job_templates_yml_2-->End
 ```
 
-### Graph for _mtv_workflow_job_templates.yml
+### Graph for _mtv_job_templates.yml
 
 ```mermaid
 flowchart TD
@@ -1268,10 +1204,9 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| _mtv_workflow_job_templates___Build_MTV_Target_Workflows_for__mf_host0[ mtv workflow job templates   build mtv target<br>workflows for  mf host]:::task
-  _mtv_workflow_job_templates___Build_MTV_Target_Workflows_for__mf_host0-->|Task| _mtv_workflow_job_templates___Get_list_of_MTV_Target_workflow_names1[ mtv workflow job templates   get list of mtv<br>target workflow names]:::task
-  _mtv_workflow_job_templates___Get_list_of_MTV_Target_workflow_names1-->|Task| _mtv_workflow_job_templates___Build_MTV_workflow2[ mtv workflow job templates   build mtv workflow]:::task
-  _mtv_workflow_job_templates___Build_MTV_workflow2-->End
+  Start-->|Task| _mtv_job_templates___Configure_VMWare_MTV_Job_Template0[ mtv job templates   configure vmware mtv job<br>template<br>When: **target type     vmware  and   mtv job template  <br>trim   length    0**]:::task
+  _mtv_job_templates___Configure_VMWare_MTV_Job_Template0-->|Task| _mtv_job_templates___Configure_oVirt_MTV_Job_Template1[ mtv job templates   configure ovirt mtv job<br>template<br>When: **target type     ovirt  and   mtv job template  <br>trim   length    0**]:::task
+  _mtv_job_templates___Configure_oVirt_MTV_Job_Template1-->End
 ```
 
 ### Graph for main.yml
@@ -1302,7 +1237,7 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Call_dispatch_role____aap_seed_cac_collection____dispatch_10-->End
 ```
 
-### Graph for workflows.yml
+### Graph for _mtv_workflow_job_templates.yml
 
 ```mermaid
 flowchart TD
@@ -1316,12 +1251,29 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| workflows___Set_workflow_variables0[workflows   set workflow variables]:::task
-  workflows___Set_workflow_variables0-->|Task| workflows___Build_Operator_Workflows1[workflows   build operator workflows]:::task
-  workflows___Build_Operator_Workflows1-->|Include task| workflows___Build_MTV_Target_Workflows__mtv_workflow_job_templates_yml_2[workflows   build mtv target workflows<br>include_task:  mtv workflow job templates yml]:::includeTasks
-  workflows___Build_MTV_Target_Workflows__mtv_workflow_job_templates_yml_2-->|Task| workflows___Build_MTV_Workflow3[workflows   build mtv workflow]:::task
-  workflows___Build_MTV_Workflow3-->|Task| workflows___Build_Migration_Factory_Workflow4[workflows   build migration factory workflow]:::task
-  workflows___Build_Migration_Factory_Workflow4-->End
+  Start-->|Task| _mtv_workflow_job_templates___Build_MTV_Target_Workflows_for__mf_host0[ mtv workflow job templates   build mtv target<br>workflows for  mf host]:::task
+  _mtv_workflow_job_templates___Build_MTV_Target_Workflows_for__mf_host0-->|Task| _mtv_workflow_job_templates___Get_list_of_MTV_Target_workflow_names1[ mtv workflow job templates   get list of mtv<br>target workflow names]:::task
+  _mtv_workflow_job_templates___Get_list_of_MTV_Target_workflow_names1-->|Task| _mtv_workflow_job_templates___Build_MTV_workflow2[ mtv workflow job templates   build mtv workflow]:::task
+  _mtv_workflow_job_templates___Build_MTV_workflow2-->End
+```
+
+### Graph for job_templates.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| job_templates___Set_templates_variable0[job templates   set templates variable]:::task
+  job_templates___Set_templates_variable0-->|Include task| job_templates___Build_Operator_Install_Job_Templates__build_job_templates_yml_1[job templates   build operator install job<br>templates<br>include_task:  build job templates yml]:::includeTasks
+  job_templates___Build_Operator_Install_Job_Templates__build_job_templates_yml_1-->End
 ```
 
 ### Graph for _build_credentials.yml
@@ -1344,6 +1296,54 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _build_credentials___Build_migration_targets2-->|Task| _build_credentials___Build_Migration_Factory_CaC_Credential_for__mf_host3[ build credentials   build migration factory cac<br>credential for  mf host<br>When: **mf host in groups  migration spoke**]:::task
   _build_credentials___Build_Migration_Factory_CaC_Credential_for__mf_host3-->|Task| _build_credentials___Build_kubeconfig_for__mf_host4[ build credentials   build kubeconfig for  mf host]:::task
   _build_credentials___Build_kubeconfig_for__mf_host4-->End
+```
+
+### Graph for workflows.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| workflows___Set_workflow_variables0[workflows   set workflow variables]:::task
+  workflows___Set_workflow_variables0-->|Task| workflows___Build_Operator_Workflows1[workflows   build operator workflows]:::task
+  workflows___Build_Operator_Workflows1-->|Include task| workflows___Build_MTV_Target_Workflows__mtv_workflow_job_templates_yml_2[workflows   build mtv target workflows<br>include_task:  mtv workflow job templates yml]:::includeTasks
+  workflows___Build_MTV_Target_Workflows__mtv_workflow_job_templates_yml_2-->|Task| workflows___Build_MTV_Workflow3[workflows   build mtv workflow]:::task
+  workflows___Build_MTV_Workflow3-->|Task| workflows___Build_Migration_Factory_Workflow4[workflows   build migration factory workflow]:::task
+  workflows___Build_Migration_Factory_Workflow4-->End
+```
+
+### Graph for credentials.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| credentials___Set_credentials_variable0[credentials   set credentials variable]:::task
+  credentials___Set_credentials_variable0-->|Task| credentials___Build_AAP_Credential1[credentials   build aap credential<br>When: **aap seed aap credentials create   default true**]:::task
+  credentials___Build_AAP_Credential1-->|Task| credentials___Build_Automation_Hub_Credentials2[credentials   build automation hub credentials<br>When: **aap seed automation hub credentials create  <br>default true**]:::task
+  credentials___Build_Automation_Hub_Credentials2-->|Task| credentials___Build_Project_Credential3[credentials   build project credential<br>When: **aap seed project credentials create   default true<br>**]:::task
+  credentials___Build_Project_Credential3-->|Task| credentials___Build_Container_Registry_Credential4[credentials   build container registry credential<br>When: **aap seed container registry credentials create  <br>default true**]:::task
+  credentials___Build_Container_Registry_Credential4-->|Block Start| credentials___Build_Operator_Management_Credentials5_block_start_0[[credentials   build operator management<br>credentials<br>When: **aap seed migration targets credentials create  <br>default true**]]:::block
+  credentials___Build_Operator_Management_Credentials5_block_start_0-->|Task| credentials___Build_Migration_Target_Credentials0[credentials   build migration target credentials<br>When: **groups  migration spoke     length   0 and<br>hostvars groups  migration spoke   0    migration<br>targets     default       length   0**]:::task
+  credentials___Build_Migration_Target_Credentials0-->|Include task| credentials___Build_required_credentials__build_credentials_yml_1[credentials   build required credentials<br>include_task:  build credentials yml]:::includeTasks
+  credentials___Build_required_credentials__build_credentials_yml_1-.->|End of Block| credentials___Build_Operator_Management_Credentials5_block_start_0
+  credentials___Build_required_credentials__build_credentials_yml_1-->End
 ```
 
 ## Author Information

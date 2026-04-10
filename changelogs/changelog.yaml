@@ -297,3 +297,10 @@ releases:
       - 1.22.0_fix_resolvemarkdownlinterrors.yml
       - 1.22.0_fix_setcollectionauthors.yml
     release_date: '2026-04-02'
+  1.23.0:
+    changes:
+      minor_changes:
+        - Enhance properties for how AAP is subscribed (#14)
+    fragments:
+      - 1.23.0_feat_EnhancepropertiesforhowAAPissu.yml
+    release_date: '2026-04-10'

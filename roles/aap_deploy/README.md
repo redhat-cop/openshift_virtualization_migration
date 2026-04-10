@@ -12,7 +12,7 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.22.0
+Version - 1.23.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -104,7 +104,7 @@ Description: Deploys an instance of Ansible Automation Platform.
 
 ## Task Flow Graphs
 
-### Graph for main.yml
+### Graph for subscribe.yml
 
 ```mermaid
 flowchart TD
@@ -118,9 +118,9 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Include task| Install_AAP_install_yml_0[install aap<br>When: **aap deploy aap install   bool**<br>include_task: install yml]:::includeTasks
-  Install_AAP_install_yml_0-->|Include task| Attach_AAP_Subscriptions_subscribe_yml_1[attach aap subscriptions<br>When: **aap deploy aap install   bool**<br>include_task: subscribe yml]:::includeTasks
-  Attach_AAP_Subscriptions_subscribe_yml_1-->End
+  Start-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0([subscribe   call bootstrap role to subscribe<br>When: **bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
+  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1([subscribe   call bootstrap role to subscribe<br>When: **not bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
+  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1-->End
 ```
 
 ### Graph for install.yml
@@ -159,7 +159,7 @@ classDef rescue stroke:#665352,stroke-width:2px;
   install___Display_retrieved_password_for_non_bootstrap_mode4-->End
 ```
 
-### Graph for subscribe.yml
+### Graph for main.yml
 
 ```mermaid
 flowchart TD
@@ -173,9 +173,9 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0([subscribe   call bootstrap role to subscribe<br>When: **bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
-  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1([subscribe   call bootstrap role to subscribe<br>When: **not bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
-  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1-->End
+  Start-->|Include task| Install_AAP_install_yml_0[install aap<br>When: **aap deploy aap install   bool**<br>include_task: install yml]:::includeTasks
+  Install_AAP_install_yml_0-->|Include task| Attach_AAP_Subscriptions_subscribe_yml_1[attach aap subscriptions<br>When: **aap deploy aap install   bool**<br>include_task: subscribe yml]:::includeTasks
+  Attach_AAP_Subscriptions_subscribe_yml_1-->End
 ```
 
 ## Playbook
