@@ -1,0 +1,70 @@
+---
+
+- name: _validate_vm_volumes | Extract DataVolume References from VM
+  ansible.builtin.set_fact:
+    validate_migration_vm_dv_names: >-
+      {{ validate_migration_rel_vm.spec.template.spec.volumes | default([])
+         | selectattr('dataVolume', 'defined')
+         | map(attribute='dataVolume.name')
+         | list }}
+    validate_migration_vm_pvc_names: >-
+      {{ validate_migration_rel_vm.spec.template.spec.volumes | default([])
+         | selectattr('persistentVolumeClaim', 'defined')
+         | map(attribute='persistentVolumeClaim.claimName')
+         | list }}
+
+- name: _validate_vm_volumes | Verify Referenced DataVolumes Exist
+  when: validate_migration_vm_dv_names | length > 0
+  block:
+    - name: _validate_vm_volumes | Query Referenced DataVolumes
+      kubernetes.core.k8s_info:
+        api_version: cdi.kubevirt.io/v1beta1
+        kind: DataVolume
+        namespace: "{{ validate_migration_rel_vm.metadata.namespace }}"
+        name: "{{ validate_migration_dv_ref_name }}"
+      register: validate_migration_dv_ref_query
+      loop: "{{ validate_migration_vm_dv_names }}"
+      loop_control:
+        loop_var: validate_migration_dv_ref_name
+        label: "{{ validate_migration_dv_ref_name }}"
+
+    - name: _validate_vm_volumes | Track Missing DataVolumes
+      ansible.builtin.set_fact:
+        validate_migration_missing_dvs: >-
+          {{ validate_migration_missing_dvs
+             + [validate_migration_dv_ref_result.validate_migration_dv_ref_name] }}
+      when: validate_migration_dv_ref_result.resources | length == 0
+      loop: "{{ validate_migration_dv_ref_query.results }}"
+      loop_control:
+        loop_var: validate_migration_dv_ref_result
+        label: "{{ validate_migration_dv_ref_result.validate_migration_dv_ref_name }}"
+
+- name: _validate_vm_volumes | Verify Referenced PVCs Exist
+  when: validate_migration_vm_pvc_names | length > 0
+  block:
+    - name: _validate_vm_volumes | Query Referenced PVCs
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: PersistentVolumeClaim
+        namespace: "{{ validate_migration_rel_vm.metadata.namespace }}"
+        name: "{{ validate_migration_pvc_ref_name }}"
+      register: validate_migration_pvc_ref_query
+      loop: "{{ validate_migration_vm_pvc_names }}"
+      loop_control:
+        loop_var: validate_migration_pvc_ref_name
+        label: "{{ validate_migration_pvc_ref_name }}"
+
+    - name: _validate_vm_volumes | Verify PVC Bindings
+      ansible.builtin.assert:
+        that:
+          - validate_migration_pvc_ref_result.resources | length > 0
+        fail_msg: >-
+          PVC '{{ validate_migration_pvc_ref_result.validate_migration_pvc_ref_name }}'
+          referenced by VM '{{ validate_migration_rel_vm.metadata.name }}' not found
+        quiet: true
+      loop: "{{ validate_migration_pvc_ref_query.results }}"
+      loop_control:
+        loop_var: validate_migration_pvc_ref_result
+        label: "{{ validate_migration_pvc_ref_result.validate_migration_pvc_ref_name }}"
+
+...
