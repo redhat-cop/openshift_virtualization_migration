@@ -1,0 +1,75 @@
+---
+
+- name: _apply_metadata | Initialize Patch Operations
+  ansible.builtin.set_fact:
+    vm_storage_labeling_patch: []
+
+- name: _apply_metadata | Build Label Patch Operations
+  when: vm_storage_labeling_current_request.labels | default({}, true) | length > 0
+  ansible.builtin.set_fact:
+    vm_storage_labeling_patch: >-
+      {{ vm_storage_labeling_patch + [
+        {
+          'op': ('replace'
+            if (vm_storage_labeling_volume.metadata.labels | default({}) | dict2items
+                | selectattr('key', 'equalto', vm_storage_labeling_label.key) | list | length > 0)
+            else 'add'),
+          'path': '/metadata/labels/' + (vm_storage_labeling_label.key | regex_replace('/', '~1')),
+          'value': vm_storage_labeling_label.value
+        }
+      ] }}
+  loop: "{{ vm_storage_labeling_current_request.labels | dict2items }}"
+  loop_control:
+    loop_var: vm_storage_labeling_label
+    label: "{{ vm_storage_labeling_label.key }}"
+
+- name: _apply_metadata | Build Annotation Patch Operations
+  when: vm_storage_labeling_current_request.annotations | default({}, true) | length > 0
+  ansible.builtin.set_fact:
+    vm_storage_labeling_patch: >-
+      {{ vm_storage_labeling_patch + [
+        {
+          'op': ('replace'
+            if (vm_storage_labeling_volume.metadata.annotations | default({}) | dict2items
+                | selectattr('key', 'equalto', vm_storage_labeling_annotation.key) | list | length > 0)
+            else 'add'),
+          'path': '/metadata/annotations/' + (vm_storage_labeling_annotation.key | regex_replace('/', '~1')),
+          'value': vm_storage_labeling_annotation.value
+        }
+      ] }}
+  loop: "{{ vm_storage_labeling_current_request.annotations | dict2items }}"
+  loop_control:
+    loop_var: vm_storage_labeling_annotation
+    label: "{{ vm_storage_labeling_annotation.key }}"
+
+- name: _apply_metadata | Apply Patch to PersistentVolumeClaim
+  when: vm_storage_labeling_patch | length > 0
+  kubernetes.core.k8s_json_patch:
+    api_key: "{{ vm_storage_labeling_api_key }}"
+    host: "{{ vm_storage_labeling_openshift_host }}"
+    api_version: v1
+    kind: PersistentVolumeClaim
+    namespace: "{{ vm_storage_labeling_volume.metadata.namespace }}"
+    name: "{{ vm_storage_labeling_volume.metadata.name }}"
+    validate_certs: "{{ vm_storage_labeling_openshift_verify_ssl }}"
+    patch: "{{ vm_storage_labeling_patch }}"
+  register: vm_storage_labeling_patch_result
+
+- name: _apply_metadata | Apply Patch to DataVolume
+  when:
+    - vm_storage_labeling_patch | length > 0
+    - vm_storage_labeling_volume.metadata.ownerReferences | default([])
+      | selectattr('kind', 'equalto', 'DataVolume') | list | length > 0
+  kubernetes.core.k8s_json_patch:
+    api_key: "{{ vm_storage_labeling_api_key }}"
+    host: "{{ vm_storage_labeling_openshift_host }}"
+    api_version: cdi.kubevirt.io/v1beta1
+    kind: DataVolume
+    namespace: "{{ vm_storage_labeling_volume.metadata.namespace }}"
+    name: "{{ vm_storage_labeling_volume.metadata.name }}"
+    validate_certs: "{{ vm_storage_labeling_openshift_verify_ssl }}"
+    patch: "{{ vm_storage_labeling_patch }}"
+  register: vm_storage_labeling_dv_patch_result
+  failed_when: false
+
+...
