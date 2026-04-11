@@ -55,6 +55,7 @@ bootstrap_vmware_password: "{{ vmware_password }}"
 bootstrap_vmware_validate_certs: "{{ vmware_validate_certs | default(false) }}"
 bootstrap_vmware_cacert: "{{ vmware_cacert }}"
 bootstrap_vmware_context_path: "{{ vmware_context_path }}"
+bootstrap_vmware_vsphere_endpoint_type: "{{ vmware_vsphere_endpoint_type }}"
 bootstrap_aap_job_template_extra_vars: "{{ aap_job_template_extra_vars | default({}) }}"
 
 # Controller bootstrap vars. Don't worry about order, when the dispatch role is called it \
@@ -138,6 +139,7 @@ controller_credentials:
       vmware_validate_certs: "{{ bootstrap_vmware_validate_certs }}"
       vmware_cacert: "{{ bootstrap_vmware_cacert }}"
       vmware_context_path: "{{ bootstrap_vmware_context_path }}"
+      vmware_vsphere_endpoint_type: "{{ bootstrap_vmware_vsphere_endpoint_type }}"
       container_host: "{{ bootstrap_container_host }}"
       container_password: "{{ bootstrap_container_password }}"
       container_username: "{{ bootstrap_container_username }}"

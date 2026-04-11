@@ -21,4 +21,5 @@
             secretRef: "{{ vmware_credentials_secret_ref | default(omit, true) }}"
             vddk:
               image: "{{ vmware_vddk_init_image | default(omit, true) }}"
+            vsphereEndpointType: "{{ vmware_vsphere_endpoint_type | default(omit, true) }}"
 ...

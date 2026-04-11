@@ -63,6 +63,7 @@ mtv_management_migration_targets: []
 #   certificate: |
 #     <certificate>
 #   insecureSkipTlsVerify: true
+#   vsphereEndpointType: vcenter # Either esxi or vcenter (defaults to vcenter if not set)
 #   credentialsSecretRef: <reference> # Namespaced name (<namespace>/<name>) or just <name> \
 #   if in <mtv_management_provider_namespace> containing MTV provider details
 

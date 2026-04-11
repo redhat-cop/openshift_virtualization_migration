@@ -226,6 +226,11 @@ aap_seed_vmware_cacert: "{{ vmware_cacert }}"
 # description: VMware Context Path
 aap_seed_vmware_context_path: "{{ vmware_context_path }}"
 
+# title: VMware vSphere Endpoint Type
+# required: True
+# description: VMware vSphere Endpoint Type
+aap_seed_vmware_vsphere_endpoint_type: "{{ vsphere_endpoint_type }}"
+
 # title: AAP Container Credential Name
 # required: True
 # description: AAP Container Credential Name
@@ -427,6 +432,9 @@ aap_seed_controller_credential_types:
         - id: vddk_init_image_credentials_secret
           type: string
           label: VDDK Init Image Credentials Secret
+        - id: vsphere_endpoint_type
+          type: string
+          label: vSphere Endpoint Type
         - id: provider_name
           type: string
           label: Provider source
@@ -441,6 +449,7 @@ aap_seed_controller_credential_types:
         vmware_cacert: "{% raw %}{  { cacert }}{% endraw %}"
         vmware_context_path: "{% raw %}{  { context_path }}{% endraw %}"
         vmware_credentials_secret_ref: "{% raw %}{  { credentials_secret_ref }}{% endraw %}"
+        vmware_vsphere_endpoint_type: "{% raw %}{  { vsphere_endpoint_type }}{% endraw %}"
         vmware_vddk_init_image: "{% raw %}{  { vddk_init_image }}{% endraw %}"
         vmware_vddk_init_image_username: "{% raw %}{  { vddk_init_image_username }}{% endraw %}"
         vmware_vddk_init_image_password: "{% raw %}{  { vddk_init_image_password }}{% endraw %}"
