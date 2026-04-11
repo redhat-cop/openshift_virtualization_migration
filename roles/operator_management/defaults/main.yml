@@ -32,6 +32,7 @@ operator_management_default_operators:
   - far
   - nmstate
   - nho
+  - gitops
 
 # title: Operator Management of MTV
 # required: True
@@ -184,6 +185,25 @@ operator_management_default_nho:
       name: node-healthcheck-operator
     spec:
       name: node-healthcheck-operator
+
+# title: Operator Management of Red Hat OpenShift GitOps
+# required: True
+# description: Operator Management of Red Hat OpenShift GitOps
+operator_management_default_gitops:
+  namespace:
+    metadata:
+      name: &operator_management_gitops_namespace openshift-gitops-operator
+  operatorgroup:
+    metadata:
+      name: openshift-gitops-operator-group
+    spec:
+      targetNamespaces:
+        - *operator_management_gitops_namespace
+  subscription:
+    metadata:
+      name: openshift-gitops-operator
+    spec:
+      name: openshift-gitops-operator
 
 # title: Operator Management of Red Hat Marketplace
 # required: True
