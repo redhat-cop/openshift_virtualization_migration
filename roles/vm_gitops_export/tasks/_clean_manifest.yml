@@ -1,0 +1,61 @@
+---
+
+- name: _clean_manifest | Build Cleaned Manifest
+  ansible.builtin.set_fact:
+    vm_gitops_export_cleaned_manifests: >-
+      {{ vm_gitops_export_cleaned_manifests + [vm_gitops_export_cleaned_vm] }}
+  vars:
+    vm_gitops_export_source: "{{ vm_gitops_export_vm.response_obj }}"
+    vm_gitops_export_clean_metadata: >-
+      {{
+        vm_gitops_export_source.metadata
+        | dict2items
+        | rejectattr('key', 'in', vm_gitops_export_metadata_remove_keys)
+        | items2dict
+      }}
+    vm_gitops_export_metadata_remove_keys:
+      - uid
+      - resourceVersion
+      - generation
+      - creationTimestamp
+      - deletionTimestamp
+      - deletionGracePeriodSeconds
+      - managedFields
+      - ownerReferences
+      - finalizers
+      - selfLink
+    vm_gitops_export_clean_annotations: >-
+      {{
+        vm_gitops_export_clean_metadata.annotations | default({})
+        | dict2items
+        | rejectattr('key', 'match', 'kubectl.kubernetes.io/')
+        | rejectattr('key', 'match', 'kubevirt.io/latest-observed-api-version')
+        | rejectattr('key', 'match', 'kubevirt.io/storage-observed-api-version')
+        | items2dict
+      }}
+    vm_gitops_export_final_metadata: >-
+      {{
+        vm_gitops_export_clean_metadata
+        | ansible.builtin.combine(
+            {'annotations': vm_gitops_export_clean_annotations}
+              if vm_gitops_export_clean_annotations | length > 0
+              else {},
+            recursive=True)
+      }}
+    vm_gitops_export_cleaned_vm:
+      apiVersion: "{{ vm_gitops_export_source.apiVersion }}"
+      kind: "{{ vm_gitops_export_source.kind }}"
+      metadata: >-
+        {{
+          vm_gitops_export_final_metadata
+          | dict2items
+          | rejectattr('key', 'equalto', 'annotations')
+          | items2dict
+          | ansible.builtin.combine(
+              {'annotations': vm_gitops_export_clean_annotations}
+                if vm_gitops_export_clean_annotations | length > 0
+                else {})
+        }}
+      spec: "{{ vm_gitops_export_source.spec }}"
+
+...

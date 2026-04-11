@@ -1,0 +1,78 @@
+---
+
+- name: Verify vm_gitops_export_request Variable Provided
+  ansible.builtin.assert:
+    that:
+      - vm_gitops_export_request | default("", true) | length > 0
+    fail_msg: "'vm_gitops_export_request' Variable Not Provided"
+    quiet: true
+
+- name: Verify Required Properties Provided
+  ansible.builtin.assert:
+    that:
+      - vm_gitops_export_request | selectattr('namespace', 'undefined') | list | length == 0
+    fail_msg: "Required property 'namespace' in 'vm_gitops_export_request' Variable Not Provided"
+    quiet: true
+
+- name: Verify Git Repository URL Provided
+  ansible.builtin.assert:
+    that:
+      - vm_gitops_export_git_repo_url | default("", true) | length > 0
+    fail_msg: "'vm_gitops_export_git_repo_url' Variable Not Provided"
+    quiet: true
+
+- name: Verify Git Authentication Provided
+  ansible.builtin.assert:
+    that:
+      - >-
+        (vm_gitops_export_git_ssh_key | default("", true) | length > 0) or
+        (vm_gitops_export_git_token | default("", true) | length > 0)
+    fail_msg: "Either 'vm_gitops_export_git_ssh_key' or 'vm_gitops_export_git_token' must be provided"
+    quiet: true
+
+- name: Initialize Variables
+  ansible.builtin.set_fact:
+    vm_gitops_export_vms: []
+    vm_gitops_export_cleaned_manifests: []
+    vm_gitops_export_work_dir: "/tmp/vm_gitops_export_{{ ansible_date_time.epoch }}"
+
+- name: Invoke Collect VM Role
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.vm_collect
+  vars:
+    vm_collect_openshift_api_key: "{{ vm_gitops_export_openshift_api_key }}"
+    vm_collect_openshift_host: "{{ vm_gitops_export_openshift_host }}"
+    vm_collect_verify_ssl: "{{ vm_gitops_export_openshift_verify_ssl }}"
+    vm_collect_vms_var: vm_gitops_export_vms
+  loop: "{{ vm_gitops_export_request }}"
+  loop_control:
+    loop_var: vm_collect_request_instance
+
+- name: Verify VirtualMachines Found
+  ansible.builtin.assert:
+    that:
+      - vm_gitops_export_vms | length > 0
+    fail_msg: "No VirtualMachines found matching the provided criteria"
+    quiet: true
+
+- name: Clean VM Manifests
+  ansible.builtin.include_tasks:
+    file: _clean_manifest.yml
+  loop: "{{ vm_gitops_export_vms }}"
+  loop_control:
+    loop_var: vm_gitops_export_vm
+    label: >-
+      Namespace: {{ vm_gitops_export_vm.response_obj.metadata.namespace }}
+      - Name: {{ vm_gitops_export_vm.response_obj.metadata.name }}
+
+- name: Export Manifests to Git Repository
+  ansible.builtin.include_tasks:
+    file: _export_to_git.yml
+
+- name: Cleanup Working Directory
+  when: vm_gitops_export_cleanup | bool
+  ansible.builtin.file:
+    path: "{{ vm_gitops_export_work_dir }}"
+    state: absent
+
+...

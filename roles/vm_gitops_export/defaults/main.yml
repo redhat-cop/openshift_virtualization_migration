@@ -1,0 +1,71 @@
+---
+# defaults file for vm_gitops_export
+
+# title: GitOps Export Request
+# required: True
+# description: List of VirtualMachine GitOps Export Requests
+vm_gitops_export_request: []
+# -  namespace: <namespace> # Namespace containing VMs to capture.
+#    names: # List of VM names within a namespace. \
+#      Optional when using label_selectors.
+#      - <vm_name>
+#    label_selectors: # Label selectors to match VMs. \
+#      Cannot be used with list of VM names.
+#      - <key>=<value>
+
+# title: Git Repository URL
+# required: True
+# description: URL of the Git repository to store VM manifests
+vm_gitops_export_git_repo_url: ""
+# title: Git Branch
+# required: False
+# description: Git branch to push manifests to
+vm_gitops_export_git_branch: "main"
+# title: Git Path
+# required: False
+# description: Directory path within the Git repository to store manifests
+vm_gitops_export_git_path: "virtualmachines"
+# title: Git User Name
+# required: False
+# description: Git commit author name
+vm_gitops_export_git_user_name: "Ansible Automation"
+# title: Git User Email
+# required: False
+# description: Git commit author email
+vm_gitops_export_git_user_email: "ansible@automation.local"
+# title: Git SSH Key Path
+# required: False
+# description: Path to SSH private key for Git authentication
+vm_gitops_export_git_ssh_key: ""
+# title: Git Token
+# required: False
+# description: Token for HTTPS Git authentication
+vm_gitops_export_git_token: ""
+# title: Git Commit Message
+# required: False
+# description: Commit message for exported manifests
+vm_gitops_export_git_commit_message: "Export VirtualMachine definitions via Ansible"
+
+# title: OpenShift Host
+# required: True
+# description: OpenShift Host
+vm_gitops_export_openshift_host: "{{ openshift_host }}"
+# title: OpenShift API Key
+# required: True
+# description: OpenShift API Key
+vm_gitops_export_openshift_api_key: "{{ openshift_api_key }}"
+# title: Verify SSL Certificate
+# required: True
+# description: Verify SSL Certificate
+vm_gitops_export_openshift_verify_ssl: "{{ openshift_verify_ssl }}"
+# title: KubeVirt API Version
+# required: True
+# description: KubeVirt API Version
+vm_gitops_export_kubevirt_api_version: kubevirt.io/v1
+
+# title: Cleanup Working Directory
+# required: False
+# description: Remove local working directory after export
+vm_gitops_export_cleanup: true
+
+...

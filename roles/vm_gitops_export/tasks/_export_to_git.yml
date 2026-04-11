@@ -1,0 +1,121 @@
+---
+
+- name: _export_to_git | Create Working Directory
+  ansible.builtin.file:
+    path: "{{ vm_gitops_export_work_dir }}"
+    state: directory
+    mode: "0700"
+
+- name: _export_to_git | Configure Git SSH Command
+  when: vm_gitops_export_git_ssh_key | default("", true) | length > 0
+  ansible.builtin.set_fact:
+    vm_gitops_export_git_env:
+      GIT_SSH_COMMAND: >-
+        ssh -i {{ vm_gitops_export_git_ssh_key }} -o StrictHostKeyChecking=no
+
+- name: _export_to_git | Build HTTPS URL with Token
+  when: vm_gitops_export_git_token | default("", true) | length > 0
+  ansible.builtin.set_fact:
+    vm_gitops_export_git_clone_url: >-
+      {{ vm_gitops_export_git_repo_url
+         | regex_replace('^https://',
+           'https://oauth2:' + vm_gitops_export_git_token + '@') }}
+  no_log: true
+
+- name: _export_to_git | Set Clone URL for SSH
+  when: vm_gitops_export_git_token | default("", true) | length == 0
+  ansible.builtin.set_fact:
+    vm_gitops_export_git_clone_url: "{{ vm_gitops_export_git_repo_url }}"
+
+- name: _export_to_git | Clone Git Repository
+  ansible.builtin.git:
+    repo: "{{ vm_gitops_export_git_clone_url }}"
+    dest: "{{ vm_gitops_export_work_dir }}/repo"
+    version: "{{ vm_gitops_export_git_branch }}"
+    depth: 1
+    single_branch: true
+    key_file: >-
+      {{ vm_gitops_export_git_ssh_key
+         if (vm_gitops_export_git_ssh_key | default("", true) | length > 0)
+         else omit }}
+    accept_newhostkey: true
+  no_log: true
+
+- name: _export_to_git | Create Export Directory
+  ansible.builtin.file:
+    path: "{{ vm_gitops_export_work_dir }}/repo/{{ vm_gitops_export_git_path }}"
+    state: directory
+    mode: "0755"
+
+- name: _export_to_git | Write VM Manifests
+  ansible.builtin.copy:
+    content: >-
+      {{ vm_gitops_export_manifest | to_nice_yaml(indent=2, width=200) }}
+    dest: >-
+      {{ vm_gitops_export_work_dir }}/repo/{{ vm_gitops_export_git_path }}/{{
+        vm_gitops_export_manifest.metadata.namespace }}_{{
+        vm_gitops_export_manifest.metadata.name }}.yml
+    mode: "0644"
+  loop: "{{ vm_gitops_export_cleaned_manifests }}"
+  loop_control:
+    loop_var: vm_gitops_export_manifest
+    label: >-
+      {{ vm_gitops_export_manifest.metadata.namespace }}/{{
+        vm_gitops_export_manifest.metadata.name }}
+  register: vm_gitops_export_write_result
+
+- name: _export_to_git | Configure Git User # noqa: command-instead-of-module
+  ansible.builtin.command:
+    cmd: >-
+      git config user.{{ vm_gitops_export_git_config_item.key }}
+      '{{ vm_gitops_export_git_config_item.value }}'
+    chdir: "{{ vm_gitops_export_work_dir }}/repo"
+  loop:
+    - key: name
+      value: "{{ vm_gitops_export_git_user_name }}"
+    - key: email
+      value: "{{ vm_gitops_export_git_user_email }}"
+  loop_control:
+    loop_var: vm_gitops_export_git_config_item
+    label: "{{ vm_gitops_export_git_config_item.key }}"
+  changed_when: true
+
+- name: _export_to_git | Stage Changes # noqa: command-instead-of-module
+  ansible.builtin.command:
+    cmd: "git add {{ vm_gitops_export_git_path }}/"
+    chdir: "{{ vm_gitops_export_work_dir }}/repo"
+  changed_when: true
+
+- name: _export_to_git | Check for Changes # noqa: command-instead-of-module
+  ansible.builtin.command:
+    cmd: git diff --cached --quiet
+    chdir: "{{ vm_gitops_export_work_dir }}/repo"
+  register: vm_gitops_export_git_diff
+  changed_when: false
+  failed_when: false
+
+- name: _export_to_git | Commit Changes # noqa: command-instead-of-module
+  when: vm_gitops_export_git_diff.rc == 1
+  ansible.builtin.command:
+    cmd: >-
+      git commit -m '{{ vm_gitops_export_git_commit_message }}'
+    chdir: "{{ vm_gitops_export_work_dir }}/repo"
+  changed_when: true
+
+- name: _export_to_git | Push Changes # noqa: command-instead-of-module
+  when: vm_gitops_export_git_diff.rc == 1
+  ansible.builtin.command:
+    cmd: "git push origin {{ vm_gitops_export_git_branch }}"
+    chdir: "{{ vm_gitops_export_work_dir }}/repo"
+  environment: "{{ vm_gitops_export_git_env | default({}) }}"
+  changed_when: true
+  no_log: true
+
+- name: _export_to_git | Report No Changes
+  when: vm_gitops_export_git_diff.rc == 0
+  ansible.builtin.debug:
+    msg: >-
+      No changes detected in VirtualMachine manifests.
+      Nothing to commit.
+
+...
