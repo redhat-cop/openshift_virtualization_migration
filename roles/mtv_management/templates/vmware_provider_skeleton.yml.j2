@@ -9,7 +9,10 @@ spec:
     namespace: "{{ mtv_management_vmware_provider_secret_namespace }}"
   type: vsphere
   url: "{{ mtv_management_mtv_vmware_url }}"
-{% if 'vddk' in mtv_management_populated_vmware_target and mtv_management_populated_vmware_target['vddk'] is not none and 'image' in mtv_management_populated_vmware_target['vddk'] and (mtv_management_populated_vmware_target['vddk']['image'] | default("", true) | length > 0)  %}
   settings:
+{% if 'vddk' in mtv_management_populated_vmware_target and mtv_management_populated_vmware_target['vddk'] is not none and 'image' in mtv_management_populated_vmware_target['vddk'] and (mtv_management_populated_vmware_target['vddk']['image'] | default("", true) | length > 0)  %}
     vddkInitImage: "{{ mtv_management_populated_vmware_target['vddk']['image'] }}"
+{% endif %}
+{% if 'vsphereEndpoint' in mtv_management_populated_vmware_target and mtv_management_populated_vmware_target['vsphereEndpoint'] is not none and (mtv_management_populated_vmware_target['vsphereEndpoint'] | default("", true) | length > 0)  %}
+    sdkEndpoint: "{{ mtv_management_populated_vmware_target['vsphereEndpoint'] }}"
 {% endif %}
