@@ -1,0 +1,11 @@
+---
+
+- name: Finish Warm Migration Cutover
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Invoke Warm Migration Cutover
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.mtv_warm_cutover
+...

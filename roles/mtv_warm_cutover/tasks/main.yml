@@ -1,0 +1,20 @@
+---
+
+- name: Verify mtv_warm_cutover_request Variable Provided
+  ansible.builtin.assert:
+    that:
+      - mtv_warm_cutover_request | default("", true) | length > 0
+    fail_msg: "'mtv_warm_cutover_request' Variable Not Provided"
+    quiet: true
+
+- name: Process Warm Cutover Requests
+  ansible.builtin.include_tasks:
+    file: _process_cutover.yml
+  loop: "{{ mtv_warm_cutover_request }}"
+  loop_control:
+    loop_var: mtv_warm_cutover_item
+    label: >-
+      Namespace: {{ mtv_warm_cutover_item.namespace
+        | default(mtv_warm_cutover_default_namespace) }}
+
+...
