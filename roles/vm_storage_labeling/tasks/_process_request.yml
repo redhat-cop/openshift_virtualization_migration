@@ -28,6 +28,19 @@
     validate_certs: "{{ vm_storage_labeling_openshift_verify_ssl }}"
   register: vm_storage_labeling_pvc_by_selector
 
+- name: _process_request | Query All PVCs in Namespace
+  when:
+    - vm_storage_labeling_current_request.names | default([], true) | length == 0
+    - vm_storage_labeling_current_request.label_selectors | default([], true) | length == 0
+  kubernetes.core.k8s_info:
+    api_key: "{{ vm_storage_labeling_api_key }}"
+    host: "{{ vm_storage_labeling_openshift_host }}"
+    api_version: v1
+    kind: PersistentVolumeClaim
+    namespace: "{{ vm_storage_labeling_current_request.namespace }}"
+    validate_certs: "{{ vm_storage_labeling_openshift_verify_ssl }}"
+  register: vm_storage_labeling_pvc_all
+
 - name: _process_request | Build Volume List from Named PVCs
   when: vm_storage_labeling_pvc_by_name is not skipped
   ansible.builtin.set_fact:
@@ -41,6 +54,11 @@
   when: vm_storage_labeling_pvc_by_selector is not skipped
   ansible.builtin.set_fact:
     vm_storage_labeling_volumes: "{{ vm_storage_labeling_pvc_by_selector.resources | default([]) }}"
+
+- name: _process_request | Build Volume List from All PVCs
+  when: vm_storage_labeling_pvc_all is not skipped
+  ansible.builtin.set_fact:
+    vm_storage_labeling_volumes: "{{ vm_storage_labeling_pvc_all.resources | default([]) }}"
 
 - name: _process_request | Verify Volumes Found
   ansible.builtin.assert:

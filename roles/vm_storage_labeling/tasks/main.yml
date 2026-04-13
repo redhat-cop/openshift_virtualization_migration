@@ -14,21 +14,6 @@
     fail_msg: "Required property 'namespace' in 'vm_storage_labeling_request' Variable Not Provided"
     quiet: true
 
-- name: Verify Names or Label Selectors Provided
-  ansible.builtin.assert:
-    that:
-      - >-
-        (vm_storage_labeling_item.names | default([], true) | length > 0) or
-        (vm_storage_labeling_item.label_selectors | default([], true) | length > 0)
-    fail_msg: >-
-      Either 'names' or 'label_selectors' must be provided for
-      namespace '{{ vm_storage_labeling_item.namespace }}'
-    quiet: true
-  loop: "{{ vm_storage_labeling_request }}"
-  loop_control:
-    loop_var: vm_storage_labeling_item
-    label: "Namespace: {{ vm_storage_labeling_item.namespace }}"
-
 - name: Verify Labels or Annotations Provided
   ansible.builtin.assert:
     that:
