@@ -1,7 +1,7 @@
 # Secure Credential Practices for Developers
 
 This guide defines the secure credential management practices that all
-contributors to the OpenShift Virtualization Migration Factory must
+contributors to the Ansible for OpenShift Virtualization Migration project must
 follow. It covers the rules for handling secrets in code, the tools
 enforcing those rules, and the onboarding process for new team members.
 
@@ -9,7 +9,9 @@ This guide aligns with the Red Hat IT Information Security policy on
 secret management. Refer to the authoritative source for organization-
 wide requirements:
 
-> <https://source.redhat.com/departments/strategy_and_operations/it/it_information_security/wiki/secret_management_at_red_hat>
+> See the [Ansible Vault documentation](https://docs.ansible.com/ansible/latest/vault_guide/index.html)
+> and [AAP credential management](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.5/html/automation_controller_user_guide/controller-credentials)
+> for industry-standard secret management practices.
 
 ## Golden Rules
 
@@ -21,7 +23,7 @@ wide requirements:
    or empty strings as values for any credential field.
 3. **Encrypt sensitive variable files with Ansible Vault.** Any file
    containing real credential values must be encrypted before it
-   touches disk. See `inventory.vault.yml.example` for the template.
+   touches disk. See the `inventory.vault.yml.example` template in the repository root.
 4. **Let AAP manage runtime secrets.** Credential values used during
    playbook execution should be stored in AAP credential types, not
    in variable files on the filesystem.
@@ -156,14 +158,14 @@ When reviewing pull requests, verify the following:
 
    ```bash
    pip install pre-commit
-   cd openshift_virtualization_migration
    pre-commit install
    ```
 
 2. **Read this guide** and `docs/secure_credential_management.md`.
 
-3. **Review the Red Hat secret management policy:**
-   <https://source.redhat.com/departments/strategy_and_operations/it/it_information_security/wiki/secret_management_at_red_hat>
+3. **Review the credential management documentation:**
+   See `docs/secure_credential_management.md` for the project's
+   credential architecture and AAP integration details.
 
 4. **Set up local vault file** (if running playbooks locally):
 
@@ -203,3 +205,18 @@ If a real credential is accidentally committed to Git:
 4. **Add a Gitleaks rule** to `.gitleaks.toml` if the pattern was not
    already covered.
 5. **Report the incident** per the Red Hat secret management policy.
+
+### Public Repository Considerations
+
+Since this is a public repository, credential exposure requires
+additional community communication:
+
+1. **Post a GitHub Security Advisory** using the repository's Security
+   tab to notify watchers of the exposure and any required actions.
+2. **Open an issue** (without including the secret) describing what
+   was exposed, the timeframe, and what users should do (e.g., rotate
+   credentials, update configurations).
+3. **Notify downstream users** via any established communication
+   channels (mailing lists, Slack, etc.) with clear remediation steps.
+4. **Document the incident** in a post-mortem to prevent recurrence
+   and update this guide if new patterns need to be covered.
