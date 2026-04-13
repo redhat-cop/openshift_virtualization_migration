@@ -1,7 +1,7 @@
 # Disconnected Environment Guide
 
 This guide describes the steps and processes required to leverage the
-OpenShift Virtualization Migration Factory within a disconnected or
+Ansible for OpenShift Virtualization Migration within a disconnected or
 restricted environment from a networking and content management
 perspective.
 
@@ -23,13 +23,15 @@ consumed.
 - A Red Hat account with entitlements for downloading Operator catalog
   indexes and container images.
 
+> **Note:** This guide assumes that an Execution Environment (EE) is used for playbook execution, which satisfies Python package and Ansible collection dependencies at runtime. The mirroring steps below are provided for environments that build custom EEs or run playbooks outside of an EE.
+
 ## 1. Operator Lifecycle Manager (OLM) Catalog Mirroring
 
-The Migration Factory depends on the following OLM-managed Operators.
+The Ansible for OpenShift Virtualization Migration depends on the following OLM-managed Operators.
 Each must be available in a mirrored CatalogSource on every target
 cluster.
 
-| Operator | Package Name | Default Namespace |
+| Operator | Package Name | Default Namespace (for reference) |
 |---|---|---|
 | Migration Toolkit for Virtualization (MTV) | `mtv-operator` | `openshift-mtv` |
 | OpenShift Virtualization (CNV) | `kubevirt-hyperconverged` | `openshift-cnv` |
@@ -38,6 +40,7 @@ cluster.
 | Fence Agents Remediation (FAR) | `fence-agents-remediation` | `openshift-workload-availability` |
 | NMState | `kubernetes-nmstate-operator` | `openshift-nmstate` |
 | Node Healthcheck (NHO) | `node-healthcheck-operator` | `openshift-workload-availability` |
+| OpenShift GitOps | `openshift-gitops-operator` | `openshift-gitops` |
 
 ### Mirroring with oc-mirror
 
@@ -58,6 +61,7 @@ mirror:
         - name: fence-agents-remediation
         - name: kubernetes-nmstate-operator
         - name: node-healthcheck-operator
+        - name: openshift-gitops-operator
 ```
 
 Replace `v4.x` with the OpenShift version running on your clusters.
@@ -95,8 +99,7 @@ operator_management_catalogsources:
       image: <internal-registry>/<namespace>/redhat-operator-index:v4.x
 ```
 
-To prevent Operator installations from attempting to reach external
-registries, disable the default OperatorHub sources:
+To prevent Operator installations from utilizing the default catalog which are externally hosted, disable the default OperatorHub sources:
 
 ```bash
 oc patch operatorhub cluster --type merge \
@@ -128,6 +131,8 @@ skopeo copy \
 
 Update `aap_execution_environment_image` in the inventory to reference
 the internal registry path.
+
+> **Tip:** `oc-mirror` can also mirror container images using the `additionalImages` property in the `ImageSetConfiguration`. See the [oc-mirror v2 documentation](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html-single/disconnected_environments/index#about-installing-oc-mirror-v2) for details.
 
 ### VDDK Image
 
@@ -265,7 +270,7 @@ additional_build_steps:
 
 ## 5. Git Repository Access
 
-The Migration Factory project source and any GitOps export targets must
+The Ansible for OpenShift Virtualization Migration project source and any GitOps export targets must
 be reachable from the Ansible Automation Platform controller. In a
 disconnected environment:
 
@@ -279,14 +284,14 @@ aap_project_repo: https://<internal-git>/org/openshift_virtualization_migration.
 aap_project_branch: main
 ```
 
-- If using the `vm_gitops_export` role, ensure the target Git repository
+- If using the `vm_gitops_export` role (this role is planned to move to the `openshift_virtualization_ops` collection), ensure the target Git repository
   is also hosted internally and accessible from the EE.
 
 ## 6. Ansible Automation Platform Deployment
 
 When deploying AAP in a disconnected environment:
 
-- The AAP Operator must be included in the mirrored Operator catalog (it
+- The AAP Operator must be included in the mirrored Operator catalog (assumes AAP is deployed on OpenShift) (it
   is not in the default list above — add the `ansible-automation-platform-operator`
   package to the `ImageSetConfiguration`).
 - The AAP controller and hub pods must be able to pull images from the
@@ -322,11 +327,11 @@ to be reachable — all content must be pre-mirrored.
 Before running the Migration Factory in a disconnected environment,
 verify the following:
 
-- [ ] All seven required Operators are installable from the mirrored
+- [ ] All required Operators are installable from the mirrored
       CatalogSource.
 - [ ] The EE image is pullable from the internal registry.
 - [ ] The VDDK image is pullable from the internal registry.
-- [ ] All 13 required Ansible collections are available in the Private
+- [ ] All required Ansible collections are available in the Private
       Automation Hub.
 - [ ] All required Python packages are available in the internal PyPI
       mirror (or baked into the EE).
