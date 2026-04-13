@@ -18,6 +18,11 @@
 # Or with a vault password file:
 #   ansible-playbook -e @inventory.vault.yml playbooks/bootstrap.yml --vault-password-file .vault-password
 #
+# With ansible-navigator:
+#   ansible-navigator run playbooks/bootstrap.yml \
+#     -e @inventory.vault.yml --pae false \
+#     -- --ask-vault-pass
+#
 # IMPORTANT: Never commit this file unencrypted. The .gitignore is
 # configured to exclude *.vault.yml and vault-password* files.
 

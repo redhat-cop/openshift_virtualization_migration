@@ -1,18 +1,18 @@
 # Secure Credential Management
 
-This document describes how the OpenShift Virtualization Migration
-Factory manages sensitive credentials and the recommended practices for
+This document describes how the Ansible for OpenShift Virtualization Migration
+manages sensitive credentials and the recommended practices for
 keeping them secure.
 
 ## Architecture Overview
 
-The Migration Factory uses a layered approach to credential management:
+The Ansible for OpenShift Virtualization Migration uses a layered approach to credential management:
 
 1. **Ansible Vault** — Encrypts sensitive variable files at rest so
    credentials are never stored in plaintext in Git.
 2. **AAP Credential Types** — Stores and injects credentials at runtime
    via Ansible Automation Platform's built-in credential management.
-3. **Kubernetes Secrets** — Stores cluster-scoped credentials (API
+3. **Kubernetes Secrets** — Stores credentials (API
    tokens, service account keys) in OpenShift.
 4. **Environment Variable Injection** — AAP custom credential types
    inject secrets as environment variables or extra vars into job
@@ -42,7 +42,7 @@ The Migration Factory uses a layered approach to credential management:
 
 ## Credential Inventory
 
-The following credentials are managed by the Migration Factory:
+The following credentials are managed by the Ansible for OpenShift Virtualization Migration:
 
 | Credential | Storage Method | Used By |
 |---|---|---|
@@ -57,6 +57,8 @@ The following credentials are managed by the Migration Factory:
 | AAP admin (hostname/username/password/token) | AAP Credential | `aap_seed`, `bootstrap` |
 | Machine SSH keys | AAP Machine Credential | `aap_machine_credentials` role |
 | iDRAC (username/password) | AAP Custom Credential | Bootstrap bare-metal tasks |
+
+> **Note:** This table reflects the credentials at time of writing and may not capture all credentials as the project evolves. Refer to the role defaults and AAP credential type definitions for the authoritative list.
 
 ## Using Ansible Vault
 
@@ -104,6 +106,22 @@ ansible-playbook -e @inventory.vault.yml \
   playbooks/bootstrap.yml --vault-password-file .vault-password
 ```
 
+With ansible-navigator (password prompt):
+
+```bash
+ansible-navigator run playbooks/bootstrap.yml \\
+  -e @inventory.vault.yml --pae false \\
+  -- --ask-vault-pass
+```
+
+With ansible-navigator (password file):
+
+```bash
+ansible-navigator run playbooks/bootstrap.yml \\
+  -e @inventory.vault.yml --pae false \\
+  -- --vault-password-file .vault-password
+```
+
 ### Editing Encrypted Files
 
 ```bash
@@ -124,7 +142,7 @@ into job template runs.
 
 ### openshift_virtualization_migration_cac
 
-Config-as-Code credential that stores Migration Factory configuration
+Config-as-Code credential that stores Ansible for OpenShift Virtualization Migration configuration
 including AAP settings, organization, and project details.
 
 **Injected as extra vars:**
@@ -142,7 +160,7 @@ Per-target VMware credentials for MTV provider configuration.
 - `VMWARE_HOST`, `VMWARE_USER`, `VMWARE_PASSWORD` (env)
 - Target name, host, insecure SSL flag, VDDK image details (extra vars)
 
-### Ovirt Migration Target
+### oVirt Migration Target
 
 Per-target oVirt/RHV credentials for MTV provider configuration.
 
@@ -209,7 +227,8 @@ only in development environments when debugging credential issues.
 If you have an existing `inventory.yml` with real credential values:
 
 1. Extract all sensitive values into `inventory.vault.yml`.
-2. Replace the values in `inventory.yml` with variable references:
+2. Add the values to the vaulted `inventory.vault.yml` file.
+3. Replace the values in `inventory.yml` with variable references:
 
    ```yaml
    # inventory.yml (safe to commit)
@@ -223,13 +242,13 @@ If you have an existing `inventory.yml` with real credential values:
    vault_rh_password: "actual-password"
    ```
 
-3. Encrypt the vault file:
+4. Encrypt the vault file:
 
    ```bash
    ansible-vault encrypt inventory.vault.yml
    ```
 
-4. Verify no secrets remain in plaintext:
+5. Verify no secrets remain in plaintext:
 
    ```bash
    gitleaks detect --config .gitleaks.toml --no-git
