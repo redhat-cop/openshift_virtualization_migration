@@ -30,8 +30,8 @@
         api_version: operators.coreos.com/v1
         kind: OperatorGroup
         namespace: "{{ validate_migration_namespace }}"
-      register: validate_migration_infra_openshift_virtualization_migration_project
-      failed_when: validate_migration_infra_openshift_virtualization_migration_project.resources | length <= 0
+      register: validate_migration_operatorgroup
+      failed_when: validate_migration_operatorgroup.resources | length <= 0
 
   rescue:
     - name: ocp_operators | Debug Task (Runs if OperatorGroup doesn't Exists)
@@ -43,12 +43,12 @@
     msg:
       - >
         OperatorGroup
-        {{ infra_openshift_virtualization_migration_operatorgroup | json_query(__validate_migration_query) }}
+        {{ validate_migration_operatorgroup | json_query(__validate_migration_query) }}
         is already deployed, we shall continue
     verbosity: 3
   vars:
     # yamllint disable-line rule:line-length
-    __validate_migration_query: resources[?contains(metadata.name, '{{ infra_openshift_virtualization_migration_namespace }}')].metadata.name
+    __validate_migration_query: resources[?contains(metadata.name, '{{ validate_migration_namespace }}')].metadata.name
 
 - name: ocp_operators | Verify Subscription exists
   block:
@@ -58,7 +58,7 @@
         kind: Subscription
         namespace: "{{ validate_migration_namespace }}"
       register: validate_migration_ocp_subscription
-      failed_when: infra_openshift_virtualization_migration.resources | length <= 0
+      failed_when: validate_migration_ocp_subscription.resources | length <= 0
 
   rescue:
     - name: ocp_operators | Debug Task (Runs if Subscription doesn't Exists)
