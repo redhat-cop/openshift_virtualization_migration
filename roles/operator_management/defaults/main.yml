@@ -192,13 +192,12 @@ operator_management_default_nho:
 operator_management_default_gitops:
   namespace:
     metadata:
-      name: &operator_management_gitops_namespace openshift-gitops-operator
+      name: openshift-gitops-operator
   operatorgroup:
     metadata:
       name: openshift-gitops-operator-group
     spec:
-      targetNamespaces:
-        - *operator_management_gitops_namespace
+      targetNamespaces: []
   subscription:
     metadata:
       name: openshift-gitops-operator
