@@ -12,6 +12,7 @@ useDefault = true
 description = "Global allowlist for placeholder values and template files"
 paths = [
     '''\.gitleaks\.toml$''',
+    '''README\.md$''',
 ]
 regexTarget = "line"
 regexes = [
@@ -26,6 +27,10 @@ regexes = [
     '''EXAMPLE''',
     # YAML comments containing credential variable names
     '''^\s*#.*''',
+    # HTML bold tags documenting variable names (docsible-generated)
+    '''<b>.*</b>''',
+    # Multi-line YAML block scalars where value is a Jinja2 template on the next line
+    '''[>|][+-]?\s*$''',
 ]
 
 # Custom rules for Ansible-specific credential patterns
@@ -43,8 +48,8 @@ description = "OpenShift API key or token"
 regex = '''(?i)(openshift[_-]?(?:api[_-]?key|token|password))\s*[:=]\s*['"]?([^\s'"#}{]+)'''
 keywords = ["openshift"]
 [rules.allowlist]
-regexes = ['''changeme''', '''\{\{.*\}\}''', '''example''']
-paths = ['''defaults/main\.yml$''', '''inventory\.yml$''']
+regexes = ['''changeme''', '''\{\{.*\}\}''', '''example''', '''<b>.*</b>''', '''[>|][+-]?\s*$''']
+paths = ['''defaults/main\.yml$''', '''inventory\.yml$''', '''README\.md$''', '''tasks/main\.yml$''']
 
 [[rules]]
 id = "automation-hub-token"
@@ -61,5 +66,5 @@ description = "Container registry password"
 regex = '''(?i)(container[_-]?password|registry[_-]?password)\s*[:=]\s*['"]?([^\s'"#}{]+)'''
 keywords = ["container_password", "registry_password"]
 [rules.allowlist]
-regexes = ['''changeme''', '''\{\{.*\}\}''']
-paths = ['''defaults/main\.yml$''', '''inventory\.yml$''']
+regexes = ['''changeme''', '''\{\{.*\}\}''', '''<b>.*</b>''']
+paths = ['''defaults/main\.yml$''', '''inventory\.yml$''', '''README\.md$''']
