@@ -1,5 +1,7 @@
 ---
 # tasks file for validation
+
+# Pre-migration infrastructure validation
 - name: Include ocp_version tasks
   ansible.builtin.include_tasks: ocp_version.yml
 - name: Include ocp_operators tasks
@@ -8,4 +10,21 @@
   ansible.builtin.include_tasks: ocp_storage_support.yml
 - name: Include vmware_firewall_rules tasks
   ansible.builtin.include_tasks: vmware_firewall_rules.yml
+
+# Post-migration validation
+- name: Include post-migration VM validation
+  when: validate_migration_post_enabled | bool
+  ansible.builtin.include_tasks: post_migration_vms.yml
+
+- name: Include post-migration data volume validation
+  when: validate_migration_post_enabled | bool
+  ansible.builtin.include_tasks: post_migration_data_volumes.yml
+
+- name: Include post-migration network validation
+  when: validate_migration_post_enabled | bool
+  ansible.builtin.include_tasks: post_migration_networks.yml
+
+- name: Include post-migration relationship validation
+  when: validate_migration_post_enabled | bool
+  ansible.builtin.include_tasks: post_migration_relationships.yml
 ...
