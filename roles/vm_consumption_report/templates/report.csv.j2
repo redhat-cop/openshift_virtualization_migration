@@ -1,0 +1,7 @@
+type,name,namespace,uuid,management_type,running,created_at,last_transition,guest_hostname,ip_addresses
+{% for vm in vm_consumption_report_result.indirect_vms %}
+vm,{{ vm.name }},{{ vm.namespace }},{{ vm.uuid }},{{ vm.management_type }},{{ vm.running }},{{ vm.created_at }},{{ vm.last_transition }},{{ vm.guest_hostname }},"{{ vm.ip_addresses | join(';') }}"
+{% endfor %}
+{% for host in vm_consumption_report_result.direct_only_hosts %}
+host,{{ host.hostname }},,{{ host.uuid }},{{ host.management_type }},,,,{{ host.hostname }},
+{% endfor %}

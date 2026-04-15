@@ -1,0 +1,114 @@
+---
+
+- name: Build VM Entries
+  ansible.builtin.set_fact:
+    _vm_consumption_report_entries: >-
+      {{ _vm_consumption_report_entries | default([]) + [_entry] }}
+  vars:
+    _vmi_match: >-
+      {{ _vm_consumption_report_vmis
+         | selectattr('metadata.namespace', 'equalto', _vm.metadata.namespace)
+         | selectattr('metadata.name', 'equalto', _vm.metadata.name)
+         | list | first | default({}) }}
+    _vm_uuid: "{{ _vm.metadata.uid }}"
+    _guest_hostname: >-
+      {{ _vmi_match.status.guestOSInfo.hostname | default('') }}
+    _guest_ip_addresses: >-
+      {{ _vmi_match.status.interfaces
+         | default([])
+         | map(attribute='ipAddress')
+         | select('defined')
+         | list }}
+    _direct_match: >-
+      {{ vm_consumption_report_direct_hosts
+         | selectattr('uuid', 'defined')
+         | selectattr('uuid', 'equalto', _vm_uuid)
+         | list
+         + (vm_consumption_report_direct_hosts
+            | selectattr('hostname', 'defined')
+            | selectattr('hostname', 'equalto', _guest_hostname)
+            | list if _guest_hostname | length > 0 else [])
+         + (vm_consumption_report_direct_hosts
+            | selectattr('hostname', 'defined')
+            | selectattr('hostname', 'in', _guest_ip_addresses)
+            | list if _guest_ip_addresses | length > 0 else []) }}
+    _management_type: >-
+      {{ 'reconciled' if _direct_match | length > 0
+         else 'indirect' }}
+    _entry:
+      name: "{{ _vm.metadata.name }}"
+      namespace: "{{ _vm.metadata.namespace }}"
+      uuid: "{{ _vm_uuid }}"
+      management_type: "{{ _management_type }}"
+      running: "{{ _vm.spec.running | default(_vm.spec.runStrategy | default('Unknown')) }}"
+      created_at: "{{ _vm.metadata.creationTimestamp }}"
+      last_transition: >-
+        {{ _vm.status.conditions
+           | default([])
+           | sort(attribute='lastTransitionTime')
+           | map(attribute='lastTransitionTime')
+           | list | last | default(_vm.metadata.creationTimestamp) }}
+      guest_hostname: "{{ _guest_hostname }}"
+      ip_addresses: "{{ _guest_ip_addresses }}"
+      direct_host_match: "{{ _direct_match | first | default({}) }}"
+      labels: "{{ _vm.metadata.labels | default({}) }}"
+  loop: "{{ _vm_consumption_report_vms }}"
+  loop_control:
+    loop_var: _vm
+    label: "{{ _vm.metadata.namespace }}/{{ _vm.metadata.name }}"
+
+- name: Build Direct-Only Entries
+  ansible.builtin.set_fact:
+    _vm_consumption_report_direct_only: >-
+      {{ _vm_consumption_report_direct_only | default([]) + [_direct_entry] }}
+  vars:
+    _matched_uuids: >-
+      {{ (_vm_consumption_report_entries | default([]))
+         | selectattr('management_type', 'equalto', 'reconciled')
+         | map(attribute='direct_host_match')
+         | select('mapping')
+         | map(attribute='hostname', default='')
+         | list }}
+    _matched_hosts: >-
+      {{ (_vm_consumption_report_entries | default([]))
+         | selectattr('management_type', 'equalto', 'reconciled')
+         | map(attribute='direct_host_match')
+         | select('mapping')
+         | map(attribute='hostname', default='')
+         | list }}
+    _direct_entry:
+      hostname: "{{ _host.hostname }}"
+      uuid: "{{ _host.uuid | default('') }}"
+      management_type: "direct"
+  loop: "{{ vm_consumption_report_direct_hosts }}"
+  loop_control:
+    loop_var: _host
+    label: "{{ _host.hostname }}"
+  when:
+    - _host.hostname not in _matched_hosts
+    - (_host.uuid | default('')) not in ((_vm_consumption_report_entries | default([])) | map(attribute='uuid') | list)
+
+- name: Compile Final Report
+  ansible.builtin.set_fact:
+    vm_consumption_report_result:
+      generated_at: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }}"
+      cluster: "{{ vm_consumption_report_openshift_host }}"
+      summary:
+        total_vms: "{{ (_vm_consumption_report_entries | default([])) | length }}"
+        indirect_only: >-
+          {{ (_vm_consumption_report_entries | default([]))
+             | selectattr('management_type', 'equalto', 'indirect')
+             | list | length }}
+        direct_only: "{{ (_vm_consumption_report_direct_only | default([])) | length }}"
+        reconciled: >-
+          {{ (_vm_consumption_report_entries | default([]))
+             | selectattr('management_type', 'equalto', 'reconciled')
+             | list | length }}
+        total_managed_hosts: >-
+          {{ (_vm_consumption_report_entries | default([]))
+             | length
+             + (_vm_consumption_report_direct_only | default([]))
+             | length }}
+      indirect_vms: "{{ _vm_consumption_report_entries | default([]) }}"
+      direct_only_hosts: "{{ _vm_consumption_report_direct_only | default([]) }}"
+...

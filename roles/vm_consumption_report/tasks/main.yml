@@ -1,0 +1,59 @@
+---
+
+- name: Verify Request Variable Provided
+  ansible.builtin.assert:
+    that:
+      - vm_consumption_report_request | default([], true) | length > 0
+    fail_msg: "'vm_consumption_report_request' must contain at least one entry"
+    quiet: true
+
+- name: Initialize Report Data
+  ansible.builtin.set_fact:
+    _vm_consumption_report_vms: []
+    _vm_consumption_report_vmis: []
+
+- name: Collect VirtualMachines
+  ansible.builtin.include_tasks: _collect_vms.yml
+  loop: "{{ vm_consumption_report_request }}"
+  loop_control:
+    loop_var: _vm_consumption_report_query
+    label: "{{ _vm_consumption_report_query.namespace | default('all-namespaces') }}"
+
+- name: Collect VirtualMachineInstances for Running Status
+  ansible.builtin.include_tasks: _collect_vmis.yml
+  loop: "{{ vm_consumption_report_request }}"
+  loop_control:
+    loop_var: _vm_consumption_report_query
+    label: "{{ _vm_consumption_report_query.namespace | default('all-namespaces') }}"
+  when: vm_consumption_report_include_status | bool
+
+- name: Build Consumption Report
+  ansible.builtin.include_tasks: _build_report.yml
+
+- name: Write Report to File
+  ansible.builtin.copy:
+    content: "{{ vm_consumption_report_result | to_nice_json }}"
+    dest: "{{ vm_consumption_report_output_path }}"
+    mode: "0644"
+  when:
+    - vm_consumption_report_output_path | default("", true) | length > 0
+    - vm_consumption_report_output_format == "json"
+
+- name: Write CSV Report to File
+  ansible.builtin.template:
+    src: report.csv.j2
+    dest: "{{ vm_consumption_report_output_path }}"
+    mode: "0644"
+  when:
+    - vm_consumption_report_output_path | default("", true) | length > 0
+    - vm_consumption_report_output_format == "csv"
+
+- name: Display Report Summary
+  ansible.builtin.debug:
+    msg:
+      total_vms: "{{ vm_consumption_report_result.summary.total_vms }}"
+      indirect_only: "{{ vm_consumption_report_result.summary.indirect_only }}"
+      direct_only: "{{ vm_consumption_report_result.summary.direct_only }}"
+      reconciled: "{{ vm_consumption_report_result.summary.reconciled }}"
+      report_generated: "{{ vm_consumption_report_result.generated_at }}"
+...

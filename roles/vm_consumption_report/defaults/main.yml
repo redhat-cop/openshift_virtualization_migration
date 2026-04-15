@@ -1,0 +1,66 @@
+---
+# defaults file for vm_consumption_report
+
+# title: Consumption Report Request
+# required: True
+# description: >-
+#   List of namespaces (or all namespaces) to include in the
+#   consumption report. Each entry may filter by namespace, names,
+#   or label selectors.
+vm_consumption_report_request: []
+#  - namespace: <namespace>     # Namespace to query (omit for all namespaces)
+#    names:                     # Optional list of VM names to include
+#      - <vm-name>
+#    label_selectors:           # Optional label selectors (cannot be combined with names)
+#      - <key>=<value>
+
+# title: Directly Managed Hosts
+# required: False
+# description: >-
+#   List of directly managed hosts (contacted via SSH/WinRM) with
+#   their hostnames for reconciliation against indirectly managed
+#   OpenShift VMs. Each entry should include hostname and optionally
+#   a UUID if known.
+vm_consumption_report_direct_hosts: []
+#  - hostname: <hostname>       # Hostname or IP used by AAP/SSH
+#    uuid: <uuid>               # Optional UUID if already known
+
+# title: OpenShift host
+# required: True
+# description: OpenShift host
+vm_consumption_report_openshift_host: "{{ openshift_host }}"
+
+# title: OpenShift API Key
+# required: True
+# description: OpenShift API Key
+vm_consumption_report_openshift_api_key: "{{ openshift_api_key }}"
+
+# title: Verify SSL Certificate
+# required: True
+# description: Variable to enable SSL verification
+vm_consumption_report_openshift_verify_ssl: "{{ openshift_verify_ssl }}"
+
+# title: KubeVirt API Version
+# required: True
+# description: KubeVirt API Version
+vm_consumption_report_kubevirt_api_version: kubevirt.io/v1
+
+# title: Report Output Format
+# required: True
+# description: Output format for the consumption report (json or csv)
+vm_consumption_report_output_format: json
+
+# title: Report Output Path
+# required: False
+# description: >-
+#   File path to write the consumption report. If not set, the report
+#   is returned as a variable only.
+vm_consumption_report_output_path: ""
+
+# title: Include Running Status
+# required: True
+# description: >-
+#   When true, queries VirtualMachineInstance resources to determine
+#   current running state and guest OS info for reconciliation.
+vm_consumption_report_include_status: true
+...
