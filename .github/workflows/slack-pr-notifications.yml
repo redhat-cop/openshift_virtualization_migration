@@ -1,0 +1,63 @@
+name: Slack PR Notifications
+
+on:
+  pull_request:
+    types: [opened, closed, reopened]
+    branches: ["main"]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set notification details
+        id: details
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request_review" ]]; then
+            STATE="${{ github.event.review.state }}"
+            TITLE="PR Review: ${STATE} - ${{ github.event.pull_request.title }}"
+            COLOR=$([[ "$STATE" == "approved" ]] && echo "good" || echo "warning")
+            BODY="${{ github.event.review.user.login }} ${STATE} the PR"
+          else
+            ACTION="${{ github.event.action }}"
+            TITLE="PR ${ACTION^}: ${{ github.event.pull_request.title }}"
+            if [[ "$ACTION" == "closed" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
+              TITLE="PR Merged: ${{ github.event.pull_request.title }}"
+              COLOR="good"
+            elif [[ "$ACTION" == "opened" ]]; then
+              COLOR="#1a73e8"
+            elif [[ "$ACTION" == "reopened" ]]; then
+              COLOR="warning"
+            else
+              COLOR="danger"
+            fi
+            BODY="${{ github.event.pull_request.user.login }} ${ACTION} the PR"
+          fi
+
+          echo "title=${TITLE}" >> $GITHUB_OUTPUT
+          echo "color=${COLOR}" >> $GITHUB_OUTPUT
+          echo "body=${BODY}" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v2.1.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "${{ steps.details.outputs.color }}",
+                  "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "*${{ steps.details.outputs.title }}*\n${{ steps.details.outputs.body }}\n*Repo:* `${{ github.repository }}`\n*Branch:* `${{ github.event.pull_request.head.ref }}` -> `${{ github.event.pull_request.base.ref }}`\n<${{ github.event.pull_request.html_url }}|View Pull Request>"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
