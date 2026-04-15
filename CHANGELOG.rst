@@ -4,6 +4,14 @@ Openshift Virtualization Migration Release Notes
 
 .. contents:: Topics
 
+v1.24.1
+=======
+
+Documentation Changes
+---------------------
+
+- add table of contents (#30)
+
 v1.24.0
 =======
 

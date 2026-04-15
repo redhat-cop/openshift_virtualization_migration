@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## v1.24.1 (2026-04-15)
+
+### Chores
+
+- Revise min supported Ansible version
+  ([#28](https://github.com/redhat-cop/openshift_virtualization_migration/pull/28),
+  [`37de237`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/37de23764a7ab74c5850ff2b9acb6524a6e841ab))
+
+### Documentation
+
+- Add table of contents
+  ([#30](https://github.com/redhat-cop/openshift_virtualization_migration/pull/30),
+  [`f04a1c6`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/f04a1c6ea820bfb84e0ec13727bd660be59dab6d))
+
+
 ## v1.24.0 (2026-04-14)
 
 ### Bug Fixes

@@ -318,3 +318,10 @@ releases:
       - 1.24.0_feat_addOpenShiftGitOpsoperator21.yml
       - 1.24.0_feat_addsecurecredentialmanagementw.yml
     release_date: '2026-04-14'
+  1.24.1:
+    changes:
+      doc_changes:
+        - add table of contents (#30)
+    fragments:
+      - 1.24.1_docs_addtableofcontents30.yml
+    release_date: '2026-04-15'
