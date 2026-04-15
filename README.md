@@ -5,7 +5,39 @@
 [![Semantic Versioning](https://img.shields.io/badge/semver-2.0.0-blue?style=flat-square)](https://semver.org/)
 [![License](https://img.shields.io/github/license/redhat-cop/openshift_virtualization_migration?style=flat-square)](LICENSE)
 
-Ansible collection for OpenShift Virtualization Migration
+## Table of Contents
+
+* [Description](#description)
+* [Requirements](#requirements)
+* [Installation](#installation)
+* [Documentation](#documentation)
+    * [Contributing](CONTRIBUTING.md)
+    * [Disconnected Environment](docs/disconnected_environment_guide.md)
+    * [Secure Credential Management](docs/secure_credential_management.md)
+    * [Secure Credential Practices](docs/secure_credential_practices.md)
+* [Roles](#roles)
+    * [aap_deploy](roles/aap_deploy/README.md)
+    * [aap_machine_credentials](roles/aap_machine_credentials/README.md)
+    * [aap_seed](roles/aap_seed/README.md)
+    * [bootstrap](roles/bootstrap/README.md)
+    * [create_mf_aap_token](roles/create_mf_aap_token/README.md)
+    * [mtv_management](roles/mtv_management/README.md)
+    * [mtv_migrate](roles/mtv_migrate/README.md)
+    * [network_mgmt](roles/network_mgmt/README.md)
+    * [operator_management](roles/operator_management/README.md)
+    * [validate_migration](roles/validate_migration/README.md)
+    * [vm_backup_restore](roles/vm_backup_restore/README.md)
+    * [vm_collect](roles/vm_collect/README.md)
+    * [vm_hot_plug](roles/vm_hot_plug/README.md)
+    * [vm_lifecycle](roles/vm_lifecycle/README.md)
+    * [vm_mac_address](roles/vm_mac_address/README.md)
+    * [vm_networking](roles/vm_networking/README.md)
+    * [vm_patching](roles/vm_patching/README.md)
+    * [vm_ssh](roles/vm_ssh/README.md)
+* [Use Cases](#use-cases)
+* [Testing](#testing)
+* [Release Notes](CHANGELOG.md)
+* [License](#license)
 
 ## Description
 
@@ -97,11 +129,7 @@ tox -f sanity --ansible -c tox-ansible.ini     # run tox-ansible that does our a
 
 The [Ansible Forum](https://forum.ansible.com/tag/openshift_migrate) can be used for additional questions and issues related to this collection.
 
-## Release Notes
-
-Information related to the releases for this collection can be found in the Release Notes found within this collection.
-
-## License Information
+## License
 
 GNU General Public License v3.0 or later.
 
