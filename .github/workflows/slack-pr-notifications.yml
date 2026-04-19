@@ -1,0 +1,69 @@
+name: Slack PR Notifications
+
+on:
+  pull_request:
+    types: [opened, closed, reopened]
+    branches: ["main"]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set notification details
+        id: details
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          PR_USER: ${{ github.event.pull_request.user.login }}
+          REVIEW_STATE: ${{ github.event.review.state }}
+          REVIEW_USER: ${{ github.event.review.user.login }}
+        run: |
+          if [[ "$EVENT_NAME" == "pull_request_review" ]]; then
+            TITLE="PR Review: ${REVIEW_STATE} - ${PR_TITLE}"
+            COLOR=$([[ "$REVIEW_STATE" == "approved" ]] && echo "good" || echo "warning")
+            BODY="${REVIEW_USER} ${REVIEW_STATE} the PR"
+          else
+            TITLE="PR ${EVENT_ACTION^}: ${PR_TITLE}"
+            if [[ "$EVENT_ACTION" == "closed" && "$PR_MERGED" == "true" ]]; then
+              TITLE="PR Merged: ${PR_TITLE}"
+              COLOR="good"
+            elif [[ "$EVENT_ACTION" == "opened" ]]; then
+              COLOR="#1a73e8"
+            elif [[ "$EVENT_ACTION" == "reopened" ]]; then
+              COLOR="warning"
+            else
+              COLOR="danger"
+            fi
+            BODY="${PR_USER} ${EVENT_ACTION} the PR"
+          fi
+
+          echo "title=${TITLE}" >> $GITHUB_OUTPUT
+          echo "color=${COLOR}" >> $GITHUB_OUTPUT
+          echo "body=${BODY}" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v2.1.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "${{ steps.details.outputs.color }}",
+                  "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "*${{ steps.details.outputs.title }}*\n${{ steps.details.outputs.body }}\n*Repo:* `${{ github.repository }}`\n*Branch:* `${{ github.event.pull_request.head.ref }}` -> `${{ github.event.pull_request.base.ref }}`\n<${{ github.event.pull_request.html_url }}|View Pull Request>"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
