@@ -13,26 +13,32 @@ jobs:
     steps:
       - name: Set notification details
         id: details
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          PR_USER: ${{ github.event.pull_request.user.login }}
+          REVIEW_STATE: ${{ github.event.review.state }}
+          REVIEW_USER: ${{ github.event.review.user.login }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request_review" ]]; then
-            STATE="${{ github.event.review.state }}"
-            TITLE="PR Review: ${STATE} - ${{ github.event.pull_request.title }}"
-            COLOR=$([[ "$STATE" == "approved" ]] && echo "good" || echo "warning")
-            BODY="${{ github.event.review.user.login }} ${STATE} the PR"
+          if [[ "$EVENT_NAME" == "pull_request_review" ]]; then
+            TITLE="PR Review: ${REVIEW_STATE} - ${PR_TITLE}"
+            COLOR=$([[ "$REVIEW_STATE" == "approved" ]] && echo "good" || echo "warning")
+            BODY="${REVIEW_USER} ${REVIEW_STATE} the PR"
           else
-            ACTION="${{ github.event.action }}"
-            TITLE="PR ${ACTION^}: ${{ github.event.pull_request.title }}"
-            if [[ "$ACTION" == "closed" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
-              TITLE="PR Merged: ${{ github.event.pull_request.title }}"
+            TITLE="PR ${EVENT_ACTION^}: ${PR_TITLE}"
+            if [[ "$EVENT_ACTION" == "closed" && "$PR_MERGED" == "true" ]]; then
+              TITLE="PR Merged: ${PR_TITLE}"
               COLOR="good"
-            elif [[ "$ACTION" == "opened" ]]; then
+            elif [[ "$EVENT_ACTION" == "opened" ]]; then
               COLOR="#1a73e8"
-            elif [[ "$ACTION" == "reopened" ]]; then
+            elif [[ "$EVENT_ACTION" == "reopened" ]]; then
               COLOR="warning"
             else
               COLOR="danger"
             fi
-            BODY="${{ github.event.pull_request.user.login }} ${ACTION} the PR"
+            BODY="${PR_USER} ${EVENT_ACTION} the PR"
           fi
 
           echo "title=${TITLE}" >> $GITHUB_OUTPUT
