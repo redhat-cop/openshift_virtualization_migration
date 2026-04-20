@@ -36,7 +36,7 @@ aap_deploy_openshift_verify_ssl: "{{ openshift_verify_ssl }}"
 # required: True
 # description: The names of the components to verify is running after installation.
 aap_deploy_validate_components:
-  - "{{ aap_instance_name + '-controller-task' if aap_version is
+  - "{{ aap_instance_name + '-controller-web' if aap_version is
     not defined or aap_version is version('2.5', '>=') else aap_instance_name + '-web' }}"
   - "{{ aap_instance_name + '-controller-task' if aap_version is
     not defined or aap_version is version('2.5', '>=') else aap_instance_name + '-task' }}"
