@@ -68,7 +68,7 @@ bootstrap_controller_username: admin
 
 # title: Bootstrap AAP Version
 # required: false
-bootstrap_aap_version: "{{ aap_version | default(2.5) }}"
+bootstrap_aap_version: "{{ aap_version | default(2.6) }}"
 
 # title: Validate Controller SSL certificates
 # required: false
