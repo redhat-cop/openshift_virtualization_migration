@@ -1,0 +1,35 @@
+---
+# defaults file for mtv_warm_cutover
+
+# title: Warm Cutover Request
+# required: True
+# description: List of warm migration cutover requests
+mtv_warm_cutover_request: []
+# -  namespace: <namespace> # Namespace containing the Migration resources.
+#    names: # List of Migration resource names to trigger cutover for. \
+#      Optional when using label_selectors or plan_name.
+#      - <migration_name>
+#    label_selectors: # Label selectors to match Migration resources.
+#      - <key>=<value>
+#    plan_name: # Name of the Plan to find associated Migrations for cutover.
+#    cutover: # ISO 8601 timestamp for scheduled cutover \
+#      (e.g., '2026-04-07T02:00:00Z'). If empty, uses current time.
+
+# title: MTV Namespace
+# required: False
+# description: Default namespace for MTV resources
+mtv_warm_cutover_default_namespace: openshift-mtv
+# title: Verify Cutover Complete
+# required: False
+# description: Wait until cutover migrations complete
+mtv_warm_cutover_verify_complete: true
+# title: Verify Complete Retries
+# required: False
+# description: Number of retries when waiting for cutover completion
+mtv_warm_cutover_verify_retries: 360
+# title: Verify Complete Delay
+# required: False
+# description: Seconds to wait between retries
+mtv_warm_cutover_verify_delay: 20
+
+...

@@ -1,0 +1,100 @@
+---
+
+- name: _process_cutover | Set Working Namespace
+  ansible.builtin.set_fact:
+    mtv_warm_cutover_namespace: >-
+      {{ mtv_warm_cutover_item.namespace
+         | default(mtv_warm_cutover_default_namespace) }}
+
+- name: _process_cutover | Query Migrations by Name
+  when: mtv_warm_cutover_item.names | default([], true) | length > 0
+  kubernetes.core.k8s_info:
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Migration
+    namespace: "{{ mtv_warm_cutover_namespace }}"
+    name: "{{ mtv_warm_cutover_migration_name }}"
+  register: mtv_warm_cutover_by_name
+  loop: "{{ mtv_warm_cutover_item.names }}"
+  loop_control:
+    loop_var: mtv_warm_cutover_migration_name
+    label: "{{ mtv_warm_cutover_migration_name }}"
+
+- name: _process_cutover | Query Migrations by Label Selector
+  when:
+    - mtv_warm_cutover_item.names | default([], true) | length == 0
+    - mtv_warm_cutover_item.label_selectors | default([], true) | length > 0
+  kubernetes.core.k8s_info:
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Migration
+    namespace: "{{ mtv_warm_cutover_namespace }}"
+    label_selectors: "{{ mtv_warm_cutover_item.label_selectors }}"
+  register: mtv_warm_cutover_by_selector
+
+- name: _process_cutover | Query Migrations by Plan Name
+  when:
+    - mtv_warm_cutover_item.names | default([], true) | length == 0
+    - mtv_warm_cutover_item.label_selectors | default([], true) | length == 0
+    - mtv_warm_cutover_item.plan_name | default("", true) | length > 0
+  kubernetes.core.k8s_info:
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Migration
+    namespace: "{{ mtv_warm_cutover_namespace }}"
+  register: mtv_warm_cutover_by_plan_query
+
+- name: _process_cutover | Filter Migrations for Plan
+  when: mtv_warm_cutover_by_plan_query is not skipped
+  ansible.builtin.set_fact:
+    mtv_warm_cutover_by_plan:
+      resources: >-
+        {{ mtv_warm_cutover_by_plan_query.resources
+           | selectattr('spec.plan.name', 'equalto', mtv_warm_cutover_item.plan_name)
+           | list }}
+
+- name: _process_cutover | Build Migration List from Named Queries
+  when: mtv_warm_cutover_by_name is not skipped
+  ansible.builtin.set_fact:
+    mtv_warm_cutover_migrations: >-
+      {{ mtv_warm_cutover_by_name.results
+         | selectattr('resources', 'defined')
+         | map(attribute='resources')
+         | flatten }}
+
+- name: _process_cutover | Build Migration List from Selector
+  when: mtv_warm_cutover_by_selector is not skipped
+  ansible.builtin.set_fact:
+    mtv_warm_cutover_migrations: >-
+      {{ mtv_warm_cutover_by_selector.resources | default([]) }}
+
+- name: _process_cutover | Build Migration List from Plan
+  when:
+    - mtv_warm_cutover_by_plan is defined
+    - mtv_warm_cutover_by_plan is not skipped
+  ansible.builtin.set_fact:
+    mtv_warm_cutover_migrations: >-
+      {{ mtv_warm_cutover_by_plan.resources | default([]) }}
+
+- name: _process_cutover | Verify Migrations Found
+  ansible.builtin.assert:
+    that:
+      - mtv_warm_cutover_migrations | default([], true) | length > 0
+    fail_msg: >-
+      No Migration resources found in namespace
+      '{{ mtv_warm_cutover_namespace }}'
+      matching the provided criteria
+    quiet: true
+
+- name: _process_cutover | Determine Cutover Timestamp
+  ansible.builtin.set_fact:
+    mtv_warm_cutover_timestamp: >-
+      {{ mtv_warm_cutover_item.cutover
+         | default(now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ')) }}
+
+- name: _process_cutover | Trigger Cutover on Migrations
+  ansible.builtin.include_tasks:
+    file: _apply_cutover.yml
+  loop: "{{ mtv_warm_cutover_migrations }}"
+  loop_control:
+    loop_var: mtv_warm_cutover_migration
+    label: "{{ mtv_warm_cutover_migration.metadata.name }}"
+
+...
