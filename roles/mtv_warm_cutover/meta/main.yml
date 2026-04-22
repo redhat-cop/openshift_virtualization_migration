@@ -4,7 +4,7 @@ galaxy_info:
   description: Trigger cutover for warm migrations to finish the migration process.
   company: Red Hat
   license: GPL-3.0-only
-  min_ansible_version: 2.15.0
+  min_ansible_version: 2.16.0
   galaxy_tags: []
 dependencies: []
 ...

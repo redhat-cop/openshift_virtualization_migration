@@ -1,18 +1,21 @@
 ---
 
-- name: _apply_cutover | Verify Migration Is a Warm Migration
-  ansible.builtin.assert:
-    that:
-      - >-
-        mtv_warm_cutover_migration.spec.cutover is not defined or
-        mtv_warm_cutover_migration.spec.cutover | default("", true) | length == 0
-    fail_msg: >-
-      Migration '{{ mtv_warm_cutover_migration.metadata.name }}' already has
-      a cutover timestamp set
-      ('{{ mtv_warm_cutover_migration.spec.cutover | default("") }}')
-    quiet: true
+- name: _apply_cutover | Check if Cutover Already Defined
+  ansible.builtin.set_fact:
+    mtv_warm_cutover_already_set: >-
+      {{ mtv_warm_cutover_migration.spec.cutover is defined and
+         mtv_warm_cutover_migration.spec.cutover | default("", true) | length > 0 }}
+
+- name: _apply_cutover | Skip Already-Cutover Migration
+  when: mtv_warm_cutover_already_set | bool
+  ansible.builtin.debug:
+    msg: >-
+      Skipping Migration '{{ mtv_warm_cutover_migration.metadata.name }}'
+      — cutover already set to
+      '{{ mtv_warm_cutover_migration.spec.cutover }}'
 
 - name: _apply_cutover | Patch Migration with Cutover Timestamp
+  when: not (mtv_warm_cutover_already_set | bool)
   kubernetes.core.k8s_json_patch:
     api_version: forklift.konveyor.io/v1beta1
     kind: Migration
@@ -25,6 +28,7 @@
   register: mtv_warm_cutover_patch_result
 
 - name: _apply_cutover | Report Cutover Triggered
+  when: not (mtv_warm_cutover_already_set | bool)
   ansible.builtin.debug:
     msg: >-
       Cutover triggered for Migration
@@ -32,7 +36,9 @@
       at {{ mtv_warm_cutover_timestamp }}
 
 - name: _apply_cutover | Wait for Migration to Complete
-  when: mtv_warm_cutover_verify_complete | bool
+  when:
+    - not (mtv_warm_cutover_already_set | bool)
+    - mtv_warm_cutover_verify_complete | bool
   kubernetes.core.k8s_info:
     api_version: forklift.konveyor.io/v1beta1
     kind: Migration
@@ -51,7 +57,9 @@
   delay: "{{ mtv_warm_cutover_verify_delay }}"
 
 - name: _apply_cutover | Verify Migration Succeeded
-  when: mtv_warm_cutover_verify_complete | bool
+  when:
+    - not (mtv_warm_cutover_already_set | bool)
+    - mtv_warm_cutover_verify_complete | bool
   ansible.builtin.assert:
     that:
       - >-
