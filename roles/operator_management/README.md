@@ -14,7 +14,7 @@ This role manages the lifecycle of operators for OpenShift Virtualization
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.24.2
+Version - 1.25.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 

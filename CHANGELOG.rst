@@ -4,6 +4,20 @@ Openshift Virtualization Migration Release Notes
 
 .. contents:: Topics
 
+v1.25.0
+=======
+
+Minor Changes
+-------------
+
+- Update default channel to 2.6 (#34)
+
+Bugfixes
+--------
+
+- corrected variable names in validate_migration role (#26)
+- corrected web validation component in aap 2.5+ (#33)
+
 v1.24.2
 =======
 

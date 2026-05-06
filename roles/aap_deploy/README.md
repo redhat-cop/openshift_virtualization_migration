@@ -12,7 +12,7 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.24.2
+Version - 1.25.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -32,11 +32,11 @@ Description: Deploys an instance of Ansible Automation Platform.
 | [`aap_deploy_openshift_api_key`](defaults/main.yml#L28)   | str   | `{{ openshift_api_key }}` |  None  |   False  |  OpenShift API authentication key |
 | [`aap_deploy_openshift_verify_ssl`](defaults/main.yml#L33)   | str   | `{{ openshift_verify_ssl }}` |  None  |   False  |  Verify SSL certificates for OpenShift connection |
 | [`aap_deploy_validate_components`](defaults/main.yml#L38)   | list   | `[]` |  None  |   True  |  Ansible Automation Platform component validation |
-| [`aap_deploy_validate_components.0`](defaults/main.yml#L38)   | str   | `{{ aap_instance_name + '-controller-task' if aap_version is not defined or aap_version is version('2.5', '>=') else aap_instance_name + '-web' }}` |  None  |   True  |  Ansible Automation Platform component validation |
+| [`aap_deploy_validate_components.0`](defaults/main.yml#L38)   | str   | `{{ aap_instance_name + '-controller-web' if aap_version is not defined or aap_version is version('2.5', '>=') else aap_instance_name + '-web' }}` |  None  |   True  |  Ansible Automation Platform component validation |
 | [`aap_deploy_validate_components.1`](defaults/main.yml#L38)   | str   | `{{ aap_instance_name + '-controller-task' if aap_version is not defined or aap_version is version('2.5', '>=') else aap_instance_name + '-task' }}` |  None  |   True  |  Ansible Automation Platform component validation |
 | [`aap_deploy_validate_components.2`](defaults/main.yml#L38)   | str   | `{{ aap_instance_name + '-gateway' if aap_version is not defined or aap_version is version('2.5', '>=') else '' }}` |  None  |   True  |  Ansible Automation Platform component validation |
 | [`aap_deploy_cac_collection`](defaults/main.yml#L49)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  Ansible Automation Platform configuration collection |
-| [`aap_deploy_aap_channel`](defaults/main.yml#L53)   | str   | `{{ aap_channel ¦ default('stable-2.5') }}` |  None  |   None  |  None |
+| [`aap_deploy_aap_channel`](defaults/main.yml#L53)   | str   | `{{ aap_channel ¦ default('stable-2.6') }}` |  None  |   None  |  None |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>

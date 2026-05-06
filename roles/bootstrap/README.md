@@ -12,7 +12,7 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.24.2
+Version - 1.25.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -41,7 +41,7 @@ Description: Initialization of the Ansible for OpenShift Virtualization Migratio
 | [`bootstrap_aap_license_manifest`](defaults/main.yml#L54)   | str   | `` |  None  |   false  |  Location of the AAP license manifest file |
 | [`bootstrap_controller_hostname`](defaults/main.yml#L63)   | str   | `{{ controller_hostname ¦ default(ansible_host) }}` |  None  |   false  |  Bootstrap controller hostname |
 | [`bootstrap_controller_username`](defaults/main.yml#L67)   | str   | `admin` |  None  |   false  |  Bootstrap controller username |
-| [`bootstrap_aap_version`](defaults/main.yml#L71)   | str   | `{{ aap_version ¦ default(2.5) }}` |  None  |   false  |  Bootstrap AAP Version |
+| [`bootstrap_aap_version`](defaults/main.yml#L71)   | str   | `{{ aap_version ¦ default(2.6) }}` |  None  |   false  |  Bootstrap AAP Version |
 | [`bootstrap_controller_validate_certs`](defaults/main.yml#L75)   | str   | `{{ controller_validate_certs ¦ default(false) }}` |  None  |   false  |  Validate Controller SSL certificates |
 | [`bootstrap_license_file_submission_retries`](defaults/main.yml#L81)   | int   | `25` |  None  |   True  |  License File Submission Retries |
 | [`bootstrap_license_file_submission_delay`](defaults/main.yml#L87)   | int   | `10` |  None  |   True  |  License File Submission Delay |
