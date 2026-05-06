@@ -86,8 +86,10 @@ jobs:
   # Unified CI: Runs for internal events OR after external approval OR after release approval
   ci:
     needs: [setup, external-approval, release-approval]
+    # always() allows job to run even when dependencies are skipped, but we still require explicit success checks
     # Run if setup succeeds AND (not external OR external-approval succeeds) AND (not release OR release-approval succeeds)
     if: |
+      always() &&
       (needs.setup.result == 'success') &&
       (needs.setup.outputs.is_external == 'false' || needs.external-approval.result == 'success') &&
       (github.event_name != 'workflow_dispatch' || inputs.trigger_release != true || needs.release-approval.result == 'success')
