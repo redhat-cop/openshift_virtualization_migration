@@ -1,5 +1,35 @@
 # CHANGELOG
 
+## v1.25.0 (2026-05-06)
+
+### Bug Fixes
+
+- Corrected variable names in validate_migration role (#26) [skip ci]
+  ([`d20f0cc`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/d20f0cc694aa184bf01b757a3d9eaffc6ac386d4))
+
+- Corrected web validation component in aap 2.5+ (#33) [skip ci]
+  ([`85d39f6`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/85d39f6e9de6ca2c0cfb865b8b4a4534ce20e9fd))
+
+### Chores
+
+- Change to manual release workflow
+  ([#36](https://github.com/redhat-cop/openshift_virtualization_migration/pull/36),
+  [`c500378`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/c500378c6583f8782ebbe548e74649832d656281))
+
+- **ci**: Restore always() condition for ci job
+  ([#36](https://github.com/redhat-cop/openshift_virtualization_migration/pull/36),
+  [`c500378`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/c500378c6583f8782ebbe548e74649832d656281))
+
+- **ci**: Update workflow to support manual releases [skip ci]
+  ([#36](https://github.com/redhat-cop/openshift_virtualization_migration/pull/36),
+  [`c500378`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/c500378c6583f8782ebbe548e74649832d656281))
+
+### Features
+
+- Update default channel to 2.6 (#34) [skip ci]
+  ([`3d424d6`](https://github.com/redhat-cop/openshift_virtualization_migration/commit/3d424d657d97fcad820e712f933e007c789385e0))
+
+
 ## v1.24.2 (2026-05-01)
 
 ### Bug Fixes
