@@ -81,6 +81,7 @@
         headers:
           Authorization: Bearer {{ openshift_api_key }}
       register: _mtv_management_mtv_inventory_query_result
+      no_log: true
 
     - name: mtv_query_inventory | Set Result Fact
       ansible.builtin.set_fact:

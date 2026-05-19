@@ -19,6 +19,7 @@
       default([]) |
       selectattr('name', 'equalto', vm_hot_plug_storage_instance.name) | list | length == 0
     )
+  no_log: true
   ansible.builtin.uri:
     url:
       "{{ vm_hot_plug_openshift_host }}/apis/subresources.{{ vm_hot_plug_kubevirt_api_version }}\

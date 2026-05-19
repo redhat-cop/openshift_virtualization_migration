@@ -56,6 +56,7 @@
   delay: 5
   register: aap_seed_api_status
   until: aap_seed_api_status.status == 200
+  no_log: true
   ansible.builtin.uri:
     url: https://{{ aap_seed_controller_hostname }}/api{{ '/controller' if aap_version is not defined or aap_version is defined and aap_version is version('2.5', '>=') }}/v2/config/ # noqa: yaml[line-length]
     method: GET
@@ -72,6 +73,7 @@
   delay: 5
   register: aap_seed_api_status
   until: aap_seed_api_status.status == 200
+  no_log: true
   ansible.builtin.uri:
     url: https://{{ aap_seed_controller_hostname }}/api{{ '/controller' if aap_version is not defined or aap_version is defined and aap_version is version('2.5', '>=') }}/v2/config/ # noqa: yaml[line-length]
     method: GET
@@ -94,9 +96,7 @@
 
 - name: Set variables for {{ aap_seed_cac_collection }}
   ansible.builtin.set_fact:
-    controller_configuration_secure_logging: false # noqa: var-naming[no-role-prefix]
     controller_configuration_async_delay: 5 # noqa: var-naming[no-role-prefix]
-    aap_configuration_secure_logging: false # noqa: var-naming[no-role-prefix]
     aap_configuration_async_delay: 5 # noqa: var-naming[no-role-prefix]
 
 - name: Call dispatch role

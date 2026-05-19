@@ -189,3 +189,7 @@ cython_debug/
 *.sarif
 
 **tar.gz
+
+# Secrets and certificates
+*.pem
+*.key
