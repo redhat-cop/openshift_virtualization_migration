@@ -2,32 +2,14 @@
 
 ## Supported Versions
 
-| Version | Supported |
-|---------|-----------|
-| Latest  | Yes       |
+Ansible applies security fixes according to the 3-versions-back support
+policy. Please find more information in [our docs](
+https://docs.ansible.com/ansible/devel/reference_appendices/release_and_maintenance.html#release-status
+).
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in **openshift_virtualization_migration**, please report it
-responsibly.
-
-**Do NOT open a public GitHub issue for security vulnerabilities.**
-
-Instead, please send an email to **sfulmer@redhat.com** with:
-
-- A description of the vulnerability
-- Steps to reproduce the issue
-- Potential impact
-- Suggested fix (if any)
-
-You should receive a response within 48 hours. We will work with you to
-understand and address the issue before any public disclosure.
-
-## Security Best Practices
-
-When contributing to this project:
-
-- Never commit credentials, API keys, or tokens
-- Use environment variables or vault for sensitive data
-- Keep dependencies up to date
-- Follow the principle of least privilege in all automation
+We encourage responsible disclosure practices for security
+vulnerabilities. Please read our [policies for reporting bugs](
+https://docs.ansible.com/ansible/devel/community/reporting_bugs_and_features.html#reporting-a-bug
+) if you want to report a security issue that might affect Ansible.
