@@ -1,0 +1,81 @@
+---
+- name: post_migration_vm | Check VirtualMachineInstance status
+  kubernetes.core.k8s_info:
+    api_version: kubevirt.io/v1
+    kind: VirtualMachineInstance
+    name: "{{ __cluster_healthcheck_vm.name }}"
+    namespace: "{{ __cluster_healthcheck_vm.namespace }}"
+  register: __cluster_healthcheck_vmi
+  loop: "{{ cluster_healthcheck_post_migration_vms }}"
+  loop_control:
+    loop_var: __cluster_healthcheck_vm
+    label: "{{ __cluster_healthcheck_vm.namespace }}/{{ __cluster_healthcheck_vm.name }}"
+
+- name: post_migration_vm | Evaluate VM status
+  ansible.builtin.set_fact:
+    __cluster_healthcheck_vm_results: >-
+      {{ __cluster_healthcheck_vm_results | default([]) + [{
+           'name': __cluster_healthcheck_vmi_item.__cluster_healthcheck_vm.namespace + '/' +
+                   __cluster_healthcheck_vmi_item.__cluster_healthcheck_vm.name,
+           'running': (__cluster_healthcheck_vmi_item.resources | length > 0 and
+                       __cluster_healthcheck_vmi_item.resources[0].status.phase | default('') == 'Running'),
+           'guest_agent': (__cluster_healthcheck_vmi_item.resources | length > 0 and
+                           __cluster_healthcheck_vmi_item.resources[0].status.guestOSInfo
+                           | default({}) | length > 0),
+           'interfaces': (__cluster_healthcheck_vmi_item.resources | length > 0 and
+                          __cluster_healthcheck_vmi_item.resources[0].status.interfaces | default([])
+                          | selectattr('ipAddress', 'defined')
+                          | list | length > 0)
+         }] }}
+  loop: "{{ __cluster_healthcheck_vmi.results }}"
+  loop_control:
+    loop_var: __cluster_healthcheck_vmi_item
+    label: >-
+      {{ __cluster_healthcheck_vmi_item.__cluster_healthcheck_vm.namespace }}/{{
+         __cluster_healthcheck_vmi_item.__cluster_healthcheck_vm.name }}
+
+- name: post_migration_vm | Report VM status
+  ansible.builtin.debug:
+    msg: >-
+      VM {{ item.name }} -
+      Running: {{ item.running }},
+      Guest Agent: {{ item.guest_agent }},
+      Network: {{ item.interfaces }}
+  loop: "{{ __cluster_healthcheck_vm_results | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: post_migration_vm | Optional SSH connectivity check
+  ansible.builtin.wait_for:
+    host: >-
+      {{ __cluster_healthcheck_vmi_item.resources[0].status.interfaces[0].ipAddress }}
+    port: 22
+    timeout: "{{ cluster_healthcheck_ssh_timeout }}"
+    state: started
+  loop: "{{ __cluster_healthcheck_vmi.results }}"
+  loop_control:
+    loop_var: __cluster_healthcheck_vmi_item
+    label: >-
+      {{ __cluster_healthcheck_vmi_item.__cluster_healthcheck_vm.namespace }}/{{
+         __cluster_healthcheck_vmi_item.__cluster_healthcheck_vm.name }}
+  when:
+    - __cluster_healthcheck_vmi_item.__cluster_healthcheck_vm.check_ssh | default(false)
+    - __cluster_healthcheck_vmi_item.resources | length > 0
+    - __cluster_healthcheck_vmi_item.resources[0].status.interfaces | default([]) | length > 0
+  ignore_errors: true # noqa: ignore-errors
+  register: __cluster_healthcheck_ssh_results
+
+- name: post_migration_vm | Set post-migration VM result
+  ansible.builtin.set_fact:
+    __cluster_healthcheck_results: >-
+      {{ __cluster_healthcheck_results | combine({
+           'post_migration_vm': {
+             'status': ('fail' if (__cluster_healthcheck_vm_results | default([])
+                                   | selectattr('running', 'false') | list | length > 0)
+                        else ('warning' if (__cluster_healthcheck_vm_results | default([])
+                                            | selectattr('guest_agent', 'false') | list | length > 0)
+                              else 'pass')),
+             'details': __cluster_healthcheck_vm_results | default([])
+           }
+         }) }}
+...

@@ -1,0 +1,122 @@
+---
+- name: network_health | Check Multus pods
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: openshift-multus
+    label_selectors:
+      - "app=multus"
+  register: __cluster_healthcheck_multus_pods
+
+- name: network_health | Evaluate Multus pod health
+  ansible.builtin.set_fact:
+    __cluster_healthcheck_multus_running: >-
+      {{ __cluster_healthcheck_multus_pods.resources
+         | selectattr('status.phase', 'equalto', 'Running')
+         | list | length }}
+    __cluster_healthcheck_multus_total: >-
+      {{ __cluster_healthcheck_multus_pods.resources | length }}
+
+- name: network_health | List NetworkAttachmentDefinitions
+  kubernetes.core.k8s_info:
+    api_version: k8s.cni.cncf.io/v1
+    kind: NetworkAttachmentDefinition
+  register: __cluster_healthcheck_nad
+
+- name: network_health | Report NetworkAttachmentDefinitions
+  ansible.builtin.debug:
+    msg: >-
+      NetworkAttachmentDefinition: {{ item.metadata.namespace }}/{{ item.metadata.name }}
+  loop: "{{ __cluster_healthcheck_nad.resources }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+  when: cluster_healthcheck_debug
+
+- name: network_health | Check OVN-Kubernetes pods
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: openshift-ovn-kubernetes
+    label_selectors:
+      - "app=ovnkube-node"
+  register: __cluster_healthcheck_ovn_pods
+
+- name: network_health | Check OpenShiftSDN pods as fallback
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: openshift-sdn
+    label_selectors:
+      - "app=sdn"
+  register: __cluster_healthcheck_sdn_pods
+  when: __cluster_healthcheck_ovn_pods.resources | length == 0
+
+- name: network_health | Evaluate SDN health
+  ansible.builtin.set_fact:
+    __cluster_healthcheck_sdn_type: >-
+      {{ 'ovn-kubernetes' if __cluster_healthcheck_ovn_pods.resources | length > 0
+         else ('openshift-sdn' if (__cluster_healthcheck_sdn_pods.resources | default([]) | length > 0)
+               else 'unknown') }}
+    __cluster_healthcheck_sdn_running: >-
+      {{ (__cluster_healthcheck_ovn_pods.resources
+          | selectattr('status.phase', 'equalto', 'Running')
+          | list | length) if __cluster_healthcheck_ovn_pods.resources | length > 0
+         else (__cluster_healthcheck_sdn_pods.resources | default([])
+               | selectattr('status.phase', 'equalto', 'Running')
+               | list | length) }}
+
+- name: network_health | Get HyperConverged CR for migration network config
+  kubernetes.core.k8s_info:
+    api_version: hco.kubevirt.io/v1beta1
+    kind: HyperConverged
+    namespace: "{{ cluster_healthcheck_kubevirt_namespace }}"
+  register: __cluster_healthcheck_hco_network
+
+- name: network_health | Extract configured migration network
+  ansible.builtin.set_fact:
+    __cluster_healthcheck_migration_network: >-
+      {{ __cluster_healthcheck_hco_network.resources[0].spec.liveMigrationConfig.network
+         | default('') }}
+  when: __cluster_healthcheck_hco_network.resources | length > 0
+
+- name: network_health | Check migration network NAD
+  kubernetes.core.k8s_info:
+    api_version: k8s.cni.cncf.io/v1
+    kind: NetworkAttachmentDefinition
+    namespace: "{{ cluster_healthcheck_kubevirt_namespace }}"
+  register: __cluster_healthcheck_migration_nad
+  when: __cluster_healthcheck_migration_network | default('') | length > 0
+
+- name: network_health | Set network health result
+  ansible.builtin.set_fact:
+    __cluster_healthcheck_results: >-
+      {{ __cluster_healthcheck_results | combine({
+           'network_health': {
+             'status': ('fail' if __cluster_healthcheck_sdn_type == 'unknown'
+                        else ('warning' if __cluster_healthcheck_multus_total | int == 0
+                              else 'pass')),
+             'details': [
+               { 'check': 'Multus Pods',
+                 'status': ('pass' if __cluster_healthcheck_multus_running | int > 0 else 'warning'),
+                 'message': (__cluster_healthcheck_multus_running | string + '/' +
+                             __cluster_healthcheck_multus_total | string + ' Multus pods Running') },
+               { 'check': 'SDN Type',
+                 'status': ('pass' if __cluster_healthcheck_sdn_type != 'unknown' else 'fail'),
+                 'message': ('SDN: ' + __cluster_healthcheck_sdn_type) },
+               { 'check': 'NetworkAttachmentDefinitions',
+                 'status': 'pass',
+                 'message': (__cluster_healthcheck_nad.resources | length | string +
+                             ' NAD(s) found across cluster') },
+               { 'check': 'Migration Network',
+                 'status': ('pass' if (__cluster_healthcheck_migration_network | default('') | length == 0 or
+                                      (__cluster_healthcheck_migration_nad.resources | default([]) | length > 0))
+                            else 'warning'),
+                 'message': ('No dedicated migration network configured in HyperConverged CR'
+                             if __cluster_healthcheck_migration_network | default('') | length == 0
+                             else ((__cluster_healthcheck_migration_nad.resources | default([]) | length | string) +
+                                   ' NAD(s) in ' + cluster_healthcheck_kubevirt_namespace +
+                                   ' for migration network ' + __cluster_healthcheck_migration_network)) }
+             ]
+           }
+         }) }}
+...

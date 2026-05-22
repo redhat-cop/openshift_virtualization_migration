@@ -1,0 +1,40 @@
+---
+# tasks file for cluster_healthcheck
+- name: Initialize healthcheck results
+  ansible.builtin.set_fact:
+    __cluster_healthcheck_results:
+      ocp_node_health: { status: "skipped", details: [] }
+      kubevirt_health: { status: "skipped", details: [] }
+      mtv_health: { status: "skipped", details: [] }
+      storage_health: { status: "skipped", details: [] }
+      network_health: { status: "skipped", details: [] }
+      post_migration_vm: { status: "skipped", details: [] }
+
+- name: Include ocp_node_health tasks
+  ansible.builtin.include_tasks: ocp_node_health.yml
+  when: "'ocp_node_health' in cluster_healthcheck_checks"
+
+- name: Include kubevirt_health tasks
+  ansible.builtin.include_tasks: kubevirt_health.yml
+  when: "'kubevirt_health' in cluster_healthcheck_checks"
+
+- name: Include mtv_health tasks
+  ansible.builtin.include_tasks: mtv_health.yml
+  when: "'mtv_health' in cluster_healthcheck_checks"
+
+- name: Include storage_health tasks
+  ansible.builtin.include_tasks: storage_health.yml
+  when: "'storage_health' in cluster_healthcheck_checks"
+
+- name: Include network_health tasks
+  ansible.builtin.include_tasks: network_health.yml
+  when: "'network_health' in cluster_healthcheck_checks"
+
+- name: Include post_migration_vm tasks
+  ansible.builtin.include_tasks: post_migration_vm.yml
+  when: "cluster_healthcheck_post_migration_vms | length > 0"
+
+- name: Include report tasks
+  ansible.builtin.include_tasks: report.yml
+  when: cluster_healthcheck_generate_report
+...

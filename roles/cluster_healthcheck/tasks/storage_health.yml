@@ -1,0 +1,109 @@
+---
+- name: storage_health | Get StorageClass resources
+  kubernetes.core.k8s_info:
+    api_version: storage.k8s.io/v1
+    kind: StorageClass
+  register: __cluster_healthcheck_storage_classes
+
+- name: storage_health | Check for default StorageClass
+  ansible.builtin.set_fact:
+    __cluster_healthcheck_default_sc: >-
+      {{ __cluster_healthcheck_storage_classes.resources
+         | selectattr('metadata.annotations', 'defined')
+         | selectattr('metadata.annotations', 'ansible.builtin.contains',
+                      'storageclass.kubernetes.io/is-default-class')
+         | list }}
+
+- name: storage_health | Report StorageClasses
+  ansible.builtin.debug:
+    msg: >-
+      StorageClass: {{ item.metadata.name }},
+      Provisioner: {{ item.provisioner }},
+      Default: {{ 'Yes' if (item.metadata.annotations | default({})
+                            ).get('storageclass.kubernetes.io/is-default-class', 'false') == 'true'
+                  else 'No' }}
+  loop: "{{ __cluster_healthcheck_storage_classes.resources }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+
+- name: storage_health | Check CSI driver pods
+  kubernetes.core.k8s_info:
+    api_version: storage.k8s.io/v1
+    kind: CSIDriver
+  register: __cluster_healthcheck_csi_drivers
+
+- name: storage_health | Report CSI drivers
+  ansible.builtin.debug:
+    msg: "CSI Driver: {{ item.metadata.name }}"
+  loop: "{{ __cluster_healthcheck_csi_drivers.resources }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+
+- name: storage_health | Get PersistentVolumes
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: PersistentVolume
+  register: __cluster_healthcheck_pvs
+
+- name: storage_health | Evaluate PV capacity
+  ansible.builtin.set_fact:
+    __cluster_healthcheck_pv_available: >-
+      {{ __cluster_healthcheck_pvs.resources
+         | selectattr('status.phase', 'equalto', 'Available')
+         | list | length }}
+    __cluster_healthcheck_pv_total: >-
+      {{ __cluster_healthcheck_pvs.resources | length }}
+
+- name: storage_health | Check for PVCs stuck in Pending
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: PersistentVolumeClaim
+    field_selectors:
+      - status.phase=Pending
+  register: __cluster_healthcheck_pending_pvcs
+
+- name: storage_health | Report pending PVCs
+  ansible.builtin.debug:
+    msg: >-
+      PVC {{ item.metadata.namespace }}/{{ item.metadata.name }} is stuck in Pending state
+  loop: "{{ __cluster_healthcheck_pending_pvcs.resources }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+
+- name: storage_health | Set storage health result
+  ansible.builtin.set_fact:
+    __cluster_healthcheck_results: >-
+      {{ __cluster_healthcheck_results | combine({
+           'storage_health': {
+             'status': ('fail' if __cluster_healthcheck_storage_classes.resources | length == 0
+                        else ('warning' if (__cluster_healthcheck_default_sc | length == 0 or
+                                            __cluster_healthcheck_pending_pvcs.resources | length > 0)
+                              else 'pass')),
+             'details': [
+               { 'check': 'StorageClasses Exist',
+                 'status': ('pass' if __cluster_healthcheck_storage_classes.resources | length > 0 else 'fail'),
+                 'message': (__cluster_healthcheck_storage_classes.resources | length | string +
+                             ' StorageClass(es) found') },
+               { 'check': 'Default StorageClass',
+                 'status': ('pass' if __cluster_healthcheck_default_sc | length > 0 else 'warning'),
+                 'message': ('Default StorageClass configured'
+                             if __cluster_healthcheck_default_sc | length > 0
+                             else 'No default StorageClass set') },
+               { 'check': 'CSI Drivers',
+                 'status': ('pass' if __cluster_healthcheck_csi_drivers.resources | length > 0 else 'warning'),
+                 'message': (__cluster_healthcheck_csi_drivers.resources | length | string +
+                             ' CSI driver(s) found') },
+               { 'check': 'PV Capacity',
+                 'status': 'pass',
+                 'message': (__cluster_healthcheck_pv_available | string + '/' +
+                             __cluster_healthcheck_pv_total | string + ' PV(s) Available') },
+               { 'check': 'Pending PVCs',
+                 'status': ('warning' if __cluster_healthcheck_pending_pvcs.resources | length > 0 else 'pass'),
+                 'message': ((__cluster_healthcheck_pending_pvcs.resources | length | string) +
+                             ' PVC(s) stuck in Pending')
+                            if __cluster_healthcheck_pending_pvcs.resources | length > 0
+                            else 'No PVCs stuck in Pending' }
+             ]
+           }
+         }) }}
+...

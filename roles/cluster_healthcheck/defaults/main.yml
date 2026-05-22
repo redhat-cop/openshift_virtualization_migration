@@ -1,0 +1,23 @@
+---
+# defaults file for cluster_healthcheck
+cluster_healthcheck_checks:
+  - ocp_node_health
+  - kubevirt_health
+  - mtv_health
+  - storage_health
+  - network_health
+
+cluster_healthcheck_post_migration_vms: []
+
+cluster_healthcheck_generate_report: true
+
+cluster_healthcheck_report_path: "/tmp/cluster_healthcheck_report.html"
+
+cluster_healthcheck_mtv_namespace: "openshift-mtv"
+
+cluster_healthcheck_kubevirt_namespace: "openshift-cnv"
+
+cluster_healthcheck_ssh_timeout: 10
+
+cluster_healthcheck_debug: false
+...

@@ -1,0 +1,4 @@
+---
+# vars file for cluster_healthcheck
+__cluster_healthcheck_results: {}
+...
