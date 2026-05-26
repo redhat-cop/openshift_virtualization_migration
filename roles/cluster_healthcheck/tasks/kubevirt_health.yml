@@ -90,7 +90,7 @@
     kind: Pod
     namespace: "{{ cluster_healthcheck_kubevirt_namespace }}"
     label_selectors:
-      - "app.kubernetes.io/component=cdi-operator"
+      - "cdi.kubevirt.io=cdi-operator"
   register: __cluster_healthcheck_cdi_operator_pods
 
 - name: kubevirt_health | Check CDI deployment pods
@@ -99,8 +99,26 @@
     kind: Pod
     namespace: "{{ cluster_healthcheck_kubevirt_namespace }}"
     label_selectors:
-      - "app.kubernetes.io/component=cdi-deployment"
+      - "cdi.kubevirt.io=cdi-deployment"
   register: __cluster_healthcheck_cdi_deployment_pods
+
+- name: kubevirt_health | Check CDI apiserver pods
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: "{{ cluster_healthcheck_kubevirt_namespace }}"
+    label_selectors:
+      - "cdi.kubevirt.io=cdi-apiserver"
+  register: __cluster_healthcheck_cdi_apiserver_pods
+
+- name: kubevirt_health | Check CDI uploadproxy pods
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: "{{ cluster_healthcheck_kubevirt_namespace }}"
+    label_selectors:
+      - "cdi.kubevirt.io=cdi-uploadproxy"
+  register: __cluster_healthcheck_cdi_uploadproxy_pods
 
 - name: kubevirt_health | Evaluate CDI health
   ansible.builtin.set_fact:
@@ -113,6 +131,14 @@
         running: "{{ __cluster_healthcheck_cdi_deployment_pods.resources
                      | selectattr('status.phase', 'equalto', 'Running') | list | length }}"
         total: "{{ __cluster_healthcheck_cdi_deployment_pods.resources | length }}"
+      cdi_apiserver:
+        running: "{{ __cluster_healthcheck_cdi_apiserver_pods.resources
+                     | selectattr('status.phase', 'equalto', 'Running') | list | length }}"
+        total: "{{ __cluster_healthcheck_cdi_apiserver_pods.resources | length }}"
+      cdi_uploadproxy:
+        running: "{{ __cluster_healthcheck_cdi_uploadproxy_pods.resources
+                     | selectattr('status.phase', 'equalto', 'Running') | list | length }}"
+        total: "{{ __cluster_healthcheck_cdi_uploadproxy_pods.resources | length }}"
 
 - name: kubevirt_health | Set kubevirt health result
   ansible.builtin.set_fact:
@@ -170,6 +196,18 @@
                             else 'fail'),
                  'message': (__cluster_healthcheck_cdi_pods.cdi_deployment.running | string +
                              '/' + __cluster_healthcheck_cdi_pods.cdi_deployment.total | string +
+                             ' pods Running') },
+               { 'check': 'CDI API Server',
+                 'status': ('pass' if __cluster_healthcheck_cdi_pods.cdi_apiserver.running | int > 0
+                            else 'fail'),
+                 'message': (__cluster_healthcheck_cdi_pods.cdi_apiserver.running | string +
+                             '/' + __cluster_healthcheck_cdi_pods.cdi_apiserver.total | string +
+                             ' pods Running') },
+               { 'check': 'CDI Upload Proxy',
+                 'status': ('pass' if __cluster_healthcheck_cdi_pods.cdi_uploadproxy.running | int > 0
+                            else 'fail'),
+                 'message': (__cluster_healthcheck_cdi_pods.cdi_uploadproxy.running | string +
+                             '/' + __cluster_healthcheck_cdi_pods.cdi_uploadproxy.total | string +
                              ' pods Running') }
              ]
            }
