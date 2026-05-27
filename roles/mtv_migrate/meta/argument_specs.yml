@@ -100,6 +100,13 @@ argument_specs:
           folders:
             description: Explicit list of folders to migrate
             type: list
+          warm:
+            description: Whether to perform a warm migration (pre-copy via Changed Block Tracking)
+            type: bool
+            default: false
+          cutover:
+            description: ISO 8601 timestamp for the migration cutover (e.g., 2026-06-20T15:00:00Z)
+            type: str
       mtv_migrate_plan_base_name_annotation:
         description: Label assigned to the MTV plan name
         type: str
