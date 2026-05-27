@@ -54,7 +54,7 @@ jobs:
           fi
       - id: check
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request_target" && "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+          if [[ ("${{ github.event_name }}" == "pull_request_target" || "${{ github.event_name }}" == "pull_request") && "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
             echo "external=true" >> $GITHUB_OUTPUT
           else
             echo "external=false" >> $GITHUB_OUTPUT
