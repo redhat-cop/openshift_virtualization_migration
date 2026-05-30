@@ -47,19 +47,23 @@
     namespace: "{{ cluster_healthcheck_mtv_namespace }}"
   register: __cluster_healthcheck_providers
 
+- name: mtv_health | Identify Ready providers
+  ansible.builtin.set_fact:
+    __cluster_healthcheck_ready_provider_names: >-
+      {{ __cluster_healthcheck_providers.resources
+         | selectattr('status.conditions', 'defined')
+         | selectattr('status.conditions', 'ansible.builtin.contains',
+                      {'type': 'Ready', 'status': 'True'})
+         | map(attribute='metadata.name')
+         | list }}
+
 - name: mtv_health | Evaluate Provider readiness
   ansible.builtin.set_fact:
     __cluster_healthcheck_providers_not_ready: >-
-      {% set not_ready = [] -%}
-      {% for provider in __cluster_healthcheck_providers.resources -%}
-        {% set conditions = provider.status.conditions | default([]) -%}
-        {% set ready = conditions | selectattr('type', 'equalto', 'Ready')
-                                  | map(attribute='status') | first | default('False') -%}
-        {% if ready != 'True' -%}
-          {% if not_ready.append(provider.metadata.name) -%}{% endif -%}
-        {% endif -%}
-      {% endfor -%}
-      {{ not_ready }}
+      {{ __cluster_healthcheck_providers.resources
+         | map(attribute='metadata.name')
+         | reject('in', __cluster_healthcheck_ready_provider_names)
+         | list }}
 
 - name: mtv_health | Check for failed migration Plans
   kubernetes.core.k8s_info:
