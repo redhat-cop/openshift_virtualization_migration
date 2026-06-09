@@ -1,5 +1,106 @@
 name: CI
 
+# ============================================================================
+# WORKFLOW ARCHITECTURE: SECURITY-GATED CI FOR INTERNAL AND EXTERNAL CONTRIBUTIONS
+# ============================================================================
+#
+# This workflow implements a multi-gate security architecture to safely run CI
+# for both internal team members and external contributors from forks.
+#
+# KEY SECURITY PRINCIPLES:
+# ------------------------
+# 1. FORK PRs use pull_request_target (runs in base repo context with secrets)
+#    - Has access to repository secrets
+#    - Requires manual approval via GitHub Environment protection
+#    - Prevents malicious code from accessing secrets without review
+#
+# 2. INTERNAL PRs use pull_request (runs in PR context, no special privileges)
+#    - Automatically trusted (same repository)
+#    - No manual approval required
+#    - Standard CI permissions
+#
+# 3. Event filtering prevents duplicate runs:
+#    - pull_request: ONLY for internal PRs (head.repo == base.repo)
+#    - pull_request_target: ONLY for external PRs (head.repo != base.repo)
+#
+# WORKFLOW EXECUTION FLOW:
+# ------------------------
+#
+# ┌─────────────────────────────────────────────────────────────────┐
+# │ TRIGGER EVENT                                                   │
+# │ (push, pull_request, pull_request_target, workflow_dispatch,    │
+# │  merge_group, schedule)                                         │
+# └────────────────────────┬────────────────────────────────────────┘
+#                          │
+#                          ▼
+#              ┌───────────────────────┐
+#              │   SETUP JOB           │
+#              │  (Event Filter)       │
+#              └───────────┬───────────┘
+#                          │
+#           ┌──────────────┼──────────────┐
+#           │              │              │
+#           ▼              ▼              ▼
+#    ┌──────────┐   ┌──────────┐   ┌──────────┐
+#    │ Internal │   │ External │   │ Release  │
+#    │   PR     │   │   PR     │   │ Dispatch │
+#    └────┬─────┘   └────┬─────┘   └────┬─────┘
+#         │              │              │
+#         │         ┌────▼────┐    ┌────▼────┐
+#         │         │ GATE 1: │    │ GATE 2: │
+#         │         │External │    │Release  │
+#         │         │Approval │    │Approval │
+#         │         │(Manual) │    │(Manual) │
+#         │         └────┬────┘    └────┬────┘
+#         │              │              │
+#         └──────────────┼──────────────┘
+#                        │
+#                        ▼
+#               ┌────────────────┐
+#               │   CI JOB       │
+#               │ (Unified Tests)│
+#               └────────────────┘
+#
+# JOB DESCRIPTIONS:
+# -----------------
+#
+# 1. setup
+#    Purpose: Event filtering and contributor classification
+#    - Filters events to prevent duplicate workflow runs
+#    - Determines if PR is from external fork or internal branch
+#    - Sets is_external output for downstream jobs
+#    Runs for:
+#      ✓ pull_request (internal PRs only)
+#      ✓ pull_request_target (external PRs only)
+#      ✓ push, merge_group, schedule, workflow_dispatch
+#
+# 2. external-approval
+#    Purpose: Manual security gate for fork PRs
+#    - Only runs when is_external == 'true'
+#    - Requires approval via GitHub Environment: "external-ci"
+#    - Prevents untrusted code from accessing secrets
+#    - Configure in: Settings → Environments → external-ci
+#
+# 3. release-approval
+#    Purpose: Manual gate for release creation
+#    - Only runs when workflow_dispatch with trigger_release == true
+#    - Requires approval via GitHub Environment: "release"
+#    - Audits who triggered the release
+#    - Configure in: Settings → Environments → release
+#
+# 4. ci
+#    Purpose: Unified CI execution
+#    - Runs actual tests, builds, and checks
+#    - Executes after appropriate gate approvals
+#    - Has access to secrets for publishing
+#    Execution conditions:
+#      ✓ Internal PR: runs immediately after setup
+#      ✓ External PR: runs after external-approval succeeds
+#      ✓ Release: runs after release-approval succeeds
+#      ✓ Push/merge_group/schedule: runs immediately after setup
+#
+# ============================================================================
+
 on:
   push:
     branches: ["main"]
@@ -33,11 +134,12 @@ concurrency:
 
 jobs:
   # Logic Gate: Determine if this is an external contributor
+  # Runs on pull_request for internal PRs and pull_request_target for PRs from forks
   setup:
     runs-on: ubuntu-latest
     if: |
-      github.event_name == 'pull_request' ||
-      github.event_name == 'pull_request_target' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) ||
       github.event_name == 'push' ||
       github.event_name == 'merge_group' ||
       github.event_name == 'schedule' ||
@@ -54,7 +156,7 @@ jobs:
           fi
       - id: check
         run: |
-          if [[ ("${{ github.event_name }}" == "pull_request_target" || "${{ github.event_name }}" == "pull_request") && "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+          if [[ "${{ github.event_name }}" == "pull_request_target" ]]; then
             echo "external=true" >> $GITHUB_OUTPUT
           else
             echo "external=false" >> $GITHUB_OUTPUT
