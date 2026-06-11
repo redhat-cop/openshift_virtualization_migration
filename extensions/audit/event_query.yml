@@ -1,0 +1,118 @@
+---
+infra.openshift_virtualization_migration.*:
+  query: >-
+    (
+      {
+        "virtualmachine": "Virtual Machine",
+        "migration": "Migration",
+        "plan": "Migration Plan",
+        "provider": "Provider",
+        "networkmap": "Network Map",
+        "storagemap": "Storage Map",
+        "backup": "VM Backup",
+        "snapshot": "VM Snapshot",
+        "operator": "Operator"
+      } as $mapping |
+      (.vm // .resources // .) |
+      (if type=="array" then .[] else if type=="object" then . else empty end end) as $data |
+      select($data.metadata != null or $data.name != null) |
+      (
+        if $data | has("kind") then
+          (
+            if $data.kind == "VirtualMachine" then "virtualmachine"
+            elif $data.kind == "VirtualMachineInstance" then "virtualmachine"
+            elif $data.kind == "Migration" then "migration"
+            elif $data.kind == "Plan" then "plan"
+            elif $data.kind == "Provider" then "provider"
+            elif $data.kind == "NetworkMap" then "networkmap"
+            elif $data.kind == "StorageMap" then "storagemap"
+            elif $data.kind | test("Backup") then "backup"
+            elif $data.kind | test("Snapshot") then "snapshot"
+            else "unknown"
+            end
+          )
+        elif $data.metadata.labels then
+          (
+            if $data.metadata.labels | has("kubevirt.io/vm") then "virtualmachine"
+            elif $data.metadata.labels | has("migration.openshift.io/plan-name") then "migration"
+            else "unknown"
+            end
+          )
+        else "unknown"
+        end
+      ) as $node_type |
+      (
+        if $node_type == "virtualmachine" then
+          (
+            if $data.status.printableStatus then $data.status.printableStatus
+            else "vm"
+            end
+          )
+        elif $node_type == "migration" then "migration"
+        elif $node_type == "plan" then "plan"
+        elif $node_type == "provider" then ($data.spec.type // "provider")
+        elif $node_type == "networkmap" then "network"
+        elif $node_type == "storagemap" then "storage"
+        elif $node_type == "backup" then "backup"
+        elif $node_type == "snapshot" then "snapshot"
+        else "unknown"
+        end
+      ) as $sub_node_type |
+      {
+        name: (
+          if $data.metadata then ($data.metadata.name // $data.metadata.uid)
+          else ($data.name // "UNKNOWN")
+          end
+        ),
+        canonical_facts: {
+          name: (
+            if $data.metadata then ($data.metadata.name // "UNKNOWN")
+            else ($data.name // "UNKNOWN")
+            end
+          ),
+          id: (
+            if $data.metadata then ($data.metadata.uid // $data.metadata.name)
+            else ($data.id // $data.name)
+            end
+          ),
+          node_type: $node_type
+        },
+        facts: {
+          infra_type: "openshift_virtualization",
+          infra_bucket: ($mapping[$node_type] // "UNKNOWN"),
+          device_type: $sub_node_type,
+          namespace: (
+            if $data.metadata then ($data.metadata.namespace // "")
+            else ""
+            end
+          ),
+          status: (
+            if $data.status then
+              (
+                if $data.status.printableStatus then $data.status.printableStatus
+                elif $data.status.phase then $data.status.phase
+                elif $data.status.conditions then
+                  (
+                    $data.status.conditions |
+                    map(select(.status == "True")) |
+                    .[0].type // "unknown"
+                  )
+                else "unknown"
+                end
+              )
+            else "unknown"
+            end
+          ),
+          migration_source: (
+            if $data.spec and $data.spec.source then $data.spec.source.type
+            else ""
+            end
+          ),
+          labels: (
+            if $data.metadata and $data.metadata.labels then $data.metadata.labels
+            else {}
+            end
+          )
+        }
+      }
+    )
