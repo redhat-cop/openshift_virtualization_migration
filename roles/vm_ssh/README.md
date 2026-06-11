@@ -28,29 +28,29 @@ Description: Management of SSH keys for Virtual Machines in OpenShift.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`vm_ssh_request`](defaults/main.yml#L7)   | dict   | `{}` |  None  |   True  |  SSH Requests |
-| [`vm_ssh_openshift_host`](defaults/main.yml#L26)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift host |
-| [`vm_ssh_openshift_api_key`](defaults/main.yml#L31)   | str   | `{{ openshift_api_key }}` |  None  |   True  |  OpenShift API Key |
-| [`vm_ssh_openshift_verify_ssl`](defaults/main.yml#L36)   | str   | `{{ openshift_verify_ssl }}` |  None  |   True  |  Verify SSL Certificate |
 | [`vm_ssh_default_users`](defaults/main.yml#L41)   | list   | `[]` |  None  |   True  |  List of default SSH users |
 | [`vm_ssh_default_users.0`](defaults/main.yml#L42)   | str   | `root` |  None  |   None  |  None |
 | [`vm_ssh_kubevirt_api_version`](defaults/main.yml#L47)   | str   | `kubevirt.io/v1` |  None  |   True  |  KubeVirt API Version |
+| [`vm_ssh_openshift_api_key`](defaults/main.yml#L31)   | str   | `{{ openshift_api_key }}` |  None  |   True  |  OpenShift API Key |
+| [`vm_ssh_openshift_host`](defaults/main.yml#L26)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift host |
+| [`vm_ssh_openshift_verify_ssl`](defaults/main.yml#L36)   | str   | `{{ openshift_verify_ssl }}` |  None  |   True  |  Verify SSL Certificate |
+| [`vm_ssh_request`](defaults/main.yml#L7)   | dict   | `{}` |  None  |   True  |  SSH Requests |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
-<br>
-<b>`vm_ssh_request`:</b> SSH Requests
-<br>
-<b>`vm_ssh_openshift_host`:</b> OpenShift host
-<br>
-<b>`vm_ssh_openshift_api_key`:</b> OpenShift API Key
-<br>
-<b>`vm_ssh_openshift_verify_ssl`:</b> Variable to enable SSL verification
 <br>
 <b>`vm_ssh_default_users`:</b> List of default SSH users (default user: root)
 <br>
 <b>`vm_ssh_default_users.0`:</b> None
 <br>
 <b>`vm_ssh_kubevirt_api_version`:</b> KubeVirt API Version
+<br>
+<b>`vm_ssh_openshift_api_key`:</b> OpenShift API Key
+<br>
+<b>`vm_ssh_openshift_host`:</b> OpenShift host
+<br>
+<b>`vm_ssh_openshift_verify_ssl`:</b> Variable to enable SSL verification
+<br>
+<b>`vm_ssh_request`:</b> SSH Requests
 <br>
 <br>
 
@@ -107,51 +107,6 @@ Description: Management of SSH keys for Virtual Machines in OpenShift.
 
 ## Task Flow Graphs
 
-### Graph for _manage_secrets.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _manage_secrets___Verify_Secret_Namespace_and_Name_Provided0[ manage secrets   verify secret namespace and name<br>provided]:::task
-  _manage_secrets___Verify_Secret_Namespace_and_Name_Provided0-->|Task| _manage_secrets___Initialize_SSH_Keys_Variables1[ manage secrets   initialize ssh keys variables]:::task
-  _manage_secrets___Initialize_SSH_Keys_Variables1-->|Include task| _manage_secrets___Manage_Secret_SSH_Keys__manage_secret_keys_yml_2[ manage secrets   manage secret ssh keys<br>When: **ssh keys  in ssh secret**<br>include_task:  manage secret keys yml]:::includeTasks
-  _manage_secrets___Manage_Secret_SSH_Keys__manage_secret_keys_yml_2-->|Task| _manage_secrets___Create_SSH_Key_Secret3[ manage secrets   create ssh key secret]:::task
-  _manage_secrets___Create_SSH_Key_Secret3-->End
-```
-
-### Graph for main.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| Verify_OpenShift_Connectivity_Details_Provided0[verify openshift connectivity details provided]:::task
-  Verify_OpenShift_Connectivity_Details_Provided0-->|Block Start| Manage_Secrets1_block_start_0[[manage secrets<br>When: **secrets  in vm ssh request   default**]]:::block
-  Manage_Secrets1_block_start_0-->|Include task| Process_Secrets__manage_secrets_yml_0[process secrets<br>include_task:  manage secrets yml]:::includeTasks
-  Process_Secrets__manage_secrets_yml_0-.->|End of Block| Manage_Secrets1_block_start_0
-  Process_Secrets__manage_secrets_yml_0-->|Block Start| Manage_Targets2_block_start_0[[manage targets<br>When: **targets  in vm ssh request   default**]]:::block
-  Manage_Targets2_block_start_0-->|Include task| Process_Targets__manage_targets_yml_0[process targets<br>include_task:  manage targets yml]:::includeTasks
-  Process_Targets__manage_targets_yml_0-.->|End of Block| Manage_Targets2_block_start_0
-  Process_Targets__manage_targets_yml_0-->End
-```
-
 ### Graph for _manage_secret_keys.yml
 
 ```mermaid
@@ -178,7 +133,7 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _manage_secret_keys___Add__content__Key_to_Dict0-->End
 ```
 
-### Graph for _manage_targets.yml
+### Graph for _manage_secrets.yml
 
 ```mermaid
 flowchart TD
@@ -192,10 +147,11 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| _manage_targets___Verify_Namespace_and_Secret_Name_Provided0[ manage targets   verify namespace and secret name<br>provided]:::task
-  _manage_targets___Verify_Namespace_and_Secret_Name_Provided0-->|Include role| _manage_targets___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1( manage targets   invoke collect vm role<br>include_role: infra openshift virtualization migration vm<br>collect):::includeRole
-  _manage_targets___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1-->|Include task| _manage_targets___Update_VirtualMachine_with_SSH_Configurations__manage_target_yml_2[ manage targets   update virtualmachine with ssh<br>configurations<br>include_task:  manage target yml]:::includeTasks
-  _manage_targets___Update_VirtualMachine_with_SSH_Configurations__manage_target_yml_2-->End
+  Start-->|Task| _manage_secrets___Verify_Secret_Namespace_and_Name_Provided0[ manage secrets   verify secret namespace and name<br>provided]:::task
+  _manage_secrets___Verify_Secret_Namespace_and_Name_Provided0-->|Task| _manage_secrets___Initialize_SSH_Keys_Variables1[ manage secrets   initialize ssh keys variables]:::task
+  _manage_secrets___Initialize_SSH_Keys_Variables1-->|Include task| _manage_secrets___Manage_Secret_SSH_Keys__manage_secret_keys_yml_2[ manage secrets   manage secret ssh keys<br>When: **ssh keys  in ssh secret**<br>include_task:  manage secret keys yml]:::includeTasks
+  _manage_secrets___Manage_Secret_SSH_Keys__manage_secret_keys_yml_2-->|Task| _manage_secrets___Create_SSH_Key_Secret3[ manage secrets   create ssh key secret]:::task
+  _manage_secrets___Create_SSH_Key_Secret3-->End
 ```
 
 ### Graph for _manage_target.yml
@@ -219,6 +175,50 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _manage_target___Restart_the_VirtualMachine_infra_openshift_virtualization_migration_vm_lifecycle_0-->|Include role| _manage_target___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1( manage target   verify the virtualmachine<br>restarted<br>include_role: infra openshift virtualization migration vm<br>lifecycle):::includeRole
   _manage_target___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1-.->|End of Block| _manage_target___Restart_the_machine2_block_start_0
   _manage_target___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1-->End
+```
+
+### Graph for _manage_targets.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _manage_targets___Verify_Namespace_and_Secret_Name_Provided0[ manage targets   verify namespace and secret name<br>provided]:::task
+  _manage_targets___Verify_Namespace_and_Secret_Name_Provided0-->|Include role| _manage_targets___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1( manage targets   invoke collect vm role<br>include_role: infra openshift virtualization migration vm<br>collect):::includeRole
+  _manage_targets___Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1-->|Include task| _manage_targets___Update_VirtualMachine_with_SSH_Configurations__manage_target_yml_2[ manage targets   update virtualmachine with ssh<br>configurations<br>include_task:  manage target yml]:::includeTasks
+  _manage_targets___Update_VirtualMachine_with_SSH_Configurations__manage_target_yml_2-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| Verify_OpenShift_Connectivity_Details_Provided0[verify openshift connectivity details provided]:::task
+  Verify_OpenShift_Connectivity_Details_Provided0-->|Block Start| Manage_Secrets1_block_start_0[[manage secrets<br>When: **secrets  in vm ssh request   default**]]:::block
+  Manage_Secrets1_block_start_0-->|Include task| Process_Secrets__manage_secrets_yml_0[process secrets<br>include_task:  manage secrets yml]:::includeTasks
+  Process_Secrets__manage_secrets_yml_0-.->|End of Block| Manage_Secrets1_block_start_0
+  Process_Secrets__manage_secrets_yml_0-->|Block Start| Manage_Targets2_block_start_0[[manage targets<br>When: **targets  in vm ssh request   default**]]:::block
+  Manage_Targets2_block_start_0-->|Include task| Process_Targets__manage_targets_yml_0[process targets<br>include_task:  manage targets yml]:::includeTasks
+  Process_Targets__manage_targets_yml_0-.->|End of Block| Manage_Targets2_block_start_0
+  Process_Targets__manage_targets_yml_0-->End
 ```
 
 ## Playbook

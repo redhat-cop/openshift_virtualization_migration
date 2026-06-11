@@ -35,16 +35,37 @@ repos:
     hooks:
       - id: ansible-lint
         additional_dependencies:
-        - ansible-core==2.20.0
-        - distlib
+          - ansible-core==2.20.0
+          - distlib
         stages: [pre-commit]
         pass_filenames: false
         always_run: true
         entry: "ansible-lint"
-        args: ["-c", ".ansible-lint"]
+        args: ["-c", ".ansible-lint", "--strict"]
 
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
     hooks:
       - id: gitleaks
+
+  # Documentation validation
+  # Ensures generated documentation (README.md and role READMEs) are up-to-date
+  - repo: local
+    hooks:
+      - id: update-documentation
+        name: Generate documentation
+        entry: bash scripts/update-documentation.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        description: Regenerates README.md and role READMEs using docsible
+
+      - id: check-documentation
+        name: Verify documentation is committed
+        entry: bash scripts/check-documentation.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+        description: Checks that generated documentation has no uncommitted changes
 ...

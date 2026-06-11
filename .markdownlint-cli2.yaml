@@ -32,8 +32,7 @@ config:
   ol-prefix: false                  # MD029
   reference-links-images: false     # MD052
   table-column-style: false         # MD060
-  ul-style:                         # MD004
-    style: "asterisk"
+  ul-style: false                   # MD004
 
   # Keep this item last due to length
   proper-names: false
