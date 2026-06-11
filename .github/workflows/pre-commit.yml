@@ -57,11 +57,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'
 
-      - name: Install system dependencies
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-ci.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
         run: |
-          # Install dependencies needed for pre-commit hooks
+          # Install pre-commit and CI dependencies
           pip install pre-commit
           pip install -r requirements-ci.txt
 
@@ -76,19 +83,27 @@ jobs:
       - name: Run pre-commit hooks
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🔍 Running all pre-commit hooks"
+          echo "🔍 Running pre-commit hooks (skipping ansible-lint)"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
+          echo "Note: ansible-lint is skipped in this workflow because it requires"
+          echo "      the collection to be built and installed with all dependencies."
+          echo "      It runs in the main CI workflow with proper setup."
+          echo ""
 
-          # Run all pre-commit hooks on all files
-          # This includes:
+          # Run pre-commit hooks, skipping ansible-lint
+          # ansible-lint is skipped because:
+          # - It requires the collection to be built and installed
+          # - It needs external collection dependencies
+          # - It's already run in the main CI workflow with proper setup
+          #
+          # This workflow focuses on quick, local-friendly checks:
           # - Documentation generation and validation
           # - Markdown linting
-          # - Ansible linting
-          # - Secret scanning
-          # - And all other configured hooks
+          # - Secret scanning (gitleaks)
+          # - Trailing whitespace, merge conflicts, etc.
 
-          if pre-commit run --all-files --show-diff-on-failure --color=always; then
+          if SKIP=ansible-lint pre-commit run --all-files --show-diff-on-failure --color=always; then
             echo ""
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "✅ All pre-commit checks passed!"
