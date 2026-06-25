@@ -1,4 +1,4 @@
-# Ansible for OpenShift Virtualization Migration
+# OpenShift Virtualization Migration Collection
 
 ![GitHub Release](https://img.shields.io/github/v/release/redhat-cop/openshift_virtualization_migration?include_prereleases&style=flat-square)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/redhat-cop/openshift_virtualization_migration/ci.yml?style=flat-square&label=release)](https://github.com/redhat-cop/openshift_virtualization_migration/actions)
@@ -7,7 +7,7 @@
 
 <!--TOC-->
 
-- [Ansible for OpenShift Virtualization Migration](#ansible-for-openshift-virtualization-migration)
+- [OpenShift Virtualization Migration Collection](#openshift-virtualization-migration-collection)
   - [Description](#description)
   - [Documentation](#documentation)
   - [Release Notes](#release-notes)
@@ -102,7 +102,7 @@ Note that if you install any collections from Ansible Galaxy, they will not be u
 
 To upgrade the collection to the latest available version, run the following command:
 
-```
+```shell
 ansible-galaxy collection install infra.openshift_virtualization_migration --upgrade
 ```
 
@@ -114,9 +114,12 @@ collections:
   - name: infra.openshift_virtualization_migration
     # If you need a specific version of the collection, you can specify like this:
     # version: ...
+...
 ```
 
-See [using Ansible collections](https://docs.ansible.com/ansible/devel/user_guide/collections_using.html) for more details.
+See
+[Using Ansible Collections](https://docs.ansible.com/projects/ansible/latest/collections_guide/index.html)
+for more details.
 
 ## Use Cases
 

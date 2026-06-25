@@ -68,8 +68,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # Install pre-commit and CI dependencies
-          pip install pre-commit
           pip install -r requirements-ci.txt
 
       - name: Cache pre-commit environments

@@ -4,3 +4,4 @@ antsibull-changelog==0.35.0
 docsible==0.8.0
 python-semantic-release==10.5.3
 md-toc>=9.0.0
+pre-commit
