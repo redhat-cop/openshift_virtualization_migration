@@ -228,7 +228,7 @@ export ANSIBLE_GALAXY_SERVER_UPSTREAM_GALAXY_URL=https://galaxy.ansible.com/
 export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_URL=https://console.redhat.com/api/automation-hub/
 export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_AUTH_URL=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
 export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN="ADD_YOUR_TOKEN_HERE"
-ansible-galaxy collection install -r requirements.yml
+ansible-galaxy collection install -r requirements-dev.yml
 
 # Install Python development dependencies and tooling
 pip install -r requirements-dev.txt
