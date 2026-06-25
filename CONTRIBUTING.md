@@ -235,6 +235,24 @@ pip install -r requirements-dev.txt
 pip install -r requirements-ci.txt
 ```
 
+#### macOS-Specific Requirements
+
+If you're developing on macOS, ensure you have the following tools installed:
+
+```bash
+# Install required tools via Homebrew
+brew install python3 bash gnu-sed coreutils
+
+# Ensure bash is available at /usr/bin/bash (required for pre-commit hooks)
+# If not, create a symlink (requires admin privileges):
+sudo ln -sf /bin/bash /usr/bin/bash
+
+# Or use setup script provided in the repository
+./scripts/setup_env.sh
+```
+
+**Note**: The repository's shell scripts are compatible with both GNU (Linux) and BSD (macOS) utilities. However, pre-commit hooks may require bash to be available at `/usr/bin/bash`.
+
 ### Running Tests Locally
 
 ```bash
