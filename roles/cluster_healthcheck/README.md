@@ -64,9 +64,6 @@ cluster_healthcheck_post_migration_vms:
             namespace: migration-target
 ```
 
-## License
-
-GPL-3.0-only
 <!-- DOCSIBLE START -->
 ## cluster_healthcheck
 
