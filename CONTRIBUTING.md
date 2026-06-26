@@ -223,11 +223,14 @@ breaking_changes:
 
 ```bash
 # Install Ansible collection dependencies
-export ANSIBLE_GALAXY_SERVER_LIST=automation_hub,upstream_galaxy
+export ANSIBLE_GALAXY_SERVER_LIST=upstream_galaxy,automation_hub_certified,automation_hub_validated
 export ANSIBLE_GALAXY_SERVER_UPSTREAM_GALAXY_URL=https://galaxy.ansible.com/
-export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_URL=https://console.redhat.com/api/automation-hub/
-export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_AUTH_URL=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
-export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN="ADD_YOUR_TOKEN_HERE"
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_CERTIFIED_URL=https://console.redhat.com/api/automation-hub/content/published/
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_CERTIFIED_AUTH_URL=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_CERTIFIED_TOKEN="ADD_YOUR_TOKEN_HERE"
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_VALIDATED_URL=https://console.redhat.com/api/automation-hub/content/validated/
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_VALIDATED_AUTH_URL=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_VALIDATED_TOKEN="ADD_YOUR_TOKEN_HERE"
 ansible-galaxy collection install -r requirements-dev.yml
 
 # Install Python development dependencies and tooling
