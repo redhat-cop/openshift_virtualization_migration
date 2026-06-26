@@ -45,6 +45,7 @@ This collection includes the following roles for managing OpenShift Virtualizati
 * [aap_machine_credentials](roles/aap_machine_credentials/README.md) - Management of Machine Credentials.
 * [aap_seed](roles/aap_seed/README.md) - Populates an Ansible Automation Platform instance.
 * [bootstrap](roles/bootstrap/README.md) - Initialization of the Ansible for OpenShift Virtualization Migration environment.
+* [cluster_healthcheck](roles/cluster_healthcheck/README.md) - Cluster health validation for OpenShift Virtualization migration environments.
 * [create_mf_aap_token](roles/create_mf_aap_token/README.md) - create_mf_aap_token
 * [mtv_management](roles/mtv_management/README.md) - Management of the Migration Toolkit for Virtualization (MTV).
 * [mtv_migrate](roles/mtv_migrate/README.md) - Migration of Virtual Machines from Source to Destination.
