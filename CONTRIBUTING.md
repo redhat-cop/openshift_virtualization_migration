@@ -223,11 +223,38 @@ breaking_changes:
 
 ```bash
 # Install Ansible collection dependencies
-ansible-galaxy collection install -r requirements.yml
+export ANSIBLE_GALAXY_SERVER_LIST=upstream_galaxy,automation_hub_certified,automation_hub_validated
+export ANSIBLE_GALAXY_SERVER_UPSTREAM_GALAXY_URL=https://galaxy.ansible.com/
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_CERTIFIED_URL=https://console.redhat.com/api/automation-hub/content/published/
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_CERTIFIED_AUTH_URL=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_CERTIFIED_TOKEN="ADD_YOUR_TOKEN_HERE"
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_VALIDATED_URL=https://console.redhat.com/api/automation-hub/content/validated/
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_VALIDATED_AUTH_URL=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+export ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_VALIDATED_TOKEN="ADD_YOUR_TOKEN_HERE"
+ansible-galaxy collection install -r requirements-dev.yml
 
-# Install Python development dependencies
+# Install Python development dependencies and tooling
 pip install -r requirements-dev.txt
+pip install -r requirements-ci.txt
 ```
+
+#### macOS-Specific Requirements
+
+If you're developing on macOS, ensure you have the following tools installed:
+
+```bash
+# Install required tools via Homebrew
+brew install python3 bash gnu-sed coreutils
+
+# Ensure bash is available at /usr/bin/bash (required for pre-commit hooks)
+# If not, create a symlink (requires admin privileges):
+sudo ln -sf /bin/bash /usr/bin/bash
+
+# Or use setup script provided in the repository
+./scripts/setup_env.sh
+```
+
+**Note**: The repository's shell scripts are compatible with both GNU (Linux) and BSD (macOS) utilities. However, pre-commit hooks may require bash to be available at `/usr/bin/bash`.
 
 ### Running Tests Locally
 
@@ -251,7 +278,6 @@ pre-commit run --all-files
 This repository uses pre-commit hooks for code quality. Install them to run checks automatically before each commit:
 
 ```bash
-pip install pre-commit
 pre-commit install
 ```
 

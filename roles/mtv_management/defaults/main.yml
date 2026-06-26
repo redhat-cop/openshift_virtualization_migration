@@ -136,16 +136,33 @@ mtv_management_vmware_vddk_init_image_credentials_secret: ""
 # description: Service Account to Associate the VDDK Init Image Pull Secret
 mtv_management_vmware_vddk_init_image_service_account: default
 
-# Overrides
 # title: MTV Storage Map Override
 # required: False
-# description: Overrides for the storage map
+# description: Overrides for the default storage map. Note: This variable is ignored if
+#   mtv_management_multiple_storage_maps_overrides is populated.
 mtv_management_storage_map_overrides: [
 # - id: <datastore_id>
 #   storageClass: <name of the storage class>
 #   exclude: true
 #   include: true
 ]
+
+# title: MTV Multiple Storage Maps Overrides
+# required: False
+# description: Dictionary of multiple storage maps. Takes precedence over
+#   mtv_management_storage_map_overrides. Map keys are sanitized to comply
+#   with Kubernetes RFC 1123 naming conventions (e.g., lowercase, hyphens only)
+mtv_management_multiple_storage_maps_overrides: {}
+# map_name1:
+# - id: <datastore_id>
+#   storageClass: <name of the storage class>
+#   exclude: true
+#   include: true
+# map_name2:
+# - id: <datastore_id>
+#   storageClass: <name of the storage class>
+#   exclude: true
+#   include: true
 
 # title: MTV Network Map Overrides
 # required: False

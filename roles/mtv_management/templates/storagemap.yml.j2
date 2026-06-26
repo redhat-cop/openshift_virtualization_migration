@@ -1,7 +1,7 @@
 apiVersion: forklift.konveyor.io/v1beta1
 kind: StorageMap
 metadata:
-  name: "{{ (mtv_management_source_target + '-' + mtv_management_destination_target) | infra.openshift_virtualization_migration.rfc1123 }}"
+  name: "{{ defined_storage_map_name | default(mtv_management_source_target + '-' + mtv_management_destination_target) | infra.openshift_virtualization_migration.rfc1123 }}"
   namespace: "{{ mtv_management_migration_namespace }}"
 spec:
   provider:

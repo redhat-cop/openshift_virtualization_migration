@@ -61,7 +61,7 @@ Description: Not available.
 {%- endif %}
 
 {%- macro render_arguments_list(arguments, level=0) %}
-{%- for arg, details in arguments.items() %}
+{%- for arg, details in arguments.items() | sort %}
   {%- set indent = '  ' * level %}
   {{ indent }}* **{{ arg }}**:
   {{ indent }}  * **Required**: {{ details.required | default('false') }}
@@ -99,7 +99,7 @@ Description: Not available.
 
 <details>
 <summary><b>🧩 Argument Specifications in `meta/argument_specs`</b></summary>
-{%- for section, specs in role.argument_specs.argument_specs.items() %}
+{%- for section, specs in role.argument_specs.argument_specs.items() | sort %}
 
 #### Key: {{ section }}
 
@@ -122,14 +122,14 @@ Description: Not available.
 #### File: defaults/{{ defaultfile.file }}
 {# Cycle used for deciding to set Title and Required Column #}
 {% set ns = namespace(details_required = true, details_title = true, details_choices = true) %}
-{%- for key, details in defaultfile.data.items() -%}
+{%- for key, details in defaultfile.data.items() | sort -%}
     {%- if details.required is not none -%}{%- set ns.details_required = true -%}{%- endif -%}
     {%- if details.title is not none -%}{%- set ns.details_title = true -%}{%- endif -%}
     {%- if details.choices != "n/a" -%}{%- set ns.details_choices = true -%}{%- endif -%}
 {%- endfor -%}
 | Var          | Type         | Value       |{% if ns.details_choices %}Choices    |{% endif %}{% if ns.details_required %}Required    |{% endif %}{% if ns.details_title %} Title       |{% endif %}
 |--------------|--------------|-------------|{% if ns.details_choices %}-------------|{% endif %}{% if ns.details_required %}-------------|{% endif %}{% if ns.details_title %}-------------|{% endif %}
-{%- for key, details in defaultfile.data.items() %}
+{%- for key, details in defaultfile.data.items() | sort %}
 {%- set var_type = details.value.__class__.__name__ %}
 | [`{{ key }}`](defaults/{{ defaultfile.file }}#L{{details.line}})   | {{ var_type }}   | `{{ details.value | replace('|', '¦') }}` | {% if ns.details_choices %} {{ details.choices | replace('|', '¦') }}  |{% endif %}  {% if ns.details_required %} {{ details.required }}  |{% endif %} {% if ns.details_title %} {{ details.title | replace('|', '¦') }} |{% endif %}
 {%- endfor %}
@@ -137,14 +137,14 @@ Description: Not available.
 
 {%- for defaultfile in role.defaults -%}
 {%- set ns = namespace(has_descriptions = false) -%}
-{%- for key, details in defaultfile.data.items() -%}
+{%- for key, details in defaultfile.data.items() | sort -%}
     {%- if details.description != "n/a" -%}{%- set ns.has_descriptions = true -%}{% endif -%}
 {%- endfor -%}
 {%- if ns.has_descriptions %}
 
 <summary><b>🖇️ Full descriptions for vars in defaults/{{ defaultfile.file }}</b></summary>
 <br>
-{%- for key, details in defaultfile.data.items() %}
+{%- for key, details in defaultfile.data.items() | sort %}
     {%- if details.description != "n/a" %}
 <b>`{{ key }}`:</b> {{ details.description }}
 <br>
@@ -169,7 +169,7 @@ Description: Not available.
 {%- set ns = namespace(details_required = false, details_title = false, details_choices = false) %}
 | Var          | Type         | Value       |{% if ns.details_choices %}Choices    |{% endif %}{% if ns.details_required %}Required    |{% endif %}{% if ns.details_title %} Title       |{% endif %}
 |--------------|--------------|-------------|{% if ns.details_choices %}-------------|{% endif %}{% if ns.details_required %}-------------|{% endif %}{% if ns.details_title %}-------------|{% endif %}
-{%- for key, details in varsfile.data.items() %}
+{%- for key, details in varsfile.data.items() | sort %}
 {%- set var_type = details.value.__class__.__name__ %}
 | [{{ key }}](vars/{{ varsfile.file }}#L{{details.line}})   | {{ var_type }}   | `{{ details.value | replace('|', '¦') }}` |{% if ns.details_choices %}{{ details.choices | replace('|', '¦') }}|{% endif %}{% if ns.details_required %}{{ details.required }}|{% endif %}{% if ns.details_title %}{{ details.title | replace('|', '¦') }}|{% endif %}
 {%- endfor %}
@@ -177,7 +177,7 @@ Description: Not available.
 
 {%- for varsfile in role.vars -%}
 {% set ns = namespace(has_descriptions = false) -%}
-{%- for key, details in varsfile.data.items() -%}
+{%- for key, details in varsfile.data.items() | sort -%}
     {%- if details.description != "n/a" -%}{%- set ns.has_descriptions = true -%}{%- endif %}
 {%- endfor %}
 
@@ -213,7 +213,7 @@ Description: Not available.
 
 ## Task Flow Graphs
 
-{%- for task_file, mermaid_code in mermaid_code_per_file.items() %}
+{%- for task_file, mermaid_code in mermaid_code_per_file.items() | sort %}
 
 ### Graph for {{ task_file }}
 

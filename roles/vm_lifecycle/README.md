@@ -30,29 +30,29 @@ Description: Management of the lifecycle activities of Virtual Machines.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`vm_lifecycle_vm_operations_request`](defaults/main.yml#L6)   | list   | `[]` |  None  |   True  |  List of VMs to perform lifecycle operations |
 | [`vm_lifecycle_kubevirt_api_version`](defaults/main.yml#L17)   | str   | `kubevirt.io/v1` |  None  |   True  |  KubeVirt API Version |
-| [`vm_lifecycle_openshift_host`](defaults/main.yml#L21)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift host |
 | [`vm_lifecycle_openshift_api_key`](defaults/main.yml#L25)   | str   | `{{ openshift_api_key }}` |  None  |   True  |  OpenShift API Key |
+| [`vm_lifecycle_openshift_host`](defaults/main.yml#L21)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift host |
 | [`vm_lifecycle_openshift_verify_ssl`](defaults/main.yml#L29)   | str   | `{{ openshift_verify_ssl }}` |  None  |   True  |  Enable SSL Verification |
-| [`vm_lifecycle_verify_retries`](defaults/main.yml#L34)   | int   | `100` |  None  |   True  |  Number of retries |
 | [`vm_lifecycle_verify_delay`](defaults/main.yml#L38)   | int   | `10` |  None  |   True  |  Number of delays |
+| [`vm_lifecycle_verify_retries`](defaults/main.yml#L34)   | int   | `100` |  None  |   True  |  Number of retries |
+| [`vm_lifecycle_vm_operations_request`](defaults/main.yml#L6)   | list   | `[]` |  None  |   True  |  List of VMs to perform lifecycle operations |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
-<b>`vm_lifecycle_vm_operations_request`:</b> List of VM Lifecycle Operation requests
-<br>
 <b>`vm_lifecycle_kubevirt_api_version`:</b> KubeVirt API Version
-<br>
-<b>`vm_lifecycle_openshift_host`:</b> OpenShift host
 <br>
 <b>`vm_lifecycle_openshift_api_key`:</b> OpenShift API Key
 <br>
+<b>`vm_lifecycle_openshift_host`:</b> OpenShift host
+<br>
 <b>`vm_lifecycle_openshift_verify_ssl`:</b> Variable to enable SSL verification
+<br>
+<b>`vm_lifecycle_verify_delay`:</b> Number of delays
 <br>
 <b>`vm_lifecycle_verify_retries`:</b> Number of retries
 <br>
-<b>`vm_lifecycle_verify_delay`:</b> Number of delays
+<b>`vm_lifecycle_vm_operations_request`:</b> List of VM Lifecycle Operation requests
 <br>
 <br>
 
@@ -65,18 +65,18 @@ Description: Management of the lifecycle activities of Virtual Machines.
 | Var          | Type         | Value       |
 |--------------|--------------|-------------|
 | [vm_lifecycle_valid_vm_operations](vars/main.yml#L2)   | dict   | `{}` |
+| [vm_lifecycle_valid_vm_operations.restart](vars/main.yml#L10)   | dict   | `{}` |
+| [vm_lifecycle_valid_vm_operations.restart.endpoint](vars/main.yml#L11)   | str   | `restart` |
+| [vm_lifecycle_valid_vm_operations.restart.idempotent](vars/main.yml#L14)   | bool   | `True` |
+| [vm_lifecycle_valid_vm_operations.restart.ready](vars/main.yml#L13)   | bool   | `True` |
+| [vm_lifecycle_valid_vm_operations.restart.status](vars/main.yml#L12)   | str   | `Running` |
 | [vm_lifecycle_valid_vm_operations.start](vars/main.yml#L3)   | dict   | `{}` |
 | [vm_lifecycle_valid_vm_operations.start.endpoint](vars/main.yml#L4)   | str   | `start` |
-| [vm_lifecycle_valid_vm_operations.start.status](vars/main.yml#L5)   | str   | `Running` |
 | [vm_lifecycle_valid_vm_operations.start.ready](vars/main.yml#L6)   | bool   | `True` |
+| [vm_lifecycle_valid_vm_operations.start.status](vars/main.yml#L5)   | str   | `Running` |
 | [vm_lifecycle_valid_vm_operations.stop](vars/main.yml#L7)   | dict   | `{}` |
 | [vm_lifecycle_valid_vm_operations.stop.endpoint](vars/main.yml#L8)   | str   | `stop` |
 | [vm_lifecycle_valid_vm_operations.stop.status](vars/main.yml#L9)   | str   | `Stopped` |
-| [vm_lifecycle_valid_vm_operations.restart](vars/main.yml#L10)   | dict   | `{}` |
-| [vm_lifecycle_valid_vm_operations.restart.endpoint](vars/main.yml#L11)   | str   | `restart` |
-| [vm_lifecycle_valid_vm_operations.restart.status](vars/main.yml#L12)   | str   | `Running` |
-| [vm_lifecycle_valid_vm_operations.restart.ready](vars/main.yml#L13)   | bool   | `True` |
-| [vm_lifecycle_valid_vm_operations.restart.idempotent](vars/main.yml#L14)   | bool   | `True` |
 
 ### Tasks
 
@@ -117,24 +117,6 @@ Description: Management of the lifecycle activities of Virtual Machines.
 | vm_operations ¦ Verify VMs | `ansible.builtin.include_tasks` | False |
 
 ## Task Flow Graphs
-
-### Graph for _verify_operation.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _verify_operation___Verify_VMs0[ verify operation   verify vms]:::task
-  _verify_operation___Verify_VMs0-->End
-```
 
 ### Graph for _collect_vms.yml
 
@@ -179,6 +161,24 @@ classDef rescue stroke:#665352,stroke-width:2px;
 
   Start-->|Task| _perform_operation___Perform_VM_Operation0[ perform operation   perform vm operation]:::task
   _perform_operation___Perform_VM_Operation0-->End
+```
+
+### Graph for _verify_operation.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _verify_operation___Verify_VMs0[ verify operation   verify vms]:::task
+  _verify_operation___Verify_VMs0-->End
 ```
 
 ### Graph for vm_operations.yml

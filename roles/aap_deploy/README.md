@@ -26,27 +26,31 @@ Description: Deploys an instance of Ansible Automation Platform.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
+| [`aap_deploy_aap_channel`](defaults/main.yml#L53)   | str   | `{{ aap_channel ¦ default('stable-2.6') }}` |  None  |   None  |  None |
 | [`aap_deploy_aap_install`](defaults/main.yml#L7)   | bool   | `True` |  None  |   True  |  Boolean to allow AAP installation and subscription attachment |
+| [`aap_deploy_cac_collection`](defaults/main.yml#L49)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  Ansible Automation Platform configuration collection |
 | [`aap_deploy_controller_username`](defaults/main.yml#L18)   | str   | `{{ controller_username ¦ default('admin', true) }}` |  None  |   True  |  Username for AAP Controller authentication |
-| [`aap_deploy_openshift_host`](defaults/main.yml#L23)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift cluster hostname |
 | [`aap_deploy_openshift_api_key`](defaults/main.yml#L28)   | str   | `{{ openshift_api_key }}` |  None  |   False  |  OpenShift API authentication key |
+| [`aap_deploy_openshift_host`](defaults/main.yml#L23)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift cluster hostname |
 | [`aap_deploy_openshift_verify_ssl`](defaults/main.yml#L33)   | str   | `{{ openshift_verify_ssl }}` |  None  |   False  |  Verify SSL certificates for OpenShift connection |
 | [`aap_deploy_validate_components`](defaults/main.yml#L38)   | list   | `[]` |  None  |   True  |  Ansible Automation Platform component validation |
 | [`aap_deploy_validate_components.0`](defaults/main.yml#L38)   | str   | `{{ aap_instance_name + '-controller-web' if aap_version is not defined or aap_version is version('2.5', '>=') else aap_instance_name + '-web' }}` |  None  |   True  |  Ansible Automation Platform component validation |
 | [`aap_deploy_validate_components.1`](defaults/main.yml#L38)   | str   | `{{ aap_instance_name + '-controller-task' if aap_version is not defined or aap_version is version('2.5', '>=') else aap_instance_name + '-task' }}` |  None  |   True  |  Ansible Automation Platform component validation |
 | [`aap_deploy_validate_components.2`](defaults/main.yml#L38)   | str   | `{{ aap_instance_name + '-gateway' if aap_version is not defined or aap_version is version('2.5', '>=') else '' }}` |  None  |   True  |  Ansible Automation Platform component validation |
-| [`aap_deploy_cac_collection`](defaults/main.yml#L49)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  Ansible Automation Platform configuration collection |
-| [`aap_deploy_aap_channel`](defaults/main.yml#L53)   | str   | `{{ aap_channel ¦ default('stable-2.6') }}` |  None  |   None  |  None |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
+<b>`aap_deploy_aap_channel`:</b> None
+<br>
 <b>`aap_deploy_aap_install`:</b> Setting this variable to true will install AAP and attach a valid subscription based on your account.
+<br>
+<b>`aap_deploy_cac_collection`:</b> Determines which collection to use for configuring AAP based on the version.
 <br>
 <b>`aap_deploy_controller_username`:</b> Username used to authenticate against the AAP Controller.
 <br>
-<b>`aap_deploy_openshift_host`:</b> The hostname or API endpoint of the OpenShift cluster to validate bearer token.
-<br>
 <b>`aap_deploy_openshift_api_key`:</b> API key used to authenticate against the OpenShift cluster.
+<br>
+<b>`aap_deploy_openshift_host`:</b> The hostname or API endpoint of the OpenShift cluster to validate bearer token.
 <br>
 <b>`aap_deploy_openshift_verify_ssl`:</b> Whether to verify SSL certificates when connecting to OpenShift.
 <br>
@@ -57,10 +61,6 @@ Description: Deploys an instance of Ansible Automation Platform.
 <b>`aap_deploy_validate_components.1`:</b> The names of the components to verify is running after installation.
 <br>
 <b>`aap_deploy_validate_components.2`:</b> The names of the components to verify is running after installation.
-<br>
-<b>`aap_deploy_cac_collection`:</b> Determines which collection to use for configuring AAP based on the version.
-<br>
-<b>`aap_deploy_aap_channel`:</b> None
 <br>
 <br>
 
@@ -103,25 +103,6 @@ Description: Deploys an instance of Ansible Automation Platform.
 | subscribe ¦ Call bootstrap role to subscribe | `ansible.builtin.import_role` | True |
 
 ## Task Flow Graphs
-
-### Graph for subscribe.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0([subscribe   call bootstrap role to subscribe<br>When: **bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
-  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1([subscribe   call bootstrap role to subscribe<br>When: **not bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
-  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1-->End
-```
 
 ### Graph for install.yml
 
@@ -176,6 +157,25 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Start-->|Include task| Install_AAP_install_yml_0[install aap<br>When: **aap deploy aap install   bool**<br>include_task: install yml]:::includeTasks
   Install_AAP_install_yml_0-->|Include task| Attach_AAP_Subscriptions_subscribe_yml_1[attach aap subscriptions<br>When: **aap deploy aap install   bool**<br>include_task: subscribe yml]:::includeTasks
   Attach_AAP_Subscriptions_subscribe_yml_1-->End
+```
+
+### Graph for subscribe.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0([subscribe   call bootstrap role to subscribe<br>When: **bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
+  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_0-->|Import role| subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1([subscribe   call bootstrap role to subscribe<br>When: **not bootstrap aap   default false    bool**<br>import_role: infra openshift virtualization migration bootstrap]):::importRole
+  subscribe___Call_bootstrap_role_to_subscribe_infra_openshift_virtualization_migration_bootstrap_1-->End
 ```
 
 ## Playbook

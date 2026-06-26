@@ -30,23 +30,23 @@ Description: Hot Plug Virtual Machine resources.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`vm_hot_plug_request`](defaults/main.yml#L7)   | list   | `[]` |  None  |   True  |  Hot Plug Requests |
-| [`vm_hot_plug_openshift_host`](defaults/main.yml#L26)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift Host |
 | [`vm_hot_plug_api_key`](defaults/main.yml#L30)   | str   | `{{ openshift_api_key }}` |  None  |   True  |  OpenShift API Key |
-| [`vm_hot_plug_openshift_verify_ssl`](defaults/main.yml#L34)   | str   | `{{ openshift_verify_ssl }}` |  None  |   True  |  Verify SSL Certificate |
 | [`vm_hot_plug_kubevirt_api_version`](defaults/main.yml#L38)   | str   | `kubevirt.io/v1` |  None  |   True  |  KubeVirt API Version |
+| [`vm_hot_plug_openshift_host`](defaults/main.yml#L26)   | str   | `{{ openshift_host }}` |  None  |   True  |  OpenShift Host |
+| [`vm_hot_plug_openshift_verify_ssl`](defaults/main.yml#L34)   | str   | `{{ openshift_verify_ssl }}` |  None  |   True  |  Verify SSL Certificate |
+| [`vm_hot_plug_request`](defaults/main.yml#L7)   | list   | `[]` |  None  |   True  |  Hot Plug Requests |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
-<b>`vm_hot_plug_request`:</b> List of Hot Plug Requests
+<b>`vm_hot_plug_api_key`:</b> OpenShift API Key
+<br>
+<b>`vm_hot_plug_kubevirt_api_version`:</b> KubeVirt API Version
 <br>
 <b>`vm_hot_plug_openshift_host`:</b> OpenShift Host
 <br>
-<b>`vm_hot_plug_api_key`:</b> OpenShift API Key
-<br>
 <b>`vm_hot_plug_openshift_verify_ssl`:</b> Verify SSL Certificate
 <br>
-<b>`vm_hot_plug_kubevirt_api_version`:</b> KubeVirt API Version
+<b>`vm_hot_plug_request`:</b> List of Hot Plug Requests
 <br>
 <br>
 
@@ -88,7 +88,7 @@ Description: Hot Plug Virtual Machine resources.
 
 ## Task Flow Graphs
 
-### Graph for main.yml
+### Graph for _compute.yml
 
 ```mermaid
 flowchart TD
@@ -102,10 +102,10 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| Initialize_Variables0[initialize variables]:::task
-  Initialize_Variables0-->|Include role| Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1(invoke collect vm role<br>include_role: infra openshift virtualization migration vm<br>collect):::includeRole
-  Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1-->|Include task| Process_Hot_Plug_VM__process_vm_yml_2[process hot plug vm<br>include_task:  process vm yml]:::includeTasks
-  Process_Hot_Plug_VM__process_vm_yml_2-->End
+  Start-->|Task| _compute___Verify_Instance_Type_exists_on_VM0[ compute   verify instance type exists on vm<br>When: **instancetype  in vm hot plug vm compute**]:::task
+  _compute___Verify_Instance_Type_exists_on_VM0-->|Task| _compute___Verify_Instance_Type_does_not_exist_on_VM1[ compute   verify instance type does not exist on<br>vm<br>When: **cpu  in vm hot plug vm compute or  memory  in vm<br>hot plug vm compute**]:::task
+  _compute___Verify_Instance_Type_does_not_exist_on_VM1-->|Task| _compute___Patch_VM_with_Compute_Modifications2[ compute   patch vm with compute modifications]:::task
+  _compute___Patch_VM_with_Compute_Modifications2-->End
 ```
 
 ### Graph for _process_vm.yml
@@ -134,26 +134,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _process_vm___Verify_the_VirtualMachine_restarted_infra_openshift_virtualization_migration_vm_lifecycle_1-->End
 ```
 
-### Graph for _compute.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _compute___Verify_Instance_Type_exists_on_VM0[ compute   verify instance type exists on vm<br>When: **instancetype  in vm hot plug vm compute**]:::task
-  _compute___Verify_Instance_Type_exists_on_VM0-->|Task| _compute___Verify_Instance_Type_does_not_exist_on_VM1[ compute   verify instance type does not exist on<br>vm<br>When: **cpu  in vm hot plug vm compute or  memory  in vm<br>hot plug vm compute**]:::task
-  _compute___Verify_Instance_Type_does_not_exist_on_VM1-->|Task| _compute___Patch_VM_with_Compute_Modifications2[ compute   patch vm with compute modifications]:::task
-  _compute___Patch_VM_with_Compute_Modifications2-->End
-```
-
 ### Graph for _storage.yml
 
 ```mermaid
@@ -170,6 +150,26 @@ classDef rescue stroke:#665352,stroke-width:2px;
 
   Start-->|Task| _storage___Perform_VM_Storage_Operation0[ storage   perform vm storage operation<br>When: **state  in vm hot plug storage instance and  <br>vm hot plug storage instance state     absent  and<br>  vm hot plug vm response obj spec template spec<br>domain devices disks     default        <br>selectattr  name    equalto   vm hot plug storage<br>instance name    list   length   0   or           <br>state  not in vm hot plug storage instance or     <br>state  in vm hot plug storage instance and     vm<br>hot plug storage instance state     absent     <br>and   vm hot plug vm response obj spec template<br>spec domain devices disks     default        <br>selectattr  name    equalto   vm hot plug storage<br>instance name    list   length    0**]:::task
   _storage___Perform_VM_Storage_Operation0-->End
+```
+
+### Graph for main.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| Initialize_Variables0[initialize variables]:::task
+  Initialize_Variables0-->|Include role| Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1(invoke collect vm role<br>include_role: infra openshift virtualization migration vm<br>collect):::includeRole
+  Invoke_Collect_VM_Role_infra_openshift_virtualization_migration_vm_collect_1-->|Include task| Process_Hot_Plug_VM__process_vm_yml_2[process hot plug vm<br>include_task:  process vm yml]:::includeTasks
+  Process_Hot_Plug_VM__process_vm_yml_2-->End
 ```
 
 ## Playbook

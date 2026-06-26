@@ -26,9 +26,12 @@ Description: Verification of an Ansible for OpenShift Virtualization Migration e
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
+| [`validate_migration_cluster_name`](defaults/main.yml#L20)   | str   | `cluster01` |  None  |   None  |  None |
+| [`validate_migration_debug`](defaults/main.yml#L18)   | bool   | `True` |  None  |   None  |  None |
 | [`validate_migration_expected_provisioners`](defaults/main.yml#L3)   | list   | `[]` |  None  |   None  |  None |
 | [`validate_migration_expected_provisioners.0`](defaults/main.yml#L4)   | str   | `kubernetes.io/aws-ebs` |  None  |   None  |  None |
 | [`validate_migration_expected_provisioners.1`](defaults/main.yml#L5)   | str   | `kubernetes.io/azure-disk` |  None  |   None  |  None |
+| [`validate_migration_expected_provisioners.10`](defaults/main.yml#L14)   | str   | `kubernetes.io/vsphere-volume` |  None  |   None  |  None |
 | [`validate_migration_expected_provisioners.2`](defaults/main.yml#L6)   | str   | `kubernetes.io/azure-file` |  None  |   None  |  None |
 | [`validate_migration_expected_provisioners.3`](defaults/main.yml#L7)   | str   | `kubernetes.io/cinder` |  None  |   None  |  None |
 | [`validate_migration_expected_provisioners.4`](defaults/main.yml#L8)   | str   | `kubernetes.io/gce-pd` |  None  |   None  |  None |
@@ -37,18 +40,21 @@ Description: Verification of an Ansible for OpenShift Virtualization Migration e
 | [`validate_migration_expected_provisioners.7`](defaults/main.yml#L11)   | str   | `openshift-storage.cephfs.csi.ceph.com` |  None  |   None  |  None |
 | [`validate_migration_expected_provisioners.8`](defaults/main.yml#L12)   | str   | `openshift-storage.rbd.csi.ceph.com` |  None  |   None  |  None |
 | [`validate_migration_expected_provisioners.9`](defaults/main.yml#L13)   | str   | `kubernetes.io/rbd` |  None  |   None  |  None |
-| [`validate_migration_expected_provisioners.10`](defaults/main.yml#L14)   | str   | `kubernetes.io/vsphere-volume` |  None  |   None  |  None |
 | [`validate_migration_namespace`](defaults/main.yml#L16)   | str   | `openshift-mtv` |  None  |   None  |  None |
-| [`validate_migration_debug`](defaults/main.yml#L18)   | bool   | `True` |  None  |   None  |  None |
-| [`validate_migration_cluster_name`](defaults/main.yml#L20)   | str   | `cluster01` |  None  |   None  |  None |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
+<br>
+<b>`validate_migration_cluster_name`:</b> None
+<br>
+<b>`validate_migration_debug`:</b> None
 <br>
 <b>`validate_migration_expected_provisioners`:</b> None
 <br>
 <b>`validate_migration_expected_provisioners.0`:</b> None
 <br>
 <b>`validate_migration_expected_provisioners.1`:</b> None
+<br>
+<b>`validate_migration_expected_provisioners.10`:</b> None
 <br>
 <b>`validate_migration_expected_provisioners.2`:</b> None
 <br>
@@ -66,13 +72,7 @@ Description: Verification of an Ansible for OpenShift Virtualization Migration e
 <br>
 <b>`validate_migration_expected_provisioners.9`:</b> None
 <br>
-<b>`validate_migration_expected_provisioners.10`:</b> None
-<br>
 <b>`validate_migration_namespace`:</b> None
-<br>
-<b>`validate_migration_debug`:</b> None
-<br>
-<b>`validate_migration_cluster_name`:</b> None
 <br>
 <br>
 
@@ -149,45 +149,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Include_vmware_firewall_rules_tasks_vmware_firewall_rules_yml_3-->End
 ```
 
-### Graph for vmware_firewall_rules.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| vmware_firewall_rules___Build_a_list_of_all_the_clusters0[vmware firewall rules   build a list of all the<br>clusters]:::task
-  vmware_firewall_rules___Build_a_list_of_all_the_clusters0-->|Task| vmware_firewall_rules___Gather_firewall_info_about_all_ESXi_Host_in_given_Cluster1[vmware firewall rules   gather firewall info about<br>all esxi host in given cluster]:::task
-  vmware_firewall_rules___Gather_firewall_info_about_all_ESXi_Host_in_given_Cluster1-->|Task| vmware_firewall_rules___Debug_firewall_details2[vmware firewall rules   debug firewall details<br>When: **validate migration debug is defined and validate<br>migration debug**]:::task
-  vmware_firewall_rules___Debug_firewall_details2-->End
-```
-
-### Graph for ocp_version.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| ocp_version___Get_OCP_version_and_check_if_it_s_4_12_or_higher0[ocp version   get ocp version and check if it s 4<br>12 or higher]:::task
-  ocp_version___Get_OCP_version_and_check_if_it_s_4_12_or_higher0-->|Task| ocp_version___Print_OCP_version1[ocp version   print ocp version]:::task
-  ocp_version___Print_OCP_version1-->End
-```
-
 ### Graph for ocp_operators.yml
 
 ```mermaid
@@ -246,6 +207,45 @@ classDef rescue stroke:#665352,stroke-width:2px;
   ocp_storage_support___Get_PersistentVolumes2-->|Task| ocp_storage_support___Check_validate_migration_ocp_pvs_for_block_storage_with_EXT43[ocp storage support   check validate migration ocp<br>pvs for block storage with ext4<br>When: **item spec volumemode     block  and  ext4  in <br>item spec csi fstype   default**]:::task
   ocp_storage_support___Check_validate_migration_ocp_pvs_for_block_storage_with_EXT43-->|Task| ocp_storage_support___Print_PVs_for_block_storage_with_EXT44[ocp storage support   print pvs for block storage<br>with ext4<br>When: **validate migration ocp block ext4 pvs is defined**]:::task
   ocp_storage_support___Print_PVs_for_block_storage_with_EXT44-->End
+```
+
+### Graph for ocp_version.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| ocp_version___Get_OCP_version_and_check_if_it_s_4_12_or_higher0[ocp version   get ocp version and check if it s 4<br>12 or higher]:::task
+  ocp_version___Get_OCP_version_and_check_if_it_s_4_12_or_higher0-->|Task| ocp_version___Print_OCP_version1[ocp version   print ocp version]:::task
+  ocp_version___Print_OCP_version1-->End
+```
+
+### Graph for vmware_firewall_rules.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| vmware_firewall_rules___Build_a_list_of_all_the_clusters0[vmware firewall rules   build a list of all the<br>clusters]:::task
+  vmware_firewall_rules___Build_a_list_of_all_the_clusters0-->|Task| vmware_firewall_rules___Gather_firewall_info_about_all_ESXi_Host_in_given_Cluster1[vmware firewall rules   gather firewall info about<br>all esxi host in given cluster]:::task
+  vmware_firewall_rules___Gather_firewall_info_about_all_ESXi_Host_in_given_Cluster1-->|Task| vmware_firewall_rules___Debug_firewall_details2[vmware firewall rules   debug firewall details<br>When: **validate migration debug is defined and validate<br>migration debug**]:::task
+  vmware_firewall_rules___Debug_firewall_details2-->End
 ```
 
 ## Playbook
