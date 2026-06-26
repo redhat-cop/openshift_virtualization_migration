@@ -63,7 +63,6 @@ cluster_healthcheck_post_migration_vms:
           - name: rhel9-vm
             namespace: migration-target
 ```
-
 <!-- DOCSIBLE START -->
 ## cluster_healthcheck
 
