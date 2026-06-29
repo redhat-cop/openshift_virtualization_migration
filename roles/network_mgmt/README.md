@@ -4,6 +4,50 @@ This will not be overwritten by Docsible -->
 # 📃 Role overview
 
 This role performs network management in two modes: Manual and Automatic. It performs tasks that include gathering network information in the vCenter environment, migrate the Port Groups by creating NetworkAttachementDefinitions (NAD), and migrate distributed switches by creating NodeNetworkConfigurationPolicy (NNCP).
+
+## Network Bridge Modes
+
+This role supports three network bridge modes:
+
+### 1. linux-bridge
+
+Uses CNV bridge (cnv-bridge) for network attachment. This mode requires NNCP (NodeNetworkConfigurationPolicy) to configure the bridge on worker nodes.
+
+### 2. ovs-bridge
+
+Uses OVN-Kubernetes CNI overlay with `localnet` topology. This mode requires NNCP to configure the OVS bridge and localnet mapping on worker nodes.
+
+### 3. ovn-layer2
+
+Uses OVN-Kubernetes CNI overlay with `layer2` topology. This mode creates isolated layer2 networks without requiring NNCP or physical node network configuration.
+
+Example NAD for ovn-layer2 mode:
+
+```yaml
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    infra.openshift-virtualization-migration/source-portgroup: example-portgroup-name
+  name: example-network
+  namespace: example-namespace
+spec:
+  config: |-
+    {
+        "cniVersion": "0.3.1",
+        "name": "example-network",
+        "type": "ovn-k8s-cni-overlay",
+        "netAttachDefName": "example-namespace/example-network",
+        "topology": "layer2"
+    }
+```
+
+To use ovn-layer2 mode, set:
+
+```yaml
+network_mgmt_openshift_network_bridge_mode: ovn-layer2
+network_mgmt_ovn_topology: layer2
+```
 <!-- STATIC CONTENT END -->
 <!-- Everything below will be overwritten by Docsible -->
 <!-- DOCSIBLE START -->

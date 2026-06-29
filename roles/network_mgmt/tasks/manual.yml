@@ -31,6 +31,21 @@
     that:
       - network_mgmt_manual_bridge_name is string
       - (network_mgmt_manual_bridge_name | default('') | length) > 0
+  when:
+    - network_mgmt_openshift_network_bridge_mode == 'linux-bridge'
+
+- name: manual | Validate ovn-layer2 NAD entries
+  ansible.builtin.assert:
+    that:
+      - "'name' in nad"
+      - nad.name is string
+      - nad.name | length > 0
+    fail_msg: "Each NAD entry must have a 'name' field for ovn-layer2 mode"
+  loop: "{{ network_mgmt_manual_nad_list }}"
+  when:
+    - network_mgmt_openshift_network_bridge_mode == 'ovn-layer2'
+  loop_control:
+    loop_var: nad
 
 ## Only create the NNCP if the bridge and the bond is defined, the template looks for the ports to put in the bond.
 - name: manual | Apply NodeNetworkConfigurationPolicy
@@ -51,6 +66,7 @@
       - nad.vlan.vlan_id is string or nad.vlan.vlan_id is integer
   loop: "{{ network_mgmt_manual_nad_list }}"
   when:
+    - network_mgmt_openshift_network_bridge_mode != 'ovn-layer2'
     - ('trunk' not in nad) or (not nad.trunk)
   loop_control:
     loop_var: nad
@@ -64,9 +80,10 @@
       - nad.vlan.vlan_id is iterable
       - nad.vlan.vlan_id is not string
       - "network_mgmt_openshift_network_bridge_mode == 'linux-bridge'"
-      ## Only allow trunks with linux-bridge not supported with ovs-bridge
+      ## Only allow trunks with linux-bridge not supported with ovs-bridge or ovn-layer2
   loop: "{{ network_mgmt_manual_nad_list }}"
   when:
+    - network_mgmt_openshift_network_bridge_mode != 'ovn-layer2'
     - "'trunk' in nad"
     - nad.trunk
   loop_control:

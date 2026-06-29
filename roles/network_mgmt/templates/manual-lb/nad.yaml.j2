@@ -33,7 +33,7 @@ spec:
      "vlan": {{ nad.vlan.vlan_id | int }}
 {% endif %}
      }
-{% else %}
+{% elif network_mgmt_openshift_network_bridge_mode == 'ovs-bridge' %}
 spec:
   config: |
     {"cniVersion": "0.4.0",
@@ -45,5 +45,15 @@ spec:
 {% endif %}
      "physicalNetworkName": "{{ network_mgmt_manual_localnet_name }}",
      "netAttachDefName": "{{ nad.namespace | default(network_mgmt_nad_namespace) }}/{{ nad.name }}"
+    }
+{% else %}
+spec:
+  config: |-
+    {
+        "cniVersion": "0.3.1",
+        "name": "{{ nad.name }}",
+        "type": "ovn-k8s-cni-overlay",
+        "netAttachDefName": "{{ nad.namespace | default(network_mgmt_nad_namespace) }}/{{ nad.name }}",
+        "topology": "{{ network_mgmt_ovn_topology }}"
     }
 {% endif %}
