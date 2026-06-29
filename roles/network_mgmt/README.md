@@ -71,24 +71,25 @@ Description: Management of network related components.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`network_mgmt_manual_bond_name`](defaults/main.yml#L90)   | str   | `` |  None  |   True  |  Bond Name in Manual Mode |
-| [`network_mgmt_manual_bridge_name`](defaults/main.yml#L95)   | str   | `vm-bridge` |  None  |   True  |  Bridge Name in Manual Mode |
-| [`network_mgmt_manual_localnet_name`](defaults/main.yml#L100)   | str   | `` |  None  |   True  |  Local Network Name in Manual Mode |
-| [`network_mgmt_manual_nad_list`](defaults/main.yml#L105)   | list   | `[]` |  None  |   True  |  NAD List in Manual Mode |
-| [`network_mgmt_nad_auto_bridge_name`](defaults/main.yml#L78)   | str   | `` |  None  |   None  |  None |
-| [`network_mgmt_nad_name_prefix`](defaults/main.yml#L85)   | str   | `net-` |  None  |   True  |  NAD Name Prefix |
-| [`network_mgmt_nad_namespace`](defaults/main.yml#L73)   | str   | `default` |  None  |   True  |  NAD Namespace |
-| [`network_mgmt_nncp_max_unavailable`](defaults/main.yml#L54)   | int   | `3` |  None  |   True  |  NNCP Max Unavailability |
-| [`network_mgmt_nncp_name_prefix`](defaults/main.yml#L68)   | str   | `vs-` |  None  |   True  |  NNCP Name Prefix |
-| [`network_mgmt_nncp_nodeselector`](defaults/main.yml#L62)   | dict   | `{}` |  None  |   True  |  NNCP NodeSelector |
-| [`network_mgmt_nncp_nodeselector.node-role.kubernetes.io/worker`](defaults/main.yml#L63)   | str   | `` |  None  |   None  |  None |
-| [`network_mgmt_openshift_network_bond_mode`](defaults/main.yml#L40)   | str   | `802.3ad` |  None  |   True  |  OpenShift Network Bond Mode |
+| [`network_mgmt_manual_bond_name`](defaults/main.yml#L95)   | str   | `` |  None  |   True  |  Bond Name in Manual Mode |
+| [`network_mgmt_manual_bridge_name`](defaults/main.yml#L100)   | str   | `vm-bridge` |  None  |   True  |  Bridge Name in Manual Mode |
+| [`network_mgmt_manual_localnet_name`](defaults/main.yml#L105)   | str   | `` |  None  |   True  |  Local Network Name in Manual Mode |
+| [`network_mgmt_manual_nad_list`](defaults/main.yml#L110)   | list   | `[]` |  None  |   True  |  NAD List in Manual Mode |
+| [`network_mgmt_nad_auto_bridge_name`](defaults/main.yml#L83)   | str   | `` |  None  |   None  |  None |
+| [`network_mgmt_nad_name_prefix`](defaults/main.yml#L90)   | str   | `net-` |  None  |   True  |  NAD Name Prefix |
+| [`network_mgmt_nad_namespace`](defaults/main.yml#L78)   | str   | `default` |  None  |   True  |  NAD Namespace |
+| [`network_mgmt_nncp_max_unavailable`](defaults/main.yml#L59)   | int   | `3` |  None  |   True  |  NNCP Max Unavailability |
+| [`network_mgmt_nncp_name_prefix`](defaults/main.yml#L73)   | str   | `vs-` |  None  |   True  |  NNCP Name Prefix |
+| [`network_mgmt_nncp_nodeselector`](defaults/main.yml#L67)   | dict   | `{}` |  None  |   True  |  NNCP NodeSelector |
+| [`network_mgmt_nncp_nodeselector.node-role.kubernetes.io/worker`](defaults/main.yml#L68)   | str   | `` |  None  |   None  |  None |
+| [`network_mgmt_openshift_network_bond_mode`](defaults/main.yml#L45)   | str   | `802.3ad` |  None  |   True  |  OpenShift Network Bond Mode |
 | [`network_mgmt_openshift_network_bridge_mode`](defaults/main.yml#L26)   | str   | `linux-bridge` |  None  |   True  |  OpenShift Network Bridge Mode |
-| [`network_mgmt_openshift_network_supported_bond_modes`](defaults/main.yml#L46)   | list   | `[]` |  None  |   True  |  Supported Bond Modes |
-| [`network_mgmt_openshift_network_supported_bond_modes.0`](defaults/main.yml#L47)   | str   | `802.3ad` |  None  |   None  |  None |
-| [`network_mgmt_openshift_network_supported_bond_modes.1`](defaults/main.yml#L48)   | str   | `active-backup` |  None  |   None  |  None |
-| [`network_mgmt_openshift_network_supported_bond_modes.2`](defaults/main.yml#L49)   | str   | `balance-xor` |  None  |   None  |  None |
+| [`network_mgmt_openshift_network_supported_bond_modes`](defaults/main.yml#L51)   | list   | `[]` |  None  |   True  |  Supported Bond Modes |
+| [`network_mgmt_openshift_network_supported_bond_modes.0`](defaults/main.yml#L52)   | str   | `802.3ad` |  None  |   None  |  None |
+| [`network_mgmt_openshift_network_supported_bond_modes.1`](defaults/main.yml#L53)   | str   | `active-backup` |  None  |   None  |  None |
+| [`network_mgmt_openshift_network_supported_bond_modes.2`](defaults/main.yml#L54)   | str   | `balance-xor` |  None  |   None  |  None |
 | [`network_mgmt_openshift_node_network_ports`](defaults/main.yml#L5)   | list   | `[]` |  None  |   True  |  OpenShift Node Network Ports |
+| [`network_mgmt_ovn_topology`](defaults/main.yml#L36)   | str   | `layer2` |  None  |   False  |  OVN Topology Type |
 | [`network_mgmt_port_is_existing_bond`](defaults/main.yml#L10)   | bool   | `False` |  None  |   True  |  Define Bond |
 | [`network_mgmt_use_default_ovn_bridge`](defaults/main.yml#L31)   | bool   | `False` |  None  |   True  |  OVN Bridge |
 | [`network_mgmt_vcenter_datacenter`](defaults/main.yml#L21)   | str   | `` |  None  |   True  |  vCenter Data Center |
@@ -131,6 +132,8 @@ Description: Management of network related components.
 <b>`network_mgmt_openshift_network_supported_bond_modes.2`:</b> None
 <br>
 <b>`network_mgmt_openshift_node_network_ports`:</b> List of Node Network Ports
+<br>
+<b>`network_mgmt_ovn_topology`:</b> OVN topology type for ovn-k8s-cni-overlay (only used with ovn-layer2 mode)
 <br>
 <b>`network_mgmt_port_is_existing_bond`:</b> Boolean value to check if a bond is defined
 <br>
@@ -201,7 +204,8 @@ Description: Management of network related components.
 | manual ¦ Validate network_mgmt_manual_nad_list | `ansible.builtin.assert` | False |
 | manual ¦ Validate supported bonding mode if also creating bond | `ansible.builtin.assert` | True |
 | manual ¦ Validate ovs-bridge mode | `ansible.builtin.assert` | True |
-| manual ¦ Validate linux-bridge | `ansible.builtin.assert` | False |
+| manual ¦ Validate linux-bridge | `ansible.builtin.assert` | True |
+| manual ¦ Validate ovn-layer2 NAD entries | `ansible.builtin.assert` | True |
 | manual ¦ Apply NodeNetworkConfigurationPolicy | `redhat.openshift.k8s` | True |
 | manual ¦ Validate access port | `ansible.builtin.assert` | True |
 | manual ¦ Validate trunk ports | `ansible.builtin.assert` | True |
@@ -225,8 +229,8 @@ classDef rescue stroke:#665352,stroke-width:2px;
 
   Start-->|Include task| automatic___Include_tasks_from_gather_networks_yml_gather_networks_yml_0[automatic   include tasks from gather networks yml<br>include_task: gather networks yml]:::includeTasks
   automatic___Include_tasks_from_gather_networks_yml_gather_networks_yml_0-->|Task| automatic___Set_the_switches_and_portgroups_to_migrate1[automatic   set the switches and portgroups to<br>migrate]:::task
-  automatic___Set_the_switches_and_portgroups_to_migrate1-->|Include task| automatic___Include_tasks_from_automatic_nncp_yml_automatic_nncp_yml_2[automatic   include tasks from automatic nncp yml<br>When: **network mgmt openshift node network ports  <br>default       is iterable and  network mgmt<br>openshift node network ports   default       is<br>not string and network mgmt openshift node network<br>ports   default       length   0 and network mgmt<br>vcenter dvswitch   default     true    trim  <br>length   0 and network mgmt vcenter datacenter  <br>default     true    trim   length   0**<br>include_task: automatic nncp yml]:::includeTasks
-  automatic___Include_tasks_from_automatic_nncp_yml_automatic_nncp_yml_2-->|Include task| automatic___Include_tasks_from_automatic_nad_yml_automatic_nad_yml_3[automatic   include tasks from automatic nad yml<br>When: **network mgmt vcenter dvswitch   default     true  <br> trim   length   0 and network mgmt vcenter<br>datacenter   default     true    trim   length   0<br>and   network mgmt openshift node network ports  <br>default       is iterable and  network mgmt<br>openshift node network ports   default       is<br>not string and  network mgmt openshift node<br>network ports   default       length   0   or <br>network mgmt nad auto bridge name is defined and<br>network mgmt nad auto bridge name  length   0**<br>include_task: automatic nad yml]:::includeTasks
+  automatic___Set_the_switches_and_portgroups_to_migrate1-->|Include task| automatic___Include_tasks_from_automatic_nncp_yml_automatic_nncp_yml_2[automatic   include tasks from automatic nncp yml<br>When: **network mgmt openshift node network ports  <br>default       is iterable and  network mgmt<br>openshift node network ports   default       is<br>not string and network mgmt openshift node network<br>ports   default       length   0 and network mgmt<br>vcenter dvswitch   default     true    trim  <br>length   0 and network mgmt vcenter datacenter  <br>default     true    trim   length   0 and network<br>mgmt openshift network bridge mode     ovn layer2**<br>include_task: automatic nncp yml]:::includeTasks
+  automatic___Include_tasks_from_automatic_nncp_yml_automatic_nncp_yml_2-->|Include task| automatic___Include_tasks_from_automatic_nad_yml_automatic_nad_yml_3[automatic   include tasks from automatic nad yml<br>When: **network mgmt vcenter dvswitch   default     true  <br> trim   length   0 and network mgmt vcenter<br>datacenter   default     true    trim   length   0<br>and   network mgmt openshift node network ports  <br>default       is iterable and  network mgmt<br>openshift node network ports   default       is<br>not string and  network mgmt openshift node<br>network ports   default       length   0   or <br>network mgmt nad auto bridge name is defined and<br>network mgmt nad auto bridge name  length   0  or<br>network mgmt openshift network bridge mode     ovn<br>layer2**<br>include_task: automatic nad yml]:::includeTasks
   automatic___Include_tasks_from_automatic_nad_yml_automatic_nad_yml_3-->End
 ```
 
@@ -360,12 +364,13 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Start-->|Task| manual___Validate_network_mgmt_manual_nad_list0[manual   validate network mgmt manual nad list]:::task
   manual___Validate_network_mgmt_manual_nad_list0-->|Task| manual___Validate_supported_bonding_mode_if_also_creating_bond1[manual   validate supported bonding mode if also<br>creating bond<br>When: **not  network mgmt override openshift supported<br>bond mode   default false   and  network mgmt<br>openshift node network ports   default      <br>length     0**]:::task
   manual___Validate_supported_bonding_mode_if_also_creating_bond1-->|Task| manual___Validate_ovs_bridge_mode2[manual   validate ovs bridge mode<br>When: **network mgmt openshift network bridge mode     ovs<br>bridge**]:::task
-  manual___Validate_ovs_bridge_mode2-->|Task| manual___Validate_linux_bridge3[manual   validate linux bridge]:::task
-  manual___Validate_linux_bridge3-->|Task| manual___Apply_NodeNetworkConfigurationPolicy4[manual   apply nodenetworkconfigurationpolicy<br>When: **network mgmt manual bridge name   default      <br>length   0 and network mgmt manual bond name  <br>default       length   0 and network mgmt<br>openshift network bridge mode     linux bridge**]:::task
-  manual___Apply_NodeNetworkConfigurationPolicy4-->|Task| manual___Validate_access_port5[manual   validate access port<br>When: **trunk  not in nad  or  not nad trunk**]:::task
-  manual___Validate_access_port5-->|Task| manual___Validate_trunk_ports6[manual   validate trunk ports<br>When: **trunk  in nad and nad trunk**]:::task
-  manual___Validate_trunk_ports6-->|Task| manual___Apply_NetworkAttachmentDefinitions7[manual   apply networkattachmentdefinitions]:::task
-  manual___Apply_NetworkAttachmentDefinitions7-->End
+  manual___Validate_ovs_bridge_mode2-->|Task| manual___Validate_linux_bridge3[manual   validate linux bridge<br>When: **network mgmt openshift network bridge mode    <br>linux bridge**]:::task
+  manual___Validate_linux_bridge3-->|Task| manual___Validate_ovn_layer2_NAD_entries4[manual   validate ovn layer2 nad entries<br>When: **network mgmt openshift network bridge mode     ovn<br>layer2**]:::task
+  manual___Validate_ovn_layer2_NAD_entries4-->|Task| manual___Apply_NodeNetworkConfigurationPolicy5[manual   apply nodenetworkconfigurationpolicy<br>When: **network mgmt manual bridge name   default      <br>length   0 and network mgmt manual bond name  <br>default       length   0 and network mgmt<br>openshift network bridge mode     linux bridge**]:::task
+  manual___Apply_NodeNetworkConfigurationPolicy5-->|Task| manual___Validate_access_port6[manual   validate access port<br>When: **network mgmt openshift network bridge mode     ovn<br>layer2  and   trunk  not in nad  or  not nad trunk<br>**]:::task
+  manual___Validate_access_port6-->|Task| manual___Validate_trunk_ports7[manual   validate trunk ports<br>When: **network mgmt openshift network bridge mode     ovn<br>layer2  and  trunk  in nad and nad trunk**]:::task
+  manual___Validate_trunk_ports7-->|Task| manual___Apply_NetworkAttachmentDefinitions8[manual   apply networkattachmentdefinitions]:::task
+  manual___Apply_NetworkAttachmentDefinitions8-->End
 ```
 
 ## Playbook
