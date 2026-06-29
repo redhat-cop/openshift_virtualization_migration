@@ -51,11 +51,7 @@
   ansible.builtin.set_fact:
     __cluster_healthcheck_ready_provider_names: >-
       {{ __cluster_healthcheck_providers.resources
-         | selectattr('status.conditions', 'defined')
-         | selectattr('status.conditions', 'ansible.builtin.contains',
-                      {'type': 'Ready', 'status': 'True'})
-         | map(attribute='metadata.name')
-         | list }}
+         | community.general.json_query("[?status.conditions[?type=='Ready' && status=='True']].metadata.name") }}
 
 - name: mtv_health | Evaluate Provider readiness
   ansible.builtin.set_fact:
@@ -76,11 +72,7 @@
   ansible.builtin.set_fact:
     __cluster_healthcheck_failed_plans: >-
       {{ __cluster_healthcheck_plans.resources
-         | selectattr('status.conditions', 'defined')
-         | selectattr('status.conditions', 'ansible.builtin.contains',
-                      {'type': 'Failed', 'status': 'True'})
-         | map(attribute='metadata.name')
-         | list }}
+         | community.general.json_query("[?status.conditions[?type=='Failed' && status=='True']].metadata.name") }}
 
 - name: mtv_health | Report failed Plans
   ansible.builtin.debug:
