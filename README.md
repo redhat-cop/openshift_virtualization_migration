@@ -1,47 +1,65 @@
-# Ansible for OpenShift Virtualization Migration
+# OpenShift Virtualization Migration Collection
 
 ![GitHub Release](https://img.shields.io/github/v/release/redhat-cop/openshift_virtualization_migration?include_prereleases&style=flat-square)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/redhat-cop/openshift_virtualization_migration/ci.yml?style=flat-square&label=release)](https://github.com/redhat-cop/openshift_virtualization_migration/actions)
 [![Semantic Versioning](https://img.shields.io/badge/semver-2.0.0-blue?style=flat-square)](https://semver.org/)
 [![License](https://img.shields.io/github/license/redhat-cop/openshift_virtualization_migration?style=flat-square)](LICENSE)
 
-## Table of Contents
+<!--TOC-->
 
-* [Description](#description)
-* [Requirements](#requirements)
-* [Installation](#installation)
-* [Documentation](#documentation)
-    * [Contributing](CONTRIBUTING.md)
-    * [Disconnected Environment](docs/disconnected_environment_guide.md)
-    * [Secure Credential Management](docs/secure_credential_management.md)
-    * [Secure Credential Practices](docs/secure_credential_practices.md)
-* [Roles](#roles)
-    * [aap_deploy](roles/aap_deploy/README.md)
-    * [aap_machine_credentials](roles/aap_machine_credentials/README.md)
-    * [aap_seed](roles/aap_seed/README.md)
-    * [bootstrap](roles/bootstrap/README.md)
-    * [create_mf_aap_token](roles/create_mf_aap_token/README.md)
-    * [mtv_management](roles/mtv_management/README.md)
-    * [mtv_migrate](roles/mtv_migrate/README.md)
-    * [network_mgmt](roles/network_mgmt/README.md)
-    * [operator_management](roles/operator_management/README.md)
-    * [validate_migration](roles/validate_migration/README.md)
-    * [vm_backup_restore](roles/vm_backup_restore/README.md)
-    * [vm_collect](roles/vm_collect/README.md)
-    * [vm_hot_plug](roles/vm_hot_plug/README.md)
-    * [vm_lifecycle](roles/vm_lifecycle/README.md)
-    * [vm_mac_address](roles/vm_mac_address/README.md)
-    * [vm_networking](roles/vm_networking/README.md)
-    * [vm_patching](roles/vm_patching/README.md)
-    * [vm_ssh](roles/vm_ssh/README.md)
-* [Use Cases](#use-cases)
-* [Testing](#testing)
-* [Release Notes](CHANGELOG.md)
-* [License](#license)
+- [OpenShift Virtualization Migration Collection](#openshift-virtualization-migration-collection)
+  - [Description](#description)
+  - [Documentation](#documentation)
+  - [Release Notes](#release-notes)
+  - [Roles](#roles)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+  - [Use Cases](#use-cases)
+  - [Testing](#testing)
+  - [Support](#support)
+  - [License](#license)
+
+<!--TOC-->
 
 ## Description
 
 This collection enables the migration journey of Virtual Machine (VM) workloads from existing hypervisors to Red Hat OpenShift Virtualization using Ansible Automation Platform. Additionally it provides content for the management and maintenance of VM workloads within Red Hat OpenShift Virtualization.
+
+## Documentation
+
+* [Contributing Guide](CONTRIBUTING.md)
+* [Disconnected Environment Setup](docs/disconnected_environment_guide.md)
+* [Secure Credential Management](docs/secure_credential_management.md)
+* [Secure Credential Practices](docs/secure_credential_practices.md)
+
+## Release Notes
+
+See [CHANGELOG.md](CHANGELOG.md) for release history and changes.
+
+## Roles
+
+This collection includes the following roles for managing OpenShift Virtualization migrations:
+
+<!--ROLES_LIST_START-->
+* [aap_deploy](roles/aap_deploy/README.md) - Deploys an instance of Ansible Automation Platform.
+* [aap_machine_credentials](roles/aap_machine_credentials/README.md) - Management of Machine Credentials.
+* [aap_seed](roles/aap_seed/README.md) - Populates an Ansible Automation Platform instance.
+* [bootstrap](roles/bootstrap/README.md) - Initialization of the Ansible for OpenShift Virtualization Migration environment.
+* [create_mf_aap_token](roles/create_mf_aap_token/README.md) - create_mf_aap_token
+* [mtv_management](roles/mtv_management/README.md) - Management of the Migration Toolkit for Virtualization (MTV).
+* [mtv_migrate](roles/mtv_migrate/README.md) - Migration of Virtual Machines from Source to Destination.
+* [network_mgmt](roles/network_mgmt/README.md) - Management of network related components.
+* [operator_management](roles/operator_management/README.md) - Management of OpenShift Operators.
+* [validate_migration](roles/validate_migration/README.md) - Verification of an Ansible for OpenShift Virtualization Migration environment.
+* [vm_backup_restore](roles/vm_backup_restore/README.md) - Virtual Machine backup and restore capabilities.
+* [vm_collect](roles/vm_collect/README.md) - Collection of Migration Toolkit for Virtualization inventory information.
+* [vm_hot_plug](roles/vm_hot_plug/README.md) - Hot Plug Virtual Machine resources.
+* [vm_lifecycle](roles/vm_lifecycle/README.md) - Management of the lifecycle activities of Virtual Machines.
+* [vm_mac_address](roles/vm_mac_address/README.md) - Management of Virtual Machine MAC Addresses.
+* [vm_networking](roles/vm_networking/README.md) - Management of Virtual Machine networking.
+* [vm_patching](roles/vm_patching/README.md) - Patching related activities for Virtual Machines.
+* [vm_ssh](roles/vm_ssh/README.md) - Management of SSH keys for Virtual Machines in OpenShift.
+<!--ROLES_LIST_END-->
 
 ## Requirements
 
@@ -84,7 +102,7 @@ Note that if you install any collections from Ansible Galaxy, they will not be u
 
 To upgrade the collection to the latest available version, run the following command:
 
-```
+```shell
 ansible-galaxy collection install infra.openshift_virtualization_migration --upgrade
 ```
 
@@ -96,9 +114,12 @@ collections:
   - name: infra.openshift_virtualization_migration
     # If you need a specific version of the collection, you can specify like this:
     # version: ...
+...
 ```
 
-See [using Ansible collections](https://docs.ansible.com/ansible/devel/user_guide/collections_using.html) for more details.
+See
+[Using Ansible Collections](https://docs.ansible.com/projects/ansible/latest/collections_guide/index.html)
+for more details.
 
 ## Use Cases
 

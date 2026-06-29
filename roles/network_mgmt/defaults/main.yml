@@ -23,12 +23,17 @@ network_mgmt_vcenter_datacenter: ''
 # title: OpenShift Network Bridge Mode
 # required: True
 # description: OpenShift Network Bridge Mode
-network_mgmt_openshift_network_bridge_mode: linux-bridge ## This can be 'linux-bridge' or 'ovs-bridge'
+network_mgmt_openshift_network_bridge_mode: linux-bridge ## This can be 'linux-bridge', 'ovs-bridge', or 'ovn-layer2'
 
 # title: OVN Bridge
 # required: True
 # description: Boolean value defines usage of OVN bridge
 network_mgmt_use_default_ovn_bridge: false
+
+# title: OVN Topology Type
+# required: False
+# description: OVN topology type for ovn-k8s-cni-overlay (only used with ovn-layer2 mode)
+network_mgmt_ovn_topology: layer2 ## layer2 or localnet
 
 # https://docs.openshift.com/container-platform/4.16/networking/k8s_nmstate/\
 # k8s-nmstate-updating-node-network-config.html

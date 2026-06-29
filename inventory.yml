@@ -10,8 +10,8 @@ all:
     aap_project: OpenShift Virtualization Migration
     aap_org_name: OpenShift Virtualization Migration
     aap_namespace: virtualization-migration
-    # aap_version: 2.5 # Defaults to 2.5 if not provided
-    # aap_channel: stable-2.5 # Defaults to stable-2.5 if not provided
+    # aap_version: 2.6 # Defaults to 2.6 if not provided
+    # aap_channel: stable-2.6 # Defaults to stable-2.6 if not provided
     aap_instance_name: 'aap'
     aap_validate_certs: false
     controller_validate_certs: false

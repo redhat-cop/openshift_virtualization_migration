@@ -25,8 +25,9 @@ source "$VENV_DIR/bin/activate"
 echo -e "${GREEN}Upgrading pip...${RESET}"
 pip install --upgrade pip
 
-echo -e "${GREEN}Installing Ansible core, Ansible Lint, and Pre-commit...${RESET}"
+echo -e "${GREEN}Installing Ansible core, Ansible Lint, Pre-commit, and more...${RESET}"
 pip install -r requirements-dev.txt
+pip install -r requirements-ci.txt
 
 echo -e "${GREEN}Installing pre-commit hooks${RESET}"
 

@@ -1,6 +1,8 @@
 destination:
 {% if 'vsphere' == provider %}
-{% if ('network_destination_type' in mtv_management_mtv_vmware_network_overrides and mtv_management_mtv_vmware_network_overrides['network_destination_type'] == "pod") or mtv_management_mtv_network_networkattachmentdefinition | length == 0 %}
+{% if 'network_destination_type' in mtv_management_mtv_vmware_network_overrides and mtv_management_mtv_vmware_network_overrides['network_destination_type'] == "ignored" %}
+  type: ignored
+{% elif ('network_destination_type' in mtv_management_mtv_vmware_network_overrides and mtv_management_mtv_vmware_network_overrides['network_destination_type'] == "pod") or mtv_management_mtv_network_networkattachmentdefinition | length == 0 %}
   type: pod
 {% else %}
 {% if 'network_attachment_definition' in mtv_management_mtv_vmware_network_overrides and mtv_management_mtv_vmware_network_overrides['network_attachment_definition'] | default('', true) | trim | length > 0 %}
@@ -18,7 +20,9 @@ source:
   id: "{{ mtv_vmware_network.id }}"
   name: "{{ mtv_vmware_network.name }}"
 {% elif 'ovirt' == provider %}
-{% if ('network_destination_type' in mtv_management_mtv_ovirt_network_overrides and mtv_management_mtv_ovirt_network_overrides['network_destination_type'] == "pod") or mtv_management_mtv_network_networkattachmentdefinition | length == 0 %}
+{% if 'network_destination_type' in mtv_management_mtv_ovirt_network_overrides and mtv_management_mtv_ovirt_network_overrides['network_destination_type'] == "ignored" %}
+  type: ignored
+{% elif ('network_destination_type' in mtv_management_mtv_ovirt_network_overrides and mtv_management_mtv_ovirt_network_overrides['network_destination_type'] == "pod") or mtv_management_mtv_network_networkattachmentdefinition | length == 0 %}
   type: pod
 {% else %}
 {% if 'network_attachment_definition' in mtv_management_mtv_ovirt_network_overrides and mtv_management_mtv_ovirt_network_overrides['network_attachment_definition'] | default('', true) | trim | length > 0 %}

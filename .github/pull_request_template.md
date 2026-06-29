@@ -16,4 +16,3 @@
 > Example: `feat: add role`
 
 - [ ] I have formatted my PR title correctly.
-- [ ] I have added `[skip ci]` to the title (Maintainers only, if no release is needed).

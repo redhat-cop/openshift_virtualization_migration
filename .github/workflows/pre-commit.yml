@@ -1,0 +1,134 @@
+name: Pre-commit Checks
+
+# ============================================================================
+# WORKFLOW: PRE-COMMIT VALIDATION
+# ============================================================================
+#
+# This workflow runs all pre-commit hooks configured in .pre-commit-config.yaml
+# to validate PRs. This ensures that external contributors who may not have
+# pre-commit hooks installed locally still get the same validation feedback.
+#
+# CHECKS PERFORMED:
+# -----------------
+# All hooks from .pre-commit-config.yaml including:
+# - Documentation generation and validation (README.md + role READMEs)
+# - Markdown linting (markdownlint-cli2)
+# - Ansible linting (ansible-lint)
+# - Secret scanning (gitleaks)
+# - Merge conflict detection
+# - Trailing whitespace
+# - No direct commits to main branch
+# - Other standard pre-commit hooks
+#
+# DESIGN RATIONALE:
+# -----------------
+# Uses pull_request event for BOTH internal and external PRs because:
+# 1. Pre-commit hooks are READ-ONLY operations (no secrets needed)
+# 2. No write permissions required (workflow just fails the check)
+# 3. Provides immediate feedback to external contributors (no approval gate)
+# 4. Simpler than duplicating logic in custom CI steps
+#
+# SECURITY:
+# ---------
+# Safe for external PRs because:
+# - No repository secrets accessed
+# - Only read permissions (contents: read)
+# - Runs same validations as local pre-commit hooks
+# - Workflow failure is the feedback mechanism
+#
+# ============================================================================
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ["main"]
+
+permissions:
+  contents: read  # Only read access needed for checkout and validation
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-ci.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-ci.txt
+
+      - name: Cache pre-commit environments
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-
+
+      - name: Run pre-commit hooks
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🔍 Running pre-commit hooks (skipping ansible-lint)"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Note: ansible-lint is skipped in this workflow because it requires"
+          echo "      the collection to be built and installed with all dependencies."
+          echo "      It runs in the main CI workflow with proper setup."
+          echo ""
+
+          # Run pre-commit hooks, skipping ansible-lint
+          # ansible-lint is skipped because:
+          # - It requires the collection to be built and installed
+          # - It needs external collection dependencies
+          # - It's already run in the main CI workflow with proper setup
+          #
+          # This workflow focuses on quick, local-friendly checks:
+          # - Documentation generation and validation
+          # - Markdown linting
+          # - Secret scanning (gitleaks)
+          # - Trailing whitespace, merge conflicts, etc.
+
+          if SKIP=ansible-lint pre-commit run --all-files --show-diff-on-failure --color=always; then
+            echo ""
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "✅ All pre-commit checks passed!"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            exit 0
+          else
+            echo ""
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "❌ Pre-commit checks failed!"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo ""
+            echo "📝 How to fix:"
+            echo ""
+            echo "1. Install pre-commit hooks locally:"
+            echo "   pre-commit install"
+            echo ""
+            echo "2. Run pre-commit on all files:"
+            echo "   pre-commit run --all-files"
+            echo ""
+            echo "3. Fix any issues reported above"
+            echo ""
+            echo "4. Commit and push your changes"
+            echo ""
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "💡 Tip: Installing pre-commit hooks locally will catch these"
+            echo "   issues before you push, providing faster feedback!"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo ""
+            exit 1
+          fi

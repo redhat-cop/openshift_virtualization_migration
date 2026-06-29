@@ -335,3 +335,15 @@ releases:
       - 1.24.2_fix_MFG463Updatehotplugcomputejinj.yml
       - MFG-463.yml
     release_date: '2026-05-01'
+  1.25.0:
+    changes:
+      bugfixes:
+        - corrected variable names in validate_migration role (#26)
+        - corrected web validation component in aap 2.5+ (#33)
+      minor_changes:
+        - Update default channel to 2.6 (#34)
+    fragments:
+      - 1.25.0_feat_Updatedefaultchannelto2634.yml
+      - 1.25.0_fix_correctedvariablenamesinvalida.yml
+      - 1.25.0_fix_correctedwebvalidationcomponen.yml
+    release_date: '2026-05-06'

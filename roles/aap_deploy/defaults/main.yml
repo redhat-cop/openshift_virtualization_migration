@@ -50,7 +50,7 @@ aap_deploy_cac_collection: >-
   {{ 'infra.controller_configuration' if aap_version is defined and aap_version is version('2.5', '<')
   else 'infra.aap_configuration' }}
 
-aap_deploy_aap_channel: "{{ aap_channel | default('stable-2.5') }}"
+aap_deploy_aap_channel: "{{ aap_channel | default('stable-2.6') }}"
 
 # controller_hostname: "{{ controller_hostname }}"
 # controller_password: "{{ controller_password }}"

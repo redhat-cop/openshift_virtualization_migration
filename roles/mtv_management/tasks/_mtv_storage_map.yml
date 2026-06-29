@@ -2,7 +2,7 @@
 
 - name: _mtv_storage_map | Initialize data structures
   ansible.builtin.set_fact:
-    mtv_management_mtv_storagemaps: {}
+    mtv_management_mtv_storagemap_maps: {}
 
 - name: _mtv_storage_map | Verify Storage Map Overrides do not contain both includes and excludes
   ansible.builtin.fail:
@@ -41,9 +41,48 @@
     mtv_management_inventory_query_result_var: mtv_destination_datastores
   when: "'vsphere' in provider"
 
+- name: _mtv_storage_map | Extract included datastore IDs from overrides
+  ansible.builtin.set_fact:
+    mtv_management_mtv_allowed_datastore_ids: >-
+      {{
+        mtv_management_storage_map_overrides
+        | selectattr('include', 'defined')
+        | selectattr('include', 'equalto', true)
+        | map(attribute='id')
+        | list
+      }}
+  when:
+    - mtv_management_storage_map_overrides is defined
+    - mtv_management_storage_map_overrides | length > 0
+    - mtv_management_storage_map_overrides | selectattr('include', 'defined') | list | length > 0
+
+- name: _mtv_storage_map | Extract excluded datastore IDs from overrides
+  ansible.builtin.set_fact:
+    mtv_management_mtv_excluded_datastore_ids: >-
+      {{
+        mtv_management_storage_map_overrides
+        | selectattr('exclude', 'defined')
+        | selectattr('exclude', 'equalto', true)
+        | map(attribute='id')
+        | list
+      }}
+  when:
+    - mtv_management_storage_map_overrides is defined
+    - mtv_management_storage_map_overrides | length > 0
+    - mtv_management_storage_map_overrides | selectattr('exclude', 'defined') | list | length > 0
+
 - name: _mtv_storage_map | Process VMware Datastores
   ansible.builtin.include_tasks: _mtv_storage_map_process_datastore.yml
-  loop: "{{ mtv_destination_datastores }}"
+  loop: >-
+    {{
+      (mtv_destination_datastores | selectattr('id', 'in', mtv_management_mtv_allowed_datastore_ids) | list)
+      if (mtv_management_mtv_allowed_datastore_ids | default([]) | length > 0)
+      else (mtv_destination_datastores
+        | rejectattr('id', 'in', mtv_management_mtv_excluded_datastore_ids | default([]))
+        | list)
+      if (mtv_management_mtv_excluded_datastore_ids | default([]) | length > 0)
+      else mtv_destination_datastores
+    }}
   loop_control:
     loop_var: mtv_vmware_datastore
   when:
@@ -53,7 +92,16 @@
 
 - name: _mtv_storage_map | Process Ovirt Datastores
   ansible.builtin.include_tasks: _mtv_storage_map_process_datastore.yml
-  loop: "{{ mtv_destination_datastores }}"
+  loop: >-
+    {{
+      (mtv_destination_datastores | selectattr('id', 'in', mtv_management_mtv_allowed_datastore_ids) | list)
+      if (mtv_management_mtv_allowed_datastore_ids | default([]) | length > 0)
+      else (mtv_destination_datastores
+        | rejectattr('id', 'in', mtv_management_mtv_excluded_datastore_ids | default([]))
+        | list)
+      if (mtv_management_mtv_excluded_datastore_ids | default([]) | length > 0)
+      else mtv_destination_datastores
+    }}
   loop_control:
     loop_var: mtv_ovirt_datastore
   when:

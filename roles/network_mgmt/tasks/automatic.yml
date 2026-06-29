@@ -31,6 +31,7 @@
     - network_mgmt_openshift_node_network_ports | default([]) | length > 0
     - network_mgmt_vcenter_dvswitch | default('', true) | trim | length > 0
     - network_mgmt_vcenter_datacenter | default('', true) | trim | length > 0
+    - network_mgmt_openshift_network_bridge_mode != 'ovn-layer2'
 
 - name: automatic | Include tasks from automatic_nad.yml
   ansible.builtin.include_tasks:
@@ -44,4 +45,6 @@
       or
       (network_mgmt_nad_auto_bridge_name is defined and
       network_mgmt_nad_auto_bridge_name |length > 0)
+      or
+      network_mgmt_openshift_network_bridge_mode == 'ovn-layer2'
 ...

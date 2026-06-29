@@ -1,8 +1,8 @@
 ---
-
 - name: _mtv_network_map | Initialize data structures
   ansible.builtin.set_fact:
     mtv_management_mtv_networkmap_maps: {}
+    mtv_management_mtv_allowed_ids: []
 
 - name: _mtv_network_map | Verify Network Map Overrides do not contain both includes and excludes
   ansible.builtin.fail:
@@ -32,9 +32,28 @@
     mtv_management_inventory_query_endpoint: /providers/openshift/{{ (mtv_providers.openshift | selectattr('name', 'equalto', mtv_management_destination_target) | first).uid }}/networkattachmentdefinitions?detail=4 # noqa: yaml[line-length]
     mtv_management_inventory_query_result_var: mtv_networkattachmentdefinitions
 
+- name: _mtv_network_map | Extract allowed network IDs from overrides
+  ansible.builtin.set_fact:
+    mtv_management_mtv_allowed_ids: >-
+      {{
+        mtv_management_network_map_overrides
+        | selectattr('include', 'defined')
+        | selectattr('include', 'equalto', true)
+        | map(attribute='id')
+        | list
+      }}
+  when:
+    - mtv_management_network_map_overrides is defined
+    - mtv_management_network_map_overrides | length > 0
+
 - name: _mtv_network_map | Process VMware Networks
   ansible.builtin.include_tasks: _mtv_network_map_process_network.yml
-  loop: "{{ mtv_networks }}"
+  loop: >-
+    {{
+      (mtv_networks | selectattr('id', 'in', mtv_management_mtv_allowed_ids) | list)
+      if (mtv_management_mtv_allowed_ids | default([]) | length > 0)
+      else mtv_networks
+    }}
   loop_control:
     loop_var: mtv_vmware_network
   when:
@@ -44,7 +63,12 @@
 
 - name: _mtv_network_map | Process Ovirt Networks
   ansible.builtin.include_tasks: _mtv_network_map_process_network.yml
-  loop: "{{ mtv_networks }}"
+  loop: >-
+    {{
+      (mtv_networks | selectattr('id', 'in', mtv_management_mtv_allowed_ids) | list)
+      if (mtv_management_mtv_allowed_ids | default([]) | length > 0)
+      else mtv_networks
+    }}
   loop_control:
     loop_var: mtv_ovirt_network
   when:
