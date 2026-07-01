@@ -1,5 +1,5 @@
 ---
-- name: Query migrated VirtualMachines across target namespaces
+- name: _cleanup_migrated_vms | Query migrated VirtualMachines across target namespaces
   kubernetes.core.k8s_info:
     api_version: kubevirt.io/v1
     kind: VirtualMachine
@@ -12,7 +12,7 @@
   ignore_errors: true
   when: ocp_cleanup_target_namespaces | length > 0
 
-- name: Flatten VM results
+- name: _cleanup_migrated_vms | Flatten VM results
   ansible.builtin.set_fact:
     _ocp_cleanup_all_vms: >-
       {{ _ocp_cleanup_vms_result.results | default([])
@@ -21,13 +21,13 @@
       | flatten
       | list }}
 
-- name: Report VMs found
+- name: _cleanup_migrated_vms | Report VMs found
   ansible.builtin.debug:
     msg: >-
       VirtualMachines: found {{ _ocp_cleanup_all_vms | length }} VM(s)
       {{ '— DRY RUN, skipping deletion' if ocp_cleanup_dry_run else '— removing' }}
 
-- name: Remove VirtualMachines
+- name: _cleanup_migrated_vms | Remove VirtualMachines
   when:
     - _ocp_cleanup_all_vms | length > 0
     - not (ocp_cleanup_dry_run | bool)
@@ -46,7 +46,7 @@
   loop_control:
     label: "{{ item.metadata.namespace }}/{{ item.metadata.name }}"
 
-- name: Query PVCs in target namespaces
+- name: _cleanup_migrated_vms | Query PVCs in target namespaces
   kubernetes.core.k8s_info:
     api_version: v1
     kind: PersistentVolumeClaim
@@ -59,7 +59,7 @@
   ignore_errors: true
   when: ocp_cleanup_target_namespaces | length > 0
 
-- name: Flatten PVC results
+- name: _cleanup_migrated_vms | Flatten PVC results
   ansible.builtin.set_fact:
     _ocp_cleanup_all_pvcs: >-
       {{ _ocp_cleanup_pvcs_result.results | default([])
@@ -68,13 +68,13 @@
       | flatten
       | list }}
 
-- name: Report PVCs found
+- name: _cleanup_migrated_vms | Report PVCs found
   ansible.builtin.debug:
     msg: >-
       PVCs: found {{ _ocp_cleanup_all_pvcs | length }} PVC(s)
       {{ '— DRY RUN, skipping deletion' if ocp_cleanup_dry_run else '— removing' }}
 
-- name: Remove PVCs
+- name: _cleanup_migrated_vms | Remove PVCs
   when:
     - _ocp_cleanup_all_pvcs | length > 0
     - not (ocp_cleanup_dry_run | bool)

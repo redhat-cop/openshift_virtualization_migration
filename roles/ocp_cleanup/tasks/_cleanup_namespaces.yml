@@ -1,16 +1,16 @@
 ---
-- name: Report target namespaces
+- name: _cleanup_namespaces | Report target namespaces
   ansible.builtin.debug:
     msg: >-
       Target namespaces: {{ ocp_cleanup_target_namespaces | length }} namespace(s) to remove
       {{ '— DRY RUN, skipping deletion' if ocp_cleanup_dry_run else '— removing' }}
 
-- name: Display target namespaces
+- name: _cleanup_namespaces | Display target namespaces
   when: ocp_cleanup_target_namespaces | length > 0
   ansible.builtin.debug:
     msg: "{{ ocp_cleanup_target_namespaces }}"
 
-- name: Remove target namespaces
+- name: _cleanup_namespaces | Remove target namespaces
   when:
     - ocp_cleanup_target_namespaces | length > 0
     - not (ocp_cleanup_dry_run | bool)

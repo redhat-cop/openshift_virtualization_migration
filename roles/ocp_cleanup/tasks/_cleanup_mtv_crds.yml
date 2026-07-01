@@ -1,5 +1,5 @@
 ---
-- name: "Query {{ _ocp_cleanup_crd.kind }} resources in {{ ocp_cleanup_mtv_namespace }}"
+- name: "_cleanup_mtv_crds | Query {{ _ocp_cleanup_crd.kind }} resources in {{ ocp_cleanup_mtv_namespace }}"
   kubernetes.core.k8s_info:
     api_version: "{{ _ocp_cleanup_crd.api_version }}"
     kind: "{{ _ocp_cleanup_crd.kind }}"
@@ -10,20 +10,20 @@
   register: _ocp_cleanup_crd_results
   ignore_errors: true
 
-- name: "Report {{ _ocp_cleanup_crd.kind }} resources found"
+- name: "_cleanup_mtv_crds | Report {{ _ocp_cleanup_crd.kind }} resources found"
   ansible.builtin.debug:
     msg: >-
       {{ _ocp_cleanup_crd.kind }}: found {{ (_ocp_cleanup_crd_results.resources | default([])) | length }} resource(s)
       {{ '— DRY RUN, skipping deletion' if ocp_cleanup_dry_run else '— removing' }}
 
-- name: "Display {{ _ocp_cleanup_crd.kind }} resources"
+- name: "_cleanup_mtv_crds | Display {{ _ocp_cleanup_crd.kind }} resources"
   when:
     - _ocp_cleanup_crd_results is not failed
     - _ocp_cleanup_crd_results.resources | default([]) | length > 0
   ansible.builtin.debug:
     msg: "{{ _ocp_cleanup_crd_results.resources | map(attribute='metadata') | map(attribute='name') | list }}"
 
-- name: "Remove {{ _ocp_cleanup_crd.kind }} resources"
+- name: "_cleanup_mtv_crds | Remove {{ _ocp_cleanup_crd.kind }} resources"
   when:
     - _ocp_cleanup_crd_results is not failed
     - _ocp_cleanup_crd_results.resources | default([]) | length > 0

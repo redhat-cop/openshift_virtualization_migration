@@ -1,5 +1,5 @@
 ---
-- name: Remove operators in reverse order
+- name: _cleanup_operators | Remove operators in reverse order
   ansible.builtin.include_tasks:
     file: _cleanup_operator_item.yml
   loop: "{{ ocp_cleanup_operators | reverse | list }}"
