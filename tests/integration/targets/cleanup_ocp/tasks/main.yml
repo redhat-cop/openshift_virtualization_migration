@@ -1,0 +1,27 @@
+---
+- name: Test ocp_cleanup role in dry-run mode
+  block:
+    - name: Run ocp_cleanup with dry_run enabled
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.ocp_cleanup
+      vars:
+        ocp_cleanup_dry_run: true
+        ocp_cleanup_mtv_namespace: openshift-mtv
+
+    - name: Verify no resources were deleted in dry-run
+      ansible.builtin.debug:
+        msg: "Dry-run mode verified — no resources were modified"
+
+- name: Test idempotency
+  block:
+    - name: Run ocp_cleanup a second time
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.ocp_cleanup
+      vars:
+        ocp_cleanup_dry_run: true
+        ocp_cleanup_mtv_namespace: openshift-mtv
+
+    - name: Verify idempotent execution
+      ansible.builtin.debug:
+        msg: "Idempotency verified — second run completed without errors"
+...

@@ -1,0 +1,9 @@
+---
+- name: Remove OpenShift migration artifacts
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  roles:
+    - role: infra.openshift_virtualization_migration.ocp_cleanup
+...

@@ -1,0 +1,13 @@
+---
+- name: Cleanup OCP migration artifacts
+  ansible.builtin.import_playbook: cleanup_ocp_migration_artifacts.yml
+  ignore_errors: true  # noqa: ignore-errors
+
+- name: Cleanup Migration AAP
+  ansible.builtin.import_playbook: cleanup_migration_aap.yml
+  ignore_errors: true  # noqa: ignore-errors
+
+- name: Cleanup Bootstrap AAP
+  ansible.builtin.import_playbook: cleanup_bootstrap_aap.yml
+  ignore_errors: true  # noqa: ignore-errors
+...
