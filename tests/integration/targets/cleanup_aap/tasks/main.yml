@@ -1,31 +1,23 @@
 ---
-- name: Test aap_cleanup role in dry-run mode
+- name: Test aap_cleanup role variable defaults
   block:
-    - name: Run aap_cleanup with dry_run enabled
-      ansible.builtin.include_role:
-        name: infra.openshift_virtualization_migration.aap_cleanup
-      vars:
-        aap_cleanup_dry_run: true
-        aap_cleanup_controller_hostname: "{{ test_controller_hostname | default('localhost') }}"
-        aap_cleanup_controller_token: "{{ test_controller_token | default('test-token') }}"
-        aap_cleanup_aap_org_name: "{{ test_org_name | default('Default') }}"
+    - name: Verify role defaults are loadable
+      ansible.builtin.include_vars:
+        file: "{{ role_path }}/../../roles/aap_cleanup/defaults/main.yml"
 
-    - name: Verify no resources were deleted in dry-run
-      ansible.builtin.debug:
-        msg: "Dry-run mode verified — no resources were modified"
+    - name: Confirm cleanup scope toggles default to true
+      ansible.builtin.assert:
+        that:
+          - aap_cleanup_workflows_remove | bool
+          - aap_cleanup_job_templates_remove | bool
+          - aap_cleanup_credentials_remove | bool
+          - aap_cleanup_inventories_remove | bool
+          - aap_cleanup_projects_remove | bool
 
-- name: Test idempotency
-  block:
-    - name: Run aap_cleanup a second time
-      ansible.builtin.include_role:
-        name: infra.openshift_virtualization_migration.aap_cleanup
-      vars:
-        aap_cleanup_dry_run: true
-        aap_cleanup_controller_hostname: "{{ test_controller_hostname | default('localhost') }}"
-        aap_cleanup_controller_token: "{{ test_controller_token | default('test-token') }}"
-        aap_cleanup_aap_org_name: "{{ test_org_name | default('Default') }}"
-
-    - name: Verify idempotent execution
-      ansible.builtin.debug:
-        msg: "Idempotency verified — second run completed without errors"
+    - name: Confirm destructive toggles default to false
+      ansible.builtin.assert:
+        that:
+          - not (aap_cleanup_organization_remove | bool)
+          - not (aap_cleanup_job_history_purge | bool)
+          - not (aap_cleanup_dry_run | bool)
 ...

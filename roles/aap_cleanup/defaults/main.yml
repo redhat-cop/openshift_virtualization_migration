@@ -14,7 +14,8 @@ aap_cleanup_controller_token: >-
   | default(lookup('ansible.builtin.env', 'CONTROLLER_TOKEN')) }}
 aap_cleanup_controller_validate_certs: >-
   {{ controller_validate_certs | default(aap_validate_certs)
-  | default(lookup('ansible.builtin.env', 'CONTROLLER_VERIFY_SSL')) }}
+  | default(lookup('ansible.builtin.env', 'CONTROLLER_VERIFY_SSL'))
+  | default(true, true) | bool }}
 aap_cleanup_secure_logging: "{{ secure_logging | default(true) }}"
 
 # AAP version-aware collection selection

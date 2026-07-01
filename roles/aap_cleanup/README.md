@@ -75,28 +75,28 @@ Description: Remove AAP resources seeded by the aap_seed role
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`aap_cleanup_aap_org_name`](defaults/main.yml#L26)   | str   | `{{ aap_org_name }}` |  None  |   None  |  None |
-| [`aap_cleanup_api_base`](defaults/main.yml#L29)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`aap_cleanup_cac_collection`](defaults/main.yml#L21)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`aap_cleanup_controller_configuration_async_retries`](defaults/main.yml#L54)   | int   | `60` |  None  |   None  |  None |
+| [`aap_cleanup_aap_org_name`](defaults/main.yml#L27)   | str   | `{{ aap_org_name }}` |  None  |   None  |  None |
+| [`aap_cleanup_api_base`](defaults/main.yml#L30)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`aap_cleanup_cac_collection`](defaults/main.yml#L22)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`aap_cleanup_controller_configuration_async_retries`](defaults/main.yml#L55)   | int   | `60` |  None  |   None  |  None |
 | [`aap_cleanup_controller_hostname`](defaults/main.yml#L3)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
 | [`aap_cleanup_controller_password`](defaults/main.yml#L9)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
 | [`aap_cleanup_controller_token`](defaults/main.yml#L12)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
 | [`aap_cleanup_controller_username`](defaults/main.yml#L6)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
 | [`aap_cleanup_controller_validate_certs`](defaults/main.yml#L15)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`aap_cleanup_credential_types_remove`](defaults/main.yml#L43)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_cleanup_credentials_remove`](defaults/main.yml#L42)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_cleanup_dry_run`](defaults/main.yml#L51)   | bool   | `False` |  None  |   None  |  None |
-| [`aap_cleanup_execution_environments_remove`](defaults/main.yml#L41)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_cleanup_hosts_remove`](defaults/main.yml#L38)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_cleanup_inventories_remove`](defaults/main.yml#L39)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_cleanup_job_history_purge`](defaults/main.yml#L45)   | bool   | `False` |  None  |   None  |  None |
-| [`aap_cleanup_job_templates_remove`](defaults/main.yml#L37)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_cleanup_organization_remove`](defaults/main.yml#L44)   | bool   | `False` |  None  |   None  |  None |
-| [`aap_cleanup_projects_remove`](defaults/main.yml#L40)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_cleanup_providers`](defaults/main.yml#L48)   | str   | `{{ cleanup_providers ¦ default(['vmware', 'ovirt']) }}` |  None  |   None  |  None |
-| [`aap_cleanup_secure_logging`](defaults/main.yml#L18)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
-| [`aap_cleanup_workflows_remove`](defaults/main.yml#L36)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_cleanup_credential_types_remove`](defaults/main.yml#L44)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_cleanup_credentials_remove`](defaults/main.yml#L43)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_cleanup_dry_run`](defaults/main.yml#L52)   | bool   | `False` |  None  |   None  |  None |
+| [`aap_cleanup_execution_environments_remove`](defaults/main.yml#L42)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_cleanup_hosts_remove`](defaults/main.yml#L39)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_cleanup_inventories_remove`](defaults/main.yml#L40)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_cleanup_job_history_purge`](defaults/main.yml#L46)   | bool   | `False` |  None  |   None  |  None |
+| [`aap_cleanup_job_templates_remove`](defaults/main.yml#L38)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_cleanup_organization_remove`](defaults/main.yml#L45)   | bool   | `False` |  None  |   None  |  None |
+| [`aap_cleanup_projects_remove`](defaults/main.yml#L41)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_cleanup_providers`](defaults/main.yml#L49)   | str   | `{{ cleanup_providers ¦ default(['vmware', 'ovirt']) }}` |  None  |   None  |  None |
+| [`aap_cleanup_secure_logging`](defaults/main.yml#L19)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
+| [`aap_cleanup_workflows_remove`](defaults/main.yml#L37)   | bool   | `True` |  None  |   None  |  None |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>

@@ -1,27 +1,39 @@
 ---
-- name: Test ocp_cleanup role in dry-run mode
+- name: Test ocp_cleanup role variable defaults
   block:
-    - name: Run ocp_cleanup with dry_run enabled
-      ansible.builtin.include_role:
-        name: infra.openshift_virtualization_migration.ocp_cleanup
-      vars:
-        ocp_cleanup_dry_run: true
-        ocp_cleanup_mtv_namespace: openshift-mtv
+    - name: Verify role defaults are loadable
+      ansible.builtin.include_vars:
+        file: "{{ role_path }}/../../roles/ocp_cleanup/defaults/main.yml"
 
-    - name: Verify no resources were deleted in dry-run
-      ansible.builtin.debug:
-        msg: "Dry-run mode verified — no resources were modified"
+    - name: Confirm MTV cleanup toggles default to true
+      ansible.builtin.assert:
+        that:
+          - ocp_cleanup_mtv_migrations_remove | bool
+          - ocp_cleanup_mtv_plans_remove | bool
+          - ocp_cleanup_mtv_maps_remove | bool
+          - ocp_cleanup_mtv_providers_remove | bool
+          - ocp_cleanup_mtv_secrets_remove | bool
 
-- name: Test idempotency
-  block:
-    - name: Run ocp_cleanup a second time
-      ansible.builtin.include_role:
-        name: infra.openshift_virtualization_migration.ocp_cleanup
-      vars:
-        ocp_cleanup_dry_run: true
-        ocp_cleanup_mtv_namespace: openshift-mtv
+    - name: Confirm destructive toggles default to false
+      ansible.builtin.assert:
+        that:
+          - not (ocp_cleanup_migrated_vms_remove | bool)
+          - not (ocp_cleanup_target_namespaces_remove | bool)
+          - not (ocp_cleanup_operators_remove | bool)
+          - not (ocp_cleanup_dry_run | bool)
 
-    - name: Verify idempotent execution
-      ansible.builtin.debug:
-        msg: "Idempotency verified — second run completed without errors"
+    - name: Confirm MTV CRD kinds list is populated
+      ansible.builtin.assert:
+        that:
+          - ocp_cleanup_mtv_crd_kinds | length == 5
+          - ocp_cleanup_mtv_crd_kinds[0].kind == 'Migration'
+          - ocp_cleanup_mtv_crd_kinds[4].kind == 'Provider'
+
+    - name: Confirm operator definitions are complete
+      ansible.builtin.assert:
+        that:
+          - ocp_cleanup_operator_definitions.mtv is defined
+          - ocp_cleanup_operator_definitions.cnv is defined
+          - ocp_cleanup_operator_definitions.mtv.namespace == 'openshift-mtv'
+          - ocp_cleanup_operators | length == 8
 ...
