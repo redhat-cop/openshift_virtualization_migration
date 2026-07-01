@@ -27,5 +27,5 @@
   loop: "{{ ocp_cleanup_target_namespaces }}"
   loop_control:
     label: "{{ item }}"
-  ignore_errors: true
+  failed_when: false
 ...

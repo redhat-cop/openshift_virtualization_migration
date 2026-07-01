@@ -1,5 +1,5 @@
 ---
-- name: "_build_absent_resources | Query {{ _aap_cleanup_resource_type }} from AAP API"
+- name: "_build_absent_resources | Query resources from AAP API — {{ _aap_cleanup_resource_type }}"
   ansible.builtin.uri:
     url: >-
       https://{{ aap_cleanup_controller_hostname }}{{ aap_cleanup_api_base }}/{{ _aap_cleanup_resource_type }}/?{{
@@ -29,7 +29,7 @@
   ansible.builtin.set_fact:
     _aap_cleanup_filtered_results: "{{ _aap_cleanup_query_result.json.results }}"
 
-- name: "_build_absent_resources | Report {{ _aap_cleanup_resource_type }} found ({{ _aap_cleanup_filtered_results | length }})"
+- name: "_build_absent_resources | Report resources found — {{ _aap_cleanup_resource_type }}"
   ansible.builtin.debug:
     msg: >-
       {{ _aap_cleanup_resource_type }}: found {{ _aap_cleanup_filtered_results | length }} resource(s)
@@ -42,12 +42,12 @@
     msg: "{{ _aap_cleanup_filtered_results | map(attribute='name') | list }}"
     verbosity: 0
 
-- name: "_build_absent_resources | Build and dispatch absent {{ _aap_cleanup_resource_type }}"
+- name: "_build_absent_resources | Build and dispatch absent resources — {{ _aap_cleanup_resource_type }}"
   when:
     - _aap_cleanup_filtered_results | length > 0
     - not (aap_cleanup_dry_run | bool)
   block:
-    - name: "_build_absent_resources | Build absent resource list for {{ _aap_cleanup_resource_type }}"
+    - name: "_build_absent_resources | Build absent resource list — {{ _aap_cleanup_resource_type }}"
       ansible.builtin.set_fact:
         _aap_cleanup_absent_list: >-
           {{ _aap_cleanup_filtered_results | map('combine', {'state': 'absent'})
@@ -58,19 +58,19 @@
           | map('items2dict')
           | list }}
 
-    - name: "_build_absent_resources | Set dispatch variable {{ _aap_cleanup_dispatch_var }}"
+    - name: "_build_absent_resources | Set dispatch variable — {{ _aap_cleanup_dispatch_var }}"
       ansible.builtin.set_fact:
         "{{ _aap_cleanup_dispatch_var }}": "{{ _aap_cleanup_absent_list }}"
-        controller_dependency_check: false
+        controller_dependency_check: false  # noqa: var-naming[no-role-prefix]
 
-    - name: "_build_absent_resources | Dispatch {{ _aap_cleanup_resource_type }} removal"
+    - name: "_build_absent_resources | Dispatch removal — {{ _aap_cleanup_resource_type }}"
       ansible.builtin.include_role:
         name: "{{ aap_cleanup_cac_collection }}.dispatch"
       vars:
         controller_configuration_async_delay: 5
         aap_configuration_async_delay: 5
 
-    - name: "_build_absent_resources | Clear dispatch variable {{ _aap_cleanup_dispatch_var }}"
+    - name: "_build_absent_resources | Clear dispatch variable — {{ _aap_cleanup_dispatch_var }}"
       ansible.builtin.set_fact:
         "{{ _aap_cleanup_dispatch_var }}": []
 ...

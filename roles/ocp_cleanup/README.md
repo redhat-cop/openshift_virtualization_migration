@@ -53,11 +53,6 @@ Resources are removed respecting Kubernetes finalizer dependencies:
         ocp_cleanup_dry_run: true
         ocp_cleanup_operators_remove: true
 ```
-
-## License
-
-GPL-3.0-or-later
-
 <!-- DOCSIBLE START -->
 ## ocp_cleanup
 
@@ -410,10 +405,10 @@ Description: Remove OpenShift migration artifacts created during virtualization 
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| _cleanup_mtv_crds ¦ Query {{ _ocp_cleanup_crd.kind }} resources in {{ ocp_cleanup_mtv_namespace }} | `kubernetes.core.k8s_info` | False |
-| _cleanup_mtv_crds ¦ Report {{ _ocp_cleanup_crd.kind }} resources found | `ansible.builtin.debug` | False |
-| _cleanup_mtv_crds ¦ Display {{ _ocp_cleanup_crd.kind }} resources | `ansible.builtin.debug` | True |
-| _cleanup_mtv_crds ¦ Remove {{ _ocp_cleanup_crd.kind }} resources | `redhat.openshift.k8s` | True |
+| _cleanup_mtv_crds ¦ Query CRD resources — {{ _ocp_cleanup_crd.kind }} | `kubernetes.core.k8s_info` | False |
+| _cleanup_mtv_crds ¦ Report CRD resources found — {{ _ocp_cleanup_crd.kind }} | `ansible.builtin.debug` | False |
+| _cleanup_mtv_crds ¦ Display CRD resources — {{ _ocp_cleanup_crd.kind }} | `ansible.builtin.debug` | True |
+| _cleanup_mtv_crds ¦ Remove CRD resources — {{ _ocp_cleanup_crd.kind }} | `redhat.openshift.k8s` | True |
 
 #### File: tasks/_cleanup_mtv_secrets.yml
 
@@ -437,13 +432,13 @@ Description: Remove OpenShift migration artifacts created during virtualization 
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| _cleanup_operator_item ¦ Set operator definition for {{ _ocp_cleanup_operator_name }} | `ansible.builtin.set_fact` | False |
-| _cleanup_operator_item ¦ Report operator {{ _ocp_cleanup_operator_name }} | `ansible.builtin.debug` | False |
-| _cleanup_operator_item ¦ Remove extra resources for {{ _ocp_cleanup_operator_name }} | `redhat.openshift.k8s` | True |
-| _cleanup_operator_item ¦ Query CSVs in {{ _ocp_cleanup_op_def.namespace }} | `kubernetes.core.k8s_info` | True |
-| _cleanup_operator_item ¦ Remove CSVs for {{ _ocp_cleanup_operator_name }} | `redhat.openshift.k8s` | True |
-| _cleanup_operator_item ¦ Remove Subscription for {{ _ocp_cleanup_operator_name }} | `redhat.openshift.k8s` | True |
-| _cleanup_operator_item ¦ Remove OperatorGroup for {{ _ocp_cleanup_operator_name }} | `redhat.openshift.k8s` | True |
+| _cleanup_operator_item ¦ Set operator definition — {{ _ocp_cleanup_operator_name }} | `ansible.builtin.set_fact` | False |
+| _cleanup_operator_item ¦ Report operator — {{ _ocp_cleanup_operator_name }} | `ansible.builtin.debug` | False |
+| _cleanup_operator_item ¦ Remove extra resources — {{ _ocp_cleanup_operator_name }} | `redhat.openshift.k8s` | True |
+| _cleanup_operator_item ¦ Query CSVs — {{ _ocp_cleanup_operator_name }} | `kubernetes.core.k8s_info` | True |
+| _cleanup_operator_item ¦ Remove CSVs — {{ _ocp_cleanup_operator_name }} | `redhat.openshift.k8s` | True |
+| _cleanup_operator_item ¦ Remove Subscription — {{ _ocp_cleanup_operator_name }} | `redhat.openshift.k8s` | True |
+| _cleanup_operator_item ¦ Remove OperatorGroup — {{ _ocp_cleanup_operator_name }} | `redhat.openshift.k8s` | True |
 | _cleanup_operator_item ¦ Remove Namespace {{ _ocp_cleanup_op_def.namespace }} | `redhat.openshift.k8s` | True |
 
 #### File: tasks/_cleanup_operators.yml
@@ -493,11 +488,11 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| _cleanup_mtv_crds___Query_____ocp_cleanup_crd_kind____resources_in_ocp_cleanup_mtv_namespace0[ cleanup mtv crds   query     ocp cleanup crd kind<br>   resources in ocp cleanup mtv namespace]:::task
-  _cleanup_mtv_crds___Query_____ocp_cleanup_crd_kind____resources_in_ocp_cleanup_mtv_namespace0-->|Task| _cleanup_mtv_crds___Report_____ocp_cleanup_crd_kind____resources_found1[ cleanup mtv crds   report     ocp cleanup crd<br>kind    resources found]:::task
-  _cleanup_mtv_crds___Report_____ocp_cleanup_crd_kind____resources_found1-->|Task| _cleanup_mtv_crds___Display_____ocp_cleanup_crd_kind____resources2[ cleanup mtv crds   display     ocp cleanup crd<br>kind    resources<br>When: **ocp cleanup crd results is not failed and  ocp<br>cleanup crd results resources   default      <br>length   0**]:::task
-  _cleanup_mtv_crds___Display_____ocp_cleanup_crd_kind____resources2-->|Task| _cleanup_mtv_crds___Remove_____ocp_cleanup_crd_kind____resources3[ cleanup mtv crds   remove     ocp cleanup crd<br>kind    resources<br>When: **ocp cleanup crd results is not failed and  ocp<br>cleanup crd results resources   default      <br>length   0 and not  ocp cleanup dry run   bool**]:::task
-  _cleanup_mtv_crds___Remove_____ocp_cleanup_crd_kind____resources3-->End
+  Start-->|Task| _cleanup_mtv_crds___Query_CRD_resources_______ocp_cleanup_crd_kind___0[ cleanup mtv crds   query crd resources       ocp<br>cleanup crd kind   ]:::task
+  _cleanup_mtv_crds___Query_CRD_resources_______ocp_cleanup_crd_kind___0-->|Task| _cleanup_mtv_crds___Report_CRD_resources_found_______ocp_cleanup_crd_kind___1[ cleanup mtv crds   report crd resources found    <br>  ocp cleanup crd kind   ]:::task
+  _cleanup_mtv_crds___Report_CRD_resources_found_______ocp_cleanup_crd_kind___1-->|Task| _cleanup_mtv_crds___Display_CRD_resources_______ocp_cleanup_crd_kind___2[ cleanup mtv crds   display crd resources      <br>ocp cleanup crd kind   <br>When: **ocp cleanup crd results is not failed and  ocp<br>cleanup crd results resources   default      <br>length   0**]:::task
+  _cleanup_mtv_crds___Display_CRD_resources_______ocp_cleanup_crd_kind___2-->|Task| _cleanup_mtv_crds___Remove_CRD_resources_______ocp_cleanup_crd_kind___3[ cleanup mtv crds   remove crd resources       ocp<br>cleanup crd kind   <br>When: **ocp cleanup crd results is not failed and  ocp<br>cleanup crd results resources   default      <br>length   0 and not  ocp cleanup dry run   bool**]:::task
+  _cleanup_mtv_crds___Remove_CRD_resources_______ocp_cleanup_crd_kind___3-->End
 ```
 
 ### Graph for _cleanup_mtv_secrets.yml
@@ -556,14 +551,14 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| _cleanup_operator_item___Set_operator_definition_for__ocp_cleanup_operator_name0[ cleanup operator item   set operator definition<br>for  ocp cleanup operator name]:::task
-  _cleanup_operator_item___Set_operator_definition_for__ocp_cleanup_operator_name0-->|Task| _cleanup_operator_item___Report_operator__ocp_cleanup_operator_name1[ cleanup operator item   report operator  ocp<br>cleanup operator name]:::task
-  _cleanup_operator_item___Report_operator__ocp_cleanup_operator_name1-->|Task| _cleanup_operator_item___Remove_extra_resources_for__ocp_cleanup_operator_name2[ cleanup operator item   remove extra resources<br>for  ocp cleanup operator name<br>When: **ocp cleanup op def extra resources   length   0<br>and not  ocp cleanup dry run   bool**]:::task
-  _cleanup_operator_item___Remove_extra_resources_for__ocp_cleanup_operator_name2-->|Task| _cleanup_operator_item___Query_CSVs_in_____ocp_cleanup_op_def_namespace___3[ cleanup operator item   query csvs in     ocp<br>cleanup op def namespace   <br>When: **not  ocp cleanup dry run   bool**]:::task
-  _cleanup_operator_item___Query_CSVs_in_____ocp_cleanup_op_def_namespace___3-->|Task| _cleanup_operator_item___Remove_CSVs_for__ocp_cleanup_operator_name4[ cleanup operator item   remove csvs for  ocp<br>cleanup operator name<br>When: **not  ocp cleanup dry run   bool  and  ocp cleanup<br>csvs is not failed and  ocp cleanup csvs resources<br>  default       length   0**]:::task
-  _cleanup_operator_item___Remove_CSVs_for__ocp_cleanup_operator_name4-->|Task| _cleanup_operator_item___Remove_Subscription_for__ocp_cleanup_operator_name5[ cleanup operator item   remove subscription for <br>ocp cleanup operator name<br>When: **not  ocp cleanup dry run   bool**]:::task
-  _cleanup_operator_item___Remove_Subscription_for__ocp_cleanup_operator_name5-->|Task| _cleanup_operator_item___Remove_OperatorGroup_for__ocp_cleanup_operator_name6[ cleanup operator item   remove operatorgroup for <br>ocp cleanup operator name<br>When: **not  ocp cleanup dry run   bool**]:::task
-  _cleanup_operator_item___Remove_OperatorGroup_for__ocp_cleanup_operator_name6-->|Task| _cleanup_operator_item___Remove_Namespace_____ocp_cleanup_op_def_namespace___7[ cleanup operator item   remove namespace     ocp<br>cleanup op def namespace   <br>When: **not  ocp cleanup dry run   bool**]:::task
+  Start-->|Task| _cleanup_operator_item___Set_operator_definition____ocp_cleanup_operator_name0[ cleanup operator item   set operator definition  <br> ocp cleanup operator name]:::task
+  _cleanup_operator_item___Set_operator_definition____ocp_cleanup_operator_name0-->|Task| _cleanup_operator_item___Report_operator____ocp_cleanup_operator_name1[ cleanup operator item   report operator    ocp<br>cleanup operator name]:::task
+  _cleanup_operator_item___Report_operator____ocp_cleanup_operator_name1-->|Task| _cleanup_operator_item___Remove_extra_resources____ocp_cleanup_operator_name2[ cleanup operator item   remove extra resources   <br>ocp cleanup operator name<br>When: **ocp cleanup op def extra resources   length   0<br>and not  ocp cleanup dry run   bool**]:::task
+  _cleanup_operator_item___Remove_extra_resources____ocp_cleanup_operator_name2-->|Task| _cleanup_operator_item___Query_CSVs____ocp_cleanup_operator_name3[ cleanup operator item   query csvs    ocp cleanup<br>operator name<br>When: **not  ocp cleanup dry run   bool**]:::task
+  _cleanup_operator_item___Query_CSVs____ocp_cleanup_operator_name3-->|Task| _cleanup_operator_item___Remove_CSVs____ocp_cleanup_operator_name4[ cleanup operator item   remove csvs    ocp<br>cleanup operator name<br>When: **not  ocp cleanup dry run   bool  and  ocp cleanup<br>csvs resources   default       length   0**]:::task
+  _cleanup_operator_item___Remove_CSVs____ocp_cleanup_operator_name4-->|Task| _cleanup_operator_item___Remove_Subscription____ocp_cleanup_operator_name5[ cleanup operator item   remove subscription   <br>ocp cleanup operator name<br>When: **not  ocp cleanup dry run   bool**]:::task
+  _cleanup_operator_item___Remove_Subscription____ocp_cleanup_operator_name5-->|Task| _cleanup_operator_item___Remove_OperatorGroup____ocp_cleanup_operator_name6[ cleanup operator item   remove operatorgroup   <br>ocp cleanup operator name<br>When: **not  ocp cleanup dry run   bool**]:::task
+  _cleanup_operator_item___Remove_OperatorGroup____ocp_cleanup_operator_name6-->|Task| _cleanup_operator_item___Remove_Namespace_____ocp_cleanup_op_def_namespace___7[ cleanup operator item   remove namespace     ocp<br>cleanup op def namespace   <br>When: **not  ocp cleanup dry run   bool**]:::task
   _cleanup_operator_item___Remove_Namespace_____ocp_cleanup_op_def_namespace___7-->End
 ```
 

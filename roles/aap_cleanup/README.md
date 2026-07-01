@@ -54,11 +54,6 @@ Resources are removed in reverse creation order to respect dependencies:
       vars:
         aap_cleanup_dry_run: true  # preview first
 ```
-
-## License
-
-GPL-3.0-or-later
-
 <!-- DOCSIBLE START -->
 ## aap_cleanup
 
@@ -177,16 +172,16 @@ Description: Remove AAP resources seeded by the aap_seed role
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| _build_absent_resources ¦ Query {{ _aap_cleanup_resource_type }} from AAP API | `ansible.builtin.uri` | False |
+| _build_absent_resources ¦ Query resources from AAP API — {{ _aap_cleanup_resource_type }} | `ansible.builtin.uri` | False |
 | _build_absent_resources ¦ Filter out managed/built-in credential types | `ansible.builtin.set_fact` | True |
 | _build_absent_resources ¦ Set results for non-filtered resources | `ansible.builtin.set_fact` | True |
-| _build_absent_resources ¦ Report {{ _aap_cleanup_resource_type }} found ({{ _aap_cleanup_filtered_results ¦ length }}) | `ansible.builtin.debug` | False |
+| _build_absent_resources ¦ Report resources found — {{ _aap_cleanup_resource_type }} | `ansible.builtin.debug` | False |
 | _build_absent_resources ¦ Display resources to remove | `ansible.builtin.debug` | True |
-| _build_absent_resources ¦ Build and dispatch absent {{ _aap_cleanup_resource_type }} | `block` | True |
-| _build_absent_resources ¦ Build absent resource list for {{ _aap_cleanup_resource_type }} | `ansible.builtin.set_fact` | False |
-| _build_absent_resources ¦ Set dispatch variable {{ _aap_cleanup_dispatch_var }} | `ansible.builtin.set_fact` | False |
-| _build_absent_resources ¦ Dispatch {{ _aap_cleanup_resource_type }} removal | `ansible.builtin.include_role` | False |
-| _build_absent_resources ¦ Clear dispatch variable {{ _aap_cleanup_dispatch_var }} | `ansible.builtin.set_fact` | False |
+| _build_absent_resources ¦ Build and dispatch absent resources — {{ _aap_cleanup_resource_type }} | `block` | True |
+| _build_absent_resources ¦ Build absent resource list — {{ _aap_cleanup_resource_type }} | `ansible.builtin.set_fact` | False |
+| _build_absent_resources ¦ Set dispatch variable — {{ _aap_cleanup_dispatch_var }} | `ansible.builtin.set_fact` | False |
+| _build_absent_resources ¦ Dispatch removal — {{ _aap_cleanup_resource_type }} | `ansible.builtin.include_role` | False |
+| _build_absent_resources ¦ Clear dispatch variable — {{ _aap_cleanup_dispatch_var }} | `ansible.builtin.set_fact` | False |
 
 #### File: tasks/_cleanup_job_history.yml
 
@@ -212,18 +207,18 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| _build_absent_resources___Query__aap_cleanup_resource_type_from_AAP_API0[ build absent resources   query  aap cleanup<br>resource type from aap api]:::task
-  _build_absent_resources___Query__aap_cleanup_resource_type_from_AAP_API0-->|Task| _build_absent_resources___Filter_out_managed_built_in_credential_types1[ build absent resources   filter out managed built<br>in credential types<br>When: **aap cleanup filter managed   default false   <br>bool**]:::task
+  Start-->|Task| _build_absent_resources___Query_resources_from_AAP_API____aap_cleanup_resource_type0[ build absent resources   query resources from aap<br>api    aap cleanup resource type]:::task
+  _build_absent_resources___Query_resources_from_AAP_API____aap_cleanup_resource_type0-->|Task| _build_absent_resources___Filter_out_managed_built_in_credential_types1[ build absent resources   filter out managed built<br>in credential types<br>When: **aap cleanup filter managed   default false   <br>bool**]:::task
   _build_absent_resources___Filter_out_managed_built_in_credential_types1-->|Task| _build_absent_resources___Set_results_for_non_filtered_resources2[ build absent resources   set results for non<br>filtered resources<br>When: **not   aap cleanup filter managed   default false  <br> bool**]:::task
-  _build_absent_resources___Set_results_for_non_filtered_resources2-->|Task| _build_absent_resources___Report__aap_cleanup_resource_type_found______aap_cleanup_filtered_results___length____3[ build absent resources   report  aap cleanup<br>resource type found      aap cleanup filtered<br>results   length    ]:::task
-  _build_absent_resources___Report__aap_cleanup_resource_type_found______aap_cleanup_filtered_results___length____3-->|Task| _build_absent_resources___Display_resources_to_remove4[ build absent resources   display resources to<br>remove<br>When: **aap cleanup filtered results   length   0**]:::task
-  _build_absent_resources___Display_resources_to_remove4-->|Block Start| _build_absent_resources___Build_and_dispatch_absent__aap_cleanup_resource_type5_block_start_0[[ build absent resources   build and dispatch<br>absent  aap cleanup resource type<br>When: **aap cleanup filtered results   length   0 and not<br> aap cleanup dry run   bool**]]:::block
-  _build_absent_resources___Build_and_dispatch_absent__aap_cleanup_resource_type5_block_start_0-->|Task| _build_absent_resources___Build_absent_resource_list_for__aap_cleanup_resource_type0[ build absent resources   build absent resource<br>list for  aap cleanup resource type]:::task
-  _build_absent_resources___Build_absent_resource_list_for__aap_cleanup_resource_type0-->|Task| _build_absent_resources___Set_dispatch_variable__aap_cleanup_dispatch_var1[ build absent resources   set dispatch variable <br>aap cleanup dispatch var]:::task
-  _build_absent_resources___Set_dispatch_variable__aap_cleanup_dispatch_var1-->|Include role| _build_absent_resources___Dispatch__aap_cleanup_resource_type_removal____aap_cleanup_cac_collection____dispatch_2( build absent resources   dispatch  aap cleanup<br>resource type removal<br>include_role:    aap cleanup cac collection    dispatch):::includeRole
-  _build_absent_resources___Dispatch__aap_cleanup_resource_type_removal____aap_cleanup_cac_collection____dispatch_2-->|Task| _build_absent_resources___Clear_dispatch_variable__aap_cleanup_dispatch_var3[ build absent resources   clear dispatch variable <br>aap cleanup dispatch var]:::task
-  _build_absent_resources___Clear_dispatch_variable__aap_cleanup_dispatch_var3-.->|End of Block| _build_absent_resources___Build_and_dispatch_absent__aap_cleanup_resource_type5_block_start_0
-  _build_absent_resources___Clear_dispatch_variable__aap_cleanup_dispatch_var3-->End
+  _build_absent_resources___Set_results_for_non_filtered_resources2-->|Task| _build_absent_resources___Report_resources_found____aap_cleanup_resource_type3[ build absent resources   report resources found  <br> aap cleanup resource type]:::task
+  _build_absent_resources___Report_resources_found____aap_cleanup_resource_type3-->|Task| _build_absent_resources___Display_resources_to_remove4[ build absent resources   display resources to<br>remove<br>When: **aap cleanup filtered results   length   0**]:::task
+  _build_absent_resources___Display_resources_to_remove4-->|Block Start| _build_absent_resources___Build_and_dispatch_absent_resources____aap_cleanup_resource_type5_block_start_0[[ build absent resources   build and dispatch<br>absent resources    aap cleanup resource type<br>When: **aap cleanup filtered results   length   0 and not<br> aap cleanup dry run   bool**]]:::block
+  _build_absent_resources___Build_and_dispatch_absent_resources____aap_cleanup_resource_type5_block_start_0-->|Task| _build_absent_resources___Build_absent_resource_list____aap_cleanup_resource_type0[ build absent resources   build absent resource<br>list    aap cleanup resource type]:::task
+  _build_absent_resources___Build_absent_resource_list____aap_cleanup_resource_type0-->|Task| _build_absent_resources___Set_dispatch_variable____aap_cleanup_dispatch_var1[ build absent resources   set dispatch variable   <br>aap cleanup dispatch var]:::task
+  _build_absent_resources___Set_dispatch_variable____aap_cleanup_dispatch_var1-->|Include role| _build_absent_resources___Dispatch_removal____aap_cleanup_resource_type____aap_cleanup_cac_collection____dispatch_2( build absent resources   dispatch removal    aap<br>cleanup resource type<br>include_role:    aap cleanup cac collection    dispatch):::includeRole
+  _build_absent_resources___Dispatch_removal____aap_cleanup_resource_type____aap_cleanup_cac_collection____dispatch_2-->|Task| _build_absent_resources___Clear_dispatch_variable____aap_cleanup_dispatch_var3[ build absent resources   clear dispatch variable <br>  aap cleanup dispatch var]:::task
+  _build_absent_resources___Clear_dispatch_variable____aap_cleanup_dispatch_var3-.->|End of Block| _build_absent_resources___Build_and_dispatch_absent_resources____aap_cleanup_resource_type5_block_start_0
+  _build_absent_resources___Clear_dispatch_variable____aap_cleanup_dispatch_var3-->End
 ```
 
 ### Graph for _cleanup_job_history.yml

@@ -9,7 +9,7 @@
     validate_certs: "{{ ocp_cleanup_openshift_verify_ssl }}"
   register: _ocp_cleanup_vms_result
   loop: "{{ ocp_cleanup_target_namespaces }}"
-  ignore_errors: true
+  failed_when: false
   when: ocp_cleanup_target_namespaces | length > 0
 
 - name: _cleanup_migrated_vms | Flatten VM results
@@ -56,7 +56,7 @@
     validate_certs: "{{ ocp_cleanup_openshift_verify_ssl }}"
   register: _ocp_cleanup_pvcs_result
   loop: "{{ ocp_cleanup_target_namespaces }}"
-  ignore_errors: true
+  failed_when: false
   when: ocp_cleanup_target_namespaces | length > 0
 
 - name: _cleanup_migrated_vms | Flatten PVC results

@@ -1,15 +1,15 @@
 ---
-- name: "_cleanup_operator_item | Set operator definition for {{ _ocp_cleanup_operator_name }}"
+- name: "_cleanup_operator_item | Set operator definition — {{ _ocp_cleanup_operator_name }}"
   ansible.builtin.set_fact:
     _ocp_cleanup_op_def: "{{ ocp_cleanup_operator_definitions[_ocp_cleanup_operator_name] }}"
 
-- name: "_cleanup_operator_item | Report operator {{ _ocp_cleanup_operator_name }}"
+- name: "_cleanup_operator_item | Report operator — {{ _ocp_cleanup_operator_name }}"
   ansible.builtin.debug:
     msg: >-
       Operator {{ _ocp_cleanup_operator_name }}: namespace={{ _ocp_cleanup_op_def.namespace }}
       {{ '— DRY RUN, skipping removal' if ocp_cleanup_dry_run else '— removing' }}
 
-- name: "_cleanup_operator_item | Remove extra resources for {{ _ocp_cleanup_operator_name }}"
+- name: "_cleanup_operator_item | Remove extra resources — {{ _ocp_cleanup_operator_name }}"
   when:
     - _ocp_cleanup_op_def.extra_resources | length > 0
     - not (ocp_cleanup_dry_run | bool)
@@ -27,9 +27,9 @@
   loop: "{{ _ocp_cleanup_op_def.extra_resources }}"
   loop_control:
     label: "{{ item.kind }}/{{ item.name }}"
-  ignore_errors: true
+  failed_when: false
 
-- name: "_cleanup_operator_item | Query CSVs in {{ _ocp_cleanup_op_def.namespace }}"
+- name: "_cleanup_operator_item | Query CSVs — {{ _ocp_cleanup_operator_name }}"
   when: not (ocp_cleanup_dry_run | bool)
   kubernetes.core.k8s_info:
     api_version: operators.coreos.com/v1alpha1
@@ -39,12 +39,11 @@
     api_key: "{{ ocp_cleanup_openshift_api_key | default(omit) }}"
     validate_certs: "{{ ocp_cleanup_openshift_verify_ssl }}"
   register: _ocp_cleanup_csvs
-  ignore_errors: true
+  failed_when: false
 
-- name: "_cleanup_operator_item | Remove CSVs for {{ _ocp_cleanup_operator_name }}"
+- name: "_cleanup_operator_item | Remove CSVs — {{ _ocp_cleanup_operator_name }}"
   when:
     - not (ocp_cleanup_dry_run | bool)
-    - _ocp_cleanup_csvs is not failed
     - _ocp_cleanup_csvs.resources | default([]) | length > 0
   redhat.openshift.k8s:
     state: absent
@@ -58,9 +57,9 @@
   loop: "{{ _ocp_cleanup_csvs.resources | default([]) }}"
   loop_control:
     label: "{{ item.metadata.name }}"
-  ignore_errors: true
+  failed_when: false
 
-- name: "_cleanup_operator_item | Remove Subscription for {{ _ocp_cleanup_operator_name }}"
+- name: "_cleanup_operator_item | Remove Subscription — {{ _ocp_cleanup_operator_name }}"
   when: not (ocp_cleanup_dry_run | bool)
   redhat.openshift.k8s:
     state: absent
@@ -71,9 +70,9 @@
     host: "{{ ocp_cleanup_openshift_host | default(omit) }}"
     api_key: "{{ ocp_cleanup_openshift_api_key | default(omit) }}"
     validate_certs: "{{ ocp_cleanup_openshift_verify_ssl }}"
-  ignore_errors: true
+  failed_when: false
 
-- name: "_cleanup_operator_item | Remove OperatorGroup for {{ _ocp_cleanup_operator_name }}"
+- name: "_cleanup_operator_item | Remove OperatorGroup — {{ _ocp_cleanup_operator_name }}"
   when: not (ocp_cleanup_dry_run | bool)
   redhat.openshift.k8s:
     state: absent
@@ -84,7 +83,7 @@
     host: "{{ ocp_cleanup_openshift_host | default(omit) }}"
     api_key: "{{ ocp_cleanup_openshift_api_key | default(omit) }}"
     validate_certs: "{{ ocp_cleanup_openshift_verify_ssl }}"
-  ignore_errors: true
+  failed_when: false
 
 - name: "_cleanup_operator_item | Remove Namespace {{ _ocp_cleanup_op_def.namespace }}"
   when: not (ocp_cleanup_dry_run | bool)
@@ -98,5 +97,5 @@
     validate_certs: "{{ ocp_cleanup_openshift_verify_ssl }}"
     wait: true
     wait_timeout: "{{ ocp_cleanup_wait_retries * ocp_cleanup_wait_delay }}"
-  ignore_errors: true
+  failed_when: false
 ...
