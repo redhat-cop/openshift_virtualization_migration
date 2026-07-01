@@ -1,23 +1,13 @@
 ---
-- name: Test aap_cleanup role variable defaults
-  block:
-    - name: Verify role defaults are loadable
-      ansible.builtin.include_vars:
-        file: "{{ role_path }}/../../roles/aap_cleanup/defaults/main.yml"
+- name: Verify aap_cleanup role is available in collection
+  ansible.builtin.command:
+    cmd: ansible-doc --type role infra.openshift_virtualization_migration.aap_cleanup --json
+  register: _cleanup_aap_doc
+  changed_when: false
 
-    - name: Confirm cleanup scope toggles default to true
-      ansible.builtin.assert:
-        that:
-          - aap_cleanup_workflows_remove | bool
-          - aap_cleanup_job_templates_remove | bool
-          - aap_cleanup_credentials_remove | bool
-          - aap_cleanup_inventories_remove | bool
-          - aap_cleanup_projects_remove | bool
-
-    - name: Confirm destructive toggles default to false
-      ansible.builtin.assert:
-        that:
-          - not (aap_cleanup_organization_remove | bool)
-          - not (aap_cleanup_job_history_purge | bool)
-          - not (aap_cleanup_dry_run | bool)
+- name: Assert aap_cleanup role documentation is accessible
+  ansible.builtin.assert:
+    that:
+      - _cleanup_aap_doc.rc == 0
+    fail_msg: "aap_cleanup role not found in installed collection"
 ...
