@@ -30,12 +30,30 @@ argument_specs:
               ISO 8601 timestamp for scheduled cutover
               (e.g., '2026-04-07T02:00:00Z'). If omitted, uses current time.
             type: str
+          force_cutover:
+            description: >-
+              Override an existing cutover timestamp on a Migration.
+              Overrides the global mtv_warm_cutover_force_cutover default.
+            type: bool
+          verify_complete:
+            description: >-
+              Wait until the cutover migration completes.
+              Overrides the global mtv_warm_cutover_verify_complete default.
+            type: bool
       mtv_warm_cutover_default_namespace:
         description: Default namespace for MTV resources
         type: str
         default: openshift-mtv
+      mtv_warm_cutover_force_cutover:
+        description: >-
+          Allow overriding an existing cutover timestamp on a Migration.
+          Can be overridden per migration request via the force_cutover key.
+        type: bool
+        default: false
       mtv_warm_cutover_verify_complete:
-        description: Wait until cutover migrations complete
+        description: >-
+          Wait until cutover migrations complete.
+          Can be overridden per migration request via the verify_complete key.
         type: bool
         default: true
       mtv_warm_cutover_verify_retries:

@@ -89,6 +89,15 @@
       {{ mtv_warm_cutover_item.cutover
          | default(now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ')) }}
 
+- name: _process_cutover | Resolve Per-Request Overrides
+  ansible.builtin.set_fact:
+    mtv_warm_cutover_effective_force: >-
+      {{ mtv_warm_cutover_item.force_cutover
+         | default(mtv_warm_cutover_force_cutover) | bool }}
+    mtv_warm_cutover_effective_verify: >-
+      {{ mtv_warm_cutover_item.verify_complete
+         | default(mtv_warm_cutover_verify_complete) | bool }}
+
 - name: _process_cutover | Trigger Cutover on Migrations
   ansible.builtin.include_tasks:
     file: _apply_cutover.yml
