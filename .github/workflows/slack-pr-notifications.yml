@@ -1,0 +1,70 @@
+name: Slack PR Notifications
+
+on:
+  pull_request:
+    types: [opened, closed, reopened]
+    branches: ["main"]
+  pull_request_review:
+    types: [submitted]
+
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set notification details
+        id: details
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REVIEW_STATE: ${{ github.event.review.state }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          REVIEW_USER_LOGIN: ${{ github.event.review.user.login }}
+          EVENT_ACTION: ${{ github.event.action }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          PR_USER_LOGIN: ${{ github.event.pull_request.user.login }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          if [[ "$EVENT_NAME" == "pull_request_review" ]]; then
+            STATE="$REVIEW_STATE"
+            TITLE="PR Review: ${STATE} - ${PR_TITLE}"
+            COLOR=$([[ "$STATE" == "approved" ]] && echo "good" || echo "warning")
+            BODY="${REVIEW_USER_LOGIN} ${STATE} the PR"
+          else
+            ACTION="$EVENT_ACTION"
+            TITLE="PR ${ACTION^}: ${PR_TITLE}"
+            if [[ "$ACTION" == "closed" && "$PR_MERGED" == "true" ]]; then
+              TITLE="PR Merged: ${PR_TITLE}"
+              COLOR="good"
+            elif [[ "$ACTION" == "opened" ]]; then
+              COLOR="#1a73e8"
+            elif [[ "$ACTION" == "reopened" ]]; then
+              COLOR="warning"
+            else
+              COLOR="danger"
+            fi
+            BODY="${PR_USER_LOGIN} ${ACTION} the PR"
+          fi
+
+          # Build the Slack message text safely
+          MSG="*${TITLE}*\n${BODY}\n*Repo:* \`${REPO_NAME}\`\n*Branch:* \`${PR_HEAD_REF}\` -> \`${PR_BASE_REF}\`\n<${PR_URL}|View Pull Request>"
+
+          # Use JSON-safe encoding via jq to prevent injection
+          {
+            echo "payload<<SLACKEOF"
+            jq -n \
+              --arg color "$COLOR" \
+              --arg msg "$MSG" \
+              '{attachments: [{color: $color, blocks: [{type: "section", text: {type: "mrkdwn", text: $msg}}]}]}'
+            echo "SLACKEOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52  # v2.1.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: ${{ steps.details.outputs.payload }}
