@@ -31,6 +31,7 @@ This collection enables the migration journey of Virtual Machine (VM) workloads 
 * [Disconnected Environment Setup](docs/disconnected_environment_guide.md)
 * [Secure Credential Management](docs/secure_credential_management.md)
 * [Secure Credential Practices](docs/secure_credential_practices.md)
+* [Security Policy](SECURITY.md)
 
 ## Release Notes
 
