@@ -12,7 +12,7 @@ This will not be overwritten by Docsible -->
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.25.0
+Version - 1.22.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -27,72 +27,37 @@ Description: Migration of Virtual Machines from Source to Destination.
 
 * **Description**: MTV Migrate - Migrate VMs at scale
 * **Options**:
-  * **mtv_migrate_default_destination_target**:
-    * **Required**: false
-    * **Type**: str
-    * **Default**: host
-    * **Description**: Default destination for migrations
-  * **mtv_migrate_default_destination_type**:
-    * **Required**: false
-    * **Type**: str
-    * **Default**: openshift
-    * **Description**: Default destination type for migrations
-  * **mtv_migrate_default_migrate_dry_run**:
-    * **Required**: false
-    * **Type**: bool
-    * **Default**: False
-    * **Description**: Whether to perform a dry_run of plan creation
   * **mtv_migrate_default_namespace**:
     * **Required**: false
     * **Type**: str
     * **Default**: openshift-mtv
     * **Description**: The default namespace to use if not specified
-  * **mtv_migrate_default_source_target**:
-    * **Required**: false
-    * **Type**: str
-    * **Default**: vmware
-    * **Description**: Default source target for migration
-  * **mtv_migrate_default_source_type**:
-    * **Required**: false
-    * **Type**: str
-    * **Default**: vsphere
-    * **Description**: Default source type for migrations
-  * **mtv_migrate_default_split_plans**:
-    * **Required**: false
-    * **Type**: bool
-    * **Default**: False
-    * **Description**: Whether to split the plans into chunks of VMs
-  * **mtv_migrate_default_start_migration**:
-    * **Required**: false
-    * **Type**: bool
-    * **Default**: False
-    * **Description**: Whether to start the migration after plan is created
-  * **mtv_migrate_default_verify_migrations_complete**:
-    * **Required**: false
-    * **Type**: bool
-    * **Default**: False
-    * **Description**: Whether to wait for migrations to finish
-  * **mtv_migrate_default_verify_plans_ready**:
-    * **Required**: false
-    * **Type**: bool
-    * **Default**: False
-    * **Description**: Whether to verify the plans are ready
-  * **mtv_migrate_default_vms_per_plan**:
-    * **Required**: false
-    * **Type**: int
-    * **Default**: 10
-    * **Description**: The size for each chunk of VMs split out
   * **mtv_migrate_migration_request**:
     * **Required**: True
     * **Type**: dict
     * **Default**: none
     * **Description**: This is a dictionary with details of a migration plan to create and / or run
     * **Options**:
-      * **cutover**:
+      * **mtv_namespace**:
         * **Required**: false
         * **Type**: str
-        * **Default**: none
-        * **Description**: ISO 8601 timestamp for the migration cutover (e.g., 2026-06-20T15:00:00Z)
+        * **Default**: openshift-mtv
+        * **Description**: The namespace MTV is deployed in
+      * **source_type**:
+        * **Required**: false
+        * **Type**: str
+        * **Default**: vsphere
+        * **Description**: Source MTV Provider
+      * **source**:
+        * **Required**: false
+        * **Type**: str
+        * **Default**: vmware
+        * **Description**: Source containing VMs
+      * **source_namespace**:
+        * **Required**: false
+        * **Type**: str
+        * **Default**: openshift-mtv
+        * **Description**: Namespace the source provider is located
       * **destination**:
         * **Required**: false
         * **Type**: str
@@ -108,21 +73,36 @@ Description: Migration of Virtual Machines from Source to Destination.
         * **Type**: str
         * **Default**: openshift
         * **Description**: Destination provider type
+      * **vms_per_plan**:
+        * **Required**: false
+        * **Type**: int
+        * **Default**: 10
+        * **Description**: Number of VMs to split into multiple plans
+      * **split_plans**:
+        * **Required**: false
+        * **Type**: bool
+        * **Default**: False
+        * **Description**: Determines whether to split into multiple plans
+      * **plan_overrides**:
+        * **Required**: false
+        * **Type**: dict
+        * **Default**: none
+        * **Description**: Config to apply at the plan level
+      * **vm_overrides**:
+        * **Required**: false
+        * **Type**: dict
+        * **Default**: none
+        * **Description**: Config to apply at to each VM
+      * **target_namespace**:
+        * **Required**: false
+        * **Type**: str
+        * **Default**: openshift-mtv
+        * **Description**: Namespace to create VMs in
       * **dry_run**:
         * **Required**: false
         * **Type**: bool
         * **Default**: False
         * **Description**: Build the plans without applying them
-      * **folders**:
-        * **Required**: false
-        * **Type**: list
-        * **Default**: none
-        * **Description**: Explicit list of folders to migrate
-      * **mtv_namespace**:
-        * **Required**: false
-        * **Type**: str
-        * **Default**: openshift-mtv
-        * **Description**: The namespace MTV is deployed in
       * **network_map**:
         * **Required**: false
         * **Type**: str
@@ -133,41 +113,6 @@ Description: Migration of Virtual Machines from Source to Destination.
         * **Type**: str
         * **Default**: openshift-mtv
         * **Description**: Namespace containing the network map
-      * **plan_name**:
-        * **Required**: false
-        * **Type**: str
-        * **Default**: source_name-target_name-yyyyMMdd-HHmm
-        * **Description**: Name of the migration plan
-      * **plan_overrides**:
-        * **Required**: false
-        * **Type**: dict
-        * **Default**: none
-        * **Description**: Config to apply at the plan level
-      * **source**:
-        * **Required**: false
-        * **Type**: str
-        * **Default**: vmware
-        * **Description**: Source containing VMs
-      * **source_namespace**:
-        * **Required**: false
-        * **Type**: str
-        * **Default**: openshift-mtv
-        * **Description**: Namespace the source provider is located
-      * **source_type**:
-        * **Required**: false
-        * **Type**: str
-        * **Default**: vsphere
-        * **Description**: Source MTV Provider
-      * **split_plans**:
-        * **Required**: false
-        * **Type**: bool
-        * **Default**: False
-        * **Description**: Determines whether to split into multiple plans
-      * **start_migration**:
-        * **Required**: false
-        * **Type**: bool
-        * **Default**: False
-        * **Description**: Create migration resources for the created plan
       * **storage_map**:
         * **Required**: false
         * **Type**: str
@@ -178,46 +123,91 @@ Description: Migration of Virtual Machines from Source to Destination.
         * **Type**: str
         * **Default**: openshift-mtv
         * **Description**: Namespace containing the storage map
-      * **target_namespace**:
-        * **Required**: false
-        * **Type**: str
-        * **Default**: openshift-mtv
-        * **Description**: Namespace to create VMs in
-      * **verify_migrations_complete**:
+      * **start_migration**:
         * **Required**: false
         * **Type**: bool
         * **Default**: False
-        * **Description**: Waits for migrations to complete
+        * **Description**: Create migration resources for the created plan
       * **verify_plans_ready**:
         * **Required**: false
         * **Type**: bool
         * **Default**: False
         * **Description**: Verify the plan is in a ready state
-      * **vm_overrides**:
+      * **verify_migrations_complete**:
         * **Required**: false
-        * **Type**: dict
-        * **Default**: none
-        * **Description**: Config to apply at to each VM
+        * **Type**: bool
+        * **Default**: False
+        * **Description**: Waits for migrations to complete
+      * **plan_name**:
+        * **Required**: false
+        * **Type**: str
+        * **Default**: source_name-target_name-yyyyMMdd-HHmm
+        * **Description**: Name of the migration plan
       * **vms**:
         * **Required**: false
         * **Type**: list
         * **Default**: none
         * **Description**: Explicit list of VMs to migrate
-      * **vms_per_plan**:
+      * **folders**:
         * **Required**: false
-        * **Type**: int
-        * **Default**: 10
-        * **Description**: Number of VMs to split into multiple plans
-      * **warm**:
-        * **Required**: false
-        * **Type**: bool
-        * **Default**: False
-        * **Description**: Whether to perform a warm migration (pre-copy via Changed Block Tracking)
+        * **Type**: list
+        * **Default**: none
+        * **Description**: Explicit list of folders to migrate
   * **mtv_migrate_plan_base_name_annotation**:
     * **Required**: false
     * **Type**: str
     * **Default**: infra.openshift-virtualization-migration/plan-name
     * **Description**: Label assigned to the MTV plan name
+  * **mtv_migrate_default_source_type**:
+    * **Required**: false
+    * **Type**: str
+    * **Default**: vsphere
+    * **Description**: Default source type for migrations
+  * **mtv_migrate_default_source_target**:
+    * **Required**: false
+    * **Type**: str
+    * **Default**: vmware
+    * **Description**: Default source target for migration
+  * **mtv_migrate_default_destination_type**:
+    * **Required**: false
+    * **Type**: str
+    * **Default**: openshift
+    * **Description**: Default destination type for migrations
+  * **mtv_migrate_default_destination_target**:
+    * **Required**: false
+    * **Type**: str
+    * **Default**: host
+    * **Description**: Default destination for migrations
+  * **mtv_migrate_default_split_plans**:
+    * **Required**: false
+    * **Type**: bool
+    * **Default**: False
+    * **Description**: Whether to split the plans into chunks of VMs
+  * **mtv_migrate_default_vms_per_plan**:
+    * **Required**: false
+    * **Type**: int
+    * **Default**: 10
+    * **Description**: The size for each chunk of VMs split out
+  * **mtv_migrate_default_start_migration**:
+    * **Required**: false
+    * **Type**: bool
+    * **Default**: False
+    * **Description**: Whether to start the migration after plan is created
+  * **mtv_migrate_default_migrate_dry_run**:
+    * **Required**: false
+    * **Type**: bool
+    * **Default**: False
+    * **Description**: Whether to perform a dry_run of plan creation
+  * **mtv_migrate_default_verify_plans_ready**:
+    * **Required**: false
+    * **Type**: bool
+    * **Default**: False
+    * **Description**: Whether to verify the plans are ready
+  * **mtv_migrate_default_verify_migrations_complete**:
+    * **Required**: false
+    * **Type**: bool
+    * **Default**: False
+    * **Description**: Whether to wait for migrations to finish
 
 </details>
 
@@ -229,86 +219,83 @@ Description: Migration of Virtual Machines from Source to Destination.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`mtv_migrate_default_destination_target`](defaults/main.yml#L88)   | str   | `host` |  None  |   True  |  MTV Default Destination Target |
-| [`mtv_migrate_default_destination_target_namespace`](defaults/main.yml#L94)   | str   | `{{ _mtv_migrate_mtv_namespace }}` |  None  |   True  |  MTV Default Target Namespace |
-| [`mtv_migrate_default_destination_type`](defaults/main.yml#L82)   | str   | `openshift` |  None  |   True  |  MTV Default Destination Type |
-| [`mtv_migrate_default_migrate_dry_run`](defaults/main.yml#L118)   | bool   | `False` |  None  |   True  |  MTV Default Dry Run |
 | [`mtv_migrate_default_namespace`](defaults/main.yml#L7)   | str   | `openshift-mtv` |  None  |   True  |  Default MTV Namespace |
-| [`mtv_migrate_default_network_map_name`](defaults/main.yml#L156)   | str   | `{{ (_mtv_migrate_mtv_source_target + '-' + _mtv_migrate_mtv_destination_target) ¦ infra.openshift_virtualization_migration.rfc1123 }}` |  None  |   True  |  MTV Default Network Map Name |
-| [`mtv_migrate_default_network_map_namespace`](defaults/main.yml#L162)   | str   | `{{ _mtv_migrate_mtv_namespace }}` |  None  |   True  |  MTV Default Network Map Namespace |
-| [`mtv_migrate_default_plan_base_name`](defaults/main.yml#L148)   | str   | `{{ (_mtv_migrate_mtv_source_target + '-' + _mtv_migrate_mtv_destination_target) + '-' + lookup('pipe', 'date +%Y%m%d-%H%M') }}` |  None  |   True  |  MTV Default Plan Base Name |
-| [`mtv_migrate_default_source_target`](defaults/main.yml#L70)   | str   | `vmware` |  None  |   True  |  MTV Default Source Target |
-| [`mtv_migrate_default_source_target_namespace`](defaults/main.yml#L76)   | str   | `{{ _mtv_migrate_mtv_namespace }}` |  None  |   True  |  MTV Default Source Namespace |
-| [`mtv_migrate_default_source_type`](defaults/main.yml#L64)   | str   | `vsphere` |  None  |   True  |  MTV Default Source Type |
-| [`mtv_migrate_default_split_plans`](defaults/main.yml#L100)   | bool   | `False` |  None  |   True  |  MTV Default Split Plans |
-| [`mtv_migrate_default_start_migration`](defaults/main.yml#L112)   | bool   | `False` |  None  |   True  |  MTV Default Start Migration |
-| [`mtv_migrate_default_storage_map_name`](defaults/main.yml#L168)   | str   | `{{ (_mtv_migrate_mtv_source_target + '-' + _mtv_migrate_mtv_destination_target) ¦ infra.openshift_virtualization_migration.rfc1123 }}` |  None  |   True  |  MTV Default Storage Map Name |
-| [`mtv_migrate_default_storage_map_namespace`](defaults/main.yml#L174)   | str   | `{{ _mtv_migrate_mtv_namespace }}` |  None  |   True  |  MTV Default Storage Map Namespace |
-| [`mtv_migrate_default_target_namespace`](defaults/main.yml#L142)   | str   | `{{ _mtv_migrate_mtv_namespace }}` |  None  |   True  |  MTV Default Target Namespace |
-| [`mtv_migrate_default_verify_migrations_complete`](defaults/main.yml#L130)   | bool   | `False` |  None  |   True  |  MTV Default Verify Migrations Complete |
-| [`mtv_migrate_default_verify_plans_ready`](defaults/main.yml#L124)   | bool   | `False` |  None  |   True  |  MTV Default Verify Plans Ready |
-| [`mtv_migrate_default_vms_per_plan`](defaults/main.yml#L106)   | int   | `10` |  None  |   True  |  MTV Default VMs Per Plan |
-| [`mtv_migrate_default_warm`](defaults/main.yml#L136)   | bool   | `False` |  None  |   True  |  MTV Default Warm Migration |
 | [`mtv_migrate_migration_request`](defaults/main.yml#L13)   | dict   | `{}` |  None  |   True  |  Migration Request |
-| [`mtv_migrate_plan_base_name_annotation`](defaults/main.yml#L56)   | str   | `infra.openshift-virtualization-migration/plan-name` |  None  |   True  |  MTV Migrate Annotation |
-| [`mtv_migrate_verify_migration_complete_delay`](defaults/main.yml#L194)   | int   | `20` |  None  |   True  |  MTV Migration Verify Migration Complete Delay |
-| [`mtv_migrate_verify_migration_complete_retries`](defaults/main.yml#L189)   | int   | `360` |  None  |   True  |  MTV Migration Verify Migration Complete Retries |
-| [`mtv_migrate_verify_plans_ready_delay`](defaults/main.yml#L184)   | int   | `20` |  None  |   True  |  MTV Migration Verify Plans Ready Delay |
-| [`mtv_migrate_verify_plans_ready_retries`](defaults/main.yml#L179)   | int   | `180` |  None  |   True  |  MTV Migration Verify Plans Ready Retries |
+| [`mtv_migrate_plan_base_name_annotation`](defaults/main.yml#L53)   | str   | `infra.openshift-virtualization-migration/plan-name` |  None  |   True  |  MTV Migrate Annotation |
+| [`mtv_migrate_default_source_type`](defaults/main.yml#L61)   | str   | `vsphere` |  None  |   True  |  MTV Default Source Type |
+| [`mtv_migrate_default_source_target`](defaults/main.yml#L67)   | str   | `vmware` |  None  |   True  |  MTV Default Source Target |
+| [`mtv_migrate_default_source_target_namespace`](defaults/main.yml#L73)   | str   | `{{ _mtv_migrate_mtv_namespace }}` |  None  |   True  |  MTV Default Source Namespace |
+| [`mtv_migrate_default_destination_type`](defaults/main.yml#L79)   | str   | `openshift` |  None  |   True  |  MTV Default Destination Type |
+| [`mtv_migrate_default_destination_target`](defaults/main.yml#L85)   | str   | `host` |  None  |   True  |  MTV Default Destination Target |
+| [`mtv_migrate_default_destination_target_namespace`](defaults/main.yml#L91)   | str   | `{{ _mtv_migrate_mtv_namespace }}` |  None  |   True  |  MTV Default Target Namespace |
+| [`mtv_migrate_default_split_plans`](defaults/main.yml#L97)   | bool   | `False` |  None  |   True  |  MTV Default Split Plans |
+| [`mtv_migrate_default_vms_per_plan`](defaults/main.yml#L103)   | int   | `10` |  None  |   True  |  MTV Default VMs Per Plan |
+| [`mtv_migrate_default_start_migration`](defaults/main.yml#L109)   | bool   | `False` |  None  |   True  |  MTV Default Start Migration |
+| [`mtv_migrate_default_migrate_dry_run`](defaults/main.yml#L115)   | bool   | `False` |  None  |   True  |  MTV Default Dry Run |
+| [`mtv_migrate_default_verify_plans_ready`](defaults/main.yml#L121)   | bool   | `False` |  None  |   True  |  MTV Default Verify Plans Ready |
+| [`mtv_migrate_default_verify_migrations_complete`](defaults/main.yml#L127)   | bool   | `False` |  None  |   True  |  MTV Default Verify Migrations Complete |
+| [`mtv_migrate_default_target_namespace`](defaults/main.yml#L133)   | str   | `{{ _mtv_migrate_mtv_namespace }}` |  None  |   True  |  MTV Default Target Namespace |
+| [`mtv_migrate_default_plan_base_name`](defaults/main.yml#L139)   | str   | `{{ (_mtv_migrate_mtv_source_target + '-' + _mtv_migrate_mtv_destination_target) + '-' + lookup('pipe', 'date +%Y%m%d-%H%M') }}` |  None  |   True  |  MTV Default Plan Base Name |
+| [`mtv_migrate_default_network_map_name`](defaults/main.yml#L147)   | str   | `{{ (_mtv_migrate_mtv_source_target + '-' + _mtv_migrate_mtv_destination_target) ¦ infra.openshift_virtualization_migration.rfc1123 }}` |  None  |   True  |  MTV Default Network Map Name |
+| [`mtv_migrate_default_network_map_namespace`](defaults/main.yml#L153)   | str   | `{{ _mtv_migrate_mtv_namespace }}` |  None  |   True  |  MTV Default Network Map Namespace |
+| [`mtv_migrate_default_storage_map_name`](defaults/main.yml#L159)   | str   | `{{ (_mtv_migrate_mtv_source_target + '-' + _mtv_migrate_mtv_destination_target) ¦ infra.openshift_virtualization_migration.rfc1123 }}` |  None  |   True  |  MTV Default Storage Map Name |
+| [`mtv_migrate_default_storage_map_namespace`](defaults/main.yml#L165)   | str   | `{{ _mtv_migrate_mtv_namespace }}` |  None  |   True  |  MTV Default Storage Map Namespace |
+| [`mtv_migrate_verify_plans_ready_retries`](defaults/main.yml#L170)   | int   | `180` |  None  |   True  |  MTV Migration Verify Plans Ready Retries |
+| [`mtv_migrate_verify_plans_ready_delay`](defaults/main.yml#L175)   | int   | `20` |  None  |   True  |  MTV Migration Verify Plans Ready Delay |
+| [`mtv_migrate_verify_migration_complete_retries`](defaults/main.yml#L180)   | int   | `360` |  None  |   True  |  MTV Migration Verify Migration Complete Retries |
+| [`mtv_migrate_verify_migration_complete_delay`](defaults/main.yml#L185)   | int   | `20` |  None  |   True  |  MTV Migration Verify Migration Complete Delay |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
-<b>`mtv_migrate_default_destination_target`:</b> None
-<br>
-<b>`mtv_migrate_default_destination_target_namespace`:</b> None
-<br>
-<b>`mtv_migrate_default_destination_type`:</b> None
-<br>
-<b>`mtv_migrate_default_migrate_dry_run`:</b> None
-<br>
 <b>`mtv_migrate_default_namespace`:</b> The default namespace to use if not specified
-<br>
-<b>`mtv_migrate_default_network_map_name`:</b> None
-<br>
-<b>`mtv_migrate_default_network_map_namespace`:</b> None
-<br>
-<b>`mtv_migrate_default_plan_base_name`:</b> None
-<br>
-<b>`mtv_migrate_default_source_target`:</b> None
-<br>
-<b>`mtv_migrate_default_source_target_namespace`:</b> None
-<br>
-<b>`mtv_migrate_default_source_type`:</b> None
-<br>
-<b>`mtv_migrate_default_split_plans`:</b> None
-<br>
-<b>`mtv_migrate_default_start_migration`:</b> None
-<br>
-<b>`mtv_migrate_default_storage_map_name`:</b> None
-<br>
-<b>`mtv_migrate_default_storage_map_namespace`:</b> None
-<br>
-<b>`mtv_migrate_default_target_namespace`:</b> None
-<br>
-<b>`mtv_migrate_default_verify_migrations_complete`:</b> None
-<br>
-<b>`mtv_migrate_default_verify_plans_ready`:</b> None
-<br>
-<b>`mtv_migrate_default_vms_per_plan`:</b> None
-<br>
-<b>`mtv_migrate_default_warm`:</b> None
 <br>
 <b>`mtv_migrate_migration_request`:</b> None
 <br>
 <b>`mtv_migrate_plan_base_name_annotation`:</b> Label assigned to the MTV plan name
 <br>
-<b>`mtv_migrate_verify_migration_complete_delay`:</b> None
+<b>`mtv_migrate_default_source_type`:</b> None
 <br>
-<b>`mtv_migrate_verify_migration_complete_retries`:</b> None
+<b>`mtv_migrate_default_source_target`:</b> None
+<br>
+<b>`mtv_migrate_default_source_target_namespace`:</b> None
+<br>
+<b>`mtv_migrate_default_destination_type`:</b> None
+<br>
+<b>`mtv_migrate_default_destination_target`:</b> None
+<br>
+<b>`mtv_migrate_default_destination_target_namespace`:</b> None
+<br>
+<b>`mtv_migrate_default_split_plans`:</b> None
+<br>
+<b>`mtv_migrate_default_vms_per_plan`:</b> None
+<br>
+<b>`mtv_migrate_default_start_migration`:</b> None
+<br>
+<b>`mtv_migrate_default_migrate_dry_run`:</b> None
+<br>
+<b>`mtv_migrate_default_verify_plans_ready`:</b> None
+<br>
+<b>`mtv_migrate_default_verify_migrations_complete`:</b> None
+<br>
+<b>`mtv_migrate_default_target_namespace`:</b> None
+<br>
+<b>`mtv_migrate_default_plan_base_name`:</b> None
+<br>
+<b>`mtv_migrate_default_network_map_name`:</b> None
+<br>
+<b>`mtv_migrate_default_network_map_namespace`:</b> None
+<br>
+<b>`mtv_migrate_default_storage_map_name`:</b> None
+<br>
+<b>`mtv_migrate_default_storage_map_namespace`:</b> None
+<br>
+<b>`mtv_migrate_verify_plans_ready_retries`:</b> None
 <br>
 <b>`mtv_migrate_verify_plans_ready_delay`:</b> None
 <br>
-<b>`mtv_migrate_verify_plans_ready_retries`:</b> None
+<b>`mtv_migrate_verify_migration_complete_retries`:</b> None
+<br>
+<b>`mtv_migrate_verify_migration_complete_delay`:</b> None
 <br>
 <br>
 
@@ -402,28 +389,6 @@ Description: Migration of Virtual Machines from Source to Destination.
 
 ## Task Flow Graphs
 
-### Graph for _migrations.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _migrations___Template_Migrations0[ migrations   template migrations]:::task
-  _migrations___Template_Migrations0-->|Task| _migrations___Create_Migrations1[ migrations   create migrations]:::task
-  _migrations___Create_Migrations1-->|Block Start| _migrations___Wait_for_Migrations2_block_start_0[[ migrations   wait for migrations<br>When: **mtv migrate mtv verify migrations complete bool**]]:::block
-  _migrations___Wait_for_Migrations2_block_start_0-->|Task| _migrations___Check_on_Migrations0[ migrations   check on migrations]:::task
-  _migrations___Check_on_Migrations0-.->|End of Block| _migrations___Wait_for_Migrations2_block_start_0
-  _migrations___Check_on_Migrations0-->End
-```
-
 ### Graph for _plans.yml
 
 ```mermaid
@@ -493,26 +458,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _process_folder___Process_Subfolders__process_folder_yml_1-->End
 ```
 
-### Graph for _process_plans.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _process_plans___Set_Plan_Name0[ process plans   set plan name]:::task
-  _process_plans___Set_Plan_Name0-->|Task| _process_plans___Update_Plan_Content1[ process plans   update plan content]:::task
-  _process_plans___Update_Plan_Content1-->|Task| _process_plans___Add_Plan2[ process plans   add plan]:::task
-  _process_plans___Add_Plan2-->End
-```
-
 ### Graph for _process_vm.yml
 
 ```mermaid
@@ -537,6 +482,48 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _process_vm___Set_VM_to_Process6-->|Task| _process_vm___Add_VM_to_Migration_Dict7[ process vm   add vm to migration dict<br>When: **mtv migrate migration request  vms     default    <br>  selectattr  exclude    defined     selectattr <br>exclude    equalto   true    selectattr  name   <br>defined     selectattr  name    equalto    mtv<br>migrate vm to process  name      list   length   <br>0 and mtv migrate migration request  vms    <br>default       selectattr  exclude    defined    <br>selectattr  exclude    equalto   true   <br>selectattr  id    defined     selectattr  id   <br>equalto    mtv migrate vm to process  id      list<br>  length    0 and mtv migrate migration request <br>vms     default       selectattr  exclude   <br>defined     selectattr  exclude    equalto   true <br>  selectattr  path    defined     selectattr  path<br>   equalto    mtv migrate vm to process  path     <br>list   length    0 and not  mtv migrate vm to<br>process  istemplate     default false**]:::task
   _process_vm___Add_VM_to_Migration_Dict7-->|Task| _process_vm___Clear_VM_Variables8[ process vm   clear vm variables]:::task
   _process_vm___Clear_VM_Variables8-->End
+```
+
+### Graph for _migrations.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _migrations___Template_Migrations0[ migrations   template migrations]:::task
+  _migrations___Template_Migrations0-->|Task| _migrations___Create_Migrations1[ migrations   create migrations]:::task
+  _migrations___Create_Migrations1-->|Block Start| _migrations___Wait_for_Migrations2_block_start_0[[ migrations   wait for migrations<br>When: **mtv migrate mtv verify migrations complete bool**]]:::block
+  _migrations___Wait_for_Migrations2_block_start_0-->|Task| _migrations___Check_on_Migrations0[ migrations   check on migrations]:::task
+  _migrations___Check_on_Migrations0-.->|End of Block| _migrations___Wait_for_Migrations2_block_start_0
+  _migrations___Check_on_Migrations0-->End
+```
+
+### Graph for _process_plans.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| _process_plans___Set_Plan_Name0[ process plans   set plan name]:::task
+  _process_plans___Set_Plan_Name0-->|Task| _process_plans___Update_Plan_Content1[ process plans   update plan content]:::task
+  _process_plans___Update_Plan_Content1-->|Task| _process_plans___Add_Plan2[ process plans   add plan]:::task
+  _process_plans___Add_Plan2-->End
 ```
 
 ### Graph for main.yml
