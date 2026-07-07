@@ -30,6 +30,11 @@ jobs:
         run: |
           if [[ "$EVENT_NAME" == "pull_request_review" ]]; then
             STATE="$REVIEW_STATE"
+            # Skip comment-only reviews
+            if [[ -z "$STATE" ]]; then
+              echo "Skipping notification for comment-only review"
+              exit 0
+            fi
             TITLE="PR Review: ${STATE} - ${PR_TITLE}"
             COLOR=$([[ "$STATE" == "approved" ]] && echo "good" || echo "warning")
             BODY="${REVIEW_USER_LOGIN} ${STATE} the PR"
