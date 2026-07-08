@@ -67,6 +67,7 @@
         _aap_cleanup_dispatch_var: controller_hosts
         _aap_cleanup_extra_fields:
           - inventory
+        _aap_cleanup_use_org_filter: false
       when: aap_cleanup_hosts_remove | bool
 
     - name: Remove inventories
@@ -110,6 +111,7 @@
         _aap_cleanup_resource_type: credential_types
         _aap_cleanup_dispatch_var: controller_credential_types
         _aap_cleanup_filter_managed: true
+        _aap_cleanup_use_org_filter: false
       when: aap_cleanup_credential_types_remove | bool
 
     - name: Remove organization

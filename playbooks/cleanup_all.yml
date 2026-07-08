@@ -29,22 +29,5 @@
       rescue:
         - name: Migration AAP cleanup failed
           ansible.builtin.debug:
-            msg: "Migration AAP cleanup failed — continuing with Bootstrap AAP cleanup"
-
-- name: Cleanup Bootstrap AAP
-  hosts: bootstrap_aap
-  connection: local
-  gather_facts: false
-  tasks:
-    - name: Run Bootstrap AAP cleanup
-      block:
-        - name: Include AAP cleanup role
-          ansible.builtin.include_role:
-            name: infra.openshift_virtualization_migration.aap_cleanup
-          vars:
-            aap_cleanup_job_history_purge: false
-      rescue:
-        - name: Bootstrap AAP cleanup failed
-          ansible.builtin.debug:
-            msg: "Bootstrap AAP cleanup failed"
+            msg: "Migration AAP cleanup failed"
 ...
