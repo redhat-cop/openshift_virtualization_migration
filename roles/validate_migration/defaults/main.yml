@@ -19,6 +19,12 @@ validate_migration_debug: true
 
 validate_migration_cluster_name: cluster01
 
+# Pre-migration infrastructure validation settings
+# title: Enable Pre-Migration Validation
+# required: False
+# description: Enable pre-migration infrastructure validation checks
+validate_migration_pre_enabled: true
+
 # Post-migration validation settings
 # title: Enable Post-Migration Validation
 # required: False
