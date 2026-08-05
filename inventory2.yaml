@@ -1,0 +1,51 @@
+# vm_source group contains configuration values vm sources (vmware, rhev)
+vm_source:
+  hosts:
+    vmware-source-1:
+      type: vmware # Must be a supported by migration
+      username:
+      password:
+      vddk:
+        image:
+        username:
+        password:
+      # optional
+      sdkEntpoint: /sdk
+      insecureSkupTlsVerify: true
+      esxi_hosts:
+        - id:
+          ip:
+          username:
+          password:
+
+migration_aap:
+  hosts:
+    aap_host:
+  #    aap_username: changeme
+  #   aap_password: changeme
+  #   aap_token: token
+  #   aap_hostname: aap.example.com
+  #   aap_validate_certs: true
+
+migration_clusters:
+  ocp_cluster1:
+    openshift_host:
+    openshift_credential:
+      # openshift_temporary_api_key: # This is a 24 hour API key generated when you select your login in the
+      # OpenShift UI or use `oc login`. If a this var is not provided, it is expected that you provide either
+      # openshift_username + openshift_password (used to generate a temporary api key) or openshift_api_key with
+      # a permanent SA API key
+      # openshift_api_key: # This is a permanent Service Account API key. If you don't have a Service Account,
+      # one can be generated if you provide a tempoarary api key via openshift_temporary_api_key, or if you provide
+      # openshift_username + openshift_password to generate a temporary api key for you.
+      # openshift_username: # If no openshift_temporary_api_key or openshift_api_key are provided, then
+      # openshift_username + openshift_password can generate one for you
+      # openshift_password: # If no openshift_temporary_api_key or openshift_api_key are provided, then
+      # openshift_username + openshift_password can generate one for you
+    vm_sources:
+      - vm-sourece1
+    aap_hosts:
+      - aap_host
+    # Optional
+    openshift_verify_ssl: false
+    configure_mtv: true # if false then mtv will not be installed and configu
