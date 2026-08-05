@@ -1,191 +1,158 @@
 ---
-# OpenShift Virtualization Migration Ansible Inventory
+# OpenShift Virtualization Migration Factory v2 — Inventory
+#
+# This inventory mirrors the AAP inventory structure that aap_seed creates.
+# Sources and targets are logical hosts (not SSH targets) — all playbooks
+# run on localhost with connection: local.
+#
+# Sensitive values (passwords, tokens, certificates) should be placed in
+# inventory.vault.yml and encrypted with Ansible Vault. See
+# inventory.vault.yml.example for the template.
+#
+# AAP Mapping:
+#   - Each host under "sources" becomes an AAP inventory host in the
+#     "sources" group + a "Migration Factory - Source Environment" credential
+#   - Each host under "targets" becomes an AAP inventory host in the
+#     "targets" group + a "Migration Factory - Target Cluster" credential
 
 all:
   vars:
-
-    # Baseline Variables
-    aap_execution_environment: OpenShift Virtualization Migration
-    aap_execution_environment_image: registry.example.com/openshift-virtualization-migration-ee:latest
-    aap_project: OpenShift Virtualization Migration
-    aap_org_name: OpenShift Virtualization Migration
-    aap_namespace: virtualization-migration
-    # aap_version: 2.6 # Defaults to 2.6 if not provided
-    # aap_channel: stable-2.6 # Defaults to stable-2.6 if not provided
-    aap_instance_name: 'aap'
-    aap_validate_certs: false
+    # -------------------------------------------------------------------------
+    # AAP Connection
+    # -------------------------------------------------------------------------
+    # Required when running playbooks locally (outside AAP).
+    # When running inside AAP, these are provided by the controller.
+    controller_host: ""
+    controller_username: admin
+    controller_password: "{{ vault_controller_password | default('') }}"
+    # controller_token: ""
     controller_validate_certs: false
 
-    # If secure_logging is set to 'true', secrets are hidden from logs.
-    # secure_logging: false
-
-    ## Operators to deploy on the OpenShift Hub Cluster
-    # aap_seed_operator_management_hub: []
-    ## Operators to deploy on the OpenShift Spoke Clusters
-    # aap_seed_operator_management_spoke: []
-
-    # Red Hat account login used to attach AAP subscription
-    rh_username: changeme
-    rh_password: changeme
-
-    # Container registry vars
-    # This is the location of the hosted execution environment
-    container_host: changeme # e.g. 'quay.io/example'
-    container_username: changeme
-    container_password: changeme
-    container_verify_ssl: false
-
-    # Git Variables
-    ## Configure and uncomment as needed
-
-    ## AAP Project Configuration (repository URL and branch)
-    aap_project_repo: changeme
+    # -------------------------------------------------------------------------
+    # AAP Content Configuration
+    # -------------------------------------------------------------------------
+    aap_org_name: Migration Factory
+    aap_project_repo: ""
     aap_project_branch: main
 
-    ## Git Credentials
-    git_credential_name: Git
-    git_username: changeme
-    git_password: changeme
-    # git_ssh_private_key:
-    # git_ssh_key_passphrase:
+    # Execution Environment
+    aap_execution_environment: OpenShift Virtualization Migration
+    aap_execution_environment_image: ""
 
-    # Automation Hub Variables
+    # Container registry for EE image
+    container_host: ""
+    container_username: "{{ vault_container_username | default('') }}"
+    container_password: "{{ vault_container_password | default('') }}"
+    container_verify_ssl: false
+
+    # -------------------------------------------------------------------------
+    # Git Credentials
+    # -------------------------------------------------------------------------
+    git_credential_name: Git
+    git_username: "{{ vault_git_username | default('') }}"
+    git_password: "{{ vault_git_password | default('') }}"
+    # git_ssh_private_key: "{{ vault_git_ssh_private_key | default('') }}"
+    # git_ssh_key_passphrase: "{{ vault_git_ssh_key_passphrase | default('') }}"
+
+    # -------------------------------------------------------------------------
+    # Automation Hub
+    # -------------------------------------------------------------------------
     automation_hub_certified_url: https://cloud.redhat.com/api/automation-hub/content/published/
     automation_hub_certified_auth_url: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
-    automation_hub_certified_token: changeme
+    automation_hub_certified_token: "{{ vault_automation_hub_certified_token | default('') }}"
 
     automation_hub_validated_url: https://cloud.redhat.com/api/automation-hub/content/validated/
     automation_hub_validated_auth_url: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
-    automation_hub_validated_token: changeme
+    automation_hub_validated_token: "{{ vault_automation_hub_validated_token | default('') }}"
 
-# OpenShift Virtualization Migration Inventory Groups
-#
-# OpenShift Virtualization Migration Bring Your Own (BYO) Ansible Automation Platform
-# If uncommented AAP will be configured separately and will not be deployed on the hub cluster
-# migration_aap:
-#   hosts:
-#     aap_host:
-#       aap_username: changeme
-#       aap_password: changeme
-#       aap_token: token
-#       aap_hostname: aap.example.com
-#       aap_validate_certs: true
+  children:
+    # =========================================================================
+    # Source Environments (vSphere, RHV)
+    # =========================================================================
+    # Each host represents a source hypervisor environment.
+    # Non-secret metadata is stored as host vars.
+    # Secrets (username, password, certificate) are stored in vault and
+    # pushed to AAP as "Migration Factory - Source Environment" credentials.
+    sources:
+      hosts:
 
-# Note: To deploy to a single cluster configure the same host in migration_hub and
-# migration_spokes. You will only need to configure credentials once.
+        # -- Example: VMware vSphere source ----------------------------------
+        # vcenter-prod:
+        #   mf_env_type: vmware
+        #   mf_env_host: vcenter.prod.example.com
+        #   mf_sdk_endpoint: /sdk
+        #   mf_insecure_skip_tls_verify: true
+        #   mf_vddk_image: registry.example.com/vddk:8.0
+        #   mf_esxi_hosts: []
+        #   # Secrets — reference vault variables
+        #   mf_source_username: "{{ vault_vcenter_prod_username }}"
+        #   mf_source_password: "{{ vault_vcenter_prod_password }}"
+        #   mf_source_certificate: "{{ vault_vcenter_prod_certificate | default('') }}"
 
-# Migration Factory Hub cluster to configure
-migration_hub:
-  hosts:
-    # Friendly name of the Hub
-    hub.cluster.example.com:
-      # Host Variables
+        # -- Example: VMware vSphere with ESXi direct mode --------------------
+        # vcenter-lab:
+        #   mf_env_type: vmware
+        #   mf_env_host: vcenter.lab.example.com
+        #   mf_sdk_endpoint: /sdk
+        #   mf_insecure_skip_tls_verify: true
+        #   mf_vddk_image: registry.example.com/vddk:8.0
+        #   mf_esxi_hosts:
+        #     - id: host-1
+        #       ip: 10.0.1.10
+        #       user: root
+        #       password: "{{ vault_esxi_host1_password }}"
+        #     - id: host-2
+        #       ip: 10.0.1.11
+        #       user: root
+        #       password: "{{ vault_esxi_host2_password }}"
+        #   mf_source_username: "{{ vault_vcenter_lab_username }}"
+        #   mf_source_password: "{{ vault_vcenter_lab_password }}"
+        #   mf_source_certificate: ""
 
-      # OpenShift Variables for the Hub
-      # You must only define one set of openshift credentials. EITHER
-      # openshift_username + openshift_password; OR openshift_temporary_api_key OR openshift_api_key
-      openshift_host: changeme # e.g. 'https://api.example.com:6443'
-      # openshift_temporary_api_key: # This is a 24 hour API key generated when you select your login
-      # in the OpenShift UI or use `oc login`. If a this var is not provided, it is expected that you
-      # provide either openshift_username + openshift_password (used to generate a temporary api key)
-      # or openshift_api_key with a permanent SA API key
-      # openshift_api_key: # This is a permanent Service Account API key. If you don't have a Service
-      # Account, one can be generated if you provide a tempoarary api key via openshift_temporary_api_key,
-      # or if you provide openshift_username + openshift_password to generate a temporary api key for you.
-      # openshift_username: # If no openshift_temporary_api_key or openshift_api_key are provided,
-      # then openshift_username + openshift_password can generate one for you
-      # openshift_password: # If no openshift_temporary_api_key or openshift_api_key are provided,
-      # then openshift_username + openshift_password can generate one for you
-      openshift_verify_ssl: false
+        # -- Example: Red Hat Virtualization (RHV) source (Phase 2) -----------
+        # rhv-legacy:
+        #   mf_env_type: ovirt
+        #   mf_env_host: rhvm.example.com
+        #   mf_sdk_endpoint: /ovirt-engine/api
+        #   mf_insecure_skip_tls_verify: true
+        #   mf_source_username: "{{ vault_rhv_username }}"
+        #   mf_source_password: "{{ vault_rhv_password }}"
+        #   mf_source_certificate: ""
 
-      # Install AAP. Defaults to true. If false you must configure a host in the migration_factory_aap group.
-      install_aap: true
+    # =========================================================================
+    # Target OpenShift Clusters
+    # =========================================================================
+    # Each host represents a target OpenShift cluster where VMs will be
+    # migrated to. Non-secret metadata is stored as host vars.
+    # Secrets (api_key) are stored in vault and pushed to AAP as
+    # "Migration Factory - Target Cluster" credentials.
+    targets:
+      hosts:
 
-# Migration Factory Hub spokes to configure
-migration_spoke:
-  hosts:
-    # Friendly name of the Spoke
-    spoke.cluster.example.com:
-      # Host Variables
+        # -- Example: Production OpenShift cluster ----------------------------
+        # ocp-prod:
+        #   mf_env_host: https://api.ocp-prod.example.com:6443
+        #   mf_verify_ssl: false
+        #   mf_mtv_namespace: openshift-mtv
+        #   mf_default_target_namespace: vm-workloads
+        #   mf_operators:
+        #     - mtv
+        #     - cnv
+        #     - nmstate
+        #   # Secret — reference vault variable
+        #   mf_target_api_key: "{{ vault_ocp_prod_api_key }}"
 
-      # OpenShift Variables for the Spoke
-      # You must only define one set of openshift credentials. EITHER openshift_username + openshift_password;
-      # OR openshift_temporary_api_key OR openshift_api_key
-      openshift_host: changeme # e.g. 'https://api.example.com:6443'
-      # openshift_temporary_api_key: # This is a 24 hour API key generated when you select your login in the
-      # OpenShift UI or use `oc login`. If a this var is not provided, it is expected that you provide either
-      # openshift_username + openshift_password (used to generate a temporary api key) or openshift_api_key with
-      # a permanent SA API key
-      # openshift_api_key: # This is a permanent Service Account API key. If you don't have a Service Account,
-      # one can be generated if you provide a tempoarary api key via openshift_temporary_api_key, or if you provide
-      # openshift_username + openshift_password to generate a temporary api key for you.
-      # openshift_username: # If no openshift_temporary_api_key or openshift_api_key are provided, then
-      # openshift_username + openshift_password can generate one for you
-      # openshift_password: # If no openshift_temporary_api_key or openshift_api_key are provided, then
-      # openshift_username + openshift_password can generate one for you
-      openshift_verify_ssl: false
-
-      # List of migration targets to configure on this specific spoke cluster
-      configured_migration_targets:
-        - vmware-target-1
-        - rhev-target-1
-
-      # Variables to apply to all configured job templates
-      aap_job_template_extra_vars:
-
-  ## Group Variables to apply to all spokes
-  vars:
-    migration_targets:
-
-      ## Data Structure of Migration Targets
-      # - name: vmware-target-1 # Required
-      #   type: vmware # Must be `vmware`
-      #   host: vcenter.example.com
-      #   sdkEndpoint: /sdk # Defaults to this value if not provided
-      #   username: <username>
-      #   password: <password>
-      #   certificate: |
-      #     <certificate>
-      #   insecureSkipTlsVerify: <value> # defaults to `true` if not specified
-      #   credentialsSecretRef: <reference> # Namespaced name (<namespace>/<name>) or just <name> if in
-      #     <mtv_namespace> containing MTV provider details
-      #   network: <configurations applied as merged extra variables to the job template to configure networking>
-      #   mapping: <configurations applied as merged extra variables to the job template to configure MTV mapping
-      #     storage and networking>
-
-      ## Example Migration Target (uncomment to use as a baseline)
-      #  - name: vmware-2w7dj
-      #    type: vmware
-      #    host: vcsrs00-vc.demo.example.com
-      #    username: changeme
-      #    password: changeme
-      #    vddk:
-      #      image: registry.example.com/openshift-virtualization-migration-vddk:latest
-      #      username: "{{ container_username }}"
-      #      password: "{{ container_password }}"
-      #    sdkEndpoint: /sdk
-      #    insecureSkipTlsVerify: true
-      #    mapping:
-      #      create: true
-      #    esxi_hosts:
-      #      - id: host-1
-      #        password: pass1
-      #        ip: 10.10.10.123
-      #        user: root
-      #      - id: host-2
-      #        password: pass2
-      #        ip: 10.10.10.123
-      #        user: root
-
-      ## Example Migration Target (uncomment to use as a baseline)
-      #  - name: rhev-target-1 # Required
-      #    type: ovirt
-      #    host: rhev.demo.example.com
-      #    username: changeme
-      #    sdkEndpoint: /ovirt-engine/api #if not provided automatically will be added
-      #    password: changeme
-      #    insecureSkipTlsVerify: true
-      #    mapping:
-      #      create: true
+        # -- Example: Staging OpenShift cluster -------------------------------
+        # ocp-staging:
+        #   mf_env_host: https://api.ocp-staging.example.com:6443
+        #   mf_verify_ssl: false
+        #   mf_mtv_namespace: openshift-mtv
+        #   mf_default_target_namespace: vm-staging
+        #   mf_operators:
+        #     - mtv
+        #     - cnv
+        #     - nmstate
+        #     - oadp
+        #   mf_target_api_key: "{{ vault_ocp_staging_api_key }}"
 
 ...

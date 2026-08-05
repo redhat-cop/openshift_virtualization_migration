@@ -1,74 +1,73 @@
 ---
-# Sensitive Inventory Variables — Ansible Vault Encrypted
+# Migration Factory v2 — Vault Variables
 #
-# This file contains all credential values that should be encrypted
-# with Ansible Vault before use. Copy this file to inventory.vault.yml
-# and encrypt it:
+# Copy this file to inventory.vault.yml and encrypt with Ansible Vault:
 #
 #   cp inventory.vault.yml.example inventory.vault.yml
-#   # Edit inventory.vault.yml with real credential values
+#   # Edit inventory.vault.yml with real values
 #   ansible-vault encrypt inventory.vault.yml
 #
-# To edit an encrypted file:
-#   ansible-vault edit inventory.vault.yml
+# Usage:
+#   ansible-playbook -i inventory.yml -e @inventory.vault.yml playbooks/seed_aap.yml --ask-vault-pass
 #
-# To use with a playbook:
-#   ansible-playbook -e @inventory.vault.yml playbooks/bootstrap.yml --ask-vault-pass
-#
-# Or with a vault password file:
-#   ansible-playbook -e @inventory.vault.yml playbooks/bootstrap.yml --vault-password-file .vault-password
-#
-# With ansible-navigator:
-#   ansible-navigator run playbooks/bootstrap.yml \
-#     -e @inventory.vault.yml --pae false \
-#     -- --ask-vault-pass
-#
-# IMPORTANT: Never commit this file unencrypted. The .gitignore is
-# configured to exclude *.vault.yml and vault-password* files.
+# IMPORTANT: Never commit this file unencrypted.
 
-# Red Hat Account
-rh_username: ""
-rh_password: ""
+# -------------------------------------------------------------------------
+# AAP Controller
+# -------------------------------------------------------------------------
+vault_controller_password: ""
 
-# Container Registry
-container_host: ""
-container_username: ""
-container_password: ""
+# -------------------------------------------------------------------------
+# Container Registry (for EE image)
+# -------------------------------------------------------------------------
+vault_container_username: ""
+vault_container_password: ""
 
+# -------------------------------------------------------------------------
 # Git Credentials
-git_username: ""
-git_password: ""
-# git_ssh_private_key: |
+# -------------------------------------------------------------------------
+vault_git_username: ""
+vault_git_password: ""
+# vault_git_ssh_private_key: |
 #   -----BEGIN OPENSSH PRIVATE KEY-----
 #   ...
 #   -----END OPENSSH PRIVATE KEY-----
-# git_ssh_key_passphrase: ""
+# vault_git_ssh_key_passphrase: ""
 
+# -------------------------------------------------------------------------
 # Automation Hub Tokens
-automation_hub_certified_token: ""
-automation_hub_validated_token: ""
+# -------------------------------------------------------------------------
+vault_automation_hub_certified_token: ""
+vault_automation_hub_validated_token: ""
 
-# OpenShift Cluster Credentials (Hub)
-# Use ONE of the following authentication methods:
-# hub_openshift_username: ""
-# hub_openshift_password: ""
-# hub_openshift_temporary_api_key: ""
-# hub_openshift_api_key: ""
+# -------------------------------------------------------------------------
+# Source Environment Credentials
+# -------------------------------------------------------------------------
+# One set of credentials per source defined in inventory.yml.
+# Variable names should match the vault references in your source host vars.
 
-# OpenShift Cluster Credentials (Spoke)
-# Use ONE of the following authentication methods:
-# spoke_openshift_username: ""
-# spoke_openshift_password: ""
-# spoke_openshift_temporary_api_key: ""
-# spoke_openshift_api_key: ""
+# VMware vSphere
+# vault_vcenter_prod_username: ""
+# vault_vcenter_prod_password: ""
+# vault_vcenter_prod_certificate: |
+#   -----BEGIN CERTIFICATE-----
+#   ...
+#   -----END CERTIFICATE-----
 
-# Migration Target Credentials
-# vmware_username: ""
-# vmware_password: ""
-# ovirt_username: ""
-# ovirt_password: ""
+# VMware ESXi hosts (if using ESXi direct mode)
+# vault_esxi_host1_password: ""
+# vault_esxi_host2_password: ""
 
-# VDDK Registry Credentials
-# vddk_registry_username: ""
-# vddk_registry_password: ""
+# Red Hat Virtualization (Phase 2)
+# vault_rhv_username: ""
+# vault_rhv_password: ""
+
+# -------------------------------------------------------------------------
+# Target Cluster Credentials
+# -------------------------------------------------------------------------
+# One API key per target cluster defined in inventory.yml.
+# Variable names should match the vault references in your target host vars.
+
+# vault_ocp_prod_api_key: ""
+# vault_ocp_staging_api_key: ""
 ...
