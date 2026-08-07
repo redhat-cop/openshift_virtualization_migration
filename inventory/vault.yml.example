@@ -15,7 +15,9 @@
 # -------------------------------------------------------------------------
 # AAP Controller
 # -------------------------------------------------------------------------
-vault_controller_password: ""
+vault_aap_username: ""
+vault_aap_password: ""
+# vault_aap_token: ""
 
 # -------------------------------------------------------------------------
 # Container Registry (for EE image)
@@ -41,10 +43,9 @@ vault_automation_hub_certified_token: ""
 vault_automation_hub_validated_token: ""
 
 # -------------------------------------------------------------------------
-# Source Environment Credentials
+# VM Source Credentials
 # -------------------------------------------------------------------------
-# One set of credentials per source defined in inventory.yml.
-# Variable names should match the vault references in your source host vars.
+# One set per source defined in inventory.yml vm_sources group.
 
 # VMware vSphere
 # vault_vcenter_prod_username: ""
@@ -58,6 +59,10 @@ vault_automation_hub_validated_token: ""
 # vault_esxi_host1_password: ""
 # vault_esxi_host2_password: ""
 
+# VDDK registry credentials
+# vault_vddk_registry_username: ""
+# vault_vddk_registry_password: ""
+
 # Red Hat Virtualization (Phase 2)
 # vault_rhv_username: ""
 # vault_rhv_password: ""
@@ -65,9 +70,11 @@ vault_automation_hub_validated_token: ""
 # -------------------------------------------------------------------------
 # Target Cluster Credentials
 # -------------------------------------------------------------------------
-# One API key per target cluster defined in inventory.yml.
-# Variable names should match the vault references in your target host vars.
+# One set per cluster defined in inventory.yml migration_clusters group.
 
 # vault_ocp_prod_api_key: ""
+# vault_ocp_prod_username: ""
+# vault_ocp_prod_password: ""
+
 # vault_ocp_staging_api_key: ""
 ...

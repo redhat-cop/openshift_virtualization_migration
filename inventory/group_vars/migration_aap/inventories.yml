@@ -1,0 +1,11 @@
+---
+# Configuration as Code — Inventories
+#
+# These definitions are pushed to AAP by the vmf_seed_aap.yml playbook
+# using infra.aap_configuration.
+
+controller_inventories:
+  - name: "{{ aap_inventory_name | default('OpenShift Virtualization Migration') }}"
+    organization: "{{ aap_org_name | default('Default') }}"
+    description: Managed by Migration Factory CaC
+...

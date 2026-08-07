@@ -14,7 +14,7 @@ secrets.yml
 *.vault.yml
 vault-password*
 .vault-password*
-inventory-rhdp.yml
+inventory/rhdp.yml
 .lesshst
 .kube/*
 .local/*

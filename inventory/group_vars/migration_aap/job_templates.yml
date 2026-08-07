@@ -1,0 +1,20 @@
+---
+# Configuration as Code — Job Templates
+#
+# These definitions are pushed to AAP by the seed_aap.yml playbook
+# using infra.aap_configuration.
+
+controller_templates:
+  - name: OpenShift Virtualization Migration - Migrate
+    organization: "{{ aap_org_name | default('Default') }}"
+    project: "{{ aap_project_name | default('OpenShift Virtualization Migration') }}"
+    playbook: playbooks/vmf_migrate.yml
+    inventory: "{{ aap_inventory_name | default('OpenShift Virtualization Migration') }}"
+    execution_environment: "{{ aap_execution_environment | default('Default execution environment') }}"
+    ask_variables_on_launch: true
+    ask_credential_on_launch: true
+    verbosity: 0
+    extra_vars:
+      source_name: ""
+      target_name: ""
+...

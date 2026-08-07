@@ -1,0 +1,19 @@
+---
+- name: Seed AAP with Migration Factory content
+  hosts: migration_aap
+  connection: local
+  gather_facts: false
+
+  module_defaults:
+    group/ansible.controller.controller:
+      controller_host: "{{ aap_hostname }}"
+      controller_username: "{{ aap_username | default(omit) }}"
+      controller_password: "{{ aap_password | default(omit) }}"
+      controller_oauthtoken: "{{ aap_token | default(omit) }}"
+      validate_certs: "{{ aap_validate_certs | default(false) }}"
+
+  tasks:
+    - name: Push CaC content to AAP
+      ansible.builtin.include_role:
+        name: infra.aap_configuration.dispatch
+...

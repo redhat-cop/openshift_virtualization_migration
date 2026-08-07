@@ -1,0 +1,11 @@
+---
+- name: OpenShift Virtualization Migration - Migrate
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Placeholder
+      ansible.builtin.debug:
+        msg: "Migration playbook - source: {{ source_name | default('not set') }}, target: {{ target_name | default('not set') }}"
+...
