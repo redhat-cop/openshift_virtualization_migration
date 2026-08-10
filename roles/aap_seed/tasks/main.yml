@@ -2,34 +2,32 @@
 - name: Seed AAP with Migration Factory content
   module_defaults:
     group/ansible.controller.controller:
-      controller_host: "{{ aap_hostname }}"
-      controller_username: "{{ aap_username | default(omit) }}"
-      controller_password: "{{ aap_password | default(omit) }}"
-      controller_oauthtoken: "{{ aap_token | default(omit) }}"
-      validate_certs: "{{ aap_validate_certs | default(false) }}"
+      controller_host: "{{ aap_seed_hostname }}"
+      controller_username: "{{ aap_seed_username | default(omit) }}"
+      controller_password: "{{ aap_seed_password | default(omit) }}"
+      controller_oauthtoken: "{{ aap_seed_token | default(omit) }}"
+      validate_certs: "{{ aap_seed_validate_certs | default(false) }}"
+  vars:
+    aap_hostname: "{{ aap_seed_hostname }}"
+    aap_username: "{{ aap_seed_username | default(omit) }}"
+    aap_password: "{{ aap_seed_password | default(omit) }}"
+    aap_token: "{{ aap_seed_token | default(omit) }}"
+    aap_validate_certs: "{{ aap_seed_validate_certs | default(false) }}"
   block:
+    - name: Build dynamic controller objects from inventory
+      ansible.builtin.include_tasks: build_controller_objects.yml
+
     - name: Create project and sync from SCM
       block:
-        - name: Create or update the project in AAP
-          ansible.builtin.include_role:
-            name: infra.aap_configuration.controller_projects
-
-        - name: Sync project from SCM and wait for completion
-          ansible.builtin.include_role:
-            name: infra.aap_configuration.controller_project_update
-          vars:
-            controller_project_update:
-              - name: "{{ aap_project_name }}"
-                organization: "{{ aap_org_name }}"
-                wait: true
-                timeout: "{{ aap_project_sync_timeout }}"
+        - name: Sync SCM project
+          ansible.builtin.include_tasks: sync_project.yml
       rescue:
         - name: Project sync failed
           ansible.builtin.fail:
             msg: >-
               Failed to sync project from SCM. Verify that the Git URL
-              ({{ aap_project_scm_url }}) and branch
-              ({{ aap_project_scm_branch }}) are correct and
+              ({{ aap_seed_project_scm_url }}) and branch
+              ({{ aap_seed_project_scm_branch }}) are correct and
               accessible from the AAP server.
 
     - name: Push CaC content to AAP

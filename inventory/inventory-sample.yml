@@ -1,0 +1,125 @@
+---
+# OpenShift Virtualization Migration Factory v2 — Sample Inventory
+#
+# Copy this file and fill in real values for your environment:
+#
+#   cp inventory/inventory-sample.yml inventory/my-env.yml
+#   # Edit my-env.yml with real values
+#   ansible-vault encrypt_string 'my-secret' --name 'field_name'
+#
+# This inventory mirrors the AAP inventory structure that aap_seed creates:
+#
+#   vm_sources         → AAP inventory group + "Migration Factory - Source" credentials
+#   migration_clusters → AAP inventory group + "OpenShift or Kubernetes API Bearer Token" credentials
+#   migration_aap      → AAP controller connection (not pushed to AAP inventory)
+#
+# All hosts are logical representations (not SSH targets). Playbooks run on
+# localhost with connection: local and interact with clusters via API.
+
+# =============================================================================
+# AAP Controller Connection
+# =============================================================================
+# Defines the AAP instance(s) used by the Migration Factory.
+# Used when running playbooks locally (outside AAP).
+# When running inside AAP, controller connection is provided automatically.
+migration_aap:
+  hosts:
+
+    aap-instance:
+      aap_seed_hostname: https://aap.example.com
+      aap_seed_username: admin
+      aap_seed_password: changeme
+      # aap_seed_token: ""
+      aap_seed_validate_certs: false
+
+# =============================================================================
+# VM Source Environments (vSphere, RHV)
+# =============================================================================
+# Each host represents a source hypervisor environment that VMs will be
+# migrated from. Credentials are pushed to AAP as custom
+# "Migration Factory - Source Environment" credentials.
+vm_sources:
+  hosts:
+
+    # -- VMware vSphere source ---------------------------------------------------
+    vcenter-prod:
+      type: vmware
+      host: vcenter.prod.example.com
+      sdk_endpoint: /sdk
+      insecure_skip_tls_verify: true
+      username: administrator@vsphere.local
+      password: changeme
+      # certificate: |
+      #   -----BEGIN CERTIFICATE-----
+      #   ...
+      #   -----END CERTIFICATE-----
+
+    # -- VMware vSphere with VDDK and ESXi direct mode ---------------------------
+    # vcenter-lab:
+    #   type: vmware
+    #   host: vcenter.lab.example.com
+    #   sdk_endpoint: /sdk
+    #   insecure_skip_tls_verify: true
+    #   username: administrator@vsphere.local
+    #   password: changeme
+    #   vddk:
+    #     image: registry.example.com/vddk:8.0
+    #   esxi_hosts:
+    #     - id: host-1
+    #       ip: 10.0.1.10
+    #       username: root
+    #       password: changeme
+    #     - id: host-2
+    #       ip: 10.0.1.11
+    #       username: root
+    #       password: changeme
+
+    # -- Red Hat Virtualization (RHV) source -------------------------------------
+    # rhv-legacy:
+    #   type: ovirt
+    #   host: rhvm.example.com
+    #   sdk_endpoint: /ovirt-engine/api
+    #   insecure_skip_tls_verify: true
+    #   username: admin@internal
+    #   password: changeme
+
+# =============================================================================
+# Migration Target Clusters (OpenShift)
+# =============================================================================
+# Each host represents a target OpenShift cluster where VMs will be
+# migrated to. Credentials use the built-in AAP credential type
+# "OpenShift or Kubernetes API Bearer Token".
+#
+# Provide ONE of:
+#   openshift_api_key           — permanent service account token (recommended)
+#   openshift_temporary_api_key — short-lived token from oc login / web console
+migration_clusters:
+  hosts:
+
+    ocp-prod:
+      openshift_host: https://api.ocp-prod.example.com:6443
+      openshift_verify_ssl: false
+      openshift_api_key: sha256~XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+      vm_sources:
+        - vcenter-prod
+      aap_hosts:
+        - aap-instance
+      mtv_namespace: openshift-mtv
+      default_target_namespace: vm-workloads
+      configure_mtv: true
+
+    # -- Staging cluster with temporary token ------------------------------------
+    # ocp-staging:
+    #   openshift_host: https://api.ocp-staging.example.com:6443
+    #   openshift_verify_ssl: false
+    #   openshift_temporary_api_key: sha256~YYYYYYYYYYYYYYYYYYYYYYYYYYY
+    #   vm_sources:
+    #     - vcenter-prod
+    #     - vcenter-lab
+    #   aap_hosts:
+    #     - aap-instance
+    #   mtv_namespace: openshift-mtv
+    #   default_target_namespace: vm-staging
+    #   configure_mtv: true
+
+...

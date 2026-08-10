@@ -1,0 +1,140 @@
+---
+argument_specs:
+  main:
+    short_description: Seed AAP with Migration Factory CaC content
+    description:
+      - Creates a custom source credential type, dynamically builds
+        inventory hosts, groups, and credentials from the Ansible
+        inventory, syncs the SCM project, and pushes all
+        Configuration as Code objects to AAP via
+        infra.aap_configuration.dispatch.
+      - Target cluster credentials use the built-in AAP credential
+        type "OpenShift or Kubernetes API Bearer Token".
+    options:
+      aap_seed_hostname:
+        type: str
+        required: true
+        description: >-
+          FQDN or URL of the AAP controller API endpoint.
+
+      aap_seed_username:
+        type: str
+        required: false
+        description: >-
+          Username for AAP controller authentication.
+          Mutually exclusive with I(aap_seed_token).
+
+      aap_seed_password:
+        type: str
+        required: false
+        no_log: true
+        description: >-
+          Password for AAP controller authentication.
+          Mutually exclusive with I(aap_seed_token).
+
+      aap_seed_token:
+        type: str
+        required: false
+        no_log: true
+        description: >-
+          OAuth token for AAP controller authentication.
+          Mutually exclusive with
+          I(aap_seed_username)/I(aap_seed_password).
+
+      aap_seed_validate_certs:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Whether to validate TLS certificates when connecting
+          to AAP.
+
+      aap_seed_org_name:
+        type: str
+        required: false
+        default: Default
+        description: >-
+          AAP organization that owns the project, inventory, and
+          credentials.
+
+      aap_seed_project_name:
+        type: str
+        required: false
+        default: OpenShift Virtualization Migration
+        description: >-
+          Name of the SCM-backed project created in AAP.
+
+      aap_seed_project_scm_url:
+        type: str
+        required: false
+        default: https://github.com/redhat-cop/openshift_virtualization_migration.git
+        description: >-
+          Git URL used as the project SCM source.
+
+      aap_seed_project_scm_branch:
+        type: str
+        required: false
+        default: v2
+        description: >-
+          Git branch or tag to checkout for the project.
+
+      aap_seed_project_sync_timeout:
+        type: int
+        required: false
+        default: 120
+        description: >-
+          Maximum seconds to wait for the SCM project sync to
+          complete.
+
+      aap_seed_inventory_name:
+        type: str
+        required: false
+        default: OpenShift Virtualization Migration
+        description: >-
+          Name of the inventory created in AAP. Source and target
+          hosts are added to this inventory.
+
+      aap_seed_execution_environment:
+        type: str
+        required: false
+        default: Default execution environment
+        description: >-
+          Execution environment assigned to job templates.
+
+      aap_seed_source_credential_type:
+        type: str
+        required: false
+        default: Migration Factory - Source Environment
+        description: >-
+          Name of the custom credential type created in AAP for
+          source hypervisor environments (vSphere, RHV). Includes
+          an insecure TLS option.
+
+      aap_seed_target_credential_type:
+        type: str
+        required: false
+        default: OpenShift or Kubernetes API Bearer Token
+        description: >-
+          AAP credential type used for target OpenShift clusters.
+          Defaults to the built-in bearer token type. Each target
+          host should set I(openshift_api_key) or
+          I(openshift_temporary_api_key).
+
+      aap_seed_source_inventory_group:
+        type: str
+        required: false
+        default: vm_sources
+        description: >-
+          Ansible inventory group containing source hypervisor
+          hosts. Each host in this group becomes an AAP inventory
+          host and a source-environment credential.
+
+      aap_seed_target_inventory_group:
+        type: str
+        required: false
+        default: migration_clusters
+        description: >-
+          Ansible inventory group containing target OpenShift
+          cluster hosts. Each host in this group becomes an AAP
+          inventory host and a target-cluster credential.
+...

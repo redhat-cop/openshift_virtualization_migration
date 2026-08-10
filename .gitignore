@@ -190,6 +190,10 @@ cython_debug/
 
 **tar.gz
 
+# Ansible Navigator
+ansible-navigator.yml
+*-artifact-*.json
+
 # Secrets and certificates
 *.pem
 *.key

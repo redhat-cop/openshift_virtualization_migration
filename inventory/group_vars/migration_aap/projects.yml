@@ -5,10 +5,10 @@
 # using infra.aap_configuration.
 
 controller_projects:
-  - name: "{{ aap_project_name | default('OpenShift Virtualization Migration') }}"
-    organization: "{{ aap_org_name | default('Default') }}"
+  - name: "{{ aap_seed_project_name | default('OpenShift Virtualization Migration') }}"
+    organization: "{{ aap_seed_org_name | default('Default') }}"
     scm_type: git
-    scm_url: "{{ aap_project_scm_url | default('https://github.com/tech2734/openshift_virtualization_migration.git') }}"
-    scm_branch: "{{ aap_project_scm_branch | default('feature/v2-inventory') }}"
+    scm_url: "{{ aap_seed_project_scm_url | default('https://github.com/tech2734/openshift_virtualization_migration.git') }}"
+    scm_branch: "{{ aap_seed_project_scm_branch | default('feature/v2-inventory') }}"
     scm_update_on_launch: true
 ...
