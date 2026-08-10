@@ -1,0 +1,9 @@
+---
+aap_org_name: Default
+aap_project_name: OpenShift Virtualization Migration
+aap_project_scm_url: https://github.com/redhat-cop/openshift_virtualization_migration.git
+aap_project_scm_branch: v2
+aap_project_sync_timeout: 120
+aap_inventory_name: OpenShift Virtualization Migration
+aap_execution_environment: Default execution environment
+...

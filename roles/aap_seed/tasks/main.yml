@@ -1,0 +1,38 @@
+---
+- name: Seed AAP with Migration Factory content
+  module_defaults:
+    group/ansible.controller.controller:
+      controller_host: "{{ aap_hostname }}"
+      controller_username: "{{ aap_username | default(omit) }}"
+      controller_password: "{{ aap_password | default(omit) }}"
+      controller_oauthtoken: "{{ aap_token | default(omit) }}"
+      validate_certs: "{{ aap_validate_certs | default(false) }}"
+  block:
+    - name: Create project and sync from SCM
+      block:
+        - name: Create or update the project in AAP
+          ansible.builtin.include_role:
+            name: infra.aap_configuration.controller_projects
+
+        - name: Sync project from SCM and wait for completion
+          ansible.builtin.include_role:
+            name: infra.aap_configuration.controller_project_update
+          vars:
+            controller_project_update:
+              - name: "{{ aap_project_name }}"
+                organization: "{{ aap_org_name }}"
+                wait: true
+                timeout: "{{ aap_project_sync_timeout }}"
+      rescue:
+        - name: Project sync failed
+          ansible.builtin.fail:
+            msg: >-
+              Failed to sync project from SCM. Verify that the Git URL
+              ({{ aap_project_scm_url }}) and branch
+              ({{ aap_project_scm_branch }}) are correct and
+              accessible from the AAP server.
+
+    - name: Push CaC content to AAP
+      ansible.builtin.include_role:
+        name: infra.aap_configuration.dispatch
+...
