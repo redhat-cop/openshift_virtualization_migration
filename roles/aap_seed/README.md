@@ -29,7 +29,8 @@ Target cluster credentials use the built-in AAP credential type
 | `aap_seed_username` | str | Username for AAP authentication (mutually exclusive with `aap_seed_token`) |
 | `aap_seed_password` | str | Password for AAP authentication (mutually exclusive with `aap_seed_token`) |
 | `aap_seed_token` | str | OAuth token for AAP authentication |
-| `aap_seed_validate_certs` | bool | Validate TLS certificates (default: `false`) |
+| `aap_seed_validate_certs` | bool | Validate TLS certificates (default: `true`) |
+| `aap_seed_secure_logging` | bool | Suppress credential loop output (default: `true`; set to `false` for debugging) |
 
 ### AAP Content Configuration
 
@@ -61,9 +62,9 @@ vcenter-prod:
   type: vmware               # vmware or ovirt
   host: vcenter.example.com
   sdk_endpoint: /sdk
-  insecure_skip_tls_verify: true
   username: administrator@vsphere.local
   password: changeme          # use ansible-vault
+  # insecure_skip_tls_verify: true   # default: false
 ```
 
 ### Target hosts (`migration_clusters` group)
@@ -73,8 +74,8 @@ Provide one of `openshift_api_key` (permanent) or `openshift_temporary_api_key` 
 ```yaml
 ocp-prod:
   openshift_host: https://api.ocp-prod.example.com:6443
-  openshift_verify_ssl: false
   openshift_api_key: sha256~XXXXXXXXXXX
+  # openshift_verify_ssl: false      # default: true
   vm_sources:
     - vcenter-prod
   aap_hosts:

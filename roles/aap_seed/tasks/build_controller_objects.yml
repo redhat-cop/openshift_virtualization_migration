@@ -20,7 +20,7 @@
   loop_control:
     loop_var: __aap_seed_source
     label: "{{ __aap_seed_source }}"
-  no_log: true
+  no_log: "{{ aap_seed_secure_logging }}"
   vars:
     __aap_seed_vars: "{{ hostvars[__aap_seed_source] }}"
     __aap_seed_host:
@@ -41,9 +41,25 @@
         password: "{{ __aap_seed_vars['password'] }}"
         insecure_skip_tls_verify: >-
           {{ __aap_seed_vars['insecure_skip_tls_verify']
-             | default(true) }}
+             | default(false) }}
         certificate: >-
           {{ __aap_seed_vars['certificate'] | default('') }}
+
+- name: build_controller_objects | Validate target hosts have a bearer token
+  ansible.builtin.assert:
+    that:
+      - >-
+        hostvars[__aap_seed_target]['openshift_api_key'] is defined or
+        hostvars[__aap_seed_target]['openshift_temporary_api_key']
+        is defined
+    fail_msg: >-
+      Target host {{ __aap_seed_target }} must define
+      openshift_api_key or openshift_temporary_api_key.
+    quiet: true
+  loop: "{{ groups[aap_seed_target_inventory_group] | default([]) }}"
+  loop_control:
+    loop_var: __aap_seed_target
+    label: "{{ __aap_seed_target }}"
 
 - name: build_controller_objects | Build target cluster hosts and credentials # noqa: var-naming[no-role-prefix]
   ansible.builtin.set_fact:
@@ -54,13 +70,12 @@
   loop_control:
     loop_var: __aap_seed_target
     label: "{{ __aap_seed_target }}"
-  no_log: true
+  no_log: "{{ aap_seed_secure_logging }}"
   vars:
     __aap_seed_vars: "{{ hostvars[__aap_seed_target] }}"
     __aap_seed_bearer_token: >-
       {{ __aap_seed_vars['openshift_api_key']
-         | default(__aap_seed_vars['openshift_temporary_api_key']
-         | default('')) }}
+         | default(__aap_seed_vars['openshift_temporary_api_key']) }}
     __aap_seed_host:
       name: "{{ __aap_seed_target }}"
       inventory: "{{ aap_seed_inventory_name }}"
@@ -83,7 +98,7 @@
         bearer_token: "{{ __aap_seed_bearer_token }}"
         verify_ssl: >-
           {{ __aap_seed_vars['openshift_verify_ssl']
-             | default(false) }}
+             | default(true) }}
 
 - name: build_controller_objects | Build inventory groups # noqa: var-naming[no-role-prefix]
   ansible.builtin.set_fact:

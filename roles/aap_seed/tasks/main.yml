@@ -6,13 +6,13 @@
       controller_username: "{{ aap_seed_username | default(omit) }}"
       controller_password: "{{ aap_seed_password | default(omit) }}"
       controller_oauthtoken: "{{ aap_seed_token | default(omit) }}"
-      validate_certs: "{{ aap_seed_validate_certs | default(false) }}"
+      validate_certs: "{{ aap_seed_validate_certs }}"
   vars:
     aap_hostname: "{{ aap_seed_hostname }}"
     aap_username: "{{ aap_seed_username | default(omit) }}"
     aap_password: "{{ aap_seed_password | default(omit) }}"
     aap_token: "{{ aap_seed_token | default(omit) }}"
-    aap_validate_certs: "{{ aap_seed_validate_certs | default(false) }}"
+    aap_validate_certs: "{{ aap_seed_validate_certs }}"
   block:
     - name: Build dynamic controller objects from inventory
       ansible.builtin.include_tasks: build_controller_objects.yml

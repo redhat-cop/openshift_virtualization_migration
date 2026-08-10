@@ -46,9 +46,9 @@ vm_sources:
       type: vmware
       host: vcenter.prod.example.com
       sdk_endpoint: /sdk
-      insecure_skip_tls_verify: true
       username: administrator@vsphere.local
       password: changeme
+      # insecure_skip_tls_verify: true   # default: false
       # certificate: |
       #   -----BEGIN CERTIFICATE-----
       #   ...
@@ -59,7 +59,6 @@ vm_sources:
     #   type: vmware
     #   host: vcenter.lab.example.com
     #   sdk_endpoint: /sdk
-    #   insecure_skip_tls_verify: true
     #   username: administrator@vsphere.local
     #   password: changeme
     #   vddk:
@@ -79,7 +78,6 @@ vm_sources:
     #   type: ovirt
     #   host: rhvm.example.com
     #   sdk_endpoint: /ovirt-engine/api
-    #   insecure_skip_tls_verify: true
     #   username: admin@internal
     #   password: changeme
 
@@ -98,8 +96,8 @@ migration_clusters:
 
     ocp-prod:
       openshift_host: https://api.ocp-prod.example.com:6443
-      openshift_verify_ssl: false
       openshift_api_key: sha256~XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+      # openshift_verify_ssl: false      # default: true
       vm_sources:
         - vcenter-prod
       aap_hosts:
@@ -111,7 +109,6 @@ migration_clusters:
     # -- Staging cluster with temporary token ------------------------------------
     # ocp-staging:
     #   openshift_host: https://api.ocp-staging.example.com:6443
-    #   openshift_verify_ssl: false
     #   openshift_temporary_api_key: sha256~YYYYYYYYYYYYYYYYYYYYYYYYYYY
     #   vm_sources:
     #     - vcenter-prod

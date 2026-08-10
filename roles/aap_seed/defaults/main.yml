@@ -1,4 +1,7 @@
 ---
+aap_seed_validate_certs: true
+aap_seed_secure_logging: true
+
 aap_seed_org_name: Default
 aap_seed_project_name: OpenShift Virtualization Migration
 aap_seed_project_scm_url: https://github.com/redhat-cop/openshift_virtualization_migration.git

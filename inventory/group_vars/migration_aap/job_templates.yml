@@ -1,7 +1,7 @@
 ---
 # Configuration as Code — Job Templates
 #
-# These definitions are pushed to AAP by the seed_aap.yml playbook
+# These definitions are pushed to AAP by the vmf_seed_aap.yml playbook
 # using infra.aap_configuration.
 
 controller_templates:

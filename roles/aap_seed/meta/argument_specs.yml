@@ -44,10 +44,19 @@ argument_specs:
       aap_seed_validate_certs:
         type: bool
         required: false
-        default: false
+        default: true
         description: >-
           Whether to validate TLS certificates when connecting
           to AAP.
+
+      aap_seed_secure_logging:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Suppress task output for credential loops to prevent
+          secrets from leaking to logs.  Set to C(false) when
+          debugging credential construction.
 
       aap_seed_org_name:
         type: str
