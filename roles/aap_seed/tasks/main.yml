@@ -14,10 +14,23 @@
     aap_token: "{{ aap_seed_token | default(omit) }}"
     aap_validate_certs: "{{ aap_seed_validate_certs }}"
   block:
-    - name: Build dynamic controller objects from inventory
-      ansible.builtin.include_tasks: build_controller_objects.yml
+    # -- Build phase -----------------------------------------------------------
+    - name: Build simple AAP objects from defaults
+      ansible.builtin.include_tasks: build_objects.yml
 
+    - name: Validate inventory host variables
+      ansible.builtin.include_tasks: validate.yml
+
+    - name: Build credentials from inventory
+      ansible.builtin.include_tasks: build_credentials.yml
+
+    - name: Build hosts and groups from inventory
+      ansible.builtin.include_tasks: build_hosts.yml
+      when: aap_seed_hosts_create | bool
+
+    # -- Sync phase ------------------------------------------------------------
     - name: Create project and sync from SCM
+      when: aap_seed_projects_create | bool
       block:
         - name: Sync SCM project
           ansible.builtin.include_tasks: sync_project.yml
@@ -30,6 +43,25 @@
               ({{ aap_seed_project_scm_branch }}) are correct and
               accessible from the AAP server.
 
+    # -- Handoff ---------------------------------------------------------------
+    - name: Copy aap_seed_controller_* to controller_* for dispatch # noqa: var-naming[no-role-prefix]
+      ansible.builtin.set_fact:
+        controller_credential_types: >-
+          {{ aap_seed_controller_credential_types | default([]) }}
+        controller_credentials: >-
+          {{ aap_seed_controller_credentials | default([]) }}
+        controller_inventories: >-
+          {{ aap_seed_controller_inventories | default([]) }}
+        controller_hosts: >-
+          {{ aap_seed_controller_hosts | default([]) }}
+        controller_groups: >-
+          {{ aap_seed_controller_groups | default([]) }}
+        controller_projects: >-
+          {{ aap_seed_controller_projects | default([]) }}
+        controller_templates: >-
+          {{ aap_seed_controller_templates | default([]) }}
+
+    # -- Dispatch --------------------------------------------------------------
     - name: Push CaC content to AAP
       ansible.builtin.include_role:
         name: infra.aap_configuration.dispatch

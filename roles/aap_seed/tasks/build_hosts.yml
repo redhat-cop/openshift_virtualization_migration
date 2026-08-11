@@ -1,0 +1,65 @@
+---
+- name: build_hosts | Initialize host list
+  ansible.builtin.set_fact:
+    aap_seed_controller_hosts: []
+
+- name: build_hosts | Build source environment hosts
+  ansible.builtin.set_fact:
+    aap_seed_controller_hosts: >-
+      {{ aap_seed_controller_hosts + [__aap_seed_host_entry] }}
+  loop: "{{ groups[aap_seed_source_inventory_group] | default([]) }}"
+  loop_control:
+    loop_var: __aap_seed_host_name
+    label: "{{ __aap_seed_host_name }}"
+  vars:
+    __aap_seed_vars: "{{ hostvars[__aap_seed_host_name] }}"
+    __aap_seed_host_entry:
+      name: "{{ __aap_seed_host_name }}"
+      inventory: "{{ aap_seed_inventory_name }}"
+      variables:
+        type: "{{ __aap_seed_vars['type'] | default('vmware') }}"
+        host: "{{ __aap_seed_vars['host'] }}"
+        sdk_endpoint: >-
+          {{ __aap_seed_vars['sdk_endpoint'] | default('/sdk') }}
+
+- name: build_hosts | Build target cluster hosts
+  ansible.builtin.set_fact:
+    aap_seed_controller_hosts: >-
+      {{ aap_seed_controller_hosts + [__aap_seed_host_entry] }}
+  loop: "{{ groups[aap_seed_target_inventory_group] | default([]) }}"
+  loop_control:
+    loop_var: __aap_seed_host_name
+    label: "{{ __aap_seed_host_name }}"
+  vars:
+    __aap_seed_vars: "{{ hostvars[__aap_seed_host_name] }}"
+    __aap_seed_host_entry:
+      name: "{{ __aap_seed_host_name }}"
+      inventory: "{{ aap_seed_inventory_name }}"
+      variables:
+        openshift_host: "{{ __aap_seed_vars['openshift_host'] }}"
+        mtv_namespace: >-
+          {{ __aap_seed_vars['mtv_namespace']
+             | default('openshift-mtv') }}
+        default_target_namespace: >-
+          {{ __aap_seed_vars['default_target_namespace']
+             | default('') }}
+        vm_sources: >-
+          {{ __aap_seed_vars['vm_sources'] | default([]) }}
+
+- name: build_hosts | Build inventory groups
+  ansible.builtin.set_fact:
+    aap_seed_controller_groups: >-
+      {{
+        ( [ { 'name': aap_seed_source_inventory_group,
+              'inventory': aap_seed_inventory_name,
+              'hosts': groups[aap_seed_source_inventory_group] | default([]) } ]
+          if groups[aap_seed_source_inventory_group] | default([]) | length > 0
+          else [] )
+        +
+        ( [ { 'name': aap_seed_target_inventory_group,
+              'inventory': aap_seed_inventory_name,
+              'hosts': groups[aap_seed_target_inventory_group] | default([]) } ]
+          if groups[aap_seed_target_inventory_group] | default([]) | length > 0
+          else [] )
+      }}
+...

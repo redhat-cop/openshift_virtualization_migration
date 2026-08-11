@@ -2,6 +2,8 @@
 - name: sync_project | Create or update the project in AAP
   ansible.builtin.include_role:
     name: infra.aap_configuration.controller_projects
+  vars:
+    controller_projects: "{{ aap_seed_controller_projects }}" # noqa: var-naming[no-role-prefix]
 
 - name: sync_project | Sync project from SCM and wait for completion
   ansible.builtin.include_role:

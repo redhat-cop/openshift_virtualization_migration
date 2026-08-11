@@ -1,0 +1,17 @@
+---
+- name: validate | Target hosts must define a bearer token
+  ansible.builtin.assert:
+    that:
+      - >-
+        hostvars[__aap_seed_target]['openshift_api_key'] is defined or
+        hostvars[__aap_seed_target]['openshift_temporary_api_key']
+        is defined
+    fail_msg: >-
+      Target host {{ __aap_seed_target }} must define
+      openshift_api_key or openshift_temporary_api_key.
+    quiet: true
+  loop: "{{ groups[aap_seed_target_inventory_group] | default([]) }}"
+  loop_control:
+    loop_var: __aap_seed_target
+    label: "{{ __aap_seed_target }}"
+...

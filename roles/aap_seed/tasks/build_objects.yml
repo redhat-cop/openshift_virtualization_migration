@@ -1,0 +1,22 @@
+---
+# Pass-through from defaults for simple object types.
+# Users override by redefining aap_seed_controller_* in their inventory.
+
+- name: build_objects | Set inventories
+  ansible.builtin.set_fact:
+    aap_seed_controller_inventories: >-
+      {{ aap_seed_controller_inventories
+         if (aap_seed_inventories_create | bool) else [] }}
+
+- name: build_objects | Set projects
+  ansible.builtin.set_fact:
+    aap_seed_controller_projects: >-
+      {{ aap_seed_controller_projects
+         if (aap_seed_projects_create | bool) else [] }}
+
+- name: build_objects | Set job templates
+  ansible.builtin.set_fact:
+    aap_seed_controller_templates: >-
+      {{ aap_seed_controller_templates
+         if (aap_seed_templates_create | bool) else [] }}
+...

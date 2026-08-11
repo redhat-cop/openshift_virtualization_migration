@@ -3,13 +3,17 @@ argument_specs:
   main:
     short_description: Seed AAP with Migration Factory CaC content
     description:
-      - Creates a custom source credential type, dynamically builds
-        inventory hosts, groups, and credentials from the Ansible
-        inventory, syncs the SCM project, and pushes all
-        Configuration as Code objects to AAP via
+      - Dynamically builds all AAP Configuration as Code objects
+        from the Ansible inventory and role defaults, syncs the
+        SCM project, and pushes everything to AAP via
         infra.aap_configuration.dispatch.
+      - Object types managed include credential types, credentials,
+        inventories, hosts, groups, projects, and job templates.
       - Target cluster credentials use the built-in AAP credential
         type "OpenShift or Kubernetes API Bearer Token".
+      - Each object type can be skipped with a C(_create) toggle or
+        replaced entirely by overriding the corresponding
+        C(aap_seed_controller_*) variable.
     options:
       aap_seed_hostname:
         type: str
@@ -116,8 +120,7 @@ argument_specs:
         default: Migration Factory - Source Environment
         description: >-
           Name of the custom credential type created in AAP for
-          source hypervisor environments (vSphere, RHV). Includes
-          an insecure TLS option.
+          source hypervisor environments (vSphere, RHV).
 
       aap_seed_target_credential_type:
         type: str
@@ -146,4 +149,71 @@ argument_specs:
           Ansible inventory group containing target OpenShift
           cluster hosts. Each host in this group becomes an AAP
           inventory host and a target-cluster credential.
+
+      aap_seed_credential_types_create:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Create the custom source credential type in AAP.
+          Set to C(false) to skip.
+
+      aap_seed_credentials_create:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Build and push credentials for source and target hosts.
+          Set to C(false) to skip.
+
+      aap_seed_inventories_create:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Create the AAP inventory. Set to C(false) to skip.
+
+      aap_seed_hosts_create:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Build and push inventory hosts and groups from the
+          Ansible inventory. Set to C(false) to skip.
+
+      aap_seed_projects_create:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Create and sync the SCM project. Set to C(false)
+          to skip.
+
+      aap_seed_templates_create:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Create job templates. Set to C(false) to skip.
+
+      aap_seed_controller_inventories:
+        type: list
+        required: false
+        description: >-
+          List of AAP inventory definitions. Override to replace
+          the default Migration Factory inventory.
+
+      aap_seed_controller_projects:
+        type: list
+        required: false
+        description: >-
+          List of AAP project definitions. Override to replace
+          the default SCM project.
+
+      aap_seed_controller_templates:
+        type: list
+        required: false
+        description: >-
+          List of AAP job template definitions. Override to
+          replace the default migrate template.
 ...

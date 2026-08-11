@@ -1,7 +1,13 @@
 ---
+# ---------------------------------------------------------------------------
+# AAP connection
+# ---------------------------------------------------------------------------
 aap_seed_validate_certs: true
 aap_seed_secure_logging: true
 
+# ---------------------------------------------------------------------------
+# Object naming
+# ---------------------------------------------------------------------------
 aap_seed_org_name: Default
 aap_seed_project_name: OpenShift Virtualization Migration
 aap_seed_project_scm_url: https://github.com/redhat-cop/openshift_virtualization_migration.git
@@ -15,4 +21,94 @@ aap_seed_target_credential_type: OpenShift or Kubernetes API Bearer Token
 
 aap_seed_source_inventory_group: vm_sources
 aap_seed_target_inventory_group: migration_clusters
+
+aap_seed_project_credential: ""
+aap_seed_git_username: ""
+aap_seed_git_password: ""
+aap_seed_git_ssh_key: ""
+aap_seed_git_ssh_key_unlock: ""
+
+aap_seed_migrate_template_name: OpenShift Virtualization Migration - Migrate
+aap_seed_migrate_playbook: playbooks/vmf_migrate.yml
+
+# ---------------------------------------------------------------------------
+# Per-type create toggles — set to false to skip an entire category
+# ---------------------------------------------------------------------------
+aap_seed_credential_types_create: true
+aap_seed_credentials_create: true
+aap_seed_inventories_create: true
+aap_seed_hosts_create: true
+aap_seed_projects_create: true
+aap_seed_templates_create: true
+
+# ---------------------------------------------------------------------------
+# Default AAP object lists
+#
+# Users may override any of these by redefining the variable in their
+# inventory or playbook.  The role builds these into controller_*
+# variables at runtime and passes them to infra.aap_configuration.dispatch.
+# ---------------------------------------------------------------------------
+
+aap_seed_controller_credential_types:
+  - name: "{{ aap_seed_source_credential_type }}"
+    organization: "{{ aap_seed_org_name }}"
+    kind: cloud
+    inputs:
+      fields:
+        - id: host
+          type: string
+          label: Hostname or IP
+        - id: username
+          type: string
+          label: Username
+        - id: password
+          type: string
+          label: Password
+          secret: true
+        - id: certificate
+          type: string
+          label: SSL/TLS CA Certificate
+          multiline: true
+          secret: true
+        - id: insecure_skip_tls_verify
+          type: boolean
+          label: Insecure Skip TLS Verify
+      required:
+        - host
+        - username
+        - password
+    injectors:
+      extra_vars:
+        mf_source_host: !unsafe "{{ host }}"
+        mf_source_username: !unsafe "{{ username }}"
+        mf_source_password: !unsafe "{{ password }}"
+        mf_source_certificate: !unsafe "{{ certificate }}"
+        mf_insecure_skip_tls_verify: !unsafe "{{ insecure_skip_tls_verify }}"
+
+aap_seed_controller_inventories:
+  - name: "{{ aap_seed_inventory_name }}"
+    organization: "{{ aap_seed_org_name }}"
+
+aap_seed_controller_projects:
+  - name: "{{ aap_seed_project_name }}"
+    organization: "{{ aap_seed_org_name }}"
+    scm_type: git
+    scm_url: "{{ aap_seed_project_scm_url }}"
+    scm_branch: "{{ aap_seed_project_scm_branch }}"
+    scm_update_on_launch: true
+    credential: "{{ aap_seed_project_credential | default(omit, true) }}"
+
+aap_seed_controller_templates:
+  - name: "{{ aap_seed_migrate_template_name }}"
+    organization: "{{ aap_seed_org_name }}"
+    project: "{{ aap_seed_project_name }}"
+    playbook: "{{ aap_seed_migrate_playbook }}"
+    inventory: "{{ aap_seed_inventory_name }}"
+    execution_environment: "{{ aap_seed_execution_environment }}"
+    ask_variables_on_launch: true
+    ask_credential_on_launch: true
+    verbosity: 0
+    extra_vars:
+      source_name: ""
+      target_name: ""
 ...
