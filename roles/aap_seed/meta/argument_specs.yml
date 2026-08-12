@@ -189,12 +189,31 @@ argument_specs:
           Create and sync the SCM project. Set to C(false)
           to skip.
 
+      aap_seed_execution_environments_create:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Create execution environments in AAP. Set to C(false) to
+          skip.  Only applies when
+          I(aap_seed_controller_execution_environments) is non-empty.
+
       aap_seed_templates_create:
         type: bool
         required: false
         default: true
         description: >-
           Create job templates. Set to C(false) to skip.
+
+      aap_seed_controller_execution_environments:
+        type: list
+        required: false
+        default: []
+        description: >-
+          List of AAP execution environment definitions. Empty by
+          default; populate to create custom EEs. Each entry follows
+          the C(infra.aap_configuration.controller_execution_environments)
+          schema (name, image, etc.).
 
       aap_seed_controller_inventories:
         type: list

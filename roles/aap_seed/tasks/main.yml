@@ -49,6 +49,8 @@
           {{ aap_seed_controller_hosts | default([]) }}
         controller_groups: >-
           {{ aap_seed_controller_groups | default([]) }}
+        controller_execution_environments: >-
+          {{ aap_seed_controller_execution_environments | default([]) }}
         controller_projects: >-
           {{ aap_seed_controller_projects | default([]) }}
         controller_templates: >-

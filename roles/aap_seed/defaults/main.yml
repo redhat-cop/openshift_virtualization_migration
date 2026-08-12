@@ -39,6 +39,7 @@ aap_seed_credentials_create: true
 aap_seed_inventories_create: true
 aap_seed_hosts_create: true
 aap_seed_projects_create: true
+aap_seed_execution_environments_create: true
 aap_seed_templates_create: true
 
 # ---------------------------------------------------------------------------
@@ -97,6 +98,8 @@ aap_seed_controller_projects:
     scm_branch: "{{ aap_seed_project_scm_branch }}"
     scm_update_on_launch: true
     credential: "{{ aap_seed_project_credential | default(omit, true) }}"
+
+aap_seed_controller_execution_environments: []
 
 aap_seed_controller_templates:
   - name: "{{ aap_seed_migrate_template_name }}"

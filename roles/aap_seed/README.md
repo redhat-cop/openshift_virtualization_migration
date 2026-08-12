@@ -7,6 +7,7 @@ The role dynamically builds all AAP objects from the Ansible inventory and role 
 - **Credential types** -- custom type for source hypervisor environments
 - **Credentials** -- one per source (vSphere/RHV), one per target (OpenShift bearer token), and optionally a Git credential for private repos
 - **Inventory, hosts, groups** -- source and target hosts with non-sensitive metadata
+- **Execution environments** -- optional custom EE definitions
 - **Project** -- SCM-backed project synced from Git
 - **Job templates** -- default migrate template
 
@@ -94,6 +95,7 @@ Set any toggle to `false` to skip that object category entirely.
 | `aap_seed_credentials_create` | `true` | Build and push all credentials |
 | `aap_seed_inventories_create` | `true` | Create the AAP inventory |
 | `aap_seed_hosts_create` | `true` | Build and push inventory hosts and groups |
+| `aap_seed_execution_environments_create` | `true` | Create execution environments (only when list is non-empty) |
 | `aap_seed_projects_create` | `true` | Create and sync the SCM project |
 | `aap_seed_templates_create` | `true` | Create job templates |
 
@@ -104,6 +106,7 @@ Override these to completely replace the role's default object definitions.
 | Variable | Description |
 |----------|-------------|
 | `aap_seed_controller_credential_types` | Custom credential type definitions |
+| `aap_seed_controller_execution_environments` | Execution environment definitions (default: `[]`) |
 | `aap_seed_controller_inventories` | AAP inventory definitions |
 | `aap_seed_controller_projects` | AAP project definitions |
 | `aap_seed_controller_templates` | AAP job template definitions |
@@ -153,6 +156,14 @@ ocp-prod:
     - name: Sync project and push CaC objects to AAP
       ansible.builtin.import_role:
         name: aap_seed
+```
+
+### Add a custom execution environment
+
+```yaml
+aap_seed_controller_execution_environments:
+  - name: Migration Factory EE
+    image: quay.io/org/migration-factory-ee:latest
 ```
 
 ### Skip specific object types
