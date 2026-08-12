@@ -189,4 +189,4 @@ aap_seed_controller_execution_environments:
 
 ## License
 
-Apache-2.0
+GPL-3.0-or-later
