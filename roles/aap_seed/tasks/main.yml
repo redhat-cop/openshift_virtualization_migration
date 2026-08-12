@@ -39,6 +39,8 @@
     # -- Handoff ---------------------------------------------------------------
     - name: Copy aap_seed_controller_* to controller_* for dispatch # noqa: var-naming[no-role-prefix]
       ansible.builtin.set_fact:
+        aap_organizations: >-
+          {{ aap_seed_controller_organizations | default([]) }}
         controller_credential_types: >-
           {{ aap_seed_controller_credential_types | default([]) }}
         controller_credentials: >-
@@ -52,7 +54,8 @@
         controller_execution_environments: >-
           {{ aap_seed_controller_execution_environments | default([]) }}
         controller_projects: >-
-          {{ aap_seed_controller_projects | default([]) }}
+          {{ [] if (aap_seed_projects_create | bool)
+             else aap_seed_controller_projects | default([]) }}
         controller_templates: >-
           {{ aap_seed_controller_templates | default([]) }}
 

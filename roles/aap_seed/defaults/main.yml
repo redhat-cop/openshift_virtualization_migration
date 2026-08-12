@@ -34,6 +34,7 @@ aap_seed_migrate_playbook: playbooks/vmf_migrate.yml
 # ---------------------------------------------------------------------------
 # Per-type create toggles — set to false to skip an entire category
 # ---------------------------------------------------------------------------
+aap_seed_organizations_create: true
 aap_seed_credential_types_create: true
 aap_seed_credentials_create: true
 aap_seed_inventories_create: true
@@ -49,6 +50,8 @@ aap_seed_templates_create: true
 # inventory or playbook.  The role builds these into controller_*
 # variables at runtime and passes them to infra.aap_configuration.dispatch.
 # ---------------------------------------------------------------------------
+
+aap_seed_controller_organizations: []
 
 aap_seed_controller_credential_types:
   - name: "{{ aap_seed_source_credential_type }}"

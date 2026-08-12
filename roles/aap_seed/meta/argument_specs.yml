@@ -150,6 +150,15 @@ argument_specs:
           cluster hosts. Each host in this group becomes an AAP
           inventory host and a target-cluster credential.
 
+      aap_seed_organizations_create:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Create organizations in AAP. Set to C(false) to skip.
+          Only applies when
+          I(aap_seed_controller_organizations) is non-empty.
+
       aap_seed_credential_types_create:
         type: bool
         required: false
@@ -204,6 +213,16 @@ argument_specs:
         default: true
         description: >-
           Create job templates. Set to C(false) to skip.
+
+      aap_seed_controller_organizations:
+        type: list
+        required: false
+        default: []
+        description: >-
+          List of AAP organization definitions. Empty by default;
+          populate to create organizations before other objects.
+          Each entry follows the
+          C(infra.aap_configuration.gateway_organizations) schema.
 
       aap_seed_controller_execution_environments:
         type: list

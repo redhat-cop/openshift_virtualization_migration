@@ -2,6 +2,12 @@
 # Pass-through from defaults for simple object types.
 # Users override by redefining aap_seed_controller_* in their inventory.
 
+- name: build_objects | Set organizations
+  ansible.builtin.set_fact:
+    aap_seed_controller_organizations: >-
+      {{ aap_seed_controller_organizations
+         if (aap_seed_organizations_create | bool) else [] }}
+
 - name: build_objects | Set inventories
   ansible.builtin.set_fact:
     aap_seed_controller_inventories: >-

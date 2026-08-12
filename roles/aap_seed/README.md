@@ -91,6 +91,7 @@ Set any toggle to `false` to skip that object category entirely.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `aap_seed_organizations_create` | `true` | Create organizations (only when list is non-empty) |
 | `aap_seed_credential_types_create` | `true` | Create custom source credential type |
 | `aap_seed_credentials_create` | `true` | Build and push all credentials |
 | `aap_seed_inventories_create` | `true` | Create the AAP inventory |
@@ -105,6 +106,7 @@ Override these to completely replace the role's default object definitions.
 
 | Variable | Description |
 |----------|-------------|
+| `aap_seed_controller_organizations` | Organization definitions (default: `[]`) |
 | `aap_seed_controller_credential_types` | Custom credential type definitions |
 | `aap_seed_controller_execution_environments` | Execution environment definitions (default: `[]`) |
 | `aap_seed_controller_inventories` | AAP inventory definitions |
