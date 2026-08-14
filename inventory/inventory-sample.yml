@@ -27,40 +27,40 @@ migration_aap:
 
     # -- Public repo (no Git credential needed) ----------------------------------
     aap-instance:
-      aap_seed_hostname: https://aap.example.com
-      aap_seed_username: admin
-      aap_seed_password: changeme
-      # aap_seed_token: ""
-      aap_seed_validate_certs: false
-      # aap_seed_project_scm_url: https://github.com/redhat-cop/openshift_virtualization_migration.git
-      # aap_seed_project_scm_branch: v2
+      aap_hostname: https://aap.example.com
+      aap_username: admin
+      aap_password: changeme
+      # aap_token: ""
+      aap_validate_certs: false
+      # aap_project_scm_url: https://github.com/redhat-cop/openshift_virtualization_migration.git
+      # aap_project_scm_branch: v2
 
     # -- Private repo with Git credential (HTTPS) ---------------------------------
     # aap-private:
-    #   aap_seed_hostname: https://aap.example.com
-    #   aap_seed_username: admin
-    #   aap_seed_password: changeme
-    #   aap_seed_validate_certs: true
-    #   aap_seed_project_scm_url: https://github.com/myorg/my-private-repo.git
-    #   aap_seed_project_scm_branch: main
-    #   aap_seed_project_credential: My Git Credential
-    #   aap_seed_git_username: my-git-user
-    #   aap_seed_git_password: changeme            # use ansible-vault
+    #   aap_hostname: https://aap.example.com
+    #   aap_username: admin
+    #   aap_password: changeme
+    #   aap_validate_certs: true
+    #   aap_project_scm_url: https://github.com/myorg/my-private-repo.git
+    #   aap_project_scm_branch: main
+    #   aap_project_credential: My Git Credential
+    #   aap_git_username: my-git-user
+    #   aap_git_password: changeme                 # use ansible-vault
 
     # -- Private repo with Git credential (SSH key) --------------------------------
     # aap-ssh:
-    #   aap_seed_hostname: https://aap.example.com
-    #   aap_seed_username: admin
-    #   aap_seed_password: changeme
-    #   aap_seed_validate_certs: true
-    #   aap_seed_project_scm_url: git@github.com:myorg/my-private-repo.git
-    #   aap_seed_project_scm_branch: main
-    #   aap_seed_project_credential: My Git SSH Key
-    #   aap_seed_git_ssh_key: |                    # use ansible-vault
+    #   aap_hostname: https://aap.example.com
+    #   aap_username: admin
+    #   aap_password: changeme
+    #   aap_validate_certs: true
+    #   aap_project_scm_url: git@github.com:myorg/my-private-repo.git
+    #   aap_project_scm_branch: main
+    #   aap_project_credential: My Git SSH Key
+    #   aap_git_ssh_key: |                         # use ansible-vault
     #     -----BEGIN OPENSSH PRIVATE KEY-----
     #     ...
     #     -----END OPENSSH PRIVATE KEY-----
-    #   aap_seed_git_ssh_key_unlock: changeme      # use ansible-vault
+    #   aap_git_ssh_key_unlock: changeme           # use ansible-vault
 
 # =============================================================================
 # VM Source Environments (vSphere, RHV)

@@ -38,16 +38,19 @@ Users can override any object list by redefining the corresponding
 
 ## Role Variables
 
-### AAP Connection (required)
+### AAP Connection
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `aap_seed_hostname` | str | FQDN or URL of the AAP controller API endpoint |
-| `aap_seed_username` | str | Username for AAP authentication (mutually exclusive with `aap_seed_token`) |
-| `aap_seed_password` | str | Password for AAP authentication (mutually exclusive with `aap_seed_token`) |
-| `aap_seed_token` | str | OAuth token for AAP authentication |
-| `aap_seed_validate_certs` | bool | Validate TLS certificates (default: `true`) |
-| `aap_seed_secure_logging` | bool | Suppress credential loop output (default: `true`; set to `false` for debugging) |
+Set these in your inventory under the `migration_aap` host. The role cascades
+from generic `aap_*` variables so they can be shared with other roles.
+
+| Inventory Variable | Role Variable | Type | Description |
+|--------------------|---------------|------|-------------|
+| `aap_hostname` | `aap_seed_hostname` | str | FQDN or URL of the AAP controller API endpoint |
+| `aap_username` | `aap_seed_username` | str | Username for AAP authentication (mutually exclusive with token) |
+| `aap_password` | `aap_seed_password` | str | Password for AAP authentication (mutually exclusive with token) |
+| `aap_token` | `aap_seed_token` | str | OAuth token for AAP authentication |
+| `aap_validate_certs` | `aap_seed_validate_certs` | bool | Validate TLS certificates (default: `true`) |
+| — | `aap_seed_secure_logging` | bool | Suppress credential loop output (default: `true`; set to `false` for debugging) |
 
 ### AAP Content Configuration
 
@@ -55,10 +58,10 @@ Users can override any object list by redefining the corresponding
 |----------|---------|-------------|
 | `aap_seed_org_name` | `Default` | AAP organization for all objects |
 | `aap_seed_project_name` | `OpenShift Virtualization Migration` | SCM project name |
-| `aap_seed_project_scm_url` | `https://github.com/redhat-cop/openshift_virtualization_migration.git` | Git URL |
-| `aap_seed_project_scm_branch` | `v2` | Git branch or tag |
+| `aap_seed_project_scm_url` | cascades from `aap_project_scm_url` | Git URL |
+| `aap_seed_project_scm_branch` | cascades from `aap_project_scm_branch` | Git branch or tag |
 | `aap_seed_project_sync_timeout` | `120` | SCM sync timeout in seconds |
-| `aap_seed_project_credential` | `""` | Name of the Git credential to create and attach to the project (leave empty to skip) |
+| `aap_seed_project_credential` | cascades from `aap_project_credential` | Name of the Git credential to create and attach to the project (leave empty to skip) |
 | `aap_seed_inventory_name` | `OpenShift Virtualization Migration` | AAP inventory name |
 | `aap_seed_execution_environment` | `Default execution environment` | Execution environment for job templates |
 | `aap_seed_migrate_template_name` | `OpenShift Virtualization Migration - Migrate` | Name of the default job template |
@@ -66,15 +69,16 @@ Users can override any object list by redefining the corresponding
 
 ### Git Credential (optional)
 
-When `aap_seed_project_credential` is set, the role creates a Source Control
-credential in AAP. Provide either username/password or an SSH key.
+When `aap_project_credential` (or `aap_seed_project_credential`) is set, the
+role creates a Source Control credential in AAP. Provide either
+username/password or an SSH key in the inventory.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `aap_seed_git_username` | `""` | Git username for HTTPS authentication |
-| `aap_seed_git_password` | `""` | Git password or personal access token |
-| `aap_seed_git_ssh_key` | `""` | SSH private key for Git authentication |
-| `aap_seed_git_ssh_key_unlock` | `""` | Passphrase to unlock the SSH key |
+| Inventory Variable | Role Variable | Default | Description |
+|--------------------|---------------|---------|-------------|
+| `aap_git_username` | `aap_seed_git_username` | `""` | Git username for HTTPS authentication |
+| `aap_git_password` | `aap_seed_git_password` | `""` | Git password or personal access token |
+| `aap_git_ssh_key` | `aap_seed_git_ssh_key` | `""` | SSH private key for Git authentication |
+| `aap_git_ssh_key_unlock` | `aap_seed_git_ssh_key_unlock` | `""` | Passphrase to unlock the SSH key |
 
 ### Credential and Inventory Group Names
 

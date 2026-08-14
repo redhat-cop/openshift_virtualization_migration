@@ -1,8 +1,12 @@
 ---
 # ---------------------------------------------------------------------------
-# AAP connection
+# AAP connection — cascade from generic inventory variables
 # ---------------------------------------------------------------------------
-aap_seed_validate_certs: true
+aap_seed_hostname: "{{ aap_hostname }}"
+aap_seed_username: "{{ aap_username | default(omit) }}"
+aap_seed_password: "{{ aap_password | default(omit) }}"
+aap_seed_token: "{{ aap_token | default(omit) }}"
+aap_seed_validate_certs: "{{ aap_validate_certs | default(true) }}"
 aap_seed_secure_logging: true
 
 # ---------------------------------------------------------------------------
@@ -10,8 +14,10 @@ aap_seed_secure_logging: true
 # ---------------------------------------------------------------------------
 aap_seed_org_name: Default
 aap_seed_project_name: OpenShift Virtualization Migration
-aap_seed_project_scm_url: https://github.com/redhat-cop/openshift_virtualization_migration.git
-aap_seed_project_scm_branch: v2
+aap_seed_project_scm_url: >-
+  {{ aap_project_scm_url |
+     default('https://github.com/redhat-cop/openshift_virtualization_migration.git') }}
+aap_seed_project_scm_branch: "{{ aap_project_scm_branch | default('v2') }}"
 aap_seed_project_sync_timeout: 120
 aap_seed_inventory_name: OpenShift Virtualization Migration
 aap_seed_execution_environment: Default execution environment
@@ -22,11 +28,11 @@ aap_seed_target_credential_type: OpenShift or Kubernetes API Bearer Token
 aap_seed_source_inventory_group: vm_sources
 aap_seed_target_inventory_group: migration_clusters
 
-aap_seed_project_credential: ""
-aap_seed_git_username: ""
-aap_seed_git_password: ""
-aap_seed_git_ssh_key: ""
-aap_seed_git_ssh_key_unlock: ""
+aap_seed_project_credential: "{{ aap_project_credential | default('') }}"
+aap_seed_git_username: "{{ aap_git_username | default('') }}"
+aap_seed_git_password: "{{ aap_git_password | default('') }}"
+aap_seed_git_ssh_key: "{{ aap_git_ssh_key | default('') }}"
+aap_seed_git_ssh_key_unlock: "{{ aap_git_ssh_key_unlock | default('') }}"
 
 aap_seed_migrate_template_name: OpenShift Virtualization Migration - Migrate
 aap_seed_migrate_playbook: playbooks/vmf_migrate.yml

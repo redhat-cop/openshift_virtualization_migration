@@ -17,9 +17,10 @@ argument_specs:
     options:
       aap_seed_hostname:
         type: str
-        required: true
+        required: false
         description: >-
           FQDN or URL of the AAP controller API endpoint.
+          Defaults to C(aap_hostname) from inventory.
 
       aap_seed_username:
         type: str
@@ -27,6 +28,7 @@ argument_specs:
         description: >-
           Username for AAP controller authentication.
           Mutually exclusive with I(aap_seed_token).
+          Defaults to C(aap_username) from inventory.
 
       aap_seed_password:
         type: str
@@ -35,6 +37,7 @@ argument_specs:
         description: >-
           Password for AAP controller authentication.
           Mutually exclusive with I(aap_seed_token).
+          Defaults to C(aap_password) from inventory.
 
       aap_seed_token:
         type: str
@@ -44,6 +47,7 @@ argument_specs:
           OAuth token for AAP controller authentication.
           Mutually exclusive with
           I(aap_seed_username)/I(aap_seed_password).
+          Defaults to C(aap_token) from inventory.
 
       aap_seed_validate_certs:
         type: bool
@@ -51,7 +55,8 @@ argument_specs:
         default: true
         description: >-
           Whether to validate TLS certificates when connecting
-          to AAP.
+          to AAP. Defaults to C(aap_validate_certs) from
+          inventory, or C(true) if unset.
 
       aap_seed_secure_logging:
         type: bool
@@ -83,6 +88,7 @@ argument_specs:
         default: https://github.com/redhat-cop/openshift_virtualization_migration.git
         description: >-
           Git URL used as the project SCM source.
+          Defaults to C(aap_project_scm_url) from inventory.
 
       aap_seed_project_scm_branch:
         type: str
@@ -90,6 +96,7 @@ argument_specs:
         default: v2
         description: >-
           Git branch or tag to checkout for the project.
+          Defaults to C(aap_project_scm_branch) from inventory.
 
       aap_seed_project_sync_timeout:
         type: int
@@ -131,6 +138,50 @@ argument_specs:
           Defaults to the built-in bearer token type. Each target
           host should set I(openshift_api_key) or
           I(openshift_temporary_api_key).
+
+      aap_seed_project_credential:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Name of the Git credential to create and attach to the
+          SCM project. Leave empty to skip.
+          Defaults to C(aap_project_credential) from inventory.
+
+      aap_seed_git_username:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Git username for HTTPS authentication.
+          Defaults to C(aap_git_username) from inventory.
+
+      aap_seed_git_password:
+        type: str
+        required: false
+        no_log: true
+        default: ""
+        description: >-
+          Git password or personal access token.
+          Defaults to C(aap_git_password) from inventory.
+
+      aap_seed_git_ssh_key:
+        type: str
+        required: false
+        no_log: true
+        default: ""
+        description: >-
+          SSH private key for Git authentication.
+          Defaults to C(aap_git_ssh_key) from inventory.
+
+      aap_seed_git_ssh_key_unlock:
+        type: str
+        required: false
+        no_log: true
+        default: ""
+        description: >-
+          Passphrase to unlock the SSH key.
+          Defaults to C(aap_git_ssh_key_unlock) from inventory.
 
       aap_seed_source_inventory_group:
         type: str

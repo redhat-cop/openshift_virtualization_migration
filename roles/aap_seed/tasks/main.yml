@@ -1,11 +1,5 @@
 ---
 - name: Seed AAP with Migration Factory content
-  vars:
-    aap_hostname: "{{ aap_seed_hostname }}" # noqa: var-naming[no-role-prefix]
-    aap_username: "{{ aap_seed_username | default(omit) }}" # noqa: var-naming[no-role-prefix]
-    aap_password: "{{ aap_seed_password | default(omit) }}" # noqa: var-naming[no-role-prefix]
-    aap_token: "{{ aap_seed_token | default(omit) }}" # noqa: var-naming[no-role-prefix]
-    aap_validate_certs: "{{ aap_seed_validate_certs }}" # noqa: var-naming[no-role-prefix]
   block:
     # -- Build phase -----------------------------------------------------------
     - name: Build simple AAP objects from defaults
