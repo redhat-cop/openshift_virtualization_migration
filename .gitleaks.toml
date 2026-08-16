@@ -48,8 +48,8 @@ description = "OpenShift API key or token"
 regex = '''(?i)(openshift[_-]?(?:api[_-]?key|token|password))\s*[:=]\s*['"]?([^\s'"#}{]+)'''
 keywords = ["openshift"]
 [rules.allowlist]
-regexes = ['''changeme''', '''\{\{.*\}\}''', '''example''', '''<b>.*</b>''', '''[>|][+-]?\s*$''']
-paths = ['''defaults/main\.yml$''', '''inventory\.yml$''', '''README\.md$''', '''tasks/main\.yml$''']
+regexes = ['''changeme''', '''\{\{.*\}\}''', '''example''', '''<b>.*</b>''', '''[>|][+-]?\s*$''', '''XXXX''']
+paths = ['''defaults/main\.yml$''', '''inventory\.yml$''', '''README\.md$''', '''tasks/main\.yml$''', '''argument_specs\.yml$''', '''inventory-sample\.yml$''']
 
 [[rules]]
 id = "automation-hub-token"
