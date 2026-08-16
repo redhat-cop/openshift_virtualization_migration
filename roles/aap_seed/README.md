@@ -194,7 +194,6 @@ aap_seed_controller_execution_environments:
 ## License
 
 GPL-3.0-or-later
-
 <!-- DOCSIBLE START -->
 ## aap_seed
 

@@ -7,5 +7,8 @@
   tasks:
     - name: Placeholder
       ansible.builtin.debug:
-        msg: "Migration playbook - source: {{ source_name | default('not set') }}, target: {{ target_name | default('not set') }}"
+        msg: >-
+          Migration playbook -
+          source: {{ source_name | default('not set') }},
+          target: {{ target_name | default('not set') }}
 ...
