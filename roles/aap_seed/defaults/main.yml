@@ -37,6 +37,10 @@ aap_seed_git_ssh_key_unlock: "{{ aap_git_ssh_key_unlock | default('') }}"
 aap_seed_migrate_template_name: OpenShift Virtualization Migration - Migrate
 aap_seed_migrate_playbook: playbooks/vmf_migrate.yml
 
+aap_seed_configure_mtv_template_name: >-
+  OpenShift Virtualization Migration - Configure MTV
+aap_seed_configure_mtv_playbook: playbooks/vmf_configure_providers.yml
+
 # ---------------------------------------------------------------------------
 # Per-type create toggles — set to false to skip an entire category
 # ---------------------------------------------------------------------------
@@ -115,6 +119,18 @@ aap_seed_controller_templates:
     organization: "{{ aap_seed_org_name }}"
     project: "{{ aap_seed_project_name }}"
     playbook: "{{ aap_seed_migrate_playbook }}"
+    inventory: "{{ aap_seed_inventory_name }}"
+    execution_environment: "{{ aap_seed_execution_environment }}"
+    ask_variables_on_launch: true
+    ask_credential_on_launch: true
+    verbosity: 0
+    extra_vars:
+      source_name: ""
+      target_name: ""
+  - name: "{{ aap_seed_configure_mtv_template_name }}"
+    organization: "{{ aap_seed_org_name }}"
+    project: "{{ aap_seed_project_name }}"
+    playbook: "{{ aap_seed_configure_mtv_playbook }}"
     inventory: "{{ aap_seed_inventory_name }}"
     execution_environment: "{{ aap_seed_execution_environment }}"
     ask_variables_on_launch: true

@@ -8,7 +8,8 @@ argument_specs:
         SCM project, and pushes everything to AAP via
         infra.aap_configuration.dispatch.
       - Object types managed include credential types, credentials,
-        inventories, hosts, groups, projects, and job templates.
+        inventories, hosts, groups, projects, job templates,
+        execution environments, and organizations.
       - Target cluster credentials use the built-in AAP credential
         type "OpenShift or Kubernetes API Bearer Token".
       - Each object type can be skipped with a C(_create) toggle or
@@ -182,6 +183,20 @@ argument_specs:
         description: >-
           Passphrase to unlock the SSH key.
           Defaults to C(aap_git_ssh_key_unlock) from inventory.
+
+      aap_seed_configure_mtv_template_name:
+        type: str
+        required: false
+        default: OpenShift Virtualization Migration - Configure MTV
+        description: >-
+          Name of the Configure MTV job template created in AAP.
+
+      aap_seed_configure_mtv_playbook:
+        type: str
+        required: false
+        default: playbooks/vmf_configure_providers.yml
+        description: >-
+          Playbook path for the Configure MTV job template.
 
       aap_seed_source_inventory_group:
         type: str
