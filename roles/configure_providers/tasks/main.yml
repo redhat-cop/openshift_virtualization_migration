@@ -1,0 +1,13 @@
+---
+- name: Configure MTV provider for source-target pair
+  block:
+    - name: Validate inputs and resolve provider variables
+      ansible.builtin.include_tasks: validate.yml
+
+    - name: Create provider secret and CR on target cluster
+      ansible.builtin.include_tasks: create_provider.yml
+
+  rescue:
+    - name: Gather provider error details and fail
+      ansible.builtin.include_tasks: rescue_provider.yml
+...

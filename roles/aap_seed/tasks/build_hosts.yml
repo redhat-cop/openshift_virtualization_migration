@@ -21,6 +21,8 @@
         host: "{{ __aap_seed_vars['host'] }}"
         sdk_endpoint: >-
           {{ __aap_seed_vars['sdk_endpoint'] | default('/sdk') }}
+        vddk: >-
+          {{ __aap_seed_vars['vddk'] | default({}) }}
 
 - name: build_hosts | Build target cluster hosts
   ansible.builtin.set_fact:

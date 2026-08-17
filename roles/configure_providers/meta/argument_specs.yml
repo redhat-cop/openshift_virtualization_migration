@@ -1,0 +1,81 @@
+---
+argument_specs:
+  main:
+    short_description: >-
+      Create MTV/Forklift source provider CRs on OpenShift target clusters
+    description:
+      - >-
+        Creates a Forklift Provider custom resource and its backing Secret
+        on a target OpenShift cluster for a given source environment.
+      - >-
+        Designed to run from AAP with credential injection. The source
+        credential injects mf_source_username, mf_source_password, and
+        mf_source_certificate as extra vars. The target credential injects
+        K8S_AUTH_HOST, K8S_AUTH_API_KEY, and K8S_AUTH_VERIFY_SSL as
+        environment variables.
+      - >-
+        For targets with multiple sources, launch the job template once
+        per source-target pair.
+    options:
+      source_name:
+        type: str
+        required: true
+        description: >-
+          Name of the source environment (must match an AAP inventory host
+          in the vm_sources group).
+
+      target_name:
+        type: str
+        required: true
+        description: >-
+          Name of the target OpenShift cluster (must match an AAP inventory
+          host in the migration_clusters group).
+
+      configure_providers_mtv_namespace:
+        type: str
+        required: false
+        default: openshift-mtv
+        description: >-
+          Namespace where MTV (Forklift) is installed on the target cluster.
+          Resolved from the target host's mtv_namespace variable by default.
+
+      configure_providers_provider_wait:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to wait for the Provider CR to reach Ready status after
+          creation.
+
+      configure_providers_provider_wait_timeout:
+        type: int
+        required: false
+        default: 120
+        description: >-
+          Seconds to wait for the Provider to become Ready before failing.
+
+      configure_providers_provider_wait_poll:
+        type: int
+        required: false
+        default: 10
+        description: >-
+          Seconds between status polls while waiting for Ready.
+
+      configure_providers_provider_state:
+        type: str
+        required: false
+        default: present
+        choices:
+          - present
+          - absent
+        description: >-
+          Desired state of the provider. Set to absent to remove a
+          previously created provider and its secret.
+
+      configure_providers_api_version:
+        type: str
+        required: false
+        default: forklift.konveyor.io/v1beta1
+        description: >-
+          Forklift API version for Provider CRs.
+...

@@ -1,0 +1,92 @@
+---
+- name: validate | Assert required survey variables are defined
+  ansible.builtin.assert:
+    that:
+      - source_name is defined
+      - source_name | length > 0
+      - target_name is defined
+      - target_name | length > 0
+    fail_msg: >-
+      Both source_name and target_name must be provided as survey
+      variables when launching this job template.
+    quiet: true
+
+- name: validate | Assert source exists in AAP inventory
+  ansible.builtin.assert:
+    that:
+      - source_name in hostvars
+    fail_msg: >-
+      Source '{{ source_name }}' was not found in the AAP inventory.
+      Verify the source host exists in the '{{ hostvars[target_name]['vm_sources']
+      | default('vm_sources') }}' group.
+    quiet: true
+
+- name: validate | Assert target exists in AAP inventory
+  ansible.builtin.assert:
+    that:
+      - target_name in hostvars
+    fail_msg: >-
+      Target '{{ target_name }}' was not found in the AAP inventory.
+      Verify the target host exists in the migration_clusters group.
+    quiet: true
+
+- name: validate | Assert source is mapped to this target
+  ansible.builtin.assert:
+    that:
+      - source_name in (hostvars[target_name]['vm_sources'] | default([]))
+    fail_msg: >-
+      Source '{{ source_name }}' is not in the vm_sources list for
+      target '{{ target_name }}'. Current vm_sources:
+      {{ hostvars[target_name]['vm_sources'] | default([]) }}.
+    quiet: true
+
+- name: validate | Assert source credentials are injected
+  ansible.builtin.assert:
+    that:
+      - mf_source_username is defined
+      - mf_source_username | length > 0
+      - mf_source_password is defined
+      - mf_source_password | length > 0
+    fail_msg: >-
+      Source credentials (mf_source_username, mf_source_password) were
+      not injected. Ensure the '{{ source_name }}' credential is
+      attached to this job template launch.
+    quiet: true
+  no_log: true
+
+- name: validate | Assert source type is supported
+  ansible.builtin.assert:
+    that:
+      - configure_providers_source_type in ['vmware', 'ovirt']
+    fail_msg: >-
+      Unsupported source type '{{ configure_providers_source_type }}'
+      for source '{{ source_name }}'. Supported types: vmware, ovirt.
+    quiet: true
+
+- name: validate | Check Forklift CRD exists on target cluster
+  kubernetes.core.k8s_info:
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: providers.forklift.konveyor.io
+  register: _configure_providers_crd
+
+- name: validate | Assert MTV operator is installed
+  ansible.builtin.assert:
+    that:
+      - _configure_providers_crd.resources | length > 0
+    fail_msg: >-
+      The Forklift/MTV Provider CRD was not found on target cluster
+      '{{ target_name }}'. Ensure the MTV operator is installed in
+      namespace '{{ configure_providers_mtv_namespace }}' before
+      running this role.
+    quiet: true
+
+- name: validate | Resolve provider variables
+  ansible.builtin.set_fact:
+    _configure_providers_forklift_type: >-
+      {{ 'vsphere' if configure_providers_source_type == 'vmware'
+         else configure_providers_source_type }}
+    _configure_providers_source_url: >-
+      https://{{ configure_providers_source_host }}{{ configure_providers_source_sdk_endpoint }}
+    _configure_providers_secret_name: "{{ source_name }}-provider-secret"
+...
