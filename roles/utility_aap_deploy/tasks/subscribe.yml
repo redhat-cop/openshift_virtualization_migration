@@ -34,7 +34,7 @@
     - name: subscribe | Set subscription ID based on utility_aap_deploy_aap_subscriptions
       ansible.builtin.set_fact:
         __utility_aap_deploy_aap_subscriptions_rh_subscription_id: >-
-          {% set query = "[?subscription_id == '" + utility_aap_deploy_rh_subscription_id + "']" %}
+          {%- set query = "[?subscription_id == '" + utility_aap_deploy_rh_subscription_id + "']" -%}
           {{
             (__utility_aap_deploy_aap_subscriptions.subscriptions | json_query(query) | first).subscription_id
             if utility_aap_deploy_rh_subscription_id | default('', true) | trim | length > 0
