@@ -3,7 +3,7 @@ name: PR Validation
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
-    branches: [ "main" ]
+    branches: [ "main", "v2" ]
   merge_group:
     types: [checks_requested]
 

@@ -41,7 +41,7 @@ name: Pre-commit Checks
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: ["main"]
+    branches: ["main", "v2"]
 
 permissions:
   contents: read  # Only read access needed for checkout and validation

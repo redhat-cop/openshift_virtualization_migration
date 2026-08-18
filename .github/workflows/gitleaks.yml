@@ -3,9 +3,9 @@ name: Gitleaks
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "v2"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "v2"]
   workflow_dispatch:
 
 permissions:
