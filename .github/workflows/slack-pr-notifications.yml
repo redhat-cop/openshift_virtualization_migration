@@ -3,7 +3,7 @@ name: Slack PR Notifications
 on:
   pull_request_target:
     types: [opened, closed, reopened]
-    branches: ["main"]
+    branches: ["main", "v2"]
   pull_request_review:
     types: [submitted]
 
