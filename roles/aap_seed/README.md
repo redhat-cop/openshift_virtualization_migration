@@ -190,11 +190,6 @@ aap_seed_controller_execution_environments:
         aap_seed_inventories_create: false
         aap_seed_hosts_create: false
 ```
-
-## License
-
-GPL-3.0-or-later
-
 <!-- DOCSIBLE START -->
 ## aap_seed
 
@@ -215,8 +210,18 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 
 #### Key: main
 
-* **Description**: ['Dynamically builds all AAP Configuration as Code objects from the Ansible inventory and role defaults, syncs the SCM project, and pushes everything to AAP via infra.aap_configuration.dispatch.', 'Object types managed include credential types, credentials, inventories, hosts, groups, projects, and job templates.', 'Target cluster credentials use the built-in AAP credential type "OpenShift or Kubernetes API Bearer Token".', 'Each object type can be skipped with a C(_create) toggle or replaced entirely by overriding the corresponding C(aap_seed_controller_*) variable.']
+* **Description**: ['Dynamically builds all AAP Configuration as Code objects from the Ansible inventory and role defaults, syncs the SCM project, and pushes everything to AAP via infra.aap_configuration.dispatch.', 'Object types managed include credential types, credentials, inventories, hosts, groups, projects, job templates, execution environments, and organizations.', 'Target cluster credentials use the built-in AAP credential type "OpenShift or Kubernetes API Bearer Token".', 'Each object type can be skipped with a C(_create) toggle or replaced entirely by overriding the corresponding C(aap_seed_controller_*) variable.']
 * **Options**:
+  * **aap_seed_configure_mtv_playbook**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: playbooks/vmf_configure_providers.yml
+    * **Description**: Playbook path for the Configure MTV job template.
+  * **aap_seed_configure_mtv_template_name**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: OpenShift Virtualization Migration - Configure MTV
+    * **Description**: Name of the Configure MTV job template created in AAP.
   * **aap_seed_controller_execution_environments**:
     * **Required**: False
     * **Type**: list
