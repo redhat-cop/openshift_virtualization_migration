@@ -89,11 +89,11 @@ aap_seed_controller_credential_types:
         - password
     injectors:
       extra_vars:
-        mf_source_host: !unsafe "{{ host }}"
-        mf_source_username: !unsafe "{{ username }}"
-        mf_source_password: !unsafe "{{ password }}"
-        mf_source_certificate: !unsafe "{{ certificate }}"
-        mf_insecure_skip_tls_verify: !unsafe "{{ insecure_skip_tls_verify }}"
+        mf_source_host: "{% raw %}{  { host }}{% endraw %}"
+        mf_source_username: "{% raw %}{  { username }}{% endraw %}"
+        mf_source_password: "{% raw %}{  { password }}{% endraw %}"
+        mf_source_certificate: "{% raw %}{  { certificate }}{% endraw %}"
+        mf_insecure_skip_tls_verify: "{% raw %}{  { insecure_skip_tls_verify }}{% endraw %}"
 
 aap_seed_controller_inventories:
   - name: "{{ aap_seed_inventory_name }}"

@@ -45,7 +45,7 @@ Description: Deploys an instance of Ansible Automation Platform.
   * **utility_aap_deploy_aap_license_manifest**:
     * **Required**: False
     * **Type**: str
-    * **Default**: 
+    * **Default**:
     * **Description**: Location of the AAP license manifest file.
   * **utility_aap_deploy_aap_namespace**:
     * **Required**: False
@@ -150,7 +150,7 @@ Description: Deploys an instance of Ansible Automation Platform.
   * **utility_aap_deploy_rh_subscription_id**:
     * **Required**: False
     * **Type**: str
-    * **Default**: 
+    * **Default**:
     * **Description**: Red Hat subscription ID.
   * **utility_aap_deploy_rh_username**:
     * **Required**: False
