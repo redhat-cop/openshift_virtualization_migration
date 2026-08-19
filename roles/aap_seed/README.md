@@ -190,10 +190,6 @@ aap_seed_controller_execution_environments:
         aap_seed_inventories_create: false
         aap_seed_hosts_create: false
 ```
-
-## License
-
-GPL-3.0-or-later
 <!-- DOCSIBLE START -->
 ## aap_seed
 
