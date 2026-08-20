@@ -143,18 +143,48 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 
 #### Key: main
 
-* **Description**: ['Creates a Forklift Provider custom resource and its backing Secret on a target OpenShift cluster for a given source environment.', 'Designed to run from AAP with credential injection. The source credential injects mf_source_username, mf_source_password, and mf_source_certificate as extra vars. The target credential injects K8S_AUTH_HOST, K8S_AUTH_API_KEY, and K8S_AUTH_VERIFY_SSL as environment variables.', 'For targets with multiple sources, launch the job template once per source-target pair.']
+* **Description**: ['Creates a Forklift Provider custom resource and its backing Secret on a target OpenShift cluster for a given source environment.', 'Designed to run from AAP with credential injection. The source credential injects mf_source_username, mf_source_password, and mf_source_certificate as extra vars. OpenShift connection is configured via role-specific variables cascaded from generic inventory names.', 'For targets with multiple sources, launch the job template once per source-target pair.']
 * **Options**:
   * **configure_providers_api_version**:
     * **Required**: False
     * **Type**: str
     * **Default**: forklift.konveyor.io/v1beta1
     * **Description**: Forklift API version for Provider CRs.
-  * **configure_providers_mtv_namespace**:
+  * **configure_providers_auto_retrieve_cert**:
+    * **Required**: False
+    * **Type**: bool
+    * **Default**: True
+    * **Description**: Whether to automatically retrieve the source TLS certificate when insecureSkipTlsVerify is false and no certificate is provided.
+  * **configure_providers_openshift_api_key**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: none
+    * **Description**: OpenShift API key. Cascaded from the generic openshift_api_key or openshift_credential variable.
+  * **configure_providers_openshift_ca_cert_path**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: none
+    * **Description**: Path to the OpenShift CA Certificate.
+  * **configure_providers_openshift_host**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: none
+    * **Description**: OpenShift host. Cascaded from the generic openshift_host variable.
+  * **configure_providers_openshift_verify_ssl**:
+    * **Required**: False
+    * **Type**: bool
+    * **Default**: True
+    * **Description**: Whether to verify SSL certificates for the OpenShift connection.
+  * **configure_providers_provider_namespace**:
     * **Required**: False
     * **Type**: str
     * **Default**: openshift-mtv
-    * **Description**: Namespace where MTV (Forklift) is installed on the target cluster. Resolved from the target host's mtv_namespace variable by default.
+    * **Description**: Namespace where the provider will be created. Resolved from the target host's mtv_namespace variable by default.
+  * **configure_providers_provider_override**:
+    * **Required**: False
+    * **Type**: dict
+    * **Default**: {}
+    * **Description**: Override configuration merged into the Provider CR spec. Allows setting additional properties such as settings or other fields that evolve with the Forklift API.
   * **configure_providers_provider_state**:
     * **Required**: False
     * **Type**: str
@@ -178,6 +208,11 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
     * **Type**: int
     * **Default**: 120
     * **Description**: Seconds to wait for the Provider to become Ready before failing.
+  * **configure_providers_secure_logging**:
+    * **Required**: False
+    * **Type**: bool
+    * **Default**: True
+    * **Description**: Whether to enable secure logging for sensitive tasks.
   * **source_name**:
     * **Required**: True
     * **Type**: str
@@ -199,22 +234,41 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`configure_providers_api_version`](defaults/main.yml#L24)   | str   | `forklift.konveyor.io/v1beta1` |  None  |   None  |  None |
-| [`configure_providers_mtv_namespace`](defaults/main.yml#L8)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_provider_state`](defaults/main.yml#L21)   | str   | `present` |  None  |   None  |  None |
-| [`configure_providers_provider_wait`](defaults/main.yml#L12)   | bool   | `True` |  None  |   None  |  None |
-| [`configure_providers_provider_wait_poll`](defaults/main.yml#L18)   | int   | `10` |  None  |   None  |  None |
-| [`configure_providers_provider_wait_timeout`](defaults/main.yml#L15)   | int   | `120` |  None  |   None  |  None |
-| [`configure_providers_source_host`](defaults/main.yml#L32)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_source_sdk_endpoint`](defaults/main.yml#L35)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_source_type`](defaults/main.yml#L29)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_source_vddk`](defaults/main.yml#L38)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`configure_providers_api_version`](defaults/main.yml#L43)   | str   | `forklift.konveyor.io/v1beta1` |  None  |   None  |  None |
+| [`configure_providers_auto_retrieve_cert`](defaults/main.yml#L50)   | bool   | `True` |  None  |   None  |  None |
+| [`configure_providers_openshift_api_key`](defaults/main.yml#L7)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`configure_providers_openshift_ca_cert_path`](defaults/main.yml#L15)   | str   | `{{ openshift_ca_cert_path ¦ default(omit) }}` |  None  |   None  |  None |
+| [`configure_providers_openshift_host`](defaults/main.yml#L5)   | str   | `{{ openshift_host }}` |  None  |   None  |  None |
+| [`configure_providers_openshift_verify_ssl`](defaults/main.yml#L17)   | str   | `{{ openshift_verify_ssl ¦ default(true) }}` |  None  |   None  |  None |
+| [`configure_providers_provider_namespace`](defaults/main.yml#L27)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`configure_providers_provider_override`](defaults/main.yml#L46)   | dict   | `{}` |  None  |   None  |  None |
+| [`configure_providers_provider_state`](defaults/main.yml#L40)   | str   | `present` |  None  |   None  |  None |
+| [`configure_providers_provider_wait`](defaults/main.yml#L31)   | bool   | `True` |  None  |   None  |  None |
+| [`configure_providers_provider_wait_poll`](defaults/main.yml#L37)   | int   | `10` |  None  |   None  |  None |
+| [`configure_providers_provider_wait_timeout`](defaults/main.yml#L34)   | int   | `120` |  None  |   None  |  None |
+| [`configure_providers_secure_logging`](defaults/main.yml#L19)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
+| [`configure_providers_source_host`](defaults/main.yml#L58)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`configure_providers_source_sdk_endpoint`](defaults/main.yml#L61)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`configure_providers_source_type`](defaults/main.yml#L55)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`configure_providers_source_vddk`](defaults/main.yml#L64)   | str   | `{{ hostvars[source_name]['vddk'] ¦ default({}) }}` |  None  |   None  |  None |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
 <b>`configure_providers_api_version`:</b> None
 <br>
-<b>`configure_providers_mtv_namespace`:</b> None
+<b>`configure_providers_auto_retrieve_cert`:</b> None
+<br>
+<b>`configure_providers_openshift_api_key`:</b> None
+<br>
+<b>`configure_providers_openshift_ca_cert_path`:</b> None
+<br>
+<b>`configure_providers_openshift_host`:</b> None
+<br>
+<b>`configure_providers_openshift_verify_ssl`:</b> None
+<br>
+<b>`configure_providers_provider_namespace`:</b> None
+<br>
+<b>`configure_providers_provider_override`:</b> None
 <br>
 <b>`configure_providers_provider_state`:</b> None
 <br>
@@ -223,6 +277,8 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 <b>`configure_providers_provider_wait_poll`:</b> None
 <br>
 <b>`configure_providers_provider_wait_timeout`:</b> None
+<br>
+<b>`configure_providers_secure_logging`:</b> None
 <br>
 <b>`configure_providers_source_host`:</b> None
 <br>
@@ -248,8 +304,8 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| create_provider ¦ Ensure provider secret exists | `kubernetes.core.k8s` | False |
-| create_provider ¦ Ensure provider CR exists | `kubernetes.core.k8s` | False |
+| create_provider ¦ Ensure provider secret exists | `redhat.openshift.k8s` | False |
+| create_provider ¦ Ensure provider CR exists | `redhat.openshift.k8s` | False |
 | create_provider ¦ Wait for provider to become Ready | `kubernetes.core.k8s_info` | True |
 | create_provider ¦ Provider created successfully | `ansible.builtin.debug` | False |
 
@@ -267,14 +323,17 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
 | validate ¦ Assert required survey variables are defined | `ansible.builtin.assert` | False |
-| validate ¦ Assert source exists in AAP inventory | `ansible.builtin.assert` | False |
 | validate ¦ Assert target exists in AAP inventory | `ansible.builtin.assert` | False |
+| validate ¦ Assert source exists in AAP inventory | `ansible.builtin.assert` | False |
 | validate ¦ Assert source is mapped to this target | `ansible.builtin.assert` | False |
 | validate ¦ Assert source credentials are injected | `ansible.builtin.assert` | False |
 | validate ¦ Assert source type is supported | `ansible.builtin.assert` | False |
 | validate ¦ Check Forklift CRD exists on target cluster | `kubernetes.core.k8s_info` | False |
 | validate ¦ Assert MTV operator is installed | `ansible.builtin.assert` | False |
 | validate ¦ Resolve provider variables | `ansible.builtin.set_fact` | False |
+| validate ¦ Retrieve source TLS certificate | `block` | True |
+| validate ¦ Retrieve remote certificate from source | `community.crypto.get_certificate` | False |
+| validate ¦ Set retrieved certificate | `ansible.builtin.set_fact` | False |
 
 ## Task Flow Graphs
 
@@ -359,15 +418,19 @@ classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
   Start-->|Task| validate___Assert_required_survey_variables_are_defined0[validate   assert required survey variables are<br>defined]:::task
-  validate___Assert_required_survey_variables_are_defined0-->|Task| validate___Assert_source_exists_in_AAP_inventory1[validate   assert source exists in aap inventory]:::task
-  validate___Assert_source_exists_in_AAP_inventory1-->|Task| validate___Assert_target_exists_in_AAP_inventory2[validate   assert target exists in aap inventory]:::task
-  validate___Assert_target_exists_in_AAP_inventory2-->|Task| validate___Assert_source_is_mapped_to_this_target3[validate   assert source is mapped to this target]:::task
+  validate___Assert_required_survey_variables_are_defined0-->|Task| validate___Assert_target_exists_in_AAP_inventory1[validate   assert target exists in aap inventory]:::task
+  validate___Assert_target_exists_in_AAP_inventory1-->|Task| validate___Assert_source_exists_in_AAP_inventory2[validate   assert source exists in aap inventory]:::task
+  validate___Assert_source_exists_in_AAP_inventory2-->|Task| validate___Assert_source_is_mapped_to_this_target3[validate   assert source is mapped to this target]:::task
   validate___Assert_source_is_mapped_to_this_target3-->|Task| validate___Assert_source_credentials_are_injected4[validate   assert source credentials are injected]:::task
   validate___Assert_source_credentials_are_injected4-->|Task| validate___Assert_source_type_is_supported5[validate   assert source type is supported]:::task
   validate___Assert_source_type_is_supported5-->|Task| validate___Check_Forklift_CRD_exists_on_target_cluster6[validate   check forklift crd exists on target<br>cluster]:::task
   validate___Check_Forklift_CRD_exists_on_target_cluster6-->|Task| validate___Assert_MTV_operator_is_installed7[validate   assert mtv operator is installed]:::task
   validate___Assert_MTV_operator_is_installed7-->|Task| validate___Resolve_provider_variables8[validate   resolve provider variables]:::task
-  validate___Resolve_provider_variables8-->End
+  validate___Resolve_provider_variables8-->|Block Start| validate___Retrieve_source_TLS_certificate9_block_start_0[[validate   retrieve source tls certificate<br>When: **configure providers auto retrieve cert   bool and<br>not  mf insecure skip tls verify   default false  <br> bool  and mf source certificate   default      <br>trim   length    0**]]:::block
+  validate___Retrieve_source_TLS_certificate9_block_start_0-->|Task| validate___Retrieve_remote_certificate_from_source0[validate   retrieve remote certificate from source]:::task
+  validate___Retrieve_remote_certificate_from_source0-->|Task| validate___Set_retrieved_certificate1[validate   set retrieved certificate]:::task
+  validate___Set_retrieved_certificate1-.->|End of Block| validate___Retrieve_source_TLS_certificate9_block_start_0
+  validate___Set_retrieved_certificate1-->End
 ```
 
 ## Author Information
