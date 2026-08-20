@@ -11,6 +11,15 @@
       variables when launching this job template.
     quiet: true
 
+- name: validate | Assert target exists in AAP inventory
+  ansible.builtin.assert:
+    that:
+      - target_name in hostvars
+    fail_msg: >-
+      Target '{{ target_name }}' was not found in the AAP inventory.
+      Verify the target host exists in the migration_clusters group.
+    quiet: true
+
 - name: validate | Assert source exists in AAP inventory
   ansible.builtin.assert:
     that:
@@ -19,15 +28,6 @@
       Source '{{ source_name }}' was not found in the AAP inventory.
       Verify the source host exists in the '{{ hostvars[target_name]['vm_sources']
       | default('vm_sources') }}' group.
-    quiet: true
-
-- name: validate | Assert target exists in AAP inventory
-  ansible.builtin.assert:
-    that:
-      - target_name in hostvars
-    fail_msg: >-
-      Target '{{ target_name }}' was not found in the AAP inventory.
-      Verify the target host exists in the migration_clusters group.
     quiet: true
 
 - name: validate | Assert source is mapped to this target
@@ -65,6 +65,10 @@
 
 - name: validate | Check Forklift CRD exists on target cluster
   kubernetes.core.k8s_info:
+    host: "{{ configure_providers_openshift_host }}"
+    api_key: "{{ configure_providers_openshift_api_key }}"
+    validate_certs: "{{ configure_providers_openshift_verify_ssl }}"
+    ca_cert: "{{ configure_providers_openshift_ca_cert_path | default(omit) }}"
     api_version: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     name: providers.forklift.konveyor.io
@@ -76,8 +80,7 @@
       - _configure_providers_crd.resources | length > 0
     fail_msg: >-
       The Forklift/MTV Provider CRD was not found on target cluster
-      '{{ target_name }}'. Ensure the MTV operator is installed in
-      namespace '{{ configure_providers_mtv_namespace }}' before
+      '{{ target_name }}'. Ensure the MTV operator is installed before
       running this role.
     quiet: true
 
@@ -88,5 +91,24 @@
          else configure_providers_source_type }}
     _configure_providers_source_url: >-
       https://{{ configure_providers_source_host }}{{ configure_providers_source_sdk_endpoint }}
-    _configure_providers_secret_name: "{{ source_name }}-provider-secret"
+    _configure_providers_provider_name: >-
+      {{ source_name | infra.openshift_virtualization_migration.rfc1123 }}
+    _configure_providers_secret_name: >-
+      {{ (source_name ~ '-provider-secret') | infra.openshift_virtualization_migration.rfc1123 }}
+
+- name: validate | Retrieve source TLS certificate
+  when:
+    - configure_providers_auto_retrieve_cert | bool
+    - not (mf_insecure_skip_tls_verify | default(false) | bool)
+    - mf_source_certificate | default('') | trim | length == 0
+  block:
+    - name: validate | Retrieve remote certificate from source
+      community.crypto.get_certificate:
+        host: "{{ configure_providers_source_host }}"
+        port: "{{ (_configure_providers_source_url | urlsplit('port') | default('443', true)) | int }}"
+      register: _configure_providers_remote_cert
+
+    - name: validate | Set retrieved certificate
+      ansible.builtin.set_fact:
+        mf_source_certificate: "{{ _configure_providers_remote_cert.cert }}"
 ...

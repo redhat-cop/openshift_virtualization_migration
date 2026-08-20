@@ -1,8 +1,8 @@
 apiVersion: {{ configure_providers_api_version }}
 kind: Provider
 metadata:
-  name: {{ source_name }}
-  namespace: {{ configure_providers_mtv_namespace }}
+  name: {{ _configure_providers_provider_name }}
+  namespace: {{ configure_providers_provider_namespace }}
   labels:
     app.kubernetes.io/managed-by: ansible-migration-factory
 spec:
@@ -10,7 +10,7 @@ spec:
   url: {{ _configure_providers_source_url }}
   secret:
     name: {{ _configure_providers_secret_name }}
-    namespace: {{ configure_providers_mtv_namespace }}
+    namespace: {{ configure_providers_provider_namespace }}
 {% if configure_providers_source_type == 'vmware' and configure_providers_source_vddk.image | default('') | length > 0 %}
   settings:
     vddkInitImage: {{ configure_providers_source_vddk.image }}

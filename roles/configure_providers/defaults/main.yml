@@ -1,11 +1,30 @@
 ---
 # ---------------------------------------------------------------------------
+# OpenShift connection — cascaded from generic inventory variables
+# ---------------------------------------------------------------------------
+configure_providers_openshift_host: "{{ openshift_host }}"
+
+configure_providers_openshift_api_key: >-
+  {{
+    openshift_credential.openshift_api_key
+    | default(openshift_credential.openshift_temporary_api_key)
+    if openshift_credential is defined
+    else openshift_api_key | default(openshift_temporary_api_key)
+  }}
+
+configure_providers_openshift_ca_cert_path: "{{ openshift_ca_cert_path | default(omit) }}"
+
+configure_providers_openshift_verify_ssl: "{{ openshift_verify_ssl | default(true) }}"
+
+configure_providers_secure_logging: "{{ secure_logging | default(true) }}"
+
+# ---------------------------------------------------------------------------
 # Provider configuration — controls how MTV providers are created
 # ---------------------------------------------------------------------------
 
-# Namespace where MTV (Forklift) is installed on the target cluster.
+# Namespace where the provider will be created.
 # Resolved from target host vars in AAP inventory; override if needed.
-configure_providers_mtv_namespace: >-
+configure_providers_provider_namespace: >-
   {{ hostvars[target_name]['mtv_namespace'] | default('openshift-mtv') }}
 
 # Whether to wait for the Provider CR to reach Ready status after creation.
@@ -23,6 +42,13 @@ configure_providers_provider_state: present
 # Forklift API version for Provider CRs.
 configure_providers_api_version: forklift.konveyor.io/v1beta1
 
+# Override configuration merged into the Provider CR spec.
+configure_providers_provider_override: {}
+
+# Whether to automatically retrieve the source TLS certificate
+# when insecureSkipTlsVerify is false and no certificate is provided.
+configure_providers_auto_retrieve_cert: true
+
 # ---------------------------------------------------------------------------
 # Source metadata — resolved from AAP inventory host vars
 # ---------------------------------------------------------------------------
@@ -35,6 +61,5 @@ configure_providers_source_host: >-
 configure_providers_source_sdk_endpoint: >-
   {{ hostvars[source_name]['sdk_endpoint'] | default('/sdk') }}
 
-configure_providers_source_vddk: >-
-  {{ hostvars[source_name]['vddk'] | default({}) }}
+configure_providers_source_vddk: "{{ hostvars[source_name]['vddk'] | default({}) }}"
 ...

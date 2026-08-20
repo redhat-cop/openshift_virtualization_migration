@@ -10,9 +10,9 @@ argument_specs:
       - >-
         Designed to run from AAP with credential injection. The source
         credential injects mf_source_username, mf_source_password, and
-        mf_source_certificate as extra vars. The target credential injects
-        K8S_AUTH_HOST, K8S_AUTH_API_KEY, and K8S_AUTH_VERIFY_SSL as
-        environment variables.
+        mf_source_certificate as extra vars. OpenShift connection is
+        configured via role-specific variables cascaded from generic
+        inventory names.
       - >-
         For targets with multiple sources, launch the job template once
         per source-target pair.
@@ -31,12 +31,45 @@ argument_specs:
           Name of the target OpenShift cluster (must match an AAP inventory
           host in the migration_clusters group).
 
-      configure_providers_mtv_namespace:
+      configure_providers_openshift_host:
+        type: str
+        required: false
+        description: >-
+          OpenShift host. Cascaded from the generic openshift_host variable.
+
+      configure_providers_openshift_api_key:
+        type: str
+        required: false
+        description: >-
+          OpenShift API key. Cascaded from the generic openshift_api_key
+          or openshift_credential variable.
+
+      configure_providers_openshift_ca_cert_path:
+        type: str
+        required: false
+        description: >-
+          Path to the OpenShift CA Certificate.
+
+      configure_providers_openshift_verify_ssl:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to verify SSL certificates for the OpenShift connection.
+
+      configure_providers_secure_logging:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to enable secure logging for sensitive tasks.
+
+      configure_providers_provider_namespace:
         type: str
         required: false
         default: openshift-mtv
         description: >-
-          Namespace where MTV (Forklift) is installed on the target cluster.
+          Namespace where the provider will be created.
           Resolved from the target host's mtv_namespace variable by default.
 
       configure_providers_provider_wait:
@@ -78,4 +111,22 @@ argument_specs:
         default: forklift.konveyor.io/v1beta1
         description: >-
           Forklift API version for Provider CRs.
+
+      configure_providers_provider_override:
+        type: dict
+        required: false
+        default: {}
+        description: >-
+          Override configuration merged into the Provider CR spec.
+          Allows setting additional properties such as settings or
+          other fields that evolve with the Forklift API.
+
+      configure_providers_auto_retrieve_cert:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to automatically retrieve the source TLS certificate
+          when insecureSkipTlsVerify is false and no certificate is
+          provided.
 ...
