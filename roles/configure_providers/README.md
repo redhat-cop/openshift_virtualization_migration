@@ -145,7 +145,7 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 
 #### Key: main
 
-* **Description**: ['Creates a Forklift Provider custom resource and its backing Secret on a target OpenShift cluster for a given source environment.', 'Designed to run from AAP with credential injection. The source credential injects mf_source_username, mf_source_password, and mf_source_certificate as extra vars. OpenShift connection is configured via role-specific variables cascaded from generic inventory names.', 'For targets with multiple sources, launch the job template once per source-target pair.']
+* **Description**: ['Creates a Forklift Provider custom resource and its backing Secret on a target OpenShift cluster for a given source environment.', 'Designed to run from AAP with credential injection. The source credential injects mf_source_username, mf_source_password, and mf_source_certificate as extra vars. OpenShift connection is provided by the AAP OpenShift credential which sets K8S_AUTH_* environment variables.', 'For targets with multiple sources, launch the job template once per source-target pair.']
 * **Options**:
   * **configure_providers_api_version**:
     * **Required**: False
@@ -157,26 +157,6 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
     * **Type**: bool
     * **Default**: True
     * **Description**: Whether to automatically retrieve the source TLS certificate when insecureSkipTlsVerify is false and no certificate is provided.
-  * **configure_providers_openshift_api_key**:
-    * **Required**: False
-    * **Type**: str
-    * **Default**: none
-    * **Description**: OpenShift API key. Cascaded from the generic openshift_api_key or openshift_credential variable.
-  * **configure_providers_openshift_ca_cert_path**:
-    * **Required**: False
-    * **Type**: str
-    * **Default**: none
-    * **Description**: Path to the OpenShift CA Certificate.
-  * **configure_providers_openshift_host**:
-    * **Required**: False
-    * **Type**: str
-    * **Default**: none
-    * **Description**: OpenShift host. Cascaded from the generic openshift_host variable.
-  * **configure_providers_openshift_verify_ssl**:
-    * **Required**: False
-    * **Type**: bool
-    * **Default**: True
-    * **Description**: Whether to verify SSL certificates for the OpenShift connection.
   * **configure_providers_provider_namespace**:
     * **Required**: False
     * **Type**: str
@@ -236,37 +216,25 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`configure_providers_api_version`](defaults/main.yml#L43)   | str   | `forklift.konveyor.io/v1beta1` |  None  |   None  |  None |
-| [`configure_providers_auto_retrieve_cert`](defaults/main.yml#L50)   | bool   | `True` |  None  |   None  |  None |
-| [`configure_providers_openshift_api_key`](defaults/main.yml#L7)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_openshift_ca_cert_path`](defaults/main.yml#L15)   | str   | `{{ openshift_ca_cert_path ¦ default(omit) }}` |  None  |   None  |  None |
-| [`configure_providers_openshift_host`](defaults/main.yml#L5)   | str   | `{{ openshift_host }}` |  None  |   None  |  None |
-| [`configure_providers_openshift_verify_ssl`](defaults/main.yml#L17)   | str   | `{{ openshift_verify_ssl ¦ default(true) }}` |  None  |   None  |  None |
-| [`configure_providers_provider_namespace`](defaults/main.yml#L27)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_provider_override`](defaults/main.yml#L46)   | dict   | `{}` |  None  |   None  |  None |
-| [`configure_providers_provider_state`](defaults/main.yml#L40)   | str   | `present` |  None  |   None  |  None |
-| [`configure_providers_provider_wait`](defaults/main.yml#L31)   | bool   | `True` |  None  |   None  |  None |
-| [`configure_providers_provider_wait_poll`](defaults/main.yml#L37)   | int   | `10` |  None  |   None  |  None |
-| [`configure_providers_provider_wait_timeout`](defaults/main.yml#L34)   | int   | `120` |  None  |   None  |  None |
-| [`configure_providers_secure_logging`](defaults/main.yml#L19)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
-| [`configure_providers_source_host`](defaults/main.yml#L58)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_source_sdk_endpoint`](defaults/main.yml#L61)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_source_type`](defaults/main.yml#L55)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_source_vddk`](defaults/main.yml#L64)   | str   | `{{ hostvars[source_name]['vddk'] ¦ default({}) }}` |  None  |   None  |  None |
+| [`configure_providers_api_version`](defaults/main.yml#L26)   | str   | `forklift.konveyor.io/v1beta1` |  None  |   None  |  None |
+| [`configure_providers_auto_retrieve_cert`](defaults/main.yml#L33)   | bool   | `True` |  None  |   None  |  None |
+| [`configure_providers_provider_namespace`](defaults/main.yml#L10)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`configure_providers_provider_override`](defaults/main.yml#L29)   | dict   | `{}` |  None  |   None  |  None |
+| [`configure_providers_provider_state`](defaults/main.yml#L23)   | str   | `present` |  None  |   None  |  None |
+| [`configure_providers_provider_wait`](defaults/main.yml#L14)   | bool   | `True` |  None  |   None  |  None |
+| [`configure_providers_provider_wait_poll`](defaults/main.yml#L20)   | int   | `10` |  None  |   None  |  None |
+| [`configure_providers_provider_wait_timeout`](defaults/main.yml#L17)   | int   | `120` |  None  |   None  |  None |
+| [`configure_providers_secure_logging`](defaults/main.yml#L2)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
+| [`configure_providers_source_host`](defaults/main.yml#L41)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`configure_providers_source_sdk_endpoint`](defaults/main.yml#L44)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`configure_providers_source_type`](defaults/main.yml#L38)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`configure_providers_source_vddk`](defaults/main.yml#L47)   | str   | `{{ hostvars[source_name]['vddk'] ¦ default({}) }}` |  None  |   None  |  None |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
 <b>`configure_providers_api_version`:</b> None
 <br>
 <b>`configure_providers_auto_retrieve_cert`:</b> None
-<br>
-<b>`configure_providers_openshift_api_key`:</b> None
-<br>
-<b>`configure_providers_openshift_ca_cert_path`:</b> None
-<br>
-<b>`configure_providers_openshift_host`:</b> None
-<br>
-<b>`configure_providers_openshift_verify_ssl`:</b> None
 <br>
 <b>`configure_providers_provider_namespace`:</b> None
 <br>
