@@ -18,13 +18,15 @@ place.
 ## Requirements
 
 - MTV (Forklift) operator must be installed on the target OpenShift cluster
-- `kubernetes.core` Ansible collection
+- `kubernetes.core` and `redhat.openshift` Ansible collections
 - AAP credential types:
   - **Migration Factory - Source Environment** (custom) — injects
     `mf_source_username`, `mf_source_password`, `mf_source_certificate`,
     `mf_source_host`, `mf_insecure_skip_tls_verify`
-  - **OpenShift or Kubernetes API Bearer Token** (built-in) — injects
-    `K8S_AUTH_HOST`, `K8S_AUTH_API_KEY`, `K8S_AUTH_VERIFY_SSL` as env vars
+  - **OpenShift or Kubernetes API Bearer Token** (built-in) — sets
+    `K8S_AUTH_HOST`, `K8S_AUTH_API_KEY`, `K8S_AUTH_VERIFY_SSL` as
+    environment variables, which `kubernetes.core` and `redhat.openshift`
+    modules read automatically
 
 ## Role Variables
 

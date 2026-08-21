@@ -1,10 +1,6 @@
 ---
 - name: rescue_provider | Fetch provider status
   kubernetes.core.k8s_info:
-    host: "{{ configure_providers_openshift_host }}"
-    api_key: "{{ configure_providers_openshift_api_key }}"
-    validate_certs: "{{ configure_providers_openshift_verify_ssl }}"
-    ca_cert: "{{ configure_providers_openshift_ca_cert_path | default(omit) }}"
     api_version: "{{ configure_providers_api_version }}"
     kind: Provider
     name: "{{ _configure_providers_provider_name }}"

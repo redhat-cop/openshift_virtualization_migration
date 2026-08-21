@@ -1,21 +1,4 @@
 ---
-# ---------------------------------------------------------------------------
-# OpenShift connection — cascaded from generic inventory variables
-# ---------------------------------------------------------------------------
-configure_providers_openshift_host: "{{ openshift_host }}"
-
-configure_providers_openshift_api_key: >-
-  {{
-    openshift_credential.openshift_api_key
-    | default(openshift_credential.openshift_temporary_api_key)
-    if openshift_credential is defined
-    else openshift_api_key | default(openshift_temporary_api_key)
-  }}
-
-configure_providers_openshift_ca_cert_path: "{{ openshift_ca_cert_path | default(omit) }}"
-
-configure_providers_openshift_verify_ssl: "{{ openshift_verify_ssl | default(true) }}"
-
 configure_providers_secure_logging: "{{ secure_logging | default(true) }}"
 
 # ---------------------------------------------------------------------------

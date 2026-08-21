@@ -1,10 +1,6 @@
 ---
 - name: create_provider | Ensure provider secret exists
   redhat.openshift.k8s:
-    host: "{{ configure_providers_openshift_host }}"
-    api_key: "{{ configure_providers_openshift_api_key }}"
-    validate_certs: "{{ configure_providers_openshift_verify_ssl }}"
-    ca_cert: "{{ configure_providers_openshift_ca_cert_path | default(omit) }}"
     state: "{{ configure_providers_provider_state }}"
     apply: true
     definition: >-
@@ -13,24 +9,14 @@
 
 - name: create_provider | Ensure provider CR exists
   redhat.openshift.k8s:
-    host: "{{ configure_providers_openshift_host }}"
-    api_key: "{{ configure_providers_openshift_api_key }}"
-    validate_certs: "{{ configure_providers_openshift_verify_ssl }}"
-    ca_cert: "{{ configure_providers_openshift_ca_cert_path | default(omit) }}"
     state: "{{ configure_providers_provider_state }}"
     apply: true
     definition: >-
       {{ lookup('template', 'provider.yml.j2') | from_yaml
-         | ansible.builtin.combine({'spec': configure_providers_provider_override}, recursive=True)
-         if configure_providers_provider_override | length > 0
-         else lookup('template', 'provider.yml.j2') | from_yaml }}
+         | ansible.builtin.combine({'spec': configure_providers_provider_override}, recursive=True) }}
 
 - name: create_provider | Wait for provider to become Ready
   kubernetes.core.k8s_info:
-    host: "{{ configure_providers_openshift_host }}"
-    api_key: "{{ configure_providers_openshift_api_key }}"
-    validate_certs: "{{ configure_providers_openshift_verify_ssl }}"
-    ca_cert: "{{ configure_providers_openshift_ca_cert_path | default(omit) }}"
     api_version: "{{ configure_providers_api_version }}"
     kind: Provider
     name: "{{ _configure_providers_provider_name }}"

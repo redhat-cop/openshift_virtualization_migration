@@ -11,8 +11,8 @@ argument_specs:
         Designed to run from AAP with credential injection. The source
         credential injects mf_source_username, mf_source_password, and
         mf_source_certificate as extra vars. OpenShift connection is
-        configured via role-specific variables cascaded from generic
-        inventory names.
+        provided by the AAP OpenShift credential which sets K8S_AUTH_*
+        environment variables.
       - >-
         For targets with multiple sources, launch the job template once
         per source-target pair.
@@ -30,32 +30,6 @@ argument_specs:
         description: >-
           Name of the target OpenShift cluster (must match an AAP inventory
           host in the migration_clusters group).
-
-      configure_providers_openshift_host:
-        type: str
-        required: false
-        description: >-
-          OpenShift host. Cascaded from the generic openshift_host variable.
-
-      configure_providers_openshift_api_key:
-        type: str
-        required: false
-        description: >-
-          OpenShift API key. Cascaded from the generic openshift_api_key
-          or openshift_credential variable.
-
-      configure_providers_openshift_ca_cert_path:
-        type: str
-        required: false
-        description: >-
-          Path to the OpenShift CA Certificate.
-
-      configure_providers_openshift_verify_ssl:
-        type: bool
-        required: false
-        default: true
-        description: >-
-          Whether to verify SSL certificates for the OpenShift connection.
 
       configure_providers_secure_logging:
         type: bool

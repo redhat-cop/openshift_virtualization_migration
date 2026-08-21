@@ -128,10 +128,18 @@ aap_seed_controller_templates:
       description: ""
       spec:
         - question_name: Source Name
+          question_description: >-
+            Name of the source environment as it appears in the AAP
+            inventory (e.g. vcenter-prod). Must be in the target's
+            vm_sources list.
           variable: source_name
           type: text
           required: true
         - question_name: Target Name
+          question_description: >-
+            Name of the target OpenShift cluster as it appears in the
+            AAP inventory (e.g. ocp-prod). Must be in the
+            migration_clusters group.
           variable: target_name
           type: text
           required: true
@@ -149,10 +157,18 @@ aap_seed_controller_templates:
       description: ""
       spec:
         - question_name: Source Name
+          question_description: >-
+            Name of the source environment as it appears in the AAP
+            inventory (e.g. vcenter-prod). Must be in the target's
+            vm_sources list.
           variable: source_name
           type: text
           required: true
         - question_name: Target Name
+          question_description: >-
+            Name of the target OpenShift cluster as it appears in the
+            AAP inventory (e.g. ocp-prod). Must be in the
+            migration_clusters group.
           variable: target_name
           type: text
           required: true
