@@ -3,7 +3,7 @@
   kubernetes.core.k8s_info:
     api_version: "{{ configure_providers_api_version }}"
     kind: Provider
-    name: "{{ _configure_providers_provider_name }}"
+    name: "{{ _configure_providers_provider_name | default(source_name) }}"
     namespace: "{{ configure_providers_provider_namespace }}"
   register: _configure_providers_failed_result
   ignore_errors: true
