@@ -6,7 +6,7 @@
 Role belongs to infra/openshift_virtualization_migration
 Namespace - infra
 Collection - openshift_virtualization_migration
-Version - 1.22.0
+Version - 1.25.0
 Repository - https://github.com/redhat-cop/openshift_virtualization_migration
 ```
 
@@ -21,11 +21,6 @@ Description: Trigger cutover for warm migrations to finish the migration process
 
 * **Description**: MTV Warm Cutover - Trigger cutover for warm migrations
 * **Options**:
-  * **mtv_warm_cutover_request**:
-    * **Required**: True
-    * **Type**: list
-    * **Default**: none
-    * **Description**: List of warm migration cutover requests
   * **mtv_warm_cutover_default_namespace**:
     * **Required**: false
     * **Type**: str
@@ -36,21 +31,26 @@ Description: Trigger cutover for warm migrations to finish the migration process
     * **Type**: bool
     * **Default**: False
     * **Description**: Allow overriding an existing cutover timestamp on a Migration. Can be overridden per migration request via the force_cutover key.
+  * **mtv_warm_cutover_request**:
+    * **Required**: True
+    * **Type**: list
+    * **Default**: none
+    * **Description**: List of warm migration cutover requests
   * **mtv_warm_cutover_verify_complete**:
     * **Required**: false
     * **Type**: bool
     * **Default**: True
     * **Description**: Wait until cutover migrations complete. Can be overridden per migration request via the verify_complete key.
-  * **mtv_warm_cutover_verify_retries**:
-    * **Required**: false
-    * **Type**: int
-    * **Default**: 360
-    * **Description**: Number of retries when waiting for cutover completion
   * **mtv_warm_cutover_verify_delay**:
     * **Required**: false
     * **Type**: int
     * **Default**: 20
     * **Description**: Seconds to wait between retries
+  * **mtv_warm_cutover_verify_retries**:
+    * **Required**: false
+    * **Type**: int
+    * **Default**: 360
+    * **Description**: Number of retries when waiting for cutover completion
 
 </details>
 
@@ -62,26 +62,26 @@ Description: Trigger cutover for warm migrations to finish the migration process
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`mtv_warm_cutover_request`](defaults/main.yml#L7)   | list   | `[]` |  None  |   True  |  Warm Cutover Request |
 | [`mtv_warm_cutover_default_namespace`](defaults/main.yml#L23)   | str   | `openshift-mtv` |  None  |   False  |  MTV Namespace |
 | [`mtv_warm_cutover_force_cutover`](defaults/main.yml#L29)   | bool   | `False` |  None  |   False  |  Force Cutover Override |
+| [`mtv_warm_cutover_request`](defaults/main.yml#L7)   | list   | `[]` |  None  |   True  |  Warm Cutover Request |
 | [`mtv_warm_cutover_verify_complete`](defaults/main.yml#L35)   | bool   | `True` |  None  |   False  |  Verify Cutover Complete |
-| [`mtv_warm_cutover_verify_retries`](defaults/main.yml#L39)   | int   | `360` |  None  |   False  |  Verify Complete Retries |
 | [`mtv_warm_cutover_verify_delay`](defaults/main.yml#L43)   | int   | `20` |  None  |   False  |  Verify Complete Delay |
+| [`mtv_warm_cutover_verify_retries`](defaults/main.yml#L39)   | int   | `360` |  None  |   False  |  Verify Complete Retries |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
-<br>
-<b>`mtv_warm_cutover_request`:</b> List of warm migration cutover requests
 <br>
 <b>`mtv_warm_cutover_default_namespace`:</b> Default namespace for MTV resources
 <br>
 <b>`mtv_warm_cutover_force_cutover`:</b> >-
 <br>
+<b>`mtv_warm_cutover_request`:</b> List of warm migration cutover requests
+<br>
 <b>`mtv_warm_cutover_verify_complete`:</b> >-
 <br>
-<b>`mtv_warm_cutover_verify_retries`:</b> Number of retries when waiting for cutover completion
-<br>
 <b>`mtv_warm_cutover_verify_delay`:</b> Seconds to wait between retries
+<br>
+<b>`mtv_warm_cutover_verify_retries`:</b> Number of retries when waiting for cutover completion
 <br>
 <br>
 

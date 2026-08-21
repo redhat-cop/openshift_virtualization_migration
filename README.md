@@ -51,6 +51,7 @@ This collection includes the following roles for managing OpenShift Virtualizati
 * [create_mf_aap_token](roles/create_mf_aap_token/README.md) - create_mf_aap_token
 * [mtv_management](roles/mtv_management/README.md) - Management of the Migration Toolkit for Virtualization (MTV).
 * [mtv_migrate](roles/mtv_migrate/README.md) - Migration of Virtual Machines from Source to Destination.
+* [mtv_warm_cutover](roles/mtv_warm_cutover/README.md) - Trigger cutover for warm migrations to finish the migration process.
 * [network_mgmt](roles/network_mgmt/README.md) - Management of network related components.
 * [ocp_cleanup](roles/ocp_cleanup/README.md) - Remove OpenShift migration artifacts created during virtualization migration testing
 * [operator_management](roles/operator_management/README.md) - Management of OpenShift Operators.

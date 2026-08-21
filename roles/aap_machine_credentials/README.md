@@ -152,27 +152,6 @@ classDef rescue stroke:#665352,stroke-width:2px;
   _process_machine_credential___Render_Machine_Credential2-->End
 ```
 
-### Graph for _map_key_content.yml
-
-```mermaid
-flowchart TD
-Start
-classDef block stroke:#3498db,stroke-width:2px;
-classDef task stroke:#4b76bb,stroke-width:2px;
-classDef includeTasks stroke:#16a085,stroke-width:2px;
-classDef importTasks stroke:#34495e,stroke-width:2px;
-classDef includeRole stroke:#2980b9,stroke-width:2px;
-classDef importRole stroke:#699ba7,stroke-width:2px;
-classDef includeVars stroke:#8e44ad,stroke-width:2px;
-classDef rescue stroke:#665352,stroke-width:2px;
-
-  Start-->|Task| _map_key_content___Verify_required_variables_provided0[ map key content   verify required variables<br>provided]:::task
-  _map_key_content___Verify_required_variables_provided0-->|Task| _map_key_content___Check_source_path_content1[ map key content   check source path content]:::task
-  _map_key_content___Check_source_path_content1-->|Task| _map_key_content___Verify_source_path_exists2[ map key content   verify source path exists]:::task
-  _map_key_content___Verify_source_path_exists2-->|Task| _map_key_content___Map_Variables3[ map key content   map variables]:::task
-  _map_key_content___Map_Variables3-->End
-```
-
 ### Graph for main.yml
 
 ```mermaid
