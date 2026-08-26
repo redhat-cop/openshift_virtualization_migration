@@ -37,8 +37,8 @@ aap_seed_git_ssh_key_unlock: "{{ aap_git_ssh_key_unlock | default('') }}"
 aap_seed_migrate_template_name: OpenShift Virtualization Migration - Migrate
 aap_seed_migrate_playbook: playbooks/vmf_migrate.yml
 
-aap_seed_mtv_provider_template_name: OpenShift Virtualization Migration - Configure Providers
-aap_seed_mtv_provider_playbook: playbooks/vmf_configure_providers.yml
+aap_seed_mtv_provider_template_name: OpenShift Virtualization Migration - MTV Provider
+aap_seed_mtv_provider_playbook: playbooks/vmf_mtv_provider.yml
 
 # ---------------------------------------------------------------------------
 # Per-type create toggles — set to false to skip an entire category

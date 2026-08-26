@@ -300,13 +300,13 @@ Description: Seed AAP with Migration Factory Configuration as Code content
   * **aap_seed_mtv_provider_playbook**:
     * **Required**: False
     * **Type**: str
-    * **Default**: playbooks/vmf_configure_providers.yml
-    * **Description**: Playbook path for the Configure Providers job template.
+    * **Default**: playbooks/vmf_mtv_provider.yml
+    * **Description**: Playbook path for the MTV Provider job template.
   * **aap_seed_mtv_provider_template_name**:
     * **Required**: False
     * **Type**: str
-    * **Default**: OpenShift Virtualization Migration - Configure Providers
-    * **Description**: Name of the Configure Providers job template created in AAP.
+    * **Default**: OpenShift Virtualization Migration - MTV Provider
+    * **Description**: Name of the MTV Provider job template created in AAP.
   * **aap_seed_org_name**:
     * **Required**: False
     * **Type**: str
@@ -533,8 +533,8 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 | [`aap_seed_inventory_name`](defaults/main.yml#L22)   | str   | `OpenShift Virtualization Migration` |  None  |   None  |  None |
 | [`aap_seed_migrate_playbook`](defaults/main.yml#L38)   | str   | `playbooks/vmf_migrate.yml` |  None  |   None  |  None |
 | [`aap_seed_migrate_template_name`](defaults/main.yml#L37)   | str   | `OpenShift Virtualization Migration - Migrate` |  None  |   None  |  None |
-| [`aap_seed_mtv_provider_playbook`](defaults/main.yml#L41)   | str   | `playbooks/vmf_configure_providers.yml` |  None  |   None  |  None |
-| [`aap_seed_mtv_provider_template_name`](defaults/main.yml#L40)   | str   | `OpenShift Virtualization Migration - Configure Providers` |  None  |   None  |  None |
+| [`aap_seed_mtv_provider_playbook`](defaults/main.yml#L41)   | str   | `playbooks/vmf_mtv_provider.yml` |  None  |   None  |  None |
+| [`aap_seed_mtv_provider_template_name`](defaults/main.yml#L40)   | str   | `OpenShift Virtualization Migration - MTV Provider` |  None  |   None  |  None |
 | [`aap_seed_org_name`](defaults/main.yml#L15)   | str   | `Default` |  None  |   None  |  None |
 | [`aap_seed_organizations_create`](defaults/main.yml#L46)   | bool   | `True` |  None  |   None  |  None |
 | [`aap_seed_password`](defaults/main.yml#L7)   | str   | `{{ aap_password ¦ default(omit) }}` |  None  |   None  |  None |
