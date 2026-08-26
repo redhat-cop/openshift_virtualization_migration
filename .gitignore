@@ -201,3 +201,7 @@ ansible-navigator.yml
 # Secrets and certificates
 *.pem
 *.key
+
+# Session notes
+.session-context.md
+.aap-seed-improvements.md

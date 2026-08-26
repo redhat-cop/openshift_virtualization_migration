@@ -303,7 +303,8 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 | validate ¦ Resolve provider variables | `ansible.builtin.set_fact` | False |
 | validate ¦ Retrieve source TLS certificate | `block` | True |
 | validate ¦ Retrieve remote certificate from source | `community.crypto.get_certificate` | False |
-| validate ¦ Set retrieved certificate | `ansible.builtin.set_fact` | False |
+| validate ¦ Store retrieved certificate | `ansible.builtin.set_fact` | False |
+| validate ¦ Resolve effective certificate | `ansible.builtin.set_fact` | False |
 
 ## Task Flow Graphs
 
@@ -398,9 +399,10 @@ classDef rescue stroke:#665352,stroke-width:2px;
   validate___Assert_MTV_operator_is_installed7-->|Task| validate___Resolve_provider_variables8[validate   resolve provider variables]:::task
   validate___Resolve_provider_variables8-->|Block Start| validate___Retrieve_source_TLS_certificate9_block_start_0[[validate   retrieve source tls certificate<br>When: **configure providers auto retrieve cert   bool and<br>not  mf insecure skip tls verify   default false  <br> bool  and mf source certificate   default      <br>trim   length    0**]]:::block
   validate___Retrieve_source_TLS_certificate9_block_start_0-->|Task| validate___Retrieve_remote_certificate_from_source0[validate   retrieve remote certificate from source]:::task
-  validate___Retrieve_remote_certificate_from_source0-->|Task| validate___Set_retrieved_certificate1[validate   set retrieved certificate]:::task
-  validate___Set_retrieved_certificate1-.->|End of Block| validate___Retrieve_source_TLS_certificate9_block_start_0
-  validate___Set_retrieved_certificate1-->End
+  validate___Retrieve_remote_certificate_from_source0-->|Task| validate___Store_retrieved_certificate1[validate   store retrieved certificate]:::task
+  validate___Store_retrieved_certificate1-.->|End of Block| validate___Retrieve_source_TLS_certificate9_block_start_0
+  validate___Store_retrieved_certificate1-->|Task| validate___Resolve_effective_certificate10[validate   resolve effective certificate]:::task
+  validate___Resolve_effective_certificate10-->End
 ```
 
 ## Author Information
