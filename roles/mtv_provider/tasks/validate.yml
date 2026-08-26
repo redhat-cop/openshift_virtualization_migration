@@ -40,6 +40,17 @@
       {{ hostvars[target_name]['vm_sources'] | default([]) }}.
     quiet: true
 
+- name: validate | Assert source host variable is defined
+  ansible.builtin.assert:
+    that:
+      - hostvars[source_name]['host'] is defined
+      - hostvars[source_name]['host'] | length > 0
+    fail_msg: >-
+      Source '{{ source_name }}' is missing the required 'host' variable
+      in the AAP inventory. Set 'host' to the FQDN or IP of the source
+      hypervisor.
+    quiet: true
+
 - name: validate | Assert source credentials are injected
   ansible.builtin.assert:
     that:
@@ -53,6 +64,19 @@
       attached to this job template launch.
     quiet: true
   no_log: true
+
+- name: validate | Assert provider_override does not contain managed keys
+  ansible.builtin.assert:
+    that:
+      - "'secret' not in mtv_provider_provider_override"
+      - "'type' not in mtv_provider_provider_override"
+      - "'url' not in mtv_provider_provider_override"
+    fail_msg: >-
+      mtv_provider_provider_override must not contain 'secret', 'type',
+      or 'url' keys — these are managed by the role. Use the role
+      variables to control them instead.
+    quiet: true
+  when: mtv_provider_provider_override | length > 0
 
 - name: validate | Assert source type is supported
   ansible.builtin.assert:
@@ -100,8 +124,9 @@
   block:
     - name: validate | Retrieve remote certificate from source
       community.crypto.get_certificate:
-        host: "{{ mtv_provider_source_host }}"
-        port: "{{ (_mtv_provider_source_url | urlsplit('port') | default('443', true)) | int }}"
+        host: "{{ mtv_provider_source_host | regex_replace(':[0-9]+$', '') }}"
+        port: >-
+          {{ (mtv_provider_source_host | regex_search(':([0-9]+)$', '\1') | default(['443'], true))[0] | int }}
       register: _mtv_provider_remote_cert
 
     - name: validate | Store retrieved certificate

@@ -8,6 +8,14 @@
   register: _mtv_provider_failed_result
   ignore_errors: true
 
+- name: rescue_provider | Warn if cluster query failed
+  ansible.builtin.debug:
+    msg: >-
+      Could not query provider status from the target cluster:
+      {{ _mtv_provider_failed_result.msg | default('unknown error') }}.
+      Cluster may be unreachable.
+  when: _mtv_provider_failed_result is failed
+
 - name: rescue_provider | Extract error details
   ansible.builtin.set_fact:
     _mtv_provider_error_conditions: >-

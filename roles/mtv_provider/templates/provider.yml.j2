@@ -1,17 +1,17 @@
 apiVersion: {{ mtv_provider_api_version }}
 kind: Provider
 metadata:
-  name: {{ _mtv_provider_provider_name }}
-  namespace: {{ mtv_provider_provider_namespace }}
+  name: {{ _mtv_provider_provider_name | to_json }}
+  namespace: {{ mtv_provider_provider_namespace | to_json }}
   labels:
     app.kubernetes.io/managed-by: ansible-migration-factory
 spec:
-  type: {{ _mtv_provider_forklift_type }}
-  url: {{ _mtv_provider_source_url }}
+  type: {{ _mtv_provider_forklift_type | to_json }}
+  url: {{ _mtv_provider_source_url | to_json }}
   secret:
-    name: {{ _mtv_provider_secret_name }}
-    namespace: {{ mtv_provider_provider_namespace }}
+    name: {{ _mtv_provider_secret_name | to_json }}
+    namespace: {{ mtv_provider_provider_namespace | to_json }}
 {% if mtv_provider_source_type == 'vmware' and mtv_provider_source_vddk.image | default('') | length > 0 %}
   settings:
-    vddkInitImage: {{ mtv_provider_source_vddk.image }}
+    vddkInitImage: {{ mtv_provider_source_vddk.image | to_json }}
 {% endif %}

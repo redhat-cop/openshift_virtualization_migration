@@ -40,6 +40,27 @@ aap_seed_migrate_playbook: playbooks/vmf_migrate.yml
 aap_seed_mtv_provider_template_name: OpenShift Virtualization Migration - MTV Provider
 aap_seed_mtv_provider_playbook: playbooks/vmf_mtv_provider.yml
 
+aap_seed_common_survey_spec:
+  name: ""
+  description: ""
+  spec:
+    - question_name: Source Name
+      question_description: >-
+        Name of the source environment as it appears in the AAP
+        inventory (e.g. vcenter-prod). Must be in the target's
+        vm_sources list.
+      variable: source_name
+      type: text
+      required: true
+    - question_name: Target Name
+      question_description: >-
+        Name of the target OpenShift cluster as it appears in the
+        AAP inventory (e.g. ocp-prod). Must be in the
+        migration_clusters group.
+      variable: target_name
+      type: text
+      required: true
+
 # ---------------------------------------------------------------------------
 # Per-type create toggles — set to false to skip an entire category
 # ---------------------------------------------------------------------------
@@ -124,26 +145,7 @@ aap_seed_controller_templates:
     ask_variables_on_launch: true
     verbosity: 0
     survey_enabled: true
-    survey_spec:
-      name: ""
-      description: ""
-      spec:
-        - question_name: Source Name
-          question_description: >-
-            Name of the source environment as it appears in the AAP
-            inventory (e.g. vcenter-prod). Must be in the target's
-            vm_sources list.
-          variable: source_name
-          type: text
-          required: true
-        - question_name: Target Name
-          question_description: >-
-            Name of the target OpenShift cluster as it appears in the
-            AAP inventory (e.g. ocp-prod). Must be in the
-            migration_clusters group.
-          variable: target_name
-          type: text
-          required: true
+    survey_spec: "{{ aap_seed_common_survey_spec }}"
   - name: "{{ aap_seed_mtv_provider_template_name }}"
     organization: "{{ aap_seed_org_name }}"
     project: "{{ aap_seed_project_name }}"
@@ -154,24 +156,5 @@ aap_seed_controller_templates:
     ask_variables_on_launch: true
     verbosity: 0
     survey_enabled: true
-    survey_spec:
-      name: ""
-      description: ""
-      spec:
-        - question_name: Source Name
-          question_description: >-
-            Name of the source environment as it appears in the AAP
-            inventory (e.g. vcenter-prod). Must be in the target's
-            vm_sources list.
-          variable: source_name
-          type: text
-          required: true
-        - question_name: Target Name
-          question_description: >-
-            Name of the target OpenShift cluster as it appears in the
-            AAP inventory (e.g. ocp-prod). Must be in the
-            migration_clusters group.
-          variable: target_name
-          type: text
-          required: true
+    survey_spec: "{{ aap_seed_common_survey_spec }}"
 ...

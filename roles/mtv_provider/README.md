@@ -157,6 +157,7 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
 | rescue_provider ¦ Fetch provider status | `kubernetes.core.k8s_info` | False |
+| rescue_provider ¦ Warn if cluster query failed | `ansible.builtin.debug` | True |
 | rescue_provider ¦ Extract error details | `ansible.builtin.set_fact` | True |
 | rescue_provider ¦ Display provider error status | `ansible.builtin.debug` | False |
 | rescue_provider ¦ Fail with summary | `ansible.builtin.fail` | False |
@@ -169,7 +170,9 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 | validate ¦ Assert target exists in AAP inventory | `ansible.builtin.assert` | False |
 | validate ¦ Assert source exists in AAP inventory | `ansible.builtin.assert` | False |
 | validate ¦ Assert source is mapped to this target | `ansible.builtin.assert` | False |
+| validate ¦ Assert source host variable is defined | `ansible.builtin.assert` | False |
 | validate ¦ Assert source credentials are injected | `ansible.builtin.assert` | False |
+| validate ¦ Assert provider_override does not contain managed keys | `ansible.builtin.assert` | True |
 | validate ¦ Assert source type is supported | `ansible.builtin.assert` | False |
 | validate ¦ Check Forklift CRD exists on target cluster | `kubernetes.core.k8s_info` | False |
 | validate ¦ Assert MTV operator is installed | `ansible.builtin.assert` | False |
@@ -241,10 +244,11 @@ classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
   Start-->|Task| rescue_provider___Fetch_provider_status0[rescue provider   fetch provider status]:::task
-  rescue_provider___Fetch_provider_status0-->|Task| rescue_provider___Extract_error_details1[rescue provider   extract error details<br>When: **mtv provider failed result resources   default   <br>   length   0**]:::task
-  rescue_provider___Extract_error_details1-->|Task| rescue_provider___Display_provider_error_status2[rescue provider   display provider error status]:::task
-  rescue_provider___Display_provider_error_status2-->|Task| rescue_provider___Fail_with_summary3[rescue provider   fail with summary]:::task
-  rescue_provider___Fail_with_summary3-->End
+  rescue_provider___Fetch_provider_status0-->|Task| rescue_provider___Warn_if_cluster_query_failed1[rescue provider   warn if cluster query failed<br>When: **mtv provider failed result is failed**]:::task
+  rescue_provider___Warn_if_cluster_query_failed1-->|Task| rescue_provider___Extract_error_details2[rescue provider   extract error details<br>When: **mtv provider failed result resources   default   <br>   length   0**]:::task
+  rescue_provider___Extract_error_details2-->|Task| rescue_provider___Display_provider_error_status3[rescue provider   display provider error status]:::task
+  rescue_provider___Display_provider_error_status3-->|Task| rescue_provider___Fail_with_summary4[rescue provider   fail with summary]:::task
+  rescue_provider___Fail_with_summary4-->End
 ```
 
 ### Graph for validate.yml
@@ -265,17 +269,19 @@ classDef rescue stroke:#665352,stroke-width:2px;
   validate___Assert_required_survey_variables_are_defined0-->|Task| validate___Assert_target_exists_in_AAP_inventory1[validate   assert target exists in aap inventory]:::task
   validate___Assert_target_exists_in_AAP_inventory1-->|Task| validate___Assert_source_exists_in_AAP_inventory2[validate   assert source exists in aap inventory]:::task
   validate___Assert_source_exists_in_AAP_inventory2-->|Task| validate___Assert_source_is_mapped_to_this_target3[validate   assert source is mapped to this target]:::task
-  validate___Assert_source_is_mapped_to_this_target3-->|Task| validate___Assert_source_credentials_are_injected4[validate   assert source credentials are injected]:::task
-  validate___Assert_source_credentials_are_injected4-->|Task| validate___Assert_source_type_is_supported5[validate   assert source type is supported]:::task
-  validate___Assert_source_type_is_supported5-->|Task| validate___Check_Forklift_CRD_exists_on_target_cluster6[validate   check forklift crd exists on target<br>cluster]:::task
-  validate___Check_Forklift_CRD_exists_on_target_cluster6-->|Task| validate___Assert_MTV_operator_is_installed7[validate   assert mtv operator is installed]:::task
-  validate___Assert_MTV_operator_is_installed7-->|Task| validate___Resolve_provider_variables8[validate   resolve provider variables]:::task
-  validate___Resolve_provider_variables8-->|Block Start| validate___Retrieve_source_TLS_certificate9_block_start_0[[validate   retrieve source tls certificate<br>When: **mtv provider auto retrieve cert   bool and not  mf<br>insecure skip tls verify   default false    bool <br>and mf source certificate   default       trim  <br>length    0**]]:::block
-  validate___Retrieve_source_TLS_certificate9_block_start_0-->|Task| validate___Retrieve_remote_certificate_from_source0[validate   retrieve remote certificate from source]:::task
+  validate___Assert_source_is_mapped_to_this_target3-->|Task| validate___Assert_source_host_variable_is_defined4[validate   assert source host variable is defined]:::task
+  validate___Assert_source_host_variable_is_defined4-->|Task| validate___Assert_source_credentials_are_injected5[validate   assert source credentials are injected]:::task
+  validate___Assert_source_credentials_are_injected5-->|Task| validate___Assert_provider_override_does_not_contain_managed_keys6[validate   assert provider override does not<br>contain managed keys<br>When: **mtv provider provider override   length   0**]:::task
+  validate___Assert_provider_override_does_not_contain_managed_keys6-->|Task| validate___Assert_source_type_is_supported7[validate   assert source type is supported]:::task
+  validate___Assert_source_type_is_supported7-->|Task| validate___Check_Forklift_CRD_exists_on_target_cluster8[validate   check forklift crd exists on target<br>cluster]:::task
+  validate___Check_Forklift_CRD_exists_on_target_cluster8-->|Task| validate___Assert_MTV_operator_is_installed9[validate   assert mtv operator is installed]:::task
+  validate___Assert_MTV_operator_is_installed9-->|Task| validate___Resolve_provider_variables10[validate   resolve provider variables]:::task
+  validate___Resolve_provider_variables10-->|Block Start| validate___Retrieve_source_TLS_certificate11_block_start_0[[validate   retrieve source tls certificate<br>When: **mtv provider auto retrieve cert   bool and not  mf<br>insecure skip tls verify   default false    bool <br>and mf source certificate   default       trim  <br>length    0**]]:::block
+  validate___Retrieve_source_TLS_certificate11_block_start_0-->|Task| validate___Retrieve_remote_certificate_from_source0[validate   retrieve remote certificate from source]:::task
   validate___Retrieve_remote_certificate_from_source0-->|Task| validate___Store_retrieved_certificate1[validate   store retrieved certificate]:::task
-  validate___Store_retrieved_certificate1-.->|End of Block| validate___Retrieve_source_TLS_certificate9_block_start_0
-  validate___Store_retrieved_certificate1-->|Task| validate___Resolve_effective_certificate10[validate   resolve effective certificate]:::task
-  validate___Resolve_effective_certificate10-->End
+  validate___Store_retrieved_certificate1-.->|End of Block| validate___Retrieve_source_TLS_certificate11_block_start_0
+  validate___Store_retrieved_certificate1-->|Task| validate___Resolve_effective_certificate12[validate   resolve effective certificate]:::task
+  validate___Resolve_effective_certificate12-->End
 ```
 
 ## Author Information
