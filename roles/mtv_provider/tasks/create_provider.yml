@@ -1,0 +1,45 @@
+---
+- name: create_provider | Ensure provider secret exists
+  redhat.openshift.k8s:
+    state: "{{ mtv_provider_provider_state }}"
+    apply: true
+    definition: >-
+      {{ lookup('template', 'provider_secret.yml.j2') | from_yaml }}
+  no_log: "{{ mtv_provider_secure_logging }}"
+
+- name: create_provider | Ensure provider CR exists
+  redhat.openshift.k8s:
+    state: "{{ mtv_provider_provider_state }}"
+    apply: true
+    definition: >-
+      {{ lookup('template', 'provider.yml.j2') | from_yaml
+         | ansible.builtin.combine({'spec': mtv_provider_provider_override}, recursive=True) }}
+
+- name: create_provider | Wait for provider to become Ready
+  kubernetes.core.k8s_info:
+    api_version: "{{ mtv_provider_api_version }}"
+    kind: Provider
+    name: "{{ _mtv_provider_provider_name }}"
+    namespace: "{{ mtv_provider_provider_namespace }}"
+  register: _mtv_provider_result
+  until: >-
+    _mtv_provider_result.resources | length > 0 and
+    (_mtv_provider_result.resources[0].status.conditions
+     | default([])
+     | selectattr('type', 'equalto', 'Ready')
+     | selectattr('status', 'equalto', 'True')
+     | list
+     | length > 0)
+  retries: >-
+    {{ ((mtv_provider_provider_wait_timeout | int) /
+        (mtv_provider_provider_wait_poll | int)) | int }}
+  delay: "{{ mtv_provider_provider_wait_poll }}"
+  when: mtv_provider_provider_wait | bool
+
+- name: create_provider | Provider created successfully
+  ansible.builtin.debug:
+    msg: >-
+      Provider '{{ _mtv_provider_provider_name }}' ({{ _mtv_provider_forklift_type }})
+      is Ready in namespace '{{ mtv_provider_provider_namespace }}'
+      on target '{{ target_name }}'.
+...

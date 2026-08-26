@@ -7,5 +7,5 @@
   tasks:
     - name: Create MTV provider for source-target pair
       ansible.builtin.import_role:
-        name: infra.openshift_virtualization_migration.configure_providers
+        name: infra.openshift_virtualization_migration.mtv_provider
 ...

@@ -57,9 +57,9 @@
 - name: validate | Assert source type is supported
   ansible.builtin.assert:
     that:
-      - configure_providers_source_type in ['vmware', 'ovirt']
+      - mtv_provider_source_type in ['vmware', 'ovirt']
     fail_msg: >-
-      Unsupported source type '{{ configure_providers_source_type }}'
+      Unsupported source type '{{ mtv_provider_source_type }}'
       for source '{{ source_name }}'. Supported types: vmware, ovirt.
     quiet: true
 
@@ -68,12 +68,12 @@
     api_version: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     name: providers.forklift.konveyor.io
-  register: _configure_providers_crd
+  register: _mtv_provider_crd
 
 - name: validate | Assert MTV operator is installed
   ansible.builtin.assert:
     that:
-      - _configure_providers_crd.resources | length > 0
+      - _mtv_provider_crd.resources | length > 0
     fail_msg: >-
       The Forklift/MTV Provider CRD was not found on target cluster
       '{{ target_name }}'. Ensure the MTV operator is installed before
@@ -82,35 +82,35 @@
 
 - name: validate | Resolve provider variables
   ansible.builtin.set_fact:
-    _configure_providers_forklift_type: >-
-      {{ 'vsphere' if configure_providers_source_type == 'vmware'
-         else configure_providers_source_type }}
-    _configure_providers_source_url: >-
-      https://{{ configure_providers_source_host }}{{ configure_providers_source_sdk_endpoint }}
-    _configure_providers_provider_name: >-
+    _mtv_provider_forklift_type: >-
+      {{ 'vsphere' if mtv_provider_source_type == 'vmware'
+         else mtv_provider_source_type }}
+    _mtv_provider_source_url: >-
+      https://{{ mtv_provider_source_host }}{{ mtv_provider_source_sdk_endpoint }}
+    _mtv_provider_provider_name: >-
       {{ source_name | infra.openshift_virtualization_migration.rfc1123 }}
-    _configure_providers_secret_name: >-
+    _mtv_provider_secret_name: >-
       {{ (source_name ~ '-provider-secret') | infra.openshift_virtualization_migration.rfc1123 }}
 
 - name: validate | Retrieve source TLS certificate
   when:
-    - configure_providers_auto_retrieve_cert | bool
+    - mtv_provider_auto_retrieve_cert | bool
     - not (mf_insecure_skip_tls_verify | default(false) | bool)
     - mf_source_certificate | default('') | trim | length == 0
   block:
     - name: validate | Retrieve remote certificate from source
       community.crypto.get_certificate:
-        host: "{{ configure_providers_source_host }}"
-        port: "{{ (_configure_providers_source_url | urlsplit('port') | default('443', true)) | int }}"
-      register: _configure_providers_remote_cert
+        host: "{{ mtv_provider_source_host }}"
+        port: "{{ (_mtv_provider_source_url | urlsplit('port') | default('443', true)) | int }}"
+      register: _mtv_provider_remote_cert
 
     - name: validate | Store retrieved certificate
       ansible.builtin.set_fact:
-        _configure_providers_source_certificate: "{{ _configure_providers_remote_cert.cert }}"
+        _mtv_provider_source_certificate: "{{ _mtv_provider_remote_cert.cert }}"
 
 - name: validate | Resolve effective certificate
   ansible.builtin.set_fact:
-    _configure_providers_source_certificate: >-
-      {{ _configure_providers_source_certificate
+    _mtv_provider_source_certificate: >-
+      {{ _mtv_provider_source_certificate
          | default(mf_source_certificate | default('')) }}
 ...

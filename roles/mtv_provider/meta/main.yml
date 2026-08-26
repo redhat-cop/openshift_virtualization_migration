@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  role_name: configure_providers
+  role_name: mtv_provider
   author: Red Hat
   description: >-
     Create MTV/Forklift source provider CRs on OpenShift target clusters.

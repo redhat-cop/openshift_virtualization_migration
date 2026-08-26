@@ -184,14 +184,14 @@ argument_specs:
           Passphrase to unlock the SSH key.
           Defaults to C(aap_git_ssh_key_unlock) from inventory.
 
-      aap_seed_configure_providers_template_name:
+      aap_seed_mtv_provider_template_name:
         type: str
         required: false
         default: OpenShift Virtualization Migration - Configure Providers
         description: >-
           Name of the Configure Providers job template created in AAP.
 
-      aap_seed_configure_providers_playbook:
+      aap_seed_mtv_provider_playbook:
         type: str
         required: false
         default: playbooks/vmf_configure_providers.yml

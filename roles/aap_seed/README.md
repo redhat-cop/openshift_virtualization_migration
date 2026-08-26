@@ -212,16 +212,6 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 
 * **Description**: ['Dynamically builds all AAP Configuration as Code objects from the Ansible inventory and role defaults, syncs the SCM project, and pushes everything to AAP via infra.aap_configuration.dispatch.', 'Object types managed include credential types, credentials, inventories, hosts, groups, projects, job templates, execution environments, and organizations.', 'Target cluster credentials use the built-in AAP credential type "OpenShift or Kubernetes API Bearer Token".', 'Each object type can be skipped with a C(_create) toggle or replaced entirely by overriding the corresponding C(aap_seed_controller_*) variable.']
 * **Options**:
-  * **aap_seed_configure_providers_playbook**:
-    * **Required**: False
-    * **Type**: str
-    * **Default**: playbooks/vmf_configure_providers.yml
-    * **Description**: Playbook path for the Configure Providers job template.
-  * **aap_seed_configure_providers_template_name**:
-    * **Required**: False
-    * **Type**: str
-    * **Default**: OpenShift Virtualization Migration - Configure Providers
-    * **Description**: Name of the Configure Providers job template created in AAP.
   * **aap_seed_controller_execution_environments**:
     * **Required**: False
     * **Type**: list
@@ -307,6 +297,16 @@ Description: Seed AAP with Migration Factory Configuration as Code content
     * **Type**: str
     * **Default**: OpenShift Virtualization Migration
     * **Description**: Name of the inventory created in AAP. Source and target hosts are added to this inventory.
+  * **aap_seed_mtv_provider_playbook**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: playbooks/vmf_configure_providers.yml
+    * **Description**: Playbook path for the Configure Providers job template.
+  * **aap_seed_mtv_provider_template_name**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: OpenShift Virtualization Migration - Configure Providers
+    * **Description**: Name of the Configure Providers job template created in AAP.
   * **aap_seed_org_name**:
     * **Required**: False
     * **Type**: str
@@ -408,8 +408,6 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`aap_seed_configure_providers_playbook`](defaults/main.yml#L41)   | str   | `playbooks/vmf_configure_providers.yml` |  None  |   None  |  None |
-| [`aap_seed_configure_providers_template_name`](defaults/main.yml#L40)   | str   | `OpenShift Virtualization Migration - Configure Providers` |  None  |   None  |  None |
 | [`aap_seed_controller_credential_types`](defaults/main.yml#L65)   | list   | `[]` |  None  |   None  |  None |
 | [`aap_seed_controller_credential_types.0`](defaults/main.yml#L66)   | dict   | `{}` |  None  |   None  |  None |
 | [`aap_seed_controller_credential_types.0.injectors`](defaults/main.yml#L93)   | dict   | `{}` |  None  |   None  |  None |
@@ -499,9 +497,9 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 | [`aap_seed_controller_templates.1.ask_variables_on_launch`](defaults/main.yml#L154)   | bool   | `True` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.execution_environment`](defaults/main.yml#L152)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.inventory`](defaults/main.yml#L151)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.name`](defaults/main.yml#L147)   | str   | `{{ aap_seed_configure_providers_template_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.name`](defaults/main.yml#L147)   | str   | `{{ aap_seed_mtv_provider_template_name }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.organization`](defaults/main.yml#L148)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.playbook`](defaults/main.yml#L150)   | str   | `{{ aap_seed_configure_providers_playbook }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.playbook`](defaults/main.yml#L150)   | str   | `{{ aap_seed_mtv_provider_playbook }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.project`](defaults/main.yml#L149)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.survey_enabled`](defaults/main.yml#L156)   | bool   | `True` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.survey_spec`](defaults/main.yml#L157)   | dict   | `{}` |  None  |   None  |  None |
@@ -535,6 +533,8 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 | [`aap_seed_inventory_name`](defaults/main.yml#L22)   | str   | `OpenShift Virtualization Migration` |  None  |   None  |  None |
 | [`aap_seed_migrate_playbook`](defaults/main.yml#L38)   | str   | `playbooks/vmf_migrate.yml` |  None  |   None  |  None |
 | [`aap_seed_migrate_template_name`](defaults/main.yml#L37)   | str   | `OpenShift Virtualization Migration - Migrate` |  None  |   None  |  None |
+| [`aap_seed_mtv_provider_playbook`](defaults/main.yml#L41)   | str   | `playbooks/vmf_configure_providers.yml` |  None  |   None  |  None |
+| [`aap_seed_mtv_provider_template_name`](defaults/main.yml#L40)   | str   | `OpenShift Virtualization Migration - Configure Providers` |  None  |   None  |  None |
 | [`aap_seed_org_name`](defaults/main.yml#L15)   | str   | `Default` |  None  |   None  |  None |
 | [`aap_seed_organizations_create`](defaults/main.yml#L46)   | bool   | `True` |  None  |   None  |  None |
 | [`aap_seed_password`](defaults/main.yml#L7)   | str   | `{{ aap_password ¦ default(omit) }}` |  None  |   None  |  None |
@@ -555,10 +555,6 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 | [`aap_seed_validate_certs`](defaults/main.yml#L9)   | str   | `{{ aap_validate_certs ¦ default(true) }}` |  None  |   None  |  None |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
-<br>
-<b>`aap_seed_configure_providers_playbook`:</b> None
-<br>
-<b>`aap_seed_configure_providers_template_name`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types`:</b> None
 <br>
@@ -809,6 +805,10 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <b>`aap_seed_migrate_playbook`:</b> None
 <br>
 <b>`aap_seed_migrate_template_name`:</b> None
+<br>
+<b>`aap_seed_mtv_provider_playbook`:</b> None
+<br>
+<b>`aap_seed_mtv_provider_template_name`:</b> None
 <br>
 <b>`aap_seed_org_name`:</b> None
 <br>

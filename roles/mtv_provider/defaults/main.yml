@@ -1,5 +1,5 @@
 ---
-configure_providers_secure_logging: "{{ secure_logging | default(true) }}"
+mtv_provider_secure_logging: "{{ secure_logging | default(true) }}"
 
 # ---------------------------------------------------------------------------
 # Provider configuration — controls how MTV providers are created
@@ -7,42 +7,42 @@ configure_providers_secure_logging: "{{ secure_logging | default(true) }}"
 
 # Namespace where the provider will be created.
 # Resolved from target host vars in AAP inventory; override if needed.
-configure_providers_provider_namespace: >-
+mtv_provider_provider_namespace: >-
   {{ hostvars[target_name]['mtv_namespace'] | default('openshift-mtv') }}
 
 # Whether to wait for the Provider CR to reach Ready status after creation.
-configure_providers_provider_wait: true
+mtv_provider_provider_wait: true
 
 # Seconds to wait for the Provider to become Ready before failing.
-configure_providers_provider_wait_timeout: 120
+mtv_provider_provider_wait_timeout: 120
 
 # Seconds between status polls while waiting for Ready.
-configure_providers_provider_wait_poll: 10
+mtv_provider_provider_wait_poll: 10
 
 # Desired state of the provider — present or absent.
-configure_providers_provider_state: present
+mtv_provider_provider_state: present
 
 # Forklift API version for Provider CRs.
-configure_providers_api_version: forklift.konveyor.io/v1beta1
+mtv_provider_api_version: forklift.konveyor.io/v1beta1
 
 # Override configuration merged into the Provider CR spec.
-configure_providers_provider_override: {}
+mtv_provider_provider_override: {}
 
 # Whether to automatically retrieve the source TLS certificate
 # when insecureSkipTlsVerify is false and no certificate is provided.
-configure_providers_auto_retrieve_cert: true
+mtv_provider_auto_retrieve_cert: true
 
 # ---------------------------------------------------------------------------
 # Source metadata — resolved from AAP inventory host vars
 # ---------------------------------------------------------------------------
-configure_providers_source_type: >-
+mtv_provider_source_type: >-
   {{ hostvars[source_name]['type'] | default('vmware') }}
 
-configure_providers_source_host: >-
+mtv_provider_source_host: >-
   {{ hostvars[source_name]['host'] }}
 
-configure_providers_source_sdk_endpoint: >-
+mtv_provider_source_sdk_endpoint: >-
   {{ hostvars[source_name]['sdk_endpoint'] | default('/sdk') }}
 
-configure_providers_source_vddk: "{{ hostvars[source_name]['vddk'] | default({}) }}"
+mtv_provider_source_vddk: "{{ hostvars[source_name]['vddk'] | default({}) }}"
 ...

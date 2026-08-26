@@ -1,132 +1,5 @@
-# configure_providers
-
-Create MTV/Forklift source provider custom resources on OpenShift target
-clusters. Designed to run from AAP with credential injection.
-
-## Overview
-
-This role creates a Forklift `Provider` CR and its backing `Secret` on a
-target OpenShift cluster for a given source environment (vSphere or oVirt).
-It is intended to be launched as an AAP job template with `source_name` and
-`target_name` survey variables.
-
-For targets with multiple sources (`vm_sources: [vcenter-prod, vcenter-lab]`),
-launch the job template once per source-target pair. Each run creates one
-provider. The role is idempotent — re-running for the same pair updates in
-place.
-
-## Requirements
-
-- MTV (Forklift) operator must be installed on the target OpenShift cluster
-- `kubernetes.core` and `redhat.openshift` Ansible collections
-- AAP credential types:
-  - **Migration Factory - Source Environment** (custom) — injects
-    `mf_source_username`, `mf_source_password`, `mf_source_certificate`,
-    `mf_source_host`, `mf_insecure_skip_tls_verify`
-  - **OpenShift or Kubernetes API Bearer Token** (built-in) — sets
-    `K8S_AUTH_HOST`, `K8S_AUTH_API_KEY`, `K8S_AUTH_VERIFY_SSL` as
-    environment variables, which `kubernetes.core` and `redhat.openshift`
-    modules read automatically
-
-## Role Variables
-
-### Required (survey variables)
-
-| Variable | Description |
-|----------|-------------|
-| `source_name` | Name of the source environment (must match an AAP inventory host in `vm_sources`) |
-| `target_name` | Name of the target OpenShift cluster (must match an AAP inventory host in `migration_clusters`) |
-
-### Optional (role defaults)
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `configure_providers_mtv_namespace` | From `hostvars[target_name].mtv_namespace` or `openshift-mtv` | Namespace where MTV is installed |
-| `configure_providers_provider_wait` | `true` | Wait for Provider to reach Ready status |
-| `configure_providers_provider_wait_timeout` | `120` | Seconds to wait for Ready |
-| `configure_providers_provider_wait_poll` | `10` | Seconds between status polls |
-| `configure_providers_provider_state` | `present` | Set to `absent` to remove a provider |
-| `configure_providers_api_version` | `forklift.konveyor.io/v1beta1` | Forklift API version |
-
-### Source host vars (from AAP inventory)
-
-These are resolved from `hostvars[source_name]` at runtime:
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `type` | Yes | Source type: `vmware` or `ovirt` |
-| `host` | Yes | Source hostname or IP |
-| `sdk_endpoint` | No (default: `/sdk`) | SDK endpoint path |
-| `vddk.image` | No | VDDK init image URL (VMware only) |
-
-### Target host vars (from AAP inventory)
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `mtv_namespace` | No (default: `openshift-mtv`) | Namespace where MTV is installed |
-| `vm_sources` | Yes | List of source names mapped to this target |
-
-## Resources Created
-
-For each source-target pair, the role creates:
-
-1. **Secret** (`<source_name>-provider-secret`) — contains source
-   credentials (user, password, and optionally cacert or insecureSkipVerify)
-2. **Provider** (`<source_name>`) — Forklift Provider CR pointing to the
-   source with the secret reference
-
-### VMware Provider Example
-
-```yaml
-apiVersion: forklift.konveyor.io/v1beta1
-kind: Provider
-metadata:
-  name: vcenter-prod
-  namespace: openshift-mtv
-spec:
-  type: vsphere
-  url: https://vcenter.prod.example.com/sdk
-  secret:
-    name: vcenter-prod-provider-secret
-    namespace: openshift-mtv
-  settings:
-    vddkInitImage: registry.example.com/vddk:8.0
-```
-
-### oVirt Provider Example
-
-```yaml
-apiVersion: forklift.konveyor.io/v1beta1
-kind: Provider
-metadata:
-  name: rhv-legacy
-  namespace: openshift-mtv
-spec:
-  type: ovirt
-  url: https://rhvm.example.com/ovirt-engine/api
-  secret:
-    name: rhv-legacy-provider-secret
-    namespace: openshift-mtv
-```
-
-## Error Handling
-
-If the Provider fails to reach `Ready` status within the timeout, the role:
-
-1. Fetches the Provider CR's current status conditions
-2. Displays a structured error with the provider name, type, URL, phase,
-   and MTV's reported failure reason
-3. Provides troubleshooting guidance (check credentials, verify source
-   reachability, TLS settings, MTV operator status)
-
-## AAP Job Template
-
-The `aap_seed` role creates a job template named
-**OpenShift Virtualization Migration - Configure MTV** that runs
-`playbooks/vmf_configure_providers.yml`. Attach both source and target
-credentials when launching.
 <!-- DOCSIBLE START -->
-## configure_providers
+## mtv_provider
 
 ```
 Role belongs to infra/openshift_virtualization_migration
@@ -147,27 +20,27 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 
 * **Description**: ['Creates a Forklift Provider custom resource and its backing Secret on a target OpenShift cluster for a given source environment.', 'Designed to run from AAP with credential injection. The source credential injects mf_source_username, mf_source_password, and mf_source_certificate as extra vars. OpenShift connection is provided by the AAP OpenShift credential which sets K8S_AUTH_* environment variables.', 'For targets with multiple sources, launch the job template once per source-target pair.']
 * **Options**:
-  * **configure_providers_api_version**:
+  * **mtv_provider_api_version**:
     * **Required**: False
     * **Type**: str
     * **Default**: forklift.konveyor.io/v1beta1
     * **Description**: Forklift API version for Provider CRs.
-  * **configure_providers_auto_retrieve_cert**:
+  * **mtv_provider_auto_retrieve_cert**:
     * **Required**: False
     * **Type**: bool
     * **Default**: True
     * **Description**: Whether to automatically retrieve the source TLS certificate when insecureSkipTlsVerify is false and no certificate is provided.
-  * **configure_providers_provider_namespace**:
+  * **mtv_provider_provider_namespace**:
     * **Required**: False
     * **Type**: str
     * **Default**: openshift-mtv
     * **Description**: Namespace where the provider will be created. Resolved from the target host's mtv_namespace variable by default.
-  * **configure_providers_provider_override**:
+  * **mtv_provider_provider_override**:
     * **Required**: False
     * **Type**: dict
     * **Default**: {}
     * **Description**: Override configuration merged into the Provider CR spec. Allows setting additional properties such as settings or other fields that evolve with the Forklift API.
-  * **configure_providers_provider_state**:
+  * **mtv_provider_provider_state**:
     * **Required**: False
     * **Type**: str
     * **Default**: present
@@ -175,22 +48,22 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
     * **Choices**:
       * present
       * absent
-  * **configure_providers_provider_wait**:
+  * **mtv_provider_provider_wait**:
     * **Required**: False
     * **Type**: bool
     * **Default**: True
     * **Description**: Whether to wait for the Provider CR to reach Ready status after creation.
-  * **configure_providers_provider_wait_poll**:
+  * **mtv_provider_provider_wait_poll**:
     * **Required**: False
     * **Type**: int
     * **Default**: 10
     * **Description**: Seconds between status polls while waiting for Ready.
-  * **configure_providers_provider_wait_timeout**:
+  * **mtv_provider_provider_wait_timeout**:
     * **Required**: False
     * **Type**: int
     * **Default**: 120
     * **Description**: Seconds to wait for the Provider to become Ready before failing.
-  * **configure_providers_secure_logging**:
+  * **mtv_provider_secure_logging**:
     * **Required**: False
     * **Type**: bool
     * **Default**: True
@@ -216,47 +89,47 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`configure_providers_api_version`](defaults/main.yml#L26)   | str   | `forklift.konveyor.io/v1beta1` |  None  |   None  |  None |
-| [`configure_providers_auto_retrieve_cert`](defaults/main.yml#L33)   | bool   | `True` |  None  |   None  |  None |
-| [`configure_providers_provider_namespace`](defaults/main.yml#L10)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_provider_override`](defaults/main.yml#L29)   | dict   | `{}` |  None  |   None  |  None |
-| [`configure_providers_provider_state`](defaults/main.yml#L23)   | str   | `present` |  None  |   None  |  None |
-| [`configure_providers_provider_wait`](defaults/main.yml#L14)   | bool   | `True` |  None  |   None  |  None |
-| [`configure_providers_provider_wait_poll`](defaults/main.yml#L20)   | int   | `10` |  None  |   None  |  None |
-| [`configure_providers_provider_wait_timeout`](defaults/main.yml#L17)   | int   | `120` |  None  |   None  |  None |
-| [`configure_providers_secure_logging`](defaults/main.yml#L2)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
-| [`configure_providers_source_host`](defaults/main.yml#L41)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_source_sdk_endpoint`](defaults/main.yml#L44)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_source_type`](defaults/main.yml#L38)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`configure_providers_source_vddk`](defaults/main.yml#L47)   | str   | `{{ hostvars[source_name]['vddk'] ¦ default({}) }}` |  None  |   None  |  None |
+| [`mtv_provider_api_version`](defaults/main.yml#L26)   | str   | `forklift.konveyor.io/v1beta1` |  None  |   None  |  None |
+| [`mtv_provider_auto_retrieve_cert`](defaults/main.yml#L33)   | bool   | `True` |  None  |   None  |  None |
+| [`mtv_provider_provider_namespace`](defaults/main.yml#L10)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`mtv_provider_provider_override`](defaults/main.yml#L29)   | dict   | `{}` |  None  |   None  |  None |
+| [`mtv_provider_provider_state`](defaults/main.yml#L23)   | str   | `present` |  None  |   None  |  None |
+| [`mtv_provider_provider_wait`](defaults/main.yml#L14)   | bool   | `True` |  None  |   None  |  None |
+| [`mtv_provider_provider_wait_poll`](defaults/main.yml#L20)   | int   | `10` |  None  |   None  |  None |
+| [`mtv_provider_provider_wait_timeout`](defaults/main.yml#L17)   | int   | `120` |  None  |   None  |  None |
+| [`mtv_provider_secure_logging`](defaults/main.yml#L2)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
+| [`mtv_provider_source_host`](defaults/main.yml#L41)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`mtv_provider_source_sdk_endpoint`](defaults/main.yml#L44)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`mtv_provider_source_type`](defaults/main.yml#L38)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`mtv_provider_source_vddk`](defaults/main.yml#L47)   | str   | `{{ hostvars[source_name]['vddk'] ¦ default({}) }}` |  None  |   None  |  None |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
-<b>`configure_providers_api_version`:</b> None
+<b>`mtv_provider_api_version`:</b> None
 <br>
-<b>`configure_providers_auto_retrieve_cert`:</b> None
+<b>`mtv_provider_auto_retrieve_cert`:</b> None
 <br>
-<b>`configure_providers_provider_namespace`:</b> None
+<b>`mtv_provider_provider_namespace`:</b> None
 <br>
-<b>`configure_providers_provider_override`:</b> None
+<b>`mtv_provider_provider_override`:</b> None
 <br>
-<b>`configure_providers_provider_state`:</b> None
+<b>`mtv_provider_provider_state`:</b> None
 <br>
-<b>`configure_providers_provider_wait`:</b> None
+<b>`mtv_provider_provider_wait`:</b> None
 <br>
-<b>`configure_providers_provider_wait_poll`:</b> None
+<b>`mtv_provider_provider_wait_poll`:</b> None
 <br>
-<b>`configure_providers_provider_wait_timeout`:</b> None
+<b>`mtv_provider_provider_wait_timeout`:</b> None
 <br>
-<b>`configure_providers_secure_logging`:</b> None
+<b>`mtv_provider_secure_logging`:</b> None
 <br>
-<b>`configure_providers_source_host`:</b> None
+<b>`mtv_provider_source_host`:</b> None
 <br>
-<b>`configure_providers_source_sdk_endpoint`:</b> None
+<b>`mtv_provider_source_sdk_endpoint`:</b> None
 <br>
-<b>`configure_providers_source_type`:</b> None
+<b>`mtv_provider_source_type`:</b> None
 <br>
-<b>`configure_providers_source_vddk`:</b> None
+<b>`mtv_provider_source_vddk`:</b> None
 <br>
 <br>
 
@@ -324,7 +197,7 @@ classDef rescue stroke:#665352,stroke-width:2px;
 
   Start-->|Task| create_provider___Ensure_provider_secret_exists0[create provider   ensure provider secret exists]:::task
   create_provider___Ensure_provider_secret_exists0-->|Task| create_provider___Ensure_provider_CR_exists1[create provider   ensure provider cr exists]:::task
-  create_provider___Ensure_provider_CR_exists1-->|Task| create_provider___Wait_for_provider_to_become_Ready2[create provider   wait for provider to become<br>ready<br>When: **configure providers provider wait   bool**]:::task
+  create_provider___Ensure_provider_CR_exists1-->|Task| create_provider___Wait_for_provider_to_become_Ready2[create provider   wait for provider to become<br>ready<br>When: **mtv provider provider wait   bool**]:::task
   create_provider___Wait_for_provider_to_become_Ready2-->|Task| create_provider___Provider_created_successfully3[create provider   provider created successfully]:::task
   create_provider___Provider_created_successfully3-->End
 ```
@@ -368,7 +241,7 @@ classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
   Start-->|Task| rescue_provider___Fetch_provider_status0[rescue provider   fetch provider status]:::task
-  rescue_provider___Fetch_provider_status0-->|Task| rescue_provider___Extract_error_details1[rescue provider   extract error details<br>When: **configure providers failed result resources  <br>default       length   0**]:::task
+  rescue_provider___Fetch_provider_status0-->|Task| rescue_provider___Extract_error_details1[rescue provider   extract error details<br>When: **mtv provider failed result resources   default   <br>   length   0**]:::task
   rescue_provider___Extract_error_details1-->|Task| rescue_provider___Display_provider_error_status2[rescue provider   display provider error status]:::task
   rescue_provider___Display_provider_error_status2-->|Task| rescue_provider___Fail_with_summary3[rescue provider   fail with summary]:::task
   rescue_provider___Fail_with_summary3-->End
@@ -397,7 +270,7 @@ classDef rescue stroke:#665352,stroke-width:2px;
   validate___Assert_source_type_is_supported5-->|Task| validate___Check_Forklift_CRD_exists_on_target_cluster6[validate   check forklift crd exists on target<br>cluster]:::task
   validate___Check_Forklift_CRD_exists_on_target_cluster6-->|Task| validate___Assert_MTV_operator_is_installed7[validate   assert mtv operator is installed]:::task
   validate___Assert_MTV_operator_is_installed7-->|Task| validate___Resolve_provider_variables8[validate   resolve provider variables]:::task
-  validate___Resolve_provider_variables8-->|Block Start| validate___Retrieve_source_TLS_certificate9_block_start_0[[validate   retrieve source tls certificate<br>When: **configure providers auto retrieve cert   bool and<br>not  mf insecure skip tls verify   default false  <br> bool  and mf source certificate   default      <br>trim   length    0**]]:::block
+  validate___Resolve_provider_variables8-->|Block Start| validate___Retrieve_source_TLS_certificate9_block_start_0[[validate   retrieve source tls certificate<br>When: **mtv provider auto retrieve cert   bool and not  mf<br>insecure skip tls verify   default false    bool <br>and mf source certificate   default       trim  <br>length    0**]]:::block
   validate___Retrieve_source_TLS_certificate9_block_start_0-->|Task| validate___Retrieve_remote_certificate_from_source0[validate   retrieve remote certificate from source]:::task
   validate___Retrieve_remote_certificate_from_source0-->|Task| validate___Store_retrieved_certificate1[validate   store retrieved certificate]:::task
   validate___Store_retrieved_certificate1-.->|End of Block| validate___Retrieve_source_TLS_certificate9_block_start_0

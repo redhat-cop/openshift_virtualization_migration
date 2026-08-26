@@ -31,14 +31,14 @@ argument_specs:
           Name of the target OpenShift cluster (must match an AAP inventory
           host in the migration_clusters group).
 
-      configure_providers_secure_logging:
+      mtv_provider_secure_logging:
         type: bool
         required: false
         default: true
         description: >-
           Whether to enable secure logging for sensitive tasks.
 
-      configure_providers_provider_namespace:
+      mtv_provider_provider_namespace:
         type: str
         required: false
         default: openshift-mtv
@@ -46,7 +46,7 @@ argument_specs:
           Namespace where the provider will be created.
           Resolved from the target host's mtv_namespace variable by default.
 
-      configure_providers_provider_wait:
+      mtv_provider_provider_wait:
         type: bool
         required: false
         default: true
@@ -54,21 +54,21 @@ argument_specs:
           Whether to wait for the Provider CR to reach Ready status after
           creation.
 
-      configure_providers_provider_wait_timeout:
+      mtv_provider_provider_wait_timeout:
         type: int
         required: false
         default: 120
         description: >-
           Seconds to wait for the Provider to become Ready before failing.
 
-      configure_providers_provider_wait_poll:
+      mtv_provider_provider_wait_poll:
         type: int
         required: false
         default: 10
         description: >-
           Seconds between status polls while waiting for Ready.
 
-      configure_providers_provider_state:
+      mtv_provider_provider_state:
         type: str
         required: false
         default: present
@@ -79,14 +79,14 @@ argument_specs:
           Desired state of the provider. Set to absent to remove a
           previously created provider and its secret.
 
-      configure_providers_api_version:
+      mtv_provider_api_version:
         type: str
         required: false
         default: forklift.konveyor.io/v1beta1
         description: >-
           Forklift API version for Provider CRs.
 
-      configure_providers_provider_override:
+      mtv_provider_provider_override:
         type: dict
         required: false
         default: {}
@@ -95,7 +95,7 @@ argument_specs:
           Allows setting additional properties such as settings or
           other fields that evolve with the Forklift API.
 
-      configure_providers_auto_retrieve_cert:
+      mtv_provider_auto_retrieve_cert:
         type: bool
         required: false
         default: true

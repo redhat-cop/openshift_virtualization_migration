@@ -1,0 +1,54 @@
+---
+- name: rescue_provider | Fetch provider status
+  kubernetes.core.k8s_info:
+    api_version: "{{ mtv_provider_api_version }}"
+    kind: Provider
+    name: "{{ _mtv_provider_provider_name }}"
+    namespace: "{{ mtv_provider_provider_namespace }}"
+  register: _mtv_provider_failed_result
+  ignore_errors: true
+
+- name: rescue_provider | Extract error details
+  ansible.builtin.set_fact:
+    _mtv_provider_error_conditions: >-
+      {{ _mtv_provider_failed_result.resources[0].status.conditions
+         | default([]) }}
+    _mtv_provider_error_phase: >-
+      {{ _mtv_provider_failed_result.resources[0].status.phase
+         | default('Unknown') }}
+  when: >-
+    _mtv_provider_failed_result.resources | default([]) | length > 0
+
+- name: rescue_provider | Display provider error status
+  ansible.builtin.debug:
+    msg: |
+      Provider creation failed for '{{ _mtv_provider_provider_name | default(source_name) }}'.
+
+      Provider Details:
+        Name:      {{ _mtv_provider_provider_name | default(source_name) }}
+        Type:      {{ _mtv_provider_forklift_type | default('unknown') }}
+        URL:       {{ _mtv_provider_source_url | default('unknown') }}
+        Namespace: {{ mtv_provider_provider_namespace }}
+        Phase:     {{ _mtv_provider_error_phase | default('Unknown') }}
+
+      Status Conditions:
+      {{ _mtv_provider_error_conditions | default([])
+         | to_nice_yaml }}
+
+      Troubleshooting:
+        - Verify the source host ({{ mtv_provider_source_host }}) is
+          reachable from the OpenShift cluster
+        - Check that the source credentials are correct
+        - If using TLS, verify the certificate or set
+          insecure_skip_tls_verify: true on the source
+        - Confirm MTV/Forklift operator is installed and running
+
+- name: rescue_provider | Fail with summary
+  ansible.builtin.fail:
+    msg: >-
+      Failed to create provider '{{ _mtv_provider_provider_name | default(source_name) }}'
+      ({{ _mtv_provider_forklift_type | default('unknown') }})
+      on target '{{ target_name }}'.
+      Phase: {{ _mtv_provider_error_phase | default('Unknown') }}.
+      Check the debug output above for details.
+...
