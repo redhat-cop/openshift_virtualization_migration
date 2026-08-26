@@ -104,7 +104,13 @@
         port: "{{ (_configure_providers_source_url | urlsplit('port') | default('443', true)) | int }}"
       register: _configure_providers_remote_cert
 
-    - name: validate | Set retrieved certificate
+    - name: validate | Store retrieved certificate
       ansible.builtin.set_fact:
-        mf_source_certificate: "{{ _configure_providers_remote_cert.cert }}"
+        _configure_providers_source_certificate: "{{ _configure_providers_remote_cert.cert }}"
+
+- name: validate | Resolve effective certificate
+  ansible.builtin.set_fact:
+    _configure_providers_source_certificate: >-
+      {{ _configure_providers_source_certificate
+         | default(mf_source_certificate | default('')) }}
 ...
