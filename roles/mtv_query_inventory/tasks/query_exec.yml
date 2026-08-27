@@ -1,0 +1,51 @@
+---
+
+- name: query_exec | Obtain the name of a Running Forklift Inventory Pod
+  kubernetes.core.k8s_info:
+    kind: EndpointSlice
+    host: "{{ mtv_query_inventory_openshift_host }}"
+    api_key: "{{ mtv_query_inventory_openshift_api_key }}"
+    validate_certs: "{{ mtv_query_inventory_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_query_inventory_openshift_ca_cert_path | default(omit) }}"
+    namespace: "{{ mtv_query_inventory_namespace }}"
+    label_selectors:
+      kubernetes.io/service-name={{ mtv_query_inventory_service_name }}
+  register: _mtv_query_inventory_endpoint_slice
+  until:
+    - "'resources' in _mtv_query_inventory_endpoint_slice"
+    - _mtv_query_inventory_endpoint_slice.resources | length > 0
+    - "'endpoints' in (_mtv_query_inventory_endpoint_slice.resources | first)"
+    - (_mtv_query_inventory_endpoint_slice.resources | first).endpoints | length > 0
+  retries: "{{ mtv_query_inventory_query_retries }}"
+  delay: "{{ mtv_query_inventory_query_delay }}"
+  no_log: "{{ mtv_query_inventory_secure_logging }}"
+
+- name: query_exec | Set name of the MTV Inventory Pod
+  ansible.builtin.set_fact:
+    mtv_query_inventory_exec_pod_name: >-
+      {{ (((_mtv_query_inventory_endpoint_slice.resources | first).endpoints | first)).targetRef.name }}
+
+- name: query_exec | Execute Query (exec)
+  kubernetes.core.k8s_exec:
+    host: "{{ mtv_query_inventory_openshift_host }}"
+    api_key: "{{ mtv_query_inventory_openshift_api_key }}"
+    validate_certs: "{{ mtv_query_inventory_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_query_inventory_openshift_ca_cert_path | default(omit) }}"
+    namespace: "{{ mtv_query_inventory_namespace }}"
+    pod: "{{ mtv_query_inventory_exec_pod_name }}"
+    command: >-
+      curl -k -s
+      -H "Authorization: Bearer {{ mtv_query_inventory_openshift_api_key }}"
+      https://localhost:8443{{ mtv_query_inventory_endpoint_path }}
+  register: _mtv_query_inventory_query_result
+  retries: "{{ mtv_query_inventory_query_retries }}"
+  until: _mtv_query_inventory_query_result.rc == 0
+  delay: "{{ mtv_query_inventory_query_delay }}"
+  changed_when: false
+  no_log: "{{ mtv_query_inventory_secure_logging }}"
+
+- name: query_exec | Set Result Fact # noqa var-naming[no-jinja]
+  ansible.builtin.set_fact:
+    "{{ mtv_query_inventory_query_result_var | default(mtv_query_inventory_result_var) }}": >-
+      {{ _mtv_query_inventory_query_result.stdout | from_json }}
+...

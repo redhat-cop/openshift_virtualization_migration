@@ -1,0 +1,31 @@
+---
+
+- name: Verify valid retrieval method provided
+  ansible.builtin.assert:
+    that:
+      - mtv_query_inventory_retrieval_method in __mtv_query_inventory_valid_retrieval_methods
+    fail_msg: >-
+      "{{ mtv_query_inventory_retrieval_method }} is not a valid MTV inventory retrieval method.
+      Valid options are {{ __mtv_query_inventory_valid_retrieval_methods | join(', ') }}."
+    quiet: true
+
+- name: Verify MTV inventory endpoint is provided
+  ansible.builtin.assert:
+    that:
+      - mtv_query_inventory_endpoint_path | default('', true) | length > 0
+      - mtv_query_inventory_endpoint_path is ansible.builtin.match('^/[a-zA-Z0-9_\\-/]*(\\?[a-zA-Z0-9_\\-/.%&=]*)?$')
+    fail_msg: >-
+      Invalid MTV inventory endpoint provided: {{ mtv_query_inventory_endpoint_path }}.
+      Ensure that a valid URL context path is provided for the MTV inventory endpoint.
+    quiet: true
+
+- name: Query MTV inventory via api
+  when: mtv_query_inventory_retrieval_method == 'api'
+  ansible.builtin.include_tasks:
+    file: query_api.yml
+
+- name: Query MTV inventory via exec
+  when: mtv_query_inventory_retrieval_method == 'exec'
+  ansible.builtin.include_tasks:
+    file: query_exec.yml
+...

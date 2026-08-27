@@ -1,0 +1,86 @@
+---
+argument_specs:
+  main:
+    short_description: Query the MTV (Migration Toolkit for Virtualization) inventory.
+    options:
+      mtv_query_inventory_openshift_host:
+        type: str
+        required: true
+        description: OpenShift host (eg. https://api.openshift.example.com:6443).
+
+      mtv_query_inventory_openshift_api_key:
+        type: str
+        required: true
+        description: OpenShift API key.
+
+      mtv_query_inventory_openshift_ca_cert_path:
+        type: str
+        required: false
+        description: Path to the OpenShift CA Certificate.
+
+      mtv_query_inventory_openshift_verify_ssl:
+        type: bool
+        required: false
+        default: true
+        description: Whether to verify SSL certificates.
+
+      mtv_query_inventory_retrieval_method:
+        type: str
+        required: false
+        default: "api"
+        choices:
+          - api
+          - exec
+        description: >-
+          Method to retrieve inventory data from MTV.
+
+      mtv_query_inventory_api_scheme:
+        type: str
+        required: false
+        default: "https"
+        description: Scheme to use when constructing the MTV Inventory URL.
+
+      mtv_query_inventory_url:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          URL of the MTV Inventory Service. If not provided,
+          the URL will be determined from the MTV Inventory Route.
+
+      mtv_query_inventory_endpoint_path:
+        type: str
+        required: true
+        description: Relative path to the MTV inventory retrieval endpoint (eg. /providers).
+
+      mtv_query_inventory_secure_logging:
+        type: bool
+        required: false
+        default: true
+        description: Whether to enable secure logging.
+
+      mtv_query_inventory_route_name:
+        type: str
+        required: false
+        default: "forklift-inventory"
+        description: MTV Inventory Route Name.
+
+      mtv_query_inventory_service_name:
+        type: str
+        required: false
+        default: "forklift-inventory"
+        description: MTV Inventory Service Name.
+
+      mtv_query_inventory_namespace:
+        type: str
+        required: false
+        default: "openshift-mtv"
+        description: Namespace containing the MTV inventory service.
+
+      mtv_query_inventory_result_var:
+        type: str
+        required: false
+        default: "mtv_query_inventory_query_result"
+        description: >-
+          Name of the variable to store the query result.
+...

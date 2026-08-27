@@ -1,0 +1,60 @@
+---
+- name: query_api | Determine MTV Inventory URL
+  when: mtv_query_inventory_url | default('', true) | length == 0
+  block:
+    - name: query_api | Locate MTV Inventory Route
+      no_log: "{{ mtv_query_inventory_secure_logging }}"
+      kubernetes.core.k8s_info:
+        host: "{{ mtv_query_inventory_openshift_host }}"
+        api_key: "{{ mtv_query_inventory_openshift_api_key }}"
+        validate_certs: "{{ mtv_query_inventory_openshift_verify_ssl }}"
+        ca_cert: "{{ mtv_query_inventory_openshift_ca_cert_path | default(omit) }}"
+        api_version: route.openshift.io/v1
+        kind: Route
+        name: "{{ mtv_query_inventory_route_name }}"
+        namespace: "{{ mtv_query_inventory_namespace }}"
+      register: __mtv_query_inventory_route_info
+      retries: "{{ mtv_query_inventory_query_retries }}"
+      until:
+        - __mtv_query_inventory_route_info.resources is defined
+        - __mtv_query_inventory_route_info.resources | length > 0
+      delay: "{{ mtv_query_inventory_query_delay }}"
+
+    - name: query_api | Fail if MTV Inventory Route not found
+      ansible.builtin.fail:
+        msg: >-
+          MTV Inventory Route {{ mtv_query_inventory_route_name }}
+          not found in namespace {{ mtv_query_inventory_namespace }}.
+          Ensure that the MTV Inventory Route is created and accessible.
+      when: >-
+        __mtv_query_inventory_route_info is not defined
+        or __mtv_query_inventory_route_info.resources is not defined
+        or __mtv_query_inventory_route_info.resources | length == 0
+
+    - name: query_api | Set MTV Inventory URL
+      ansible.builtin.set_fact:
+        mtv_query_inventory_url: >-
+          {{ mtv_query_inventory_api_scheme }}://{{ __mtv_query_inventory_route_info.resources[0].spec.host }}
+
+- name: query_api | Execute Query (api)
+  ansible.builtin.uri:
+    url: "{{ mtv_query_inventory_url }}{{ mtv_query_inventory_endpoint_path }}"
+    method: GET
+    body_format: json
+    status_code: 200
+    return_content: true
+    validate_certs: "{{ mtv_query_inventory_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_query_inventory_openshift_ca_cert_path | default(omit) }}"
+    headers:
+      Authorization: Bearer {{ mtv_query_inventory_openshift_api_key }}
+  register: __mtv_query_inventory_query_result
+  retries: "{{ mtv_query_inventory_query_retries }}"
+  until: __mtv_query_inventory_query_result.status == 200
+  delay: "{{ mtv_query_inventory_query_delay }}"
+  no_log: "{{ mtv_query_inventory_secure_logging }}"
+
+- name: query_api | Set Inventory Result Fact # noqa var-naming[no-jinja]
+  ansible.builtin.set_fact:
+    "{{ mtv_query_inventory_query_result_var | default(mtv_query_inventory_result_var) }}": >-
+      {{ __mtv_query_inventory_query_result.json }}
+...

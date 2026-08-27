@@ -1,0 +1,100 @@
+---
+
+# title: OpenShift Host
+# required: True
+# description: OpenShift host.
+mtv_query_inventory_openshift_host: >-
+  {{
+    lookup('env', 'K8S_AUTH_HOST') | default(openshift_host, true)
+  }}
+
+# title: OpenShift API Key
+# required: True
+# description: OpenShift API key.
+mtv_query_inventory_openshift_api_key: >-
+  {{
+    lookup('env', 'K8S_AUTH_API_KEY')
+    | default(
+        openshift_credential.openshift_api_key
+        | default(openshift_credential.openshift_temporary_api_key)
+        if openshift_credential is defined
+        else openshift_api_key | default(openshift_temporary_api_key),
+        true
+      )
+  }}
+
+# title: OpenShift CA Certificate Path
+# required: False
+# description: Path to the OpenShift CA Certificate.
+mtv_query_inventory_openshift_ca_cert_path: >-
+  {{
+    lookup('env', 'K8S_AUTH_SSL_CA_CERT')
+    | default(openshift_ca_cert_path | default(omit), true)
+  }}
+
+# title: OpenShift Verify SSL
+# required: False
+# description: Whether to verify SSL certificates.
+mtv_query_inventory_openshift_verify_ssl: >-
+  {{
+    lookup('env', 'K8S_AUTH_VERIFY_SSL')
+    | default(openshift_verify_ssl | default(true), true)
+  }}
+
+# title: MTV Retrieval Method
+# required: False
+# description: Method to retrieve inventory data from MTV. Valid options are 'api' and 'exec'.
+mtv_query_inventory_retrieval_method: api
+
+# title: MTV Retrieval Method
+# required: False
+# description: Method to retrieve inventory data from MTV. Valid options are 'api' and 'exec'.
+mtv_query_inventory_api_scheme: https
+
+# title: MTV Inventory Retrieval Endpoint
+# required: True
+# description: MTV inventory retrieval endpoint.
+mtv_query_inventory_endpoint_path:
+
+# title: Inventory URL
+# required: False
+# description: >-
+#   URL of the MTV Inventory Service. If not provided,
+#   the URL will be determined from the MTV Inventory Route.
+mtv_query_inventory_url: ""
+
+# title: Secure Logging
+# required: False
+# description: Whether to enable secure logging.
+mtv_query_inventory_secure_logging: "{{ secure_logging | default(true) }}"
+
+# title: Inventory Route Name
+# required: False
+# description: Inventory Route Name
+mtv_query_inventory_route_name: forklift-inventory
+
+# title: Inventory Service Name
+# required: False
+# description: Inventory Service Name
+mtv_query_inventory_service_name: forklift-inventory
+
+# title: Inventory Namespace
+# required: False
+# description: Inventory Namespace
+mtv_query_inventory_namespace: "openshift-mtv"
+
+# title: Inventory Result Variable
+# required: False
+# description: Name of the variable to store the query result.
+mtv_query_inventory_result_var: mtv_query_inventory_query_result
+
+# title: Inventory Query Retries
+# required: False
+# description: Number of retries for the inventory queries.
+mtv_query_inventory_query_retries: 5
+
+# title: Inventory Query Delay
+# required: False
+# description: Delay between inventory query retries in seconds.
+mtv_query_inventory_query_delay: 5
+...

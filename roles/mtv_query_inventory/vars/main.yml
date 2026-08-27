@@ -1,0 +1,5 @@
+---
+__mtv_query_inventory_valid_retrieval_methods:
+  - api
+  - exec
+...
