@@ -1,4 +1,3 @@
-<!-- DOCSIBLE START -->
 ## mtv_provider
 
 ```
