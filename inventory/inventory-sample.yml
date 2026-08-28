@@ -39,7 +39,7 @@ migration_aap:
     # aap-private:
     #   aap_hostname: https://aap.example.com
     #   aap_username: admin
-    #   aap_password: changeme
+    #   aap_password: changeme                     # use ansible-vault
     #   aap_validate_certs: true
     #   aap_project_scm_url: https://github.com/myorg/my-private-repo.git
     #   aap_project_scm_branch: main
@@ -51,7 +51,7 @@ migration_aap:
     # aap-ssh:
     #   aap_hostname: https://aap.example.com
     #   aap_username: admin
-    #   aap_password: changeme
+    #   aap_password: changeme                     # use ansible-vault
     #   aap_validate_certs: true
     #   aap_project_scm_url: git@github.com:myorg/my-private-repo.git
     #   aap_project_scm_branch: main
@@ -61,6 +61,16 @@ migration_aap:
     #     ...
     #     -----END OPENSSH PRIVATE KEY-----
     #   aap_git_ssh_key_unlock: changeme           # use ansible-vault
+
+    # -- Execution Environment and Container registry Credential --------------------------------------
+    # aap-execution-environment:
+    #   aap_execution_environment_credential: Migration Factory Registry Credential
+    #   aap_execution_environment_host: quay.io
+    #   aap_execution_environment_username: admin
+    #   aap_execution_environment_password: changeme
+    #   aap_execution_environment: Migration Factory Execution Environment
+    #   aap_execution_environment_image: quay.io/myorg/my-ee:latest
+    #   aap_execution_environment_pull: missing
 
 # =============================================================================
 # VM Source Environments (vSphere, RHV)

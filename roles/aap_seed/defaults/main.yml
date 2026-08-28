@@ -7,7 +7,7 @@ aap_seed_username: "{{ aap_username | default(omit) }}"
 aap_seed_password: "{{ aap_password | default(omit) }}"
 aap_seed_token: "{{ aap_token | default(omit) }}"
 aap_seed_validate_certs: "{{ aap_validate_certs | default(true) }}"
-aap_seed_secure_logging: true
+aap_seed_secure_logging: "{{ secure_logging | default(true) }}"
 
 # ---------------------------------------------------------------------------
 # Object naming
@@ -20,7 +20,9 @@ aap_seed_project_scm_url: >-
 aap_seed_project_scm_branch: "{{ aap_project_scm_branch | default('v2') }}"
 aap_seed_project_sync_timeout: 120
 aap_seed_inventory_name: OpenShift Virtualization Migration
-aap_seed_execution_environment: "{{ aap_execution_environment | default('Default execution environment') }}"
+aap_seed_execution_environment: >-
+  {{ aap_execution_environment |
+     default('Default execution environment') }}
 
 aap_seed_source_credential_type: Migration Factory - Source Environment
 aap_seed_target_credential_type: OpenShift or Kubernetes API Bearer Token
@@ -33,6 +35,27 @@ aap_seed_git_username: "{{ aap_git_username | default('') }}"
 aap_seed_git_password: "{{ aap_git_password | default('') }}"
 aap_seed_git_ssh_key: "{{ aap_git_ssh_key | default('') }}"
 aap_seed_git_ssh_key_unlock: "{{ aap_git_ssh_key_unlock | default('') }}"
+
+aap_seed_execution_environment_description: >-
+  {{ aap_execution_environment_description |
+     default('') }}
+aap_seed_execution_environment_image: "{{ aap_execution_environment_image | default('') }}"
+aap_seed_execution_environment_pull: "{{ aap_execution_environment_pull | default('missing') }}"
+
+aap_seed_execution_environment_credential: >-
+  {{ aap_execution_environment_credential | default('') }}
+aap_seed_execution_environment_credential_description: >-
+  {{ aap_execution_environment_credential_description |
+     default('Migration Factory Registry Credential') }}
+aap_seed_execution_environment_credential_host: >-
+  {{ aap_execution_environment_credential_host | default('') }}
+aap_seed_execution_environment_credential_username: >-
+  {{ aap_execution_environment_credential_username | default('') }}
+aap_seed_execution_environment_credential_password: >-
+  {{ aap_execution_environment_credential_password | default('') }}
+aap_seed_execution_environment_credential_verify_ssl: >-
+  {{ aap_execution_environment_credential_verify_ssl |
+     default(true) }}
 
 aap_seed_migrate_template_name: OpenShift Virtualization Migration - Migrate
 aap_seed_migrate_playbook: playbooks/vmf_migrate.yml
@@ -132,7 +155,13 @@ aap_seed_controller_projects:
     scm_update_on_launch: true
     credential: "{{ aap_seed_project_credential | default(omit, true) }}"
 
-aap_seed_controller_execution_environments: []
+aap_seed_controller_execution_environments:
+  - name: "{{ aap_seed_execution_environment }}"
+    description: "{{ aap_seed_execution_environment_description }}"
+    image: "{{ aap_seed_execution_environment_image }}"
+    organization: "{{ aap_seed_org_name }}"
+    pull: "{{ aap_seed_execution_environment_pull }}"
+    credential: "{{ aap_seed_execution_environment_credential | default(omit, true) }}"
 
 aap_seed_controller_templates:
   - name: "{{ aap_seed_migrate_template_name }}"
