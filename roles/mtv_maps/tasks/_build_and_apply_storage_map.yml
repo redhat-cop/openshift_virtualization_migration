@@ -1,0 +1,95 @@
+---
+# Builds and applies a single StorageMap CR.
+# Expected variables:
+#   _mtv_maps_current_storage_map_name  — RFC 1123 name for this StorageMap
+#   _mtv_maps_current_overrides         — list of per-datastore overrides
+
+- name: _build_storage_map | Reset state for this iteration
+  ansible.builtin.set_fact:
+    _mtv_maps_storage_map_entries: []
+    _mtv_maps_allowed_ds_ids: []
+    _mtv_maps_excluded_ds_ids: []
+
+- name: _build_storage_map | Extract included datastore IDs
+  ansible.builtin.set_fact:
+    _mtv_maps_allowed_ds_ids: >-
+      {{ _mtv_maps_current_overrides
+         | selectattr('include', 'defined')
+         | selectattr('include', 'equalto', true)
+         | map(attribute='id') | list }}
+  when: >-
+    _mtv_maps_current_overrides
+    | selectattr('include', 'defined') | list | length > 0
+
+- name: _build_storage_map | Extract excluded datastore IDs
+  ansible.builtin.set_fact:
+    _mtv_maps_excluded_ds_ids: >-
+      {{ _mtv_maps_current_overrides
+         | selectattr('exclude', 'defined')
+         | selectattr('exclude', 'equalto', true)
+         | map(attribute='id') | list }}
+  when: >-
+    _mtv_maps_current_overrides
+    | selectattr('exclude', 'defined') | list | length > 0
+
+- name: _build_storage_map | Filter datastores
+  ansible.builtin.set_fact:
+    _mtv_maps_filtered_datastores: >-
+      {{
+        (_mtv_maps_datastores
+         | selectattr('id', 'in', _mtv_maps_allowed_ds_ids) | list)
+        if (_mtv_maps_allowed_ds_ids | default([]) | length > 0)
+        else
+        (_mtv_maps_datastores
+         | rejectattr('id', 'in', _mtv_maps_excluded_ds_ids | default([])) | list)
+        if (_mtv_maps_excluded_ds_ids | default([]) | length > 0)
+        else _mtv_maps_datastores
+      }}
+
+- name: _build_storage_map | Build map entries
+  ansible.builtin.set_fact:
+    _mtv_maps_storage_map_entries: >-
+      {{ _mtv_maps_storage_map_entries | default([]) + [_entry] }}
+  loop: "{{ _mtv_maps_filtered_datastores }}"
+  loop_control:
+    loop_var: _ds
+  vars:
+    _override: >-
+      {{ (_mtv_maps_current_overrides
+          | selectattr('id', 'equalto', _ds.id) | first)
+         if (_mtv_maps_current_overrides
+             | selectattr('id', 'equalto', _ds.id) | list | length > 0)
+         else {} }}
+    _sc: >-
+      {{ _override.storageClass | default('') | trim
+         if (_override.storageClass | default('') | trim | length > 0)
+         else _mtv_maps_resolved_default_sc }}
+    _entry:
+      source:
+        id: "{{ _ds.id }}"
+        name: "{{ _ds.name }}"
+      destination:
+        storageClass: "{{ _sc }}"
+
+- name: _build_storage_map | Apply StorageMap CR
+  redhat.openshift.k8s:
+    host: "{{ mtv_maps_openshift_host }}"
+    api_key: "{{ mtv_maps_openshift_api_key }}"
+    validate_certs: "{{ mtv_maps_openshift_verify_ssl }}"
+    state: present
+    apply: true
+    definition: >-
+      {{ lookup('template', 'storagemap.yml.j2') | from_yaml
+         | ansible.builtin.combine(
+             {'spec': {'map': _mtv_maps_storage_map_entries}},
+             recursive=true)
+      }}
+
+- name: _build_storage_map | StorageMap created successfully
+  ansible.builtin.debug:
+    msg: >-
+      StorageMap '{{ _mtv_maps_current_storage_map_name }}' applied in
+      namespace '{{ mtv_maps_namespace }}' with
+      {{ _mtv_maps_storage_map_entries | length }} mapping(s).
+
+...

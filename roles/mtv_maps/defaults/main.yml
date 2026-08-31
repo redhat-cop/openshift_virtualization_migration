@@ -1,0 +1,104 @@
+---
+mtv_maps_secure_logging: "{{ secure_logging | default(true) }}"
+
+# ---------------------------------------------------------------------------
+# OpenShift connection — used for k8s CRD checks and CR creation.
+# When running from AAP, these cascade from K8S_AUTH_* env vars
+# injected by the OpenShift credential.
+# ---------------------------------------------------------------------------
+mtv_maps_openshift_host: >-
+  {{
+    lookup('env', 'K8S_AUTH_HOST') | default(openshift_host, true)
+  }}
+
+mtv_maps_openshift_api_key: >-
+  {{
+    lookup('env', 'K8S_AUTH_API_KEY')
+    | default(
+        openshift_credential.openshift_api_key
+        | default(openshift_credential.openshift_temporary_api_key)
+        if openshift_credential is defined
+        else openshift_api_key | default(openshift_temporary_api_key),
+        true
+      )
+  }}
+
+mtv_maps_openshift_verify_ssl: >-
+  {{
+    lookup('env', 'K8S_AUTH_VERIFY_SSL')
+    | default(openshift_verify_ssl | default(true), true)
+  }}
+
+# ---------------------------------------------------------------------------
+# Feature toggles
+# ---------------------------------------------------------------------------
+mtv_maps_create_storage_maps: true
+mtv_maps_create_network_maps: true
+
+# ---------------------------------------------------------------------------
+# Namespace and provider references
+# ---------------------------------------------------------------------------
+
+# Namespace where StorageMap/NetworkMap CRs will be created.
+mtv_maps_namespace: >-
+  {{ hostvars[target_name]['mtv_namespace'] | default('openshift-mtv') }}
+
+# Provider names as they appear in the MTV inventory.
+# Source provider name defaults to the rfc1123-sanitised source_name,
+# matching the convention used by the mtv_provider role.
+mtv_maps_source_provider_name: >-
+  {{ source_name | infra.openshift_virtualization_migration.rfc1123 }}
+
+# Destination (OpenShift/host) provider name.
+mtv_maps_destination_provider_name: host
+
+# Forklift API version for map CRs.
+mtv_maps_api_version: forklift.konveyor.io/v1beta1
+
+# Source type — resolved from AAP inventory host vars.
+mtv_maps_source_type: >-
+  {{ hostvars[source_name]['type'] | default('vmware') }}
+
+# ---------------------------------------------------------------------------
+# Storage map configuration
+# ---------------------------------------------------------------------------
+
+# Default storage class on the destination cluster.
+# If empty, auto-detected from the cluster's default StorageClass annotation.
+mtv_maps_default_storage_class: ""
+
+# Single storage map overrides — list of per-datastore overrides.
+# Each entry: {id: <datastore_id>, storageClass: <name>, exclude: bool, include: bool}
+# Ignored when mtv_maps_multiple_storage_maps is populated.
+mtv_maps_storage_map_overrides: []
+
+# Multiple named storage maps — dict of map_name -> list of overrides.
+# Takes precedence over mtv_maps_storage_map_overrides.
+# Map names are sanitised to RFC 1123 for Kubernetes naming.
+mtv_maps_multiple_storage_maps: {}
+
+# ---------------------------------------------------------------------------
+# Network map configuration
+# ---------------------------------------------------------------------------
+
+# Network map overrides — list of per-network overrides.
+# Each entry:
+#   id:               <network_id>
+#   destination_type:  pod | multus | ignored
+#   nad:              <namespace/name> or <name> (for multus)
+#   exclude:          bool
+#   include:          bool
+mtv_maps_network_map_overrides: []
+
+# Annotation on NetworkAttachmentDefinitions used for auto-matching
+# source portgroups to destination NADs.
+mtv_maps_nad_source_annotation: >-
+  infra.openshift-virtualization-migration/source-portgroup
+
+# ---------------------------------------------------------------------------
+# mtv_query_inventory settings
+# ---------------------------------------------------------------------------
+mtv_maps_inventory_retrieval_method: api
+mtv_maps_query_retries: 5
+mtv_maps_query_delay: 5
+...

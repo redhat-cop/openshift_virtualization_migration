@@ -1,0 +1,21 @@
+---
+- name: Create MTV storage and network maps for source-target pair
+  block:
+    - name: Validate inputs and resolve variables
+      ansible.builtin.include_tasks: validate.yml
+
+    - name: Query MTV inventory for providers, datastores, networks
+      ansible.builtin.include_tasks: query_inventory.yml
+
+    - name: Create storage map(s)
+      ansible.builtin.include_tasks: create_storage_map.yml
+      when: mtv_maps_create_storage_maps | bool
+
+    - name: Create network map
+      ansible.builtin.include_tasks: create_network_map.yml
+      when: mtv_maps_create_network_maps | bool
+
+  rescue:
+    - name: Gather map error details and fail
+      ansible.builtin.include_tasks: rescue_maps.yml
+...

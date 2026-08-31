@@ -1,0 +1,148 @@
+---
+- name: validate | Assert required survey variables are defined
+  ansible.builtin.assert:
+    that:
+      - source_name is defined
+      - source_name | length > 0
+      - target_name is defined
+      - target_name | length > 0
+    fail_msg: >-
+      Both source_name and target_name must be provided as survey
+      variables when launching this job template.
+    quiet: true
+
+- name: validate | Assert target exists in AAP inventory
+  ansible.builtin.assert:
+    that:
+      - target_name in hostvars
+    fail_msg: >-
+      Target '{{ target_name }}' was not found in the AAP inventory.
+      Verify the target host exists in the migration_clusters group.
+    quiet: true
+
+- name: validate | Assert source exists in AAP inventory
+  ansible.builtin.assert:
+    that:
+      - source_name in hostvars
+    fail_msg: >-
+      Source '{{ source_name }}' was not found in the AAP inventory.
+      Verify the source host exists in the vm_sources group.
+    quiet: true
+
+- name: validate | Assert source is mapped to this target
+  ansible.builtin.assert:
+    that:
+      - source_name in (hostvars[target_name]['vm_sources'] | default([]))
+    fail_msg: >-
+      Source '{{ source_name }}' is not in the vm_sources list for
+      target '{{ target_name }}'. Current vm_sources:
+      {{ hostvars[target_name]['vm_sources'] | default([]) }}.
+    quiet: true
+
+- name: validate | Assert source type is supported
+  ansible.builtin.assert:
+    that:
+      - mtv_maps_source_type in ['vmware', 'ovirt']
+    fail_msg: >-
+      Unsupported source type '{{ mtv_maps_source_type }}'
+      for source '{{ source_name }}'. Supported types: vmware, ovirt.
+    quiet: true
+
+- name: validate | Assert mutually exclusive storage map overrides
+  ansible.builtin.assert:
+    that:
+      - not (mtv_maps_multiple_storage_maps | length > 0
+             and mtv_maps_storage_map_overrides | length > 0)
+    fail_msg: >-
+      Cannot define both mtv_maps_storage_map_overrides and
+      mtv_maps_multiple_storage_maps simultaneously. Choose one.
+    quiet: true
+  when: mtv_maps_create_storage_maps | bool
+
+- name: validate | Assert storage overrides do not mix include and exclude
+  ansible.builtin.assert:
+    that:
+      - not (mtv_maps_storage_map_overrides
+             | selectattr('include', 'defined') | list | length > 0
+             and mtv_maps_storage_map_overrides
+             | selectattr('exclude', 'defined') | list | length > 0)
+    fail_msg: >-
+      Storage map overrides cannot contain both include and exclude
+      directives in the same list.
+    quiet: true
+  when:
+    - mtv_maps_create_storage_maps | bool
+    - mtv_maps_storage_map_overrides | length > 0
+
+- name: validate | Assert network overrides do not mix include and exclude
+  ansible.builtin.assert:
+    that:
+      - not (mtv_maps_network_map_overrides
+             | selectattr('include', 'defined') | list | length > 0
+             and mtv_maps_network_map_overrides
+             | selectattr('exclude', 'defined') | list | length > 0)
+    fail_msg: >-
+      Network map overrides cannot contain both include and exclude
+      directives in the same list.
+    quiet: true
+  when:
+    - mtv_maps_create_network_maps | bool
+    - mtv_maps_network_map_overrides | length > 0
+
+- name: validate | Check StorageMap CRD exists on target cluster
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_maps_openshift_host }}"
+    api_key: "{{ mtv_maps_openshift_api_key }}"
+    validate_certs: "{{ mtv_maps_openshift_verify_ssl }}"
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: storagemaps.forklift.konveyor.io
+  register: _mtv_maps_storagemap_crd
+  when: mtv_maps_create_storage_maps | bool
+
+- name: validate | Assert StorageMap CRD is installed
+  ansible.builtin.assert:
+    that:
+      - _mtv_maps_storagemap_crd.resources | length > 0
+    fail_msg: >-
+      The Forklift/MTV StorageMap CRD was not found on target cluster
+      '{{ target_name }}'. Ensure the MTV operator is installed.
+    quiet: true
+  when: mtv_maps_create_storage_maps | bool
+
+- name: validate | Check NetworkMap CRD exists on target cluster
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_maps_openshift_host }}"
+    api_key: "{{ mtv_maps_openshift_api_key }}"
+    validate_certs: "{{ mtv_maps_openshift_verify_ssl }}"
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: networkmaps.forklift.konveyor.io
+  register: _mtv_maps_networkmap_crd
+  when: mtv_maps_create_network_maps | bool
+
+- name: validate | Assert NetworkMap CRD is installed
+  ansible.builtin.assert:
+    that:
+      - _mtv_maps_networkmap_crd.resources | length > 0
+    fail_msg: >-
+      The Forklift/MTV NetworkMap CRD was not found on target cluster
+      '{{ target_name }}'. Ensure the MTV operator is installed.
+    quiet: true
+  when: mtv_maps_create_network_maps | bool
+
+- name: validate | Resolve source-type-specific variables
+  ansible.builtin.set_fact:
+    _mtv_maps_forklift_type: >-
+      {{ 'vsphere' if mtv_maps_source_type == 'vmware'
+         else mtv_maps_source_type }}
+    _mtv_maps_datastore_resource: >-
+      {{ 'datastores' if mtv_maps_source_type == 'vmware'
+         else 'storagedomains' }}
+    _mtv_maps_storage_map_name: >-
+      {{ (source_name ~ '-' ~ mtv_maps_destination_provider_name)
+         | infra.openshift_virtualization_migration.rfc1123 }}
+    _mtv_maps_network_map_name: >-
+      {{ (source_name ~ '-' ~ mtv_maps_destination_provider_name)
+         | infra.openshift_virtualization_migration.rfc1123 }}
+...
