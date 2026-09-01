@@ -1,0 +1,28 @@
+---
+
+__mtv_plans_default_namespace: openshift-mtv
+__mtv_plans_default_source_target: "vmware"
+__mtv_plans_default_source_target_namespace: "{{ __mtv_plans_migration_namespace }}"
+__mtv_plans_default_destination_target: "host"
+__mtv_plans_default_destination_target_namespace: "{{ __mtv_plans_migration_namespace }}"
+__mtv_plans_default_split_plans: false
+__mtv_plans_default_vms_per_plan: 10
+__mtv_plans_default_migrate_dry_run: false
+__mtv_plans_default_verify_plans_ready: false
+__mtv_plans_default_type: cold
+__mtv_plans_default_target_namespace: "{{ __mtv_plans_migration_namespace }}"
+__mtv_plans_default_plan_base_name: >-
+  {{ (__mtv_plans_migration_namespace + '-' +
+  __mtv_plans_mtv_destination_target) + '-' +
+  lookup('pipe', 'date +%Y%m%d-%H%M') }}
+__mtv_plans_default_network_map_name: >-
+  {{ (__mtv_plans_mtv_source_target + '-' +
+  __mtv_plans_mtv_destination_target) |
+  infra.openshift_virtualization_migration.rfc1123 }}
+__mtv_plans_default_network_map_namespace: "{{ __mtv_plans_migration_namespace }}"
+__mtv_plans_default_storage_map_name: >-
+  {{ (__mtv_plans_mtv_source_target + '-' +
+  __mtv_plans_mtv_destination_target) |
+  infra.openshift_virtualization_migration.rfc1123 }}
+__mtv_plans_default_storage_map_namespace: "{{ __mtv_plans_migration_namespace }}"
+...

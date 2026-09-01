@@ -1,0 +1,11 @@
+---
+
+- name: Generate MTV Plans
+  hosts: "{{ migration_clusters | default('migration_clusters') }}"
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Invoke mtv_plans role
+      ansible.builtin.include_role:
+        name: mtv_plans
+...

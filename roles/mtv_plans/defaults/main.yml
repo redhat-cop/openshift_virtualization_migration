@@ -1,0 +1,101 @@
+---
+
+# title: OpenShift Host
+# required: True
+# description: OpenShift host.
+mtv_plans_openshift_host: >-
+  {{
+    lookup('env', 'K8S_AUTH_HOST') | default(openshift_host, true)
+  }}
+
+# title: OpenShift API Key
+# required: True
+# description: OpenShift API key.
+mtv_plans_openshift_api_key: >-
+  {{
+    lookup('env', 'K8S_AUTH_API_KEY')
+    | default(
+        openshift_credential.openshift_api_key
+        | default(openshift_credential.openshift_temporary_api_key)
+        if openshift_credential is defined
+        else openshift_api_key | default(openshift_temporary_api_key),
+        true
+      )
+  }}
+
+# title: OpenShift CA Certificate Path
+# required: False
+# description: Path to the OpenShift CA Certificate.
+mtv_plans_openshift_ca_cert_path: >-
+  {{
+    lookup('env', 'K8S_AUTH_SSL_CA_CERT')
+    | default(openshift_ca_cert_path | default(omit), true)
+  }}
+
+# title: OpenShift Verify SSL
+# required: False
+# description: Whether to verify SSL certificates.
+mtv_plans_openshift_verify_ssl: >-
+  {{
+    lookup('env', 'K8S_AUTH_VERIFY_SSL')
+    | default(openshift_verify_ssl | default(true), true)
+  }}
+
+# title: Plan Migration Request
+# required: True
+# description: Data Structure Representing a Plan migration request
+mtv_plans_migration_request: {
+# mtv_namespace: openshift-mtv # Name of the namespace MTV is deployed within (defaults to 'openshift-mtv')
+# migration_namespace: my-namespace # Namespace containing the migration resources \
+# (defaults to the resolved value of 'mtv_namespace')
+# source: vmware # name of the target containing source vm's (defaults to 'vmware')
+# source_namespace: openshift-mtv # Namespace the MTV source provider is located within
+# destination: host # name of the target where vm's will be migrated to (defaults to 'host')
+# destination_namespace: openshift-mtv # Namespace the MTV destination provider is located within
+# vms_per_plan: 10 # Number of vm's to split into multiple plans (defaults to 10)
+# split_plans: false # Determines whether to split plans (defaults to false)
+# plan_overrides: {} # Configuration to apply at the Plan level
+# vm_overrides: {} # Configurations to apply to each VM (Lowest priority)
+# target_namespace: openshift-mtv # Namespace VM's should be created in (defaults to the 'openshift-mtv' Namespace)
+# dry_run: false # Build the plans without applying them to the Target OpenShift cluster. Displays at the end \
+# (defaults to false)
+# network_map: vmware-host # name of the NetworkMap to associate (defaults to <source_name>-<destination_name>)
+# network_map_namespace: openshift-mtv # Namespace containing the NetworkMap (defaults to the 'openshift-mtv' Namespace)
+# storage_map: vmware-host # name of the StorageMap to associate (defaults to <source_name>-<destination_name>)
+# storage_map_namespace: openshift-mtv # Namespace containing the StorageMap (defaults to the 'openshift-mtv' Namespace)
+# type: false # Migration type. Set to "warm" to enable Warm migrations (defaults to "cold")
+# verify_plans_ready: false # Verifies Plans in a Ready state (defaults to false)
+# plan_name: mymigration # Name of the plan to create (defaults to <source_name>-<target_name>-yyyyMMdd-HHmm)
+# vms: # Explicit list of vm's to migrate (allows for VM specific configurations when migrating large number of vm's)
+#   - id: <moid> # MOID of the VM
+#     name: <name> # Name of the vm to migrate
+#     path: <path> # VMware path for the VM (Eg: <datacenter>/vm/<folder>/<name>)
+#     overrides: {} # Configurations to apply to the specific virtual machines (Highest priority)
+#     exclude: true # Exclude the VM from the plan (default to false)
+# folders:
+#   - id: <moid> # Required when multiple folders with the same name exists
+#     name: <name> # Name of the folder to migrate
+#     path: <path> # VMware path for the folder
+#     overrides: {} # Configurations to apply to all vm's in the folder and subfolder
+#     exclude: true # Exclude the folder and all subfolders from plans
+}
+
+# title: MTV Migrate Annotation
+# required: False
+# description: Label assigned to the MTV plan name
+mtv_plans_base_name_annotation: infra.openshift-virtualization-migration/plan-name
+
+# title: Managed By Label
+# required: False
+# description: Value of the app.kubernetes.io/managed-by label applied to resources.
+mtv_plans_managed_by_label: "ansible-migration-factory"
+
+# title: MTV Migration Verify Plans Ready Retries
+# required: False
+# description: Number of retries to verify plans are ready
+mtv_plans_verify_plans_ready_retries: 180
+# title: MTV Migration Verify Plans Ready Delay
+# required: False
+# description: Amount of time to wait between retries to verify plans are ready
+mtv_plans_verify_plans_ready_delay: 20
+...

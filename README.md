@@ -43,6 +43,7 @@ This collection includes the following roles for managing OpenShift Virtualizati
 
 <!--ROLES_LIST_START-->
 * [aap_seed](roles/aap_seed/README.md) - Seed AAP with Migration Factory Configuration as Code content
+* [mtv_plans](roles/mtv_plans/README.md) - Manages MTV migration plans.
 * [mtv_provider](roles/mtv_provider/README.md) - Create MTV/Forklift source provider CRs on OpenShift target clusters. Designed to run from AAP with credential injection.
 * [mtv_query_inventory](roles/mtv_query_inventory/README.md) - Queries MTV inventory.
 * [utility_aap_deploy](roles/utility_aap_deploy/README.md) - Deploys an instance of Ansible Automation Platform.

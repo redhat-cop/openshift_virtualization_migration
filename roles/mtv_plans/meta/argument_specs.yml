@@ -1,0 +1,256 @@
+---
+argument_specs:
+  main:
+    short_description: Manages MTV (Migration Toolkit for Virtualization) migration plans.
+    options:
+      mtv_plans_openshift_host:
+        type: str
+        required: true
+        description: OpenShift host (eg. https://api.openshift.example.com:6443).
+
+      mtv_plans_openshift_api_key:
+        type: str
+        required: true
+        description: OpenShift API key.
+
+      mtv_plans_openshift_ca_cert_path:
+        type: str
+        required: false
+        description: Path to the OpenShift CA Certificate.
+
+      mtv_plans_openshift_verify_ssl:
+        type: bool
+        required: false
+        default: true
+        description: Whether to verify SSL certificates. Set to C(false) to disable verification.
+
+      mtv_plans_migration_request:
+        type: dict
+        required: true
+        description: >-
+          Data structure representing a Plan migration request.
+          Must contain at least one of I(vms) or I(folders).
+        options:
+          mtv_namespace:
+            type: str
+            required: false
+            default: "openshift-mtv"
+            description: Name of the namespace MTV is deployed within.
+
+          migration_namespace:
+            type: str
+            required: false
+            description: >-
+              Namespace containing the migration resources.
+              Defaults to the resolved value of I(mtv_namespace).
+
+          source:
+            type: str
+            required: false
+            default: "vmware"
+            description: Name of the source provider containing VMs.
+
+          source_namespace:
+            type: str
+            required: false
+            description: >-
+              Namespace the MTV source provider is located within.
+              Defaults to the I(mtv_namespace) value.
+
+          destination:
+            type: str
+            required: false
+            default: "host"
+            description: Name of the destination provider where VMs will be migrated to.
+
+          destination_namespace:
+            type: str
+            required: false
+            description: >-
+              Namespace the MTV destination provider is located within.
+              Defaults to the I(mtv_namespace) value.
+
+          split_plans:
+            type: bool
+            required: false
+            default: false
+            description: Determines whether to split VMs into multiple plans.
+
+          vms_per_plan:
+            type: int
+            required: false
+            default: 10
+            description: >-
+              Number of VMs per plan when I(split_plans) is enabled.
+              Must be a positive integer when I(split_plans) is C(true).
+
+          plan_overrides:
+            type: dict
+            required: false
+            default: {}
+            description: Configuration to apply at the Plan level.
+
+          vm_overrides:
+            type: dict
+            required: false
+            default: {}
+            description: Configurations to apply to each VM (lowest priority).
+
+          target_namespace:
+            type: str
+            required: false
+            description: >-
+              Namespace VMs should be created in.
+              Defaults to the I(mtv_namespace) value.
+
+          dry_run:
+            type: bool
+            required: false
+            default: false
+            description: >-
+              Build the plans without applying them to the target OpenShift cluster.
+              Plans are displayed at the end.
+
+          network_map:
+            type: str
+            required: false
+            description: >-
+              Name of the NetworkMap to associate.
+              Defaults to C(<source>-<destination>).
+
+          network_map_namespace:
+            type: str
+            required: false
+            description: >-
+              Namespace containing the NetworkMap.
+              Defaults to the I(mtv_namespace) value.
+
+          storage_map:
+            type: str
+            required: false
+            description: >-
+              Name of the StorageMap to associate.
+              Defaults to C(<source>-<destination>).
+
+          storage_map_namespace:
+            type: str
+            required: false
+            description: >-
+              Namespace containing the StorageMap.
+              Defaults to the I(mtv_namespace) value.
+
+          type:
+            type: str
+            required: false
+            default: "cold"
+            choices:
+              - cold
+              - warm
+            description: >-
+              Migration type. Set to C(warm) to enable warm migrations.
+
+          verify_plans_ready:
+            type: bool
+            required: false
+            default: false
+            description: Verifies plans are in a C(Ready) state after creation.
+
+          plan_name:
+            type: str
+            required: false
+            description: >-
+              Name of the plan to create.
+              Defaults to C(<source>-<destination>-yyyyMMdd-HHmm).
+
+          vms:
+            type: list
+            required: false
+            default: []
+            description: Explicit list of VMs to migrate.
+            elements: dict
+            options:
+              id:
+                type: str
+                required: false
+                description: MOID of the VM.
+
+              name:
+                type: str
+                required: false
+                description: Name of the VM to migrate.
+
+              path:
+                type: str
+                required: false
+                description: VMware path for the VM (eg. <datacenter>/vm/<folder>/<name>).
+
+              overrides:
+                type: dict
+                required: false
+                default: {}
+                description: Configurations to apply to the specific virtual machine (highest priority).
+
+              exclude:
+                type: bool
+                required: false
+                default: false
+                description: Exclude the VM from the plan. Defaults to C(false).
+
+          folders:
+            type: list
+            required: false
+            default: []
+            description: List of VMware folders containing VMs to migrate.
+            elements: dict
+            options:
+              id:
+                type: str
+                required: false
+                description: Required when multiple folders with the same name exist.
+
+              name:
+                type: str
+                required: false
+                description: Name of the folder to migrate.
+
+              path:
+                type: str
+                required: false
+                description: VMware path for the folder.
+
+              overrides:
+                type: dict
+                required: false
+                default: {}
+                description: Configurations to apply to all VMs in the folder and subfolders.
+
+              exclude:
+                type: bool
+                required: false
+                default: false
+                description: Exclude the folder and all subfolders from plans. Defaults to C(false).
+
+      mtv_plans_base_name_annotation:
+        type: str
+        required: false
+        default: "infra.openshift-virtualization-migration/plan-name"
+        description: Label assigned to the MTV plan name.
+
+      mtv_plans_managed_by_label:
+        type: str
+        required: false
+        default: "ansible-migration-factory"
+        description: Value of the C(app.kubernetes.io/managed-by) label applied to resources.
+
+      mtv_plans_verify_plans_ready_retries:
+        type: int
+        required: false
+        default: 180
+        description: Number of retries to verify plans are ready.
+
+      mtv_plans_verify_plans_ready_delay:
+        type: int
+        required: false
+        default: 20
+        description: Amount of time in seconds to wait between retries to verify plans are ready.
+...
