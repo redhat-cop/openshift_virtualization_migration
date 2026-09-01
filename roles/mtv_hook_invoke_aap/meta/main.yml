@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  role_name: mtv_hook_invoke_aap
+  author: Red Hat
+  description: Triggers AAP automation as part of an MTV hook.
+  company: "Red Hat"
+  license: GPL-3.0-only
+  min_ansible_version: 2.15.0
+  galaxy_tags: []
+dependencies: []
+...

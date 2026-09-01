@@ -1,0 +1,74 @@
+---
+argument_specs:
+  main:
+    short_description: >-
+      Triggers AAP automation as part of an MTV hook.
+    options:
+      mtv_hook_invoke_aap_credentials_secret:
+        type: str
+        required: false
+        default: "mtv-aap-credentials"
+        description: Name of the Secret containing AAP credentials.
+
+      mtv_hook_invoke_aap_credentials_secret_namespace:
+        type: str
+        required: false
+        default: ""
+        description: Namespace of the Secret containing AAP credentials.
+
+      mtv_hook_invoke_aap_organization:
+        type: str
+        required: false
+        default: "Default"
+        description: Name of the AAP organization.
+
+      mtv_hook_invoke_aap_job_template:
+        type: str
+        required: true
+        description: Name of the AAP job template.
+
+      mtv_hook_invoke_aap_job_template_extra_vars:
+        type: dict
+        required: false
+        default: {}
+        description: Extra variables for the AAP job template.
+
+      mtv_hook_invoke_aap_secure_logging:
+        type: bool
+        required: false
+        default: true
+        description: Whether to enable secure logging.
+
+      mtv_hook_invoke_aap_job_template_wait:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to wait for the AAP job template to complete.
+
+      mtv_hook_invoke_aap_workload_file:
+        type: str
+        required: false
+        default: "workload.yml"
+        description: Location of the workload file.
+
+      mtv_hook_invoke_aap_plan_file:
+        type: str
+        required: false
+        default: "plan.yml"
+        description: Location of the plan file.
+
+      mtv_hook_invoke_aap_workload_var:
+        type: str
+        required: false
+        default: "workload"
+        description: >-
+          Name of the variable associated with the workload variable file.
+
+      mtv_hook_invoke_aap_plan_var:
+        type: str
+        required: false
+        default: "plan"
+        description: >-
+          Name of the variable associated with the plan variable file.
+...
