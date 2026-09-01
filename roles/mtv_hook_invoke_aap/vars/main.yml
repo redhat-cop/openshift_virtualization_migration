@@ -1,0 +1,4 @@
+---
+
+__mtv_hook_invoke_aap_namespace_file: /var/run/secrets/kubernetes.io/serviceaccount/namespace
+...

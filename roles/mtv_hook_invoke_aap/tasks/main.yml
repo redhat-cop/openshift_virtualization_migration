@@ -1,0 +1,89 @@
+---
+- name: Read namespace from file
+  when: mtv_hook_invoke_aap_credentials_secret_namespace | trim | length == 0
+  block:
+    - name: Read namespace file
+      ansible.builtin.slurp:
+        src: "{{ __mtv_hook_invoke_aap_namespace_file }}"
+      register: __mtv_hook_invoke_aap_namespace_file_result
+
+    - name: Set aap_credentials_secret_namespace from file
+      ansible.builtin.set_fact:
+        mtv_hook_invoke_aap_credentials_secret_namespace: >-
+          {{ __mtv_hook_invoke_aap_namespace_file_result.content | b64decode | trim }}
+
+- name: Load Variable Files
+  ansible.builtin.include_vars:
+    file: "{{ item.file }}"
+    name: "{{ item.var }}"
+  loop_control:
+    label: "{{ item.file }} -> {{ item.var }}"
+  loop:
+    - file: "{{ mtv_hook_invoke_aap_workload_file }}"
+      var: "{{ mtv_hook_invoke_aap_workload_var }}"
+    - file: "{{ mtv_hook_invoke_aap_plan_file }}"
+      var: "{{ mtv_hook_invoke_aap_plan_var }}"
+
+- name: Retrieve AAP Credentials Secret
+  no_log: "{{ mtv_hook_invoke_aap_secure_logging }}"
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: "{{ mtv_hook_invoke_aap_credentials_secret }}"
+    namespace: "{{ mtv_hook_invoke_aap_credentials_secret_namespace | default(omit) }}"
+  register: __mtv_hook_invoke_aap_credentials_secret_result
+
+- name: Validate Required Secret Keys
+  vars:
+    __mtv_hook_invoke_aap_secret_data: >-
+      {{ __mtv_hook_invoke_aap_credentials_secret_result.resources[0].data | default({}) }}
+    __mtv_hook_invoke_aap_has_token: >-
+      {{ 'aap_token' in __mtv_hook_invoke_aap_secret_data }}
+    __mtv_hook_invoke_aap_has_userpass: >-
+      {{ 'aap_username' in __mtv_hook_invoke_aap_secret_data
+      and 'aap_password' in __mtv_hook_invoke_aap_secret_data }}
+  ansible.builtin.assert:
+    that:
+      - __mtv_hook_invoke_aap_credentials_secret_result.resources | length > 0
+      - "'aap_controller_hostname' in __mtv_hook_invoke_aap_secret_data"
+      - __mtv_hook_invoke_aap_has_token or __mtv_hook_invoke_aap_has_userpass
+      - not (__mtv_hook_invoke_aap_has_token and __mtv_hook_invoke_aap_has_userpass)
+    fail_msg: >-
+      Secret '{{ mtv_hook_invoke_aap_credentials_secret }}' must contain 'aap_controller_hostname'
+      and either 'aap_token' or both 'aap_username' and 'aap_password' (not both methods).
+    quiet: true
+
+- name: Set AAP Credential Facts
+  no_log: "{{ mtv_hook_invoke_aap_secure_logging }}"
+  vars:
+    __mtv_hook_invoke_aap_secret_data: "{{ __mtv_hook_invoke_aap_credentials_secret_result.resources[0].data }}"
+  ansible.builtin.set_fact:
+    __mtv_hook_invoke_aap_controller_hostname: >-
+      {{ __mtv_hook_invoke_aap_secret_data.aap_controller_hostname | default('', True) | b64decode }}
+    __mtv_hook_invoke_aap_token: >-
+      {{ __mtv_hook_invoke_aap_secret_data.aap_token | default('', True) | b64decode | default(omit) }}
+    __mtv_hook_invoke_aap_username: >-
+      {{ __mtv_hook_invoke_aap_secret_data.aap_username | default('', True) | b64decode | default(omit) }}
+    __mtv_hook_invoke_aap_password: >-
+      {{ __mtv_hook_invoke_aap_secret_data.aap_password | default('', True) | b64decode | default(omit) }}
+    __mtv_hook_invoke_aap_validate_certs: >-
+      {{ __mtv_hook_invoke_aap_secret_data.aap_validate_certs | default('', True) | b64decode | default(true, True) }}
+
+- name: Launch Job Template
+  ansible.builtin.include_role:
+    name: infra.aap_configuration.controller_job_launch
+  vars:
+    aap_hostname: "{{ __mtv_hook_invoke_aap_controller_hostname }}"
+    aap_token: "{{ __mtv_hook_invoke_aap_token | default(omit) }}"
+    aap_username: "{{ __mtv_hook_invoke_aap_username | default(omit) }}"
+    aap_password: "{{ __mtv_hook_invoke_aap_password | default(omit) }}"
+    aap_validate_certs: "{{ __mtv_hook_invoke_aap_validate_certs }}"
+    controller_launch_jobs:
+      - name: "{{ mtv_hook_invoke_aap_job_template }}"
+        organization: "{{ mtv_hook_invoke_aap_organization }}"
+        extra_vars: >-
+          {{ mtv_hook_invoke_aap_job_template_extra_vars
+          | combine({(mtv_hook_invoke_aap_workload_var): workload,
+          (mtv_hook_invoke_aap_plan_var): plan}) }}
+        wait: "{{ mtv_hook_invoke_aap_job_template_wait }}"
+...
