@@ -140,4 +140,9 @@ mtv_maps_query_retries: 5
 # required: False
 # description: Delay in seconds between inventory query retries.
 mtv_maps_query_delay: 5
+
+# title: Managed By Label
+# required: False
+# description: Value of the app.kubernetes.io/managed-by label applied to CRs.
+mtv_maps_managed_by_label: ansible-migration-factory
 ...

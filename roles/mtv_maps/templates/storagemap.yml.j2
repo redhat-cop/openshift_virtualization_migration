@@ -4,7 +4,7 @@ metadata:
   name: {{ _mtv_maps_current_storage_map_name | to_json }}
   namespace: {{ mtv_maps_namespace | to_json }}
   labels:
-    app.kubernetes.io/managed-by: ansible-migration-factory
+    app.kubernetes.io/managed-by: {{ mtv_maps_managed_by_label }}
 spec:
   provider:
     source:
