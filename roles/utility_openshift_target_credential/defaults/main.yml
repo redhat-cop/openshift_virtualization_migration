@@ -45,7 +45,7 @@ utility_openshift_target_credential_cluster_role: "cluster-admin"
 # title: Managed By Label
 # required: False
 # description: Value of the app.kubernetes.io/managed-by label applied to resources.
-utility_openshift_target_credential_managed_by_label: "ansible"
+utility_openshift_target_credential_managed_by_label: "ansible-migration-factory"
 
 # title: Secure Logging
 # required: False

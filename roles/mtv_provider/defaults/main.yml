@@ -45,4 +45,7 @@ mtv_provider_source_sdk_endpoint: >-
   {{ hostvars[source_name]['sdk_endpoint'] | default('/sdk') }}
 
 mtv_provider_source_vddk: "{{ hostvars[source_name]['vddk'] | default({}) }}"
+
+# Value of the app.kubernetes.io/managed-by label applied to CRs.
+mtv_provider_managed_by_label: ansible-migration-factory
 ...

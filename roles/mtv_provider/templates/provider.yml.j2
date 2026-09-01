@@ -4,7 +4,7 @@ metadata:
   name: {{ _mtv_provider_provider_name | to_json }}
   namespace: {{ mtv_provider_provider_namespace | to_json }}
   labels:
-    app.kubernetes.io/managed-by: ansible-migration-factory
+    app.kubernetes.io/managed-by: {{ mtv_provider_managed_by_label }}
 spec:
   type: {{ _mtv_provider_forklift_type | to_json }}
   url: {{ _mtv_provider_source_url | to_json }}
