@@ -202,3 +202,4 @@ ansible-navigator.yml
 *.pem
 *.key
 .cursor/
+.docsible
