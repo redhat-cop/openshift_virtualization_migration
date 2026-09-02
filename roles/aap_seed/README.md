@@ -68,22 +68,22 @@ Description: Seed AAP with Migration Factory Configuration as Code content
   * **aap_seed_git_password**:
     * **Required**: False
     * **Type**: str
-    * **Default**: 
+    * **Default**:
     * **Description**: Git password or personal access token. Defaults to C(aap_git_password) from inventory.
   * **aap_seed_git_ssh_key**:
     * **Required**: False
     * **Type**: str
-    * **Default**: 
+    * **Default**:
     * **Description**: SSH private key for Git authentication. Defaults to C(aap_git_ssh_key) from inventory.
   * **aap_seed_git_ssh_key_unlock**:
     * **Required**: False
     * **Type**: str
-    * **Default**: 
+    * **Default**:
     * **Description**: Passphrase to unlock the SSH key. Defaults to C(aap_git_ssh_key_unlock) from inventory.
   * **aap_seed_git_username**:
     * **Required**: False
     * **Type**: str
-    * **Default**: 
+    * **Default**:
     * **Description**: Git username for HTTPS authentication. Defaults to C(aap_git_username) from inventory.
   * **aap_seed_hostname**:
     * **Required**: False
@@ -133,7 +133,7 @@ Description: Seed AAP with Migration Factory Configuration as Code content
   * **aap_seed_project_credential**:
     * **Required**: False
     * **Type**: str
-    * **Default**: 
+    * **Default**:
     * **Description**: Name of the Git credential to create and attach to the SCM project. Leave empty to skip. Defaults to C(aap_project_credential) from inventory.
   * **aap_seed_project_name**:
     * **Required**: False
