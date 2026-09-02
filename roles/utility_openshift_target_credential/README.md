@@ -1,3 +1,9 @@
+<!-- STATIC CONTENT START -->
+# utility_openshift_target_credential
+
+Manage OpenShift target cluster credentials for migration automation.
+
+<!-- STATIC CONTENT END -->
 <!-- DOCSIBLE START -->
 ## utility_openshift_target_credential
 

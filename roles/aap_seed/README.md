@@ -1,3 +1,9 @@
+<!-- STATIC CONTENT START -->
+# aap_seed
+
+Seed AAP with Migration Factory Configuration as Code content.
+
+<!-- STATIC CONTENT END -->
 <!-- DOCSIBLE START -->
 ## aap_seed
 
