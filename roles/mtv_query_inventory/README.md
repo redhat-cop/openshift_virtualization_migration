@@ -93,7 +93,7 @@ Description: Queries MTV inventory.
   * **mtv_query_inventory_url**:
     * **Required**: False
     * **Type**: str
-    * **Default**:
+    * **Default**: 
     * **Description**: URL of the MTV Inventory Service. If not provided, the URL will be determined from the MTV Inventory Route.
 
 </details>
