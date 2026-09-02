@@ -66,7 +66,9 @@
     name: infra.openshift_virtualization_migration.mtv_query_inventory
   vars:
     mtv_query_inventory_endpoint_path: >-
-      /providers/{{ _mtv_maps_forklift_type }}/{{ _mtv_maps_source_provider.uid }}/{{ _mtv_maps_datastore_resource }}?detail=4
+      /providers/{{ _mtv_maps_forklift_type }}/{{
+      _mtv_maps_source_provider.uid }}/{{
+      _mtv_maps_datastore_resource }}?detail=4
     mtv_query_inventory_result_var: _mtv_maps_datastores
     mtv_query_inventory_retrieval_method: "{{ mtv_maps_inventory_retrieval_method }}"
     mtv_query_inventory_secure_logging: "{{ mtv_maps_secure_logging }}"

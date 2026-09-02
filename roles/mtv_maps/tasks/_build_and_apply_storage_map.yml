@@ -4,13 +4,13 @@
 #   _mtv_maps_current_storage_map_name  — RFC 1123 name for this StorageMap
 #   _mtv_maps_current_overrides         — list of per-datastore overrides
 
-- name: _build_storage_map | Reset state for this iteration
+- name: _build_and_apply_storage_map | Reset state for this iteration
   ansible.builtin.set_fact:
     _mtv_maps_storage_map_entries: []
     _mtv_maps_allowed_ds_ids: []
     _mtv_maps_excluded_ds_ids: []
 
-- name: _build_storage_map | Extract included datastore IDs
+- name: _build_and_apply_storage_map | Extract included datastore IDs
   ansible.builtin.set_fact:
     _mtv_maps_allowed_ds_ids: >-
       {{ _mtv_maps_current_overrides
@@ -21,7 +21,7 @@
     _mtv_maps_current_overrides
     | selectattr('include', 'defined') | list | length > 0
 
-- name: _build_storage_map | Extract excluded datastore IDs
+- name: _build_and_apply_storage_map | Extract excluded datastore IDs
   ansible.builtin.set_fact:
     _mtv_maps_excluded_ds_ids: >-
       {{ _mtv_maps_current_overrides
@@ -32,7 +32,7 @@
     _mtv_maps_current_overrides
     | selectattr('exclude', 'defined') | list | length > 0
 
-- name: _build_storage_map | Filter datastores
+- name: _build_and_apply_storage_map | Filter datastores
   ansible.builtin.set_fact:
     _mtv_maps_filtered_datastores: >-
       {{
@@ -46,7 +46,7 @@
         else _mtv_maps_datastores
       }}
 
-- name: _build_storage_map | Build map entries
+- name: _build_and_apply_storage_map | Build map entries
   ansible.builtin.set_fact:
     _mtv_maps_storage_map_entries: >-
       {{ _mtv_maps_storage_map_entries | default([]) + [_entry] }}
@@ -71,7 +71,7 @@
       destination:
         storageClass: "{{ _sc }}"
 
-- name: _build_storage_map | Apply StorageMap CR
+- name: _build_and_apply_storage_map | Apply StorageMap CR
   redhat.openshift.k8s:
     host: "{{ mtv_maps_openshift_host }}"
     api_key: "{{ mtv_maps_openshift_api_key }}"
@@ -85,7 +85,7 @@
              recursive=true)
       }}
 
-- name: _build_storage_map | StorageMap created successfully
+- name: _build_and_apply_storage_map | StorageMap created successfully
   ansible.builtin.debug:
     msg: >-
       StorageMap '{{ _mtv_maps_current_storage_map_name }}' applied in

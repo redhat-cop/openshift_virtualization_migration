@@ -9,41 +9,43 @@
 #
 # Expected loop variable: _net (a single network from the inventory)
 
-- name: _resolve_net | Look up explicit override for this network
+- name: _resolve_network_destination | Look up explicit override for this network
   ansible.builtin.set_fact:
-    _net_override: >-
+    _mtv_maps_net_override: >-
       {{ (mtv_maps_network_map_overrides
           | selectattr('id', 'equalto', _net.id) | first)
          if (mtv_maps_network_map_overrides
              | selectattr('id', 'equalto', _net.id) | list | length > 0)
          else {} }}
 
-- name: _resolve_net | Try annotation-based NAD auto-match
+- name: _resolve_network_destination | Try annotation-based NAD auto-match
   ansible.builtin.set_fact:
-    _net_matching_nads: >-
+    _mtv_maps_net_matching_nads: >-
       {{ _mtv_maps_nads | default([])
          | selectattr('object.metadata.annotations', 'defined')
          | json_query(_nad_query) }}
   vars:
     _nad_query: >-
       [?object.metadata.annotations."{{ mtv_maps_nad_source_annotation }}"==`{{ _net.name }}`]
-  when: _net_override.destination_type is not defined
+  when: _mtv_maps_net_override.destination_type is not defined
 
-- name: _resolve_net | Warn if multiple NADs match the same portgroup
+- name: _resolve_network_destination | Warn if multiple NADs match the same portgroup
   ansible.builtin.debug:
     msg: >-
-      Multiple NADs matched portgroup '{{ _net.name }}'. Using the first
-      match: {{ (_net_matching_nads | first).object.metadata.namespace }}/{{ (_net_matching_nads | first).object.metadata.name }}.
+      Multiple NADs matched portgroup '{{ _net.name }}'.
+      Using the first match:
+      {{ (_mtv_maps_net_matching_nads | first).object.metadata.namespace
+      }}/{{ (_mtv_maps_net_matching_nads | first).object.metadata.name }}.
   when:
-    - _net_matching_nads is defined
-    - _net_matching_nads | length > 1
+    - _mtv_maps_net_matching_nads is defined
+    - _mtv_maps_net_matching_nads | length > 1
 
-- name: _resolve_net | Build destination from explicit override
+- name: _resolve_network_destination | Build destination from explicit override
   ansible.builtin.set_fact:
-    _net_destination: "{{ _dest }}"
+    _mtv_maps_net_destination: "{{ _dest }}"
   vars:
-    _type: "{{ _net_override.destination_type }}"
-    _nad_raw: "{{ _net_override.nad | default('') }}"
+    _type: "{{ _mtv_maps_net_override.destination_type }}"
+    _nad_raw: "{{ _mtv_maps_net_override.nad | default('') }}"
     _nad_parts: "{{ _nad_raw | split('/') }}"
     _dest: >-
       {{
@@ -54,27 +56,27 @@
          'name': _nad_parts[1] if (_nad_parts | length == 2) else _nad_parts[0],
          'namespace': _nad_parts[0] if (_nad_parts | length == 2) else 'default'}
       }}
-  when: _net_override.destination_type is defined
+  when: _mtv_maps_net_override.destination_type is defined
 
-- name: _resolve_net | Build destination from auto-matched NAD
+- name: _resolve_network_destination | Build destination from auto-matched NAD
   ansible.builtin.set_fact:
-    _net_destination:
+    _mtv_maps_net_destination:
       type: multus
-      name: "{{ (_net_matching_nads | first).object.metadata.name }}"
-      namespace: "{{ (_net_matching_nads | first).object.metadata.namespace }}"
+      name: "{{ (_mtv_maps_net_matching_nads | first).object.metadata.name }}"
+      namespace: "{{ (_mtv_maps_net_matching_nads | first).object.metadata.namespace }}"
   when:
-    - _net_override.destination_type is not defined
-    - _net_matching_nads | default([]) | length > 0
+    - _mtv_maps_net_override.destination_type is not defined
+    - _mtv_maps_net_matching_nads | default([]) | length > 0
 
-- name: _resolve_net | Default destination to pod network
+- name: _resolve_network_destination | Default destination to pod network
   ansible.builtin.set_fact:
-    _net_destination:
+    _mtv_maps_net_destination:
       type: pod
   when:
-    - _net_override.destination_type is not defined
-    - _net_matching_nads | default([]) | length == 0
+    - _mtv_maps_net_override.destination_type is not defined
+    - _mtv_maps_net_matching_nads | default([]) | length == 0
 
-- name: _resolve_net | Append entry to network map
+- name: _resolve_network_destination | Append entry to network map
   ansible.builtin.set_fact:
     _mtv_maps_network_map_entries: >-
       {{ _mtv_maps_network_map_entries + [_entry] }}
@@ -83,5 +85,5 @@
       source:
         id: "{{ _net.id }}"
         name: "{{ _net.name }}"
-      destination: "{{ _net_destination }}"
+      destination: "{{ _mtv_maps_net_destination }}"
 ...
