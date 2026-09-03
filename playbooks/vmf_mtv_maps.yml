@@ -8,5 +8,5 @@
         name: infra.openshift_virtualization_migration.mtv_maps
         apply:
           delegate_to: localhost
-      when: source_name in (vm_sources | default([]))
+      when: inventory_hostname == target_name
 ...
