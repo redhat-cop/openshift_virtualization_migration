@@ -9,12 +9,15 @@
          if (mtv_maps_default_storage_class | length > 0)
          else (_mtv_maps_storageclasses
                | selectattr('object.metadata.annotations', 'defined')
-               | selectattr('object.metadata.annotations.storageclass.kubernetes.io/is-default-class', 'defined')
-               | list
+               | json_query(_default_sc_query)
                | map(attribute='name')
                | first
                | default(''))
       }}
+  vars:
+    _default_sc_query: >-
+      [?object.metadata.annotations."kubernetes.io/is-default-class"=='true'
+      || object.metadata.annotations."storageclass.kubernetes.io/is-default-class"=='true']
 
 - name: create_storage_map | Assert a default storage class is available
   ansible.builtin.assert:

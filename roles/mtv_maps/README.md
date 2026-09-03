@@ -114,14 +114,6 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
     * **Type**: str
     * **Default**: none
     * **Description**: Name of the source provider in the MTV inventory. Defaults to the rfc1123-sanitised source_name.
-  * **mtv_maps_source_type**:
-    * **Required**: False
-    * **Type**: str
-    * **Default**: vmware
-    * **Description**: Type of the source environment. Resolved from the source host's type variable in the AAP inventory.
-    * **Choices**:
-      * vmware
-      * ovirt
   * **mtv_maps_storage_map_overrides**:
     * **Required**: False
     * **Type**: list
@@ -151,23 +143,22 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
 | [`mtv_maps_api_version`](defaults/main.yml#L78)   | str   | `forklift.konveyor.io/v1beta1` |  None  |   False  |  Forklift API Version |
 | [`mtv_maps_create_network_maps`](defaults/main.yml#L52)   | bool   | `True` |  None  |   False  |  Create Network Maps |
 | [`mtv_maps_create_storage_maps`](defaults/main.yml#L47)   | bool   | `True` |  None  |   False  |  Create Storage Maps |
-| [`mtv_maps_default_storage_class`](defaults/main.yml#L93)   | str   | `` |  None  |   False  |  Default Storage Class |
+| [`mtv_maps_default_storage_class`](defaults/main.yml#L85)   | str   | `` |  None  |   False  |  Default Storage Class |
 | [`mtv_maps_destination_provider_name`](defaults/main.yml#L73)   | str   | `host` |  None  |   False  |  Destination Provider Name |
-| [`mtv_maps_inventory_retrieval_method`](defaults/main.yml#L132)   | str   | `api` |  None  |   False  |  Inventory Retrieval Method |
-| [`mtv_maps_managed_by_label`](defaults/main.yml#L147)   | str   | `ansible-migration-factory` |  None  |   False  |  Managed By Label |
-| [`mtv_maps_multiple_storage_maps`](defaults/main.yml#L109)   | dict   | `{}` |  None  |   False  |  Multiple Storage Maps |
-| [`mtv_maps_nad_source_annotation`](defaults/main.yml#L124)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  NAD Source Annotation |
+| [`mtv_maps_inventory_retrieval_method`](defaults/main.yml#L124)   | str   | `api` |  None  |   False  |  Inventory Retrieval Method |
+| [`mtv_maps_managed_by_label`](defaults/main.yml#L139)   | str   | `ansible-migration-factory` |  None  |   False  |  Managed By Label |
+| [`mtv_maps_multiple_storage_maps`](defaults/main.yml#L101)   | dict   | `{}` |  None  |   False  |  Multiple Storage Maps |
+| [`mtv_maps_nad_source_annotation`](defaults/main.yml#L116)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  NAD Source Annotation |
 | [`mtv_maps_namespace`](defaults/main.yml#L59)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Namespace |
-| [`mtv_maps_network_map_overrides`](defaults/main.yml#L117)   | list   | `[]` |  None  |   False  |  Network Map Overrides |
+| [`mtv_maps_network_map_overrides`](defaults/main.yml#L109)   | list   | `[]` |  None  |   False  |  Network Map Overrides |
 | [`mtv_maps_openshift_api_key`](defaults/main.yml#L23)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
 | [`mtv_maps_openshift_host`](defaults/main.yml#L13)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift Host |
 | [`mtv_maps_openshift_verify_ssl`](defaults/main.yml#L38)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  OpenShift Verify SSL |
-| [`mtv_maps_query_delay`](defaults/main.yml#L142)   | int   | `5` |  None  |   False  |  Query Delay |
-| [`mtv_maps_query_retries`](defaults/main.yml#L137)   | int   | `5` |  None  |   False  |  Query Retries |
+| [`mtv_maps_query_delay`](defaults/main.yml#L134)   | int   | `5` |  None  |   False  |  Query Delay |
+| [`mtv_maps_query_retries`](defaults/main.yml#L129)   | int   | `5` |  None  |   False  |  Query Retries |
 | [`mtv_maps_secure_logging`](defaults/main.yml#L6)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   False  |  Secure Logging |
 | [`mtv_maps_source_provider_name`](defaults/main.yml#L67)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Source Provider Name |
-| [`mtv_maps_source_type`](defaults/main.yml#L85)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Source Type |
-| [`mtv_maps_storage_map_overrides`](defaults/main.yml#L101)   | list   | `[]` |  None  |   False  |  Storage Map Overrides |
+| [`mtv_maps_storage_map_overrides`](defaults/main.yml#L93)   | list   | `[]` |  None  |   False  |  Storage Map Overrides |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
@@ -206,8 +197,6 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
 <b>`mtv_maps_secure_logging`:</b> Whether to enable secure logging for sensitive tasks.
 <br>
 <b>`mtv_maps_source_provider_name`:</b> >-
-<br>
-<b>`mtv_maps_source_type`:</b> >-
 <br>
 <b>`mtv_maps_storage_map_overrides`:</b> >-
 <br>
@@ -275,9 +264,11 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
 | query_inventory ¦ Query MTV providers | `ansible.builtin.include_role` | False |
+| query_inventory ¦ Set source provider | `ansible.builtin.set_fact` | False |
 | query_inventory ¦ Assert source provider exists in MTV inventory | `ansible.builtin.assert` | False |
+| query_inventory ¦ Set destination provider | `ansible.builtin.set_fact` | False |
 | query_inventory ¦ Assert destination provider exists in MTV inventory | `ansible.builtin.assert` | False |
-| query_inventory ¦ Resolve provider references | `ansible.builtin.set_fact` | False |
+| query_inventory ¦ Resolve source-type-specific variables | `ansible.builtin.set_fact` | False |
 | query_inventory ¦ Query source datastores | `ansible.builtin.include_role` | True |
 | query_inventory ¦ Query destination storage classes | `ansible.builtin.include_role` | True |
 | query_inventory ¦ Query source networks | `ansible.builtin.include_role` | True |
@@ -301,7 +292,6 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
 | validate ¦ Assert target exists in AAP inventory | `ansible.builtin.assert` | False |
 | validate ¦ Assert source exists in AAP inventory | `ansible.builtin.assert` | False |
 | validate ¦ Assert source is mapped to this target | `ansible.builtin.assert` | False |
-| validate ¦ Assert source type is supported | `ansible.builtin.assert` | False |
 | validate ¦ Assert mutually exclusive storage map overrides | `ansible.builtin.assert` | True |
 | validate ¦ Assert storage overrides do not mix include and exclude | `ansible.builtin.assert` | True |
 | validate ¦ Assert network overrides do not mix include and exclude | `ansible.builtin.assert` | True |
@@ -309,7 +299,7 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
 | validate ¦ Assert StorageMap CRD is installed | `ansible.builtin.assert` | True |
 | validate ¦ Check NetworkMap CRD exists on target cluster | `kubernetes.core.k8s_info` | True |
 | validate ¦ Assert NetworkMap CRD is installed | `ansible.builtin.assert` | True |
-| validate ¦ Resolve source-type-specific variables | `ansible.builtin.set_fact` | False |
+| validate ¦ Resolve map name defaults | `ansible.builtin.set_fact` | False |
 
 ## Task Flow Graphs
 
@@ -447,14 +437,16 @@ classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
   Start-->|Include role| query_inventory___Query_MTV_providers_infra_openshift_virtualization_migration_mtv_query_inventory_0(query inventory   query mtv providers<br>include_role: infra openshift virtualization migration mtv query<br>inventory):::includeRole
-  query_inventory___Query_MTV_providers_infra_openshift_virtualization_migration_mtv_query_inventory_0-->|Task| query_inventory___Assert_source_provider_exists_in_MTV_inventory1[query inventory   assert source provider exists in<br>mtv inventory]:::task
-  query_inventory___Assert_source_provider_exists_in_MTV_inventory1-->|Task| query_inventory___Assert_destination_provider_exists_in_MTV_inventory2[query inventory   assert destination provider<br>exists in mtv inventory]:::task
-  query_inventory___Assert_destination_provider_exists_in_MTV_inventory2-->|Task| query_inventory___Resolve_provider_references3[query inventory   resolve provider references]:::task
-  query_inventory___Resolve_provider_references3-->|Include role| query_inventory___Query_source_datastores_infra_openshift_virtualization_migration_mtv_query_inventory_4(query inventory   query source datastores<br>When: **mtv maps create storage maps   bool**<br>include_role: infra openshift virtualization migration mtv query<br>inventory):::includeRole
-  query_inventory___Query_source_datastores_infra_openshift_virtualization_migration_mtv_query_inventory_4-->|Include role| query_inventory___Query_destination_storage_classes_infra_openshift_virtualization_migration_mtv_query_inventory_5(query inventory   query destination storage<br>classes<br>When: **mtv maps create storage maps   bool**<br>include_role: infra openshift virtualization migration mtv query<br>inventory):::includeRole
-  query_inventory___Query_destination_storage_classes_infra_openshift_virtualization_migration_mtv_query_inventory_5-->|Include role| query_inventory___Query_source_networks_infra_openshift_virtualization_migration_mtv_query_inventory_6(query inventory   query source networks<br>When: **mtv maps create network maps   bool**<br>include_role: infra openshift virtualization migration mtv query<br>inventory):::includeRole
-  query_inventory___Query_source_networks_infra_openshift_virtualization_migration_mtv_query_inventory_6-->|Include role| query_inventory___Query_destination_network_attachment_definitions_infra_openshift_virtualization_migration_mtv_query_inventory_7(query inventory   query destination network<br>attachment definitions<br>When: **mtv maps create network maps   bool**<br>include_role: infra openshift virtualization migration mtv query<br>inventory):::includeRole
-  query_inventory___Query_destination_network_attachment_definitions_infra_openshift_virtualization_migration_mtv_query_inventory_7-->End
+  query_inventory___Query_MTV_providers_infra_openshift_virtualization_migration_mtv_query_inventory_0-->|Task| query_inventory___Set_source_provider1[query inventory   set source provider]:::task
+  query_inventory___Set_source_provider1-->|Task| query_inventory___Assert_source_provider_exists_in_MTV_inventory2[query inventory   assert source provider exists in<br>mtv inventory]:::task
+  query_inventory___Assert_source_provider_exists_in_MTV_inventory2-->|Task| query_inventory___Set_destination_provider3[query inventory   set destination provider]:::task
+  query_inventory___Set_destination_provider3-->|Task| query_inventory___Assert_destination_provider_exists_in_MTV_inventory4[query inventory   assert destination provider<br>exists in mtv inventory]:::task
+  query_inventory___Assert_destination_provider_exists_in_MTV_inventory4-->|Task| query_inventory___Resolve_source_type_specific_variables5[query inventory   resolve source type specific<br>variables]:::task
+  query_inventory___Resolve_source_type_specific_variables5-->|Include role| query_inventory___Query_source_datastores_infra_openshift_virtualization_migration_mtv_query_inventory_6(query inventory   query source datastores<br>When: **mtv maps create storage maps   bool**<br>include_role: infra openshift virtualization migration mtv query<br>inventory):::includeRole
+  query_inventory___Query_source_datastores_infra_openshift_virtualization_migration_mtv_query_inventory_6-->|Include role| query_inventory___Query_destination_storage_classes_infra_openshift_virtualization_migration_mtv_query_inventory_7(query inventory   query destination storage<br>classes<br>When: **mtv maps create storage maps   bool**<br>include_role: infra openshift virtualization migration mtv query<br>inventory):::includeRole
+  query_inventory___Query_destination_storage_classes_infra_openshift_virtualization_migration_mtv_query_inventory_7-->|Include role| query_inventory___Query_source_networks_infra_openshift_virtualization_migration_mtv_query_inventory_8(query inventory   query source networks<br>When: **mtv maps create network maps   bool**<br>include_role: infra openshift virtualization migration mtv query<br>inventory):::includeRole
+  query_inventory___Query_source_networks_infra_openshift_virtualization_migration_mtv_query_inventory_8-->|Include role| query_inventory___Query_destination_network_attachment_definitions_infra_openshift_virtualization_migration_mtv_query_inventory_9(query inventory   query destination network<br>attachment definitions<br>When: **mtv maps create network maps   bool**<br>include_role: infra openshift virtualization migration mtv query<br>inventory):::includeRole
+  query_inventory___Query_destination_network_attachment_definitions_infra_openshift_virtualization_migration_mtv_query_inventory_9-->End
 ```
 
 ### Graph for rescue_maps.yml
@@ -497,21 +489,20 @@ classDef rescue stroke:#665352,stroke-width:2px;
   validate___Assert_required_survey_variables_are_defined0-->|Task| validate___Assert_target_exists_in_AAP_inventory1[validate   assert target exists in aap inventory]:::task
   validate___Assert_target_exists_in_AAP_inventory1-->|Task| validate___Assert_source_exists_in_AAP_inventory2[validate   assert source exists in aap inventory]:::task
   validate___Assert_source_exists_in_AAP_inventory2-->|Task| validate___Assert_source_is_mapped_to_this_target3[validate   assert source is mapped to this target]:::task
-  validate___Assert_source_is_mapped_to_this_target3-->|Task| validate___Assert_source_type_is_supported4[validate   assert source type is supported]:::task
-  validate___Assert_source_type_is_supported4-->|Task| validate___Assert_mutually_exclusive_storage_map_overrides5[validate   assert mutually exclusive storage map<br>overrides<br>When: **mtv maps create storage maps   bool**]:::task
-  validate___Assert_mutually_exclusive_storage_map_overrides5-->|Task| validate___Assert_storage_overrides_do_not_mix_include_and_exclude6[validate   assert storage overrides do not mix<br>include and exclude<br>When: **mtv maps create storage maps   bool and mtv maps<br>storage map overrides   length   0**]:::task
-  validate___Assert_storage_overrides_do_not_mix_include_and_exclude6-->|Task| validate___Assert_network_overrides_do_not_mix_include_and_exclude7[validate   assert network overrides do not mix<br>include and exclude<br>When: **mtv maps create network maps   bool and mtv maps<br>network map overrides   length   0**]:::task
-  validate___Assert_network_overrides_do_not_mix_include_and_exclude7-->|Task| validate___Check_StorageMap_CRD_exists_on_target_cluster8[validate   check storagemap crd exists on target<br>cluster<br>When: **mtv maps create storage maps   bool**]:::task
-  validate___Check_StorageMap_CRD_exists_on_target_cluster8-->|Task| validate___Assert_StorageMap_CRD_is_installed9[validate   assert storagemap crd is installed<br>When: **mtv maps create storage maps   bool**]:::task
-  validate___Assert_StorageMap_CRD_is_installed9-->|Task| validate___Check_NetworkMap_CRD_exists_on_target_cluster10[validate   check networkmap crd exists on target<br>cluster<br>When: **mtv maps create network maps   bool**]:::task
-  validate___Check_NetworkMap_CRD_exists_on_target_cluster10-->|Task| validate___Assert_NetworkMap_CRD_is_installed11[validate   assert networkmap crd is installed<br>When: **mtv maps create network maps   bool**]:::task
-  validate___Assert_NetworkMap_CRD_is_installed11-->|Task| validate___Resolve_source_type_specific_variables12[validate   resolve source type specific variables]:::task
-  validate___Resolve_source_type_specific_variables12-->End
+  validate___Assert_source_is_mapped_to_this_target3-->|Task| validate___Assert_mutually_exclusive_storage_map_overrides4[validate   assert mutually exclusive storage map<br>overrides<br>When: **mtv maps create storage maps   bool**]:::task
+  validate___Assert_mutually_exclusive_storage_map_overrides4-->|Task| validate___Assert_storage_overrides_do_not_mix_include_and_exclude5[validate   assert storage overrides do not mix<br>include and exclude<br>When: **mtv maps create storage maps   bool and mtv maps<br>storage map overrides   length   0**]:::task
+  validate___Assert_storage_overrides_do_not_mix_include_and_exclude5-->|Task| validate___Assert_network_overrides_do_not_mix_include_and_exclude6[validate   assert network overrides do not mix<br>include and exclude<br>When: **mtv maps create network maps   bool and mtv maps<br>network map overrides   length   0**]:::task
+  validate___Assert_network_overrides_do_not_mix_include_and_exclude6-->|Task| validate___Check_StorageMap_CRD_exists_on_target_cluster7[validate   check storagemap crd exists on target<br>cluster<br>When: **mtv maps create storage maps   bool**]:::task
+  validate___Check_StorageMap_CRD_exists_on_target_cluster7-->|Task| validate___Assert_StorageMap_CRD_is_installed8[validate   assert storagemap crd is installed<br>When: **mtv maps create storage maps   bool**]:::task
+  validate___Assert_StorageMap_CRD_is_installed8-->|Task| validate___Check_NetworkMap_CRD_exists_on_target_cluster9[validate   check networkmap crd exists on target<br>cluster<br>When: **mtv maps create network maps   bool**]:::task
+  validate___Check_NetworkMap_CRD_exists_on_target_cluster9-->|Task| validate___Assert_NetworkMap_CRD_is_installed10[validate   assert networkmap crd is installed<br>When: **mtv maps create network maps   bool**]:::task
+  validate___Assert_NetworkMap_CRD_is_installed10-->|Task| validate___Resolve_map_name_defaults11[validate   resolve map name defaults]:::task
+  validate___Resolve_map_name_defaults11-->End
 ```
 
 ## Author Information
 
-Red Hat CoP
+Red Hat
 
 ## License
 

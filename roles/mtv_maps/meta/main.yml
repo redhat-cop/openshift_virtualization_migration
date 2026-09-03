@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   role_name: mtv_maps
-  author: Red Hat CoP
+  author: Red Hat
   description: >-
     Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift
     target clusters for a given source-target pair.

@@ -104,17 +104,6 @@ argument_specs:
         description: >-
           Forklift API version for map CRs.
 
-      mtv_maps_source_type:
-        type: str
-        required: false
-        default: vmware
-        choices:
-          - vmware
-          - ovirt
-        description: >-
-          Type of the source environment. Resolved from the source host's
-          type variable in the AAP inventory.
-
       mtv_maps_default_storage_class:
         type: str
         required: false

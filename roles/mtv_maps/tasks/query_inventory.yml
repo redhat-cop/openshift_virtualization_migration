@@ -6,7 +6,7 @@
   ansible.builtin.include_role:
     name: infra.openshift_virtualization_migration.mtv_query_inventory
   vars:
-    mtv_query_inventory_endpoint_path: /providers
+    mtv_query_inventory_endpoint_path: /providers?detail=2
     mtv_query_inventory_result_var: _mtv_maps_providers
     mtv_query_inventory_retrieval_method: "{{ mtv_maps_inventory_retrieval_method }}"
     mtv_query_inventory_secure_logging: "{{ mtv_maps_secure_logging }}"
@@ -14,50 +14,46 @@
     mtv_query_inventory_query_retries: "{{ mtv_maps_query_retries }}"
     mtv_query_inventory_query_delay: "{{ mtv_maps_query_delay }}"
 
+- name: query_inventory | Set source provider
+  ansible.builtin.set_fact:
+    _mtv_maps_source_provider: >-
+      {{ _mtv_maps_providers | json_query('*[]') |
+      selectattr('name', 'equalto', mtv_maps_source_provider_name) |
+      selectattr('namespace', 'equalto', mtv_maps_namespace) |
+      first | default(None) }}
+
 - name: query_inventory | Assert source provider exists in MTV inventory
   ansible.builtin.assert:
     that:
-      - _mtv_maps_providers[_mtv_maps_forklift_type] is defined
-      - _mtv_maps_providers[_mtv_maps_forklift_type]
-        | selectattr('name', 'equalto', mtv_maps_source_provider_name)
-        | selectattr('namespace', 'equalto', mtv_maps_namespace)
-        | list | length == 1
+      - _mtv_maps_source_provider | default('', true) | length > 0
     fail_msg: >-
-      Source provider '{{ mtv_maps_source_provider_name }}' (type: {{ _mtv_maps_forklift_type }})
+      Source provider '{{ mtv_maps_source_provider_name }}'
       not found in namespace '{{ mtv_maps_namespace }}'.
-      Available {{ _mtv_maps_forklift_type }} providers:
-      {{ _mtv_maps_providers[_mtv_maps_forklift_type] | default([])
-         | map(attribute='name') | list }}.
     quiet: true
+
+- name: query_inventory | Set destination provider
+  ansible.builtin.set_fact:
+    _mtv_maps_dest_provider: >-
+      {{ _mtv_maps_providers | json_query('*[]') |
+      selectattr('name', 'equalto', mtv_maps_destination_provider_name) |
+      selectattr('namespace', 'equalto', mtv_maps_namespace) |
+      first | default(None) }}
 
 - name: query_inventory | Assert destination provider exists in MTV inventory
   ansible.builtin.assert:
     that:
-      - _mtv_maps_providers.openshift is defined
-      - _mtv_maps_providers.openshift
-        | selectattr('name', 'equalto', mtv_maps_destination_provider_name)
-        | selectattr('namespace', 'equalto', mtv_maps_namespace)
-        | list | length == 1
+      - _mtv_maps_dest_provider | default('', true) | length > 0
     fail_msg: >-
       Destination provider '{{ mtv_maps_destination_provider_name }}'
       not found in namespace '{{ mtv_maps_namespace }}'.
-      Available openshift providers:
-      {{ _mtv_maps_providers.openshift | default([])
-         | map(attribute='name') | list }}.
     quiet: true
 
-- name: query_inventory | Resolve provider references
+- name: query_inventory | Resolve source-type-specific variables
   ansible.builtin.set_fact:
-    _mtv_maps_source_provider: >-
-      {{ _mtv_maps_providers[_mtv_maps_forklift_type]
-         | selectattr('name', 'equalto', mtv_maps_source_provider_name)
-         | selectattr('namespace', 'equalto', mtv_maps_namespace)
-         | first }}
-    _mtv_maps_dest_provider: >-
-      {{ _mtv_maps_providers.openshift
-         | selectattr('name', 'equalto', mtv_maps_destination_provider_name)
-         | selectattr('namespace', 'equalto', mtv_maps_namespace)
-         | first }}
+    _mtv_maps_source_type: "{{ _mtv_maps_source_provider.type }}"
+    _mtv_maps_datastore_resource: >-
+      {{ 'datastores' if _mtv_maps_source_provider.type == 'vsphere'
+         else 'storagedomains' }}
 
 # --- Storage-related queries ---
 
@@ -66,7 +62,7 @@
     name: infra.openshift_virtualization_migration.mtv_query_inventory
   vars:
     mtv_query_inventory_endpoint_path: >-
-      /providers/{{ _mtv_maps_forklift_type }}/{{
+      /providers/{{ _mtv_maps_source_type }}/{{
       _mtv_maps_source_provider.uid }}/{{
       _mtv_maps_datastore_resource }}?detail=4
     mtv_query_inventory_result_var: _mtv_maps_datastores
@@ -98,7 +94,8 @@
     name: infra.openshift_virtualization_migration.mtv_query_inventory
   vars:
     mtv_query_inventory_endpoint_path: >-
-      /providers/{{ _mtv_maps_forklift_type }}/{{ _mtv_maps_source_provider.uid }}/networks?detail=4
+      /providers/{{ _mtv_maps_source_type }}/{{
+      _mtv_maps_source_provider.uid }}/networks?detail=4
     mtv_query_inventory_result_var: _mtv_maps_networks
     mtv_query_inventory_retrieval_method: "{{ mtv_maps_inventory_retrieval_method }}"
     mtv_query_inventory_secure_logging: "{{ mtv_maps_secure_logging }}"
@@ -112,7 +109,8 @@
     name: infra.openshift_virtualization_migration.mtv_query_inventory
   vars:
     mtv_query_inventory_endpoint_path: >-
-      /providers/openshift/{{ _mtv_maps_dest_provider.uid }}/networkattachmentdefinitions?detail=4
+      /providers/openshift/{{ _mtv_maps_dest_provider.uid
+      }}/networkattachmentdefinitions?detail=4
     mtv_query_inventory_result_var: _mtv_maps_nads
     mtv_query_inventory_retrieval_method: "{{ mtv_maps_inventory_retrieval_method }}"
     mtv_query_inventory_secure_logging: "{{ mtv_maps_secure_logging }}"

@@ -39,15 +39,6 @@
       {{ hostvars[target_name]['vm_sources'] | default([]) }}.
     quiet: true
 
-- name: validate | Assert source type is supported
-  ansible.builtin.assert:
-    that:
-      - mtv_maps_source_type in ['vmware', 'ovirt']
-    fail_msg: >-
-      Unsupported source type '{{ mtv_maps_source_type }}'
-      for source '{{ source_name }}'. Supported types: vmware, ovirt.
-    quiet: true
-
 - name: validate | Assert mutually exclusive storage map overrides
   ansible.builtin.assert:
     that:
@@ -131,14 +122,8 @@
     quiet: true
   when: mtv_maps_create_network_maps | bool
 
-- name: validate | Resolve source-type-specific variables
+- name: validate | Resolve map name defaults
   ansible.builtin.set_fact:
-    _mtv_maps_forklift_type: >-
-      {{ 'vsphere' if mtv_maps_source_type == 'vmware'
-         else mtv_maps_source_type }}
-    _mtv_maps_datastore_resource: >-
-      {{ 'datastores' if mtv_maps_source_type == 'vmware'
-         else 'storagedomains' }}
     _mtv_maps_storage_map_name: >-
       {{ (source_name ~ '-' ~ mtv_maps_destination_provider_name)
          | infra.openshift_virtualization_migration.rfc1123 }}

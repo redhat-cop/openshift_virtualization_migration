@@ -47,7 +47,7 @@
         Source provider:  {{ mtv_maps_source_provider_name | default('unknown') }}
         Dest provider:    {{ mtv_maps_destination_provider_name | default('unknown') }}
         Namespace:        {{ mtv_maps_namespace }}
-        Source type:      {{ mtv_maps_source_type | default('unknown') }}
+        Source type:      {{ _mtv_maps_source_type | default('unknown') }}
         Storage maps:     {{ mtv_maps_create_storage_maps }}
         Network maps:     {{ mtv_maps_create_network_maps }}
 

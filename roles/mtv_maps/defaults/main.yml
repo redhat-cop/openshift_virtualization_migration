@@ -77,14 +77,6 @@ mtv_maps_destination_provider_name: host
 # description: Forklift API version for map CRs.
 mtv_maps_api_version: forklift.konveyor.io/v1beta1
 
-# title: Source Type
-# required: False
-# description: >-
-#   Type of the source environment. Resolved from the source host's
-#   type variable in the AAP inventory. Supported values: vmware, ovirt.
-mtv_maps_source_type: >-
-  {{ hostvars[source_name]['type'] | default('vmware') }}
-
 # title: Default Storage Class
 # required: False
 # description: >-
