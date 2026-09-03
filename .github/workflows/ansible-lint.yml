@@ -1,0 +1,123 @@
+name: Ansible Lint
+
+# ============================================================================
+# WORKFLOW: TIER 1 ANSIBLE-LINT (NO SECRETS REQUIRED)
+# ============================================================================
+#
+# This workflow runs ansible-lint on all PRs (including forks) without
+# requiring AUTOMATION_HUB_TOKEN or manual approval. It provides immediate
+# lint feedback as part of the Tier 1 CI checks.
+#
+# HOW IT WORKS:
+# -------------
+# 1. Installs only publicly available collection dependencies from Galaxy
+# 2. Builds and installs the collection itself (no token needed)
+# 3. Runs ansible-lint with a CI-specific config (.ansible-lint-ci) that
+#    mocks modules and roles from private Red Hat collections
+#
+# COVERAGE:
+# ---------
+# Catches: naming conventions, YAML formatting, FQCN usage, task structure,
+#          variable naming, no-log-password, role prefix rules, and more.
+# Defers:  Module argument validation for private collection modules
+#          (handled by full CI in Tier 2 after maintainer approval).
+#
+# ============================================================================
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ["main", "v2"]
+  push:
+    branches-ignore:
+      - main
+      - v2
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ansible-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-ansible-lint-${{ hashFiles('requirements-ci.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-ansible-lint-
+            ${{ runner.os }}-pip-
+
+      - name: Install Python dependencies
+        run: |
+          pip install ansible-core ansible-lint distlib
+
+      - name: Install public Galaxy collection dependencies
+        run: |
+          ansible-galaxy collection install \
+            kubernetes.core \
+            community.crypto \
+            community.general \
+            community.vmware \
+            vmware.vmware_rest \
+            ansible.posix \
+            ansible.utils
+
+      - name: Build and install collection
+        run: |
+          ansible-galaxy collection build --force
+          ansible-galaxy collection install infra-openshift_virtualization_migration-*.tar.gz --force --no-deps
+          rm -f infra-openshift_virtualization_migration-*.tar.gz
+
+      - name: Run ansible-lint (tolerant mode)
+        run: |
+          echo "============================================================"
+          echo "  Ansible Lint - Tier 1 (tolerant mode)"
+          echo "============================================================"
+          echo ""
+          echo "Running ansible-lint with public dependencies only."
+          echo "Private Red Hat collection modules/roles are mocked."
+          echo "Full lint with all dependencies runs in Tier 2 CI"
+          echo "after maintainer approval."
+          echo ""
+
+          if ansible-lint -c .ansible-lint-ci; then
+            echo ""
+            echo "============================================================"
+            echo "  All ansible-lint checks passed!"
+            echo "============================================================"
+            exit 0
+          else
+            echo ""
+            echo "============================================================"
+            echo "  Ansible-lint checks failed!"
+            echo "============================================================"
+            echo ""
+            echo "How to fix:"
+            echo ""
+            echo "1. Install development dependencies locally:"
+            echo "   pip install -r requirements-dev.txt"
+            echo ""
+            echo "2. Run ansible-lint:"
+            echo "   ansible-lint"
+            echo ""
+            echo "3. Fix any issues reported above"
+            echo ""
+            echo "4. Commit and push your changes"
+            echo ""
+            echo "============================================================"
+            exit 1
+          fi

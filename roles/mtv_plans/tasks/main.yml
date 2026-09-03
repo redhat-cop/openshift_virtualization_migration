@@ -1,0 +1,266 @@
+---
+
+- name: Verify Request Provided
+  ansible.builtin.assert:
+    that:
+      - mtv_plans_migration_request is defined
+      - mtv_plans_migration_request | ansible.builtin.type_debug == 'dict'
+      - mtv_plans_migration_request | dict2items | length > 0
+    quiet: true
+    fail_msg: "mtv_plans_migration_request variable is required and was not provided or not properly formatted."
+
+- name: Verify VMs or Folders Provided
+  ansible.builtin.assert:
+    that: >-
+      (mtv_plans_migration_request['vms'] |
+      default([]) + mtv_plans_migration_request['folders'] |
+      default([])) | length > 0
+    fail_msg: "At least one VM or folder must be provided in the Plan migration request."
+
+- name: Process Request (MTV Namespace)
+  ansible.builtin.set_fact:
+    __mtv_plans_mtv_namespace: >-
+      {{ mtv_plans_migration_request['mtv_namespace'] | default(__mtv_plans_default_namespace) }}
+
+- name: Process Request (Migration Namespace)
+  ansible.builtin.set_fact:
+    __mtv_plans_migration_namespace: >-
+      {{ mtv_plans_migration_request['migration_namespace'] | default(__mtv_plans_mtv_namespace) }}
+
+- name: Process Request (Baseline)
+  ansible.builtin.set_fact:
+    __mtv_plans_mtv_source_target: >-
+      {{ mtv_plans_migration_request['source'] | default(__mtv_plans_default_source_target) }}
+    __mtv_plans_mtv_source_target_namespace: >-
+      {{ mtv_plans_migration_request['source_namespace'] | default(__mtv_plans_default_source_target_namespace) }}
+    __mtv_plans_mtv_destination_target: >-
+      {{ mtv_plans_migration_request['destination'] | default(__mtv_plans_default_destination_target) }}
+    __mtv_plans_mtv_destination_target_namespace: >-
+      {{ mtv_plans_migration_request['destination_namespace'] |
+      default(__mtv_plans_default_destination_target_namespace) }}
+    __mtv_plans_mtv_split_plans: >-
+       {{ mtv_plans_migration_request['split_plans'] | default(__mtv_plans_default_split_plans) }}
+    __mtv_plans_mtv_vms_per_plan: >-
+       {{ mtv_plans_migration_request['vms_per_plan'] | default(__mtv_plans_default_vms_per_plan) }}
+    __mtv_plans_mtv_dry_run: >-
+      {{ mtv_plans_migration_request['dry_run'] | default(__mtv_plans_default_migrate_dry_run) }}
+    __mtv_plans_mtv_target_namespace: >-
+      {{ mtv_plans_migration_request['target_namespace'] | default(__mtv_plans_default_target_namespace) }}
+    __mtv_plans_mtv_verify_plans_ready: >-
+      {{ mtv_plans_migration_request['verify_plans_ready'] | default(__mtv_plans_default_verify_plans_ready) }}
+    __mtv_plans_mtv_type: >-
+      {{ mtv_plans_migration_request['type'] | default(__mtv_plans_default_type) }}
+
+- name: Process Request (Maps)
+  ansible.builtin.set_fact:
+    __mtv_plans_mtv_network_map_name: >-
+      {{ mtv_plans_migration_request['network_map'] |
+      default(__mtv_plans_default_network_map_name) }}
+    __mtv_plans_mtv_network_map_namespace: >-
+      {{ mtv_plans_migration_request['network_map_namespace'] |
+      default(__mtv_plans_default_network_map_namespace) }}
+    __mtv_plans_mtv_storage_map_name: >-
+      {{ mtv_plans_migration_request['storage_map'] |
+      default(__mtv_plans_default_storage_map_name) }}
+    __mtv_plans_mtv_storage_map_namespace: >-
+      {{ mtv_plans_migration_request['storage_map_namespace'] |
+      default(__mtv_plans_default_storage_map_namespace) }}
+
+- name: Verify Split Plan Value is Positive
+  when: __mtv_plans_mtv_split_plans | bool
+  ansible.builtin.assert:
+    that:
+      - __mtv_plans_mtv_vms_per_plan | int > 0
+    fail_msg: >-
+      Split plans are enabled but vms_per_plan is not set to a positive
+      integer ({{ __mtv_plans_mtv_vms_per_plan }}).
+    quiet: true
+
+- name: Set Plan Base Name
+  ansible.builtin.set_fact:
+    __mtv_plans_mtv_plan_base_name: >-
+      {{ mtv_plans_migration_request['plan_name'] |
+      default(__mtv_plans_default_plan_base_name) }}
+
+- name: Retrieve Configured providers
+  ansible.builtin.include_role:
+    name: mtv_query_inventory
+  vars:
+    mtv_query_inventory_endpoint_path: /providers?detail=2
+    mtv_query_inventory_result_var: __mtv_plans_mtv_inventory_providers
+    mtv_query_inventory_namespace: "{{ __mtv_plans_mtv_namespace }}"
+
+- name: Set Source Provider
+  ansible.builtin.set_fact:
+    __mtv_plans_mtv_source_provider: >-
+      {{ __mtv_plans_mtv_inventory_providers | json_query('*[]') |
+      selectattr('name', 'equalto', __mtv_plans_mtv_source_target) |
+      selectattr('namespace', 'equalto', __mtv_plans_mtv_source_target_namespace) |
+      first | default(None) }}
+
+- name: Verify Source Provider
+  ansible.builtin.assert:
+    that:
+      - __mtv_plans_mtv_source_provider | default('', true) | length > 0
+    quiet: true
+    fail_msg: >-
+      Unable to locate Source Provider with name
+      '{{ __mtv_plans_mtv_source_target }}' in namespace
+      '{{ __mtv_plans_mtv_source_target_namespace }}'
+
+- name: Set Destination Provider
+  ansible.builtin.set_fact:
+    __mtv_plans_mtv_destination_provider: >-
+      {{ __mtv_plans_mtv_inventory_providers | json_query('*[]') |
+      selectattr('name', 'equalto', __mtv_plans_mtv_destination_target) |
+      selectattr('namespace', 'equalto', __mtv_plans_mtv_destination_target_namespace) |
+      first | default(None) }}
+
+- name: Verify Destination Provider
+  ansible.builtin.assert:
+    that:
+      - __mtv_plans_mtv_destination_provider | default('', true) | length > 0
+    quiet: true
+    fail_msg: >-
+      Unable to locate Destination Provider with name
+      '{{ __mtv_plans_mtv_destination_target }}' in namespace
+      '{{ __mtv_plans_mtv_destination_target_namespace }}'
+
+- name: Retrieve StorageMap
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_plans_openshift_host }}"
+    api_key: "{{ mtv_plans_openshift_api_key }}"
+    validate_certs: "{{ mtv_plans_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_plans_openshift_ca_cert_path | default(omit) }}"
+    api_version: forklift.konveyor.io/v1beta1
+    kind: StorageMap
+    name: "{{ __mtv_plans_mtv_storage_map_name }}"
+    namespace: "{{ __mtv_plans_mtv_storage_map_namespace }}"
+  register: __mtv_plans_storagemap_results
+
+- name: Verify StorageMap
+  ansible.builtin.assert:
+    that:
+      - __mtv_plans_storagemap_results.resources | length == 1
+    quiet: true
+    fail_msg: >-
+      Unable to locate StorageMap with name
+      '{{ __mtv_plans_mtv_storage_map_name }}' in namespace
+      '{{ __mtv_plans_mtv_storage_map_namespace }}'
+
+- name: Retrieve NetworkMap
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_plans_openshift_host }}"
+    api_key: "{{ mtv_plans_openshift_api_key }}"
+    validate_certs: "{{ mtv_plans_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_plans_openshift_ca_cert_path | default(omit) }}"
+    api_version: forklift.konveyor.io/v1beta1
+    kind: NetworkMap
+    name: "{{ __mtv_plans_mtv_network_map_name }}"
+    namespace: "{{ __mtv_plans_mtv_network_map_namespace }}"
+  register: __mtv_plans_networkmap_results
+
+- name: Verify NetworkMap
+  ansible.builtin.assert:
+    that:
+      - __mtv_plans_networkmap_results.resources | length == 1
+    quiet: true
+    fail_msg: >-
+      Unable to locate NetworkMap with name
+      '{{ __mtv_plans_mtv_network_map_name }}' in namespace
+      '{{ __mtv_plans_mtv_network_map_namespace }}'
+
+- name: Process Plan Skeleton
+  ansible.builtin.set_fact:
+    __mtv_plans_mtv_plan_skeleton: >-
+      {{ lookup('ansible.builtin.template', 'plan_skeleton.yml.j2') |
+      from_yaml |
+      ansible.builtin.combine({'spec':
+      (mtv_plans_migration_request['plan_overrides'] |
+      default({}))}, recursive=true) }}
+
+- name: Get Inventory vms
+  ansible.builtin.include_role:
+    name: mtv_query_inventory
+  vars:
+    mtv_query_inventory_endpoint_path: >-
+      /providers/{{ __mtv_plans_mtv_source_provider.type }}/{{
+      __mtv_plans_mtv_source_provider.uid }}/vms?detail=4
+    mtv_query_inventory_result_var: __mtv_plans_mtv_inventory_vms
+    mtv_query_inventory_namespace: "{{ __mtv_plans_mtv_namespace }}"
+
+- name: Get Inventory folders
+  ansible.builtin.include_role:
+    name: mtv_query_inventory
+  vars:
+    mtv_query_inventory_endpoint_path: >-
+      /providers/{{ __mtv_plans_mtv_source_provider.type }}/{{
+      __mtv_plans_mtv_source_provider.uid }}/folders?detail=4
+    mtv_query_inventory_result_var: __mtv_plans_mtv_inventory_folders
+    mtv_query_inventory_namespace: "{{ __mtv_plans_mtv_namespace }}"
+  when:
+    - "'folders' in mtv_plans_migration_request"
+    - mtv_plans_migration_request['folders'] | default([]) | length > 0
+
+- name: Process VMs and Generate Plans
+  infra.openshift_virtualization_migration.mtv_process_vms:
+    inventory_vms: "{{ __mtv_plans_mtv_inventory_vms }}"
+    inventory_folders: "{{ __mtv_plans_mtv_inventory_folders | default([]) }}"
+    requested_vms: "{{ mtv_plans_migration_request['vms'] | default([]) }}"
+    requested_folders: "{{ mtv_plans_migration_request['folders'] | default([]) }}"
+    vm_overrides: "{{ mtv_plans_migration_request['vm_overrides'] | default({}) }}"
+    plan_skeleton: "{{ __mtv_plans_mtv_plan_skeleton }}"
+    plan_base_name: "{{ __mtv_plans_mtv_plan_base_name }}"
+    split_plans: "{{ __mtv_plans_mtv_split_plans | bool }}"
+    vms_per_plan: "{{ __mtv_plans_mtv_vms_per_plan | int }}"
+  register: __mtv_plans_migrate_process_result
+
+- name: Set Plans from processed results
+  ansible.builtin.set_fact:
+    __mtv_plans: "{{ __mtv_plans_migrate_process_result.plans }}"
+
+- name: Create and Verify Plans
+  when: not __mtv_plans_mtv_dry_run|bool
+  block:
+    - name: Create Plans
+      redhat.openshift.k8s:
+        host: "{{ mtv_plans_openshift_host }}"
+        api_key: "{{ mtv_plans_openshift_api_key }}"
+        validate_certs: "{{ mtv_plans_openshift_verify_ssl }}"
+        ca_cert: "{{ mtv_plans_openshift_ca_cert_path | default(omit) }}"
+        definition: "{{ __mtv_plans }}"
+        state: present
+        apply: true
+
+    - name: Verify Plans Ready
+      kubernetes.core.k8s_info:
+        host: "{{ mtv_plans_openshift_host }}"
+        api_key: "{{ mtv_plans_openshift_api_key }}"
+        validate_certs: "{{ mtv_plans_openshift_verify_ssl }}"
+        ca_cert: "{{ mtv_plans_openshift_ca_cert_path | default(omit) }}"
+        api_version: "{{ created_plan.apiVersion }}"
+        kind: "{{ created_plan.kind }}"
+        namespace: "{{ created_plan.metadata.namespace }}"
+        name: "{{ created_plan.metadata.name }}"
+      register: __mtv_plans_created_plan_status
+      loop_control:
+        loop_var: created_plan
+        label: "Verified Plan {{ created_plan.metadata.name }}"
+      loop: "{{ __mtv_plans }}"
+      when: __mtv_plans_mtv_verify_plans_ready|bool
+      until:
+        - __mtv_plans_created_plan_status is defined
+        - "'resources' in __mtv_plans_created_plan_status"
+        - __mtv_plans_created_plan_status.resources | length == 1
+        - "'status' in __mtv_plans_created_plan_status.resources|first"
+        - "'conditions' in (__mtv_plans_created_plan_status.resources|first).status"
+        - (__mtv_plans_created_plan_status.resources|first).status.conditions | selectattr('type', 'defined') | selectattr('status', 'defined') | selectattr('type', 'equalto', 'Ready') | selectattr('status', 'equalto', 'True') | list | length == 1 # noqa: yaml[line-length]
+      retries: "{{ mtv_plans_verify_plans_ready_retries }}"
+      delay: "{{ mtv_plans_verify_plans_ready_delay }}"
+
+- name: Display Plans (Dry Run)
+  ansible.builtin.debug:
+    msg: "{{ __mtv_plans }}"
+  when: __mtv_plans_mtv_dry_run|bool
+
+...

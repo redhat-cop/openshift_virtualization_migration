@@ -1,45 +1,205 @@
 ---
-# ---------------------------------------------------------------------------
-# AAP connection — cascade from generic inventory variables
-# ---------------------------------------------------------------------------
-aap_seed_hostname: "{{ aap_hostname }}"
-aap_seed_username: "{{ aap_username | default(omit) }}"
-aap_seed_password: "{{ aap_password | default(omit) }}"
-aap_seed_token: "{{ aap_token | default(omit) }}"
-aap_seed_validate_certs: "{{ aap_validate_certs | default(true) }}"
-aap_seed_secure_logging: true
 
-# ---------------------------------------------------------------------------
-# Object naming
-# ---------------------------------------------------------------------------
+# title: AAP Hostname
+# required: True
+# description: Hostname of the AAP instance. Cascades from aap_hostname inventory variable.
+aap_seed_hostname: "{{ aap_hostname }}"
+
+# title: AAP Username
+# required: False
+# description: Username for AAP authentication. Cascades from aap_username inventory variable.
+aap_seed_username: "{{ aap_username | default(omit) }}"
+
+# title: AAP Password
+# required: False
+# description: Password for AAP authentication. Cascades from aap_password inventory variable.
+aap_seed_password: "{{ aap_password | default(omit) }}"
+
+# title: AAP Token
+# required: False
+# description: OAuth token for AAP authentication. Cascades from aap_token inventory variable.
+aap_seed_token: "{{ aap_token | default(omit) }}"
+
+# title: Validate Certificates
+# required: False
+# description: Whether to validate TLS certificates for AAP connections.
+aap_seed_validate_certs: "{{ aap_validate_certs | default(true) }}"
+
+# title: Secure Logging
+# required: False
+# description: >-
+#   Suppress task output for credential loops to prevent secrets from
+#   leaking to logs. Set to false when debugging credential construction.
+aap_seed_secure_logging: "{{ secure_logging | default(true) }}"
+
+# title: Organization Name
+# required: False
+# description: AAP organization name used for all created objects.
 aap_seed_org_name: Default
+
+# title: Project Name
+# required: False
+# description: Name of the AAP project created for the migration collection.
 aap_seed_project_name: OpenShift Virtualization Migration
+
+# title: Project SCM URL
+# required: False
+# description: Git repository URL for the AAP project. Cascades from aap_project_scm_url.
 aap_seed_project_scm_url: >-
   {{ aap_project_scm_url |
      default('https://github.com/redhat-cop/openshift_virtualization_migration.git') }}
-aap_seed_project_scm_branch: "{{ aap_project_scm_branch | default('v2') }}"
-aap_seed_project_sync_timeout: 120
-aap_seed_inventory_name: OpenShift Virtualization Migration
-aap_seed_execution_environment: "{{ aap_execution_environment | default('Default execution environment') }}"
 
+# title: Project SCM Branch
+# required: False
+# description: Git branch for the AAP project. Cascades from aap_project_scm_branch.
+aap_seed_project_scm_branch: "{{ aap_project_scm_branch | default('v2') }}"
+
+# title: Project Sync Timeout
+# required: False
+# description: Timeout in seconds for AAP project sync operations.
+aap_seed_project_sync_timeout: 120
+
+# title: Inventory Name
+# required: False
+# description: Name of the AAP inventory created for migration hosts.
+aap_seed_inventory_name: OpenShift Virtualization Migration
+
+# title: Execution Environment
+# required: False
+# description: Execution environment assigned to job templates. Cascades from aap_execution_environment.
+aap_seed_execution_environment: >-
+  {{ aap_execution_environment |
+     default('Default execution environment') }}
+
+# title: Source Credential Type
+# required: False
+# description: Name of the custom credential type created for source hypervisor environments.
 aap_seed_source_credential_type: Migration Factory - Source Environment
+
+# title: Target Credential Type
+# required: False
+# description: Name of the built-in credential type used for OpenShift target clusters.
 aap_seed_target_credential_type: OpenShift or Kubernetes API Bearer Token
 
+# title: Source Inventory Group
+# required: False
+# description: AAP inventory group name containing source hypervisor hosts.
 aap_seed_source_inventory_group: vm_sources
+
+# title: Target Inventory Group
+# required: False
+# description: AAP inventory group name containing target OpenShift cluster hosts.
 aap_seed_target_inventory_group: migration_clusters
 
+# title: Project Credential
+# required: False
+# description: Name of the Git credential to attach to the AAP project. Leave empty to skip.
 aap_seed_project_credential: "{{ aap_project_credential | default('') }}"
+
+# title: Git Username
+# required: False
+# description: Username for Git authentication (HTTPS). Cascades from aap_git_username.
 aap_seed_git_username: "{{ aap_git_username | default('') }}"
+
+# title: Git Password
+# required: False
+# description: Password or token for Git authentication (HTTPS). Cascades from aap_git_password.
 aap_seed_git_password: "{{ aap_git_password | default('') }}"
+
+# title: Git SSH Key
+# required: False
+# description: SSH private key for Git authentication. Cascades from aap_git_ssh_key.
 aap_seed_git_ssh_key: "{{ aap_git_ssh_key | default('') }}"
+
+# title: Git SSH Key Unlock
+# required: False
+# description: Passphrase to unlock the SSH key. Cascades from aap_git_ssh_key_unlock.
 aap_seed_git_ssh_key_unlock: "{{ aap_git_ssh_key_unlock | default('') }}"
 
+# title: EE Description
+# required: False
+# description: Description for the custom execution environment. Cascades from aap_execution_environment_description.
+aap_seed_execution_environment_description: >-
+  {{ aap_execution_environment_description |
+     default('') }}
+
+# title: EE Image
+# required: False
+# description: Container image for the custom execution environment. Cascades from aap_execution_environment_image.
+aap_seed_execution_environment_image: "{{ aap_execution_environment_image | default('') }}"
+
+# title: EE Pull Policy
+# required: False
+# description: Image pull policy for the execution environment. Cascades from aap_execution_environment_pull.
+aap_seed_execution_environment_pull: "{{ aap_execution_environment_pull | default('missing') }}"
+
+# title: EE Registry Credential
+# required: False
+# description: >-
+#   Name of the registry credential for pulling the EE image.
+#   Cascades from aap_execution_environment_credential.
+aap_seed_execution_environment_credential: >-
+  {{ aap_execution_environment_credential | default('') }}
+
+# title: EE Registry Credential Description
+# required: False
+# description: Description for the registry credential.
+aap_seed_execution_environment_credential_description: >-
+  {{ aap_execution_environment_credential_description |
+     default('Migration Factory Registry Credential') }}
+
+# title: EE Registry Credential Host
+# required: False
+# description: Hostname of the container registry. Cascades from aap_execution_environment_credential_host.
+aap_seed_execution_environment_credential_host: >-
+  {{ aap_execution_environment_credential_host | default('') }}
+
+# title: EE Registry Credential Username
+# required: False
+# description: Username for the container registry. Cascades from aap_execution_environment_credential_username.
+aap_seed_execution_environment_credential_username: >-
+  {{ aap_execution_environment_credential_username | default('') }}
+
+# title: EE Registry Credential Password
+# required: False
+# description: Password for the container registry. Cascades from aap_execution_environment_credential_password.
+aap_seed_execution_environment_credential_password: >-
+  {{ aap_execution_environment_credential_password | default('') }}
+
+# title: EE Registry Credential Verify SSL
+# required: False
+# description: >-
+#   Whether to verify SSL for the container registry.
+#   Cascades from aap_execution_environment_credential_verify_ssl.
+aap_seed_execution_environment_credential_verify_ssl: >-
+  {{ aap_execution_environment_credential_verify_ssl |
+     default(true) }}
+
+# title: Migrate Template Name
+# required: False
+# description: Name of the migration job template created in AAP.
 aap_seed_migrate_template_name: OpenShift Virtualization Migration - Migrate
+
+# title: Migrate Playbook
+# required: False
+# description: Playbook path for the migration job template.
 aap_seed_migrate_playbook: playbooks/vmf_migrate.yml
 
+# title: MTV Provider Template Name
+# required: False
+# description: Name of the MTV provider job template created in AAP.
 aap_seed_mtv_provider_template_name: OpenShift Virtualization Migration - MTV Provider
+
+# title: MTV Provider Playbook
+# required: False
+# description: Playbook path for the MTV provider job template.
 aap_seed_mtv_provider_playbook: playbooks/vmf_mtv_provider.yml
 
+# title: Common Survey Spec
+# required: False
+# description: >-
+#   Shared survey specification used by job templates. Contains the
+#   source_name and target_name prompts.
 aap_seed_common_survey_spec:
   name: ""
   description: ""
@@ -61,28 +221,56 @@ aap_seed_common_survey_spec:
       type: text
       required: true
 
-# ---------------------------------------------------------------------------
-# Per-type create toggles — set to false to skip an entire category
-# ---------------------------------------------------------------------------
+# title: Create Organizations
+# required: False
+# description: Whether to create organization objects in AAP.
 aap_seed_organizations_create: true
+
+# title: Create Credential Types
+# required: False
+# description: Whether to create custom credential type objects in AAP.
 aap_seed_credential_types_create: true
+
+# title: Create Credentials
+# required: False
+# description: Whether to create credential objects in AAP.
 aap_seed_credentials_create: true
+
+# title: Create Inventories
+# required: False
+# description: Whether to create inventory objects in AAP.
 aap_seed_inventories_create: true
+
+# title: Create Hosts
+# required: False
+# description: Whether to create host objects in AAP.
 aap_seed_hosts_create: true
+
+# title: Create Projects
+# required: False
+# description: Whether to create project objects in AAP.
 aap_seed_projects_create: true
+
+# title: Create Execution Environments
+# required: False
+# description: Whether to create execution environment objects in AAP.
 aap_seed_execution_environments_create: true
+
+# title: Create Templates
+# required: False
+# description: Whether to create job template objects in AAP.
 aap_seed_templates_create: true
 
-# ---------------------------------------------------------------------------
-# Default AAP object lists
-#
-# Users may override any of these by redefining the variable in their
-# inventory or playbook.  The role builds these into controller_*
-# variables at runtime and passes them to infra.aap_configuration.dispatch.
-# ---------------------------------------------------------------------------
-
+# title: Controller Organizations
+# required: False
+# description: List of AAP organization definitions.
 aap_seed_controller_organizations: []
 
+# title: Controller Credential Types
+# required: False
+# description: >-
+#   List of custom credential type definitions. Default creates the
+#   Migration Factory source environment credential type.
 aap_seed_controller_credential_types:
   - name: "{{ aap_seed_source_credential_type }}"
     organization: "{{ aap_seed_org_name }}"
@@ -119,10 +307,16 @@ aap_seed_controller_credential_types:
         mf_source_certificate: "{% raw %}{  { certificate }}{% endraw %}"
         mf_insecure_skip_tls_verify: "{% raw %}{  { insecure_skip_tls_verify }}{% endraw %}"
 
+# title: Controller Inventories
+# required: False
+# description: List of AAP inventory definitions.
 aap_seed_controller_inventories:
   - name: "{{ aap_seed_inventory_name }}"
     organization: "{{ aap_seed_org_name }}"
 
+# title: Controller Projects
+# required: False
+# description: List of AAP project definitions.
 aap_seed_controller_projects:
   - name: "{{ aap_seed_project_name }}"
     organization: "{{ aap_seed_org_name }}"
@@ -132,8 +326,24 @@ aap_seed_controller_projects:
     scm_update_on_launch: true
     credential: "{{ aap_seed_project_credential | default(omit, true) }}"
 
-aap_seed_controller_execution_environments: []
+# title: Controller Execution Environments
+# required: False
+# description: >-
+#   List of AAP execution environment definitions. Default creates one
+#   EE using the configured image and registry credential.
+aap_seed_controller_execution_environments:
+  - name: "{{ aap_seed_execution_environment }}"
+    description: "{{ aap_seed_execution_environment_description }}"
+    image: "{{ aap_seed_execution_environment_image }}"
+    organization: "{{ aap_seed_org_name }}"
+    pull: "{{ aap_seed_execution_environment_pull }}"
+    credential: "{{ aap_seed_execution_environment_credential | default(omit, true) }}"
 
+# title: Controller Templates
+# required: False
+# description: >-
+#   List of AAP job template definitions. Default creates the migrate
+#   and MTV provider templates.
 aap_seed_controller_templates:
   - name: "{{ aap_seed_migrate_template_name }}"
     organization: "{{ aap_seed_org_name }}"

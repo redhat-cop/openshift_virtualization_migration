@@ -1,48 +1,84 @@
 ---
+
+# title: Secure Logging
+# required: False
+# description: Whether to enable secure logging for sensitive tasks.
 mtv_provider_secure_logging: "{{ secure_logging | default(true) }}"
 
-# ---------------------------------------------------------------------------
-# Provider configuration — controls how MTV providers are created
-# ---------------------------------------------------------------------------
-
-# Namespace where the provider will be created.
-# Resolved from target host vars in AAP inventory; override if needed.
+# title: Provider Namespace
+# required: False
+# description: >-
+#   Namespace where the provider will be created. Resolved from
+#   target host vars in AAP inventory; override if needed.
 mtv_provider_provider_namespace: >-
   {{ hostvars[target_name]['mtv_namespace'] | default('openshift-mtv') }}
 
-# Whether to wait for the Provider CR to reach Ready status after creation.
+# title: Wait for Provider Ready
+# required: False
+# description: Whether to wait for the Provider CR to reach Ready status after creation.
 mtv_provider_provider_wait: true
 
-# Seconds to wait for the Provider to become Ready before failing.
+# title: Provider Wait Timeout
+# required: False
+# description: Seconds to wait for the Provider to become Ready before failing.
 mtv_provider_provider_wait_timeout: 120
 
-# Seconds between status polls while waiting for Ready.
+# title: Provider Wait Poll Interval
+# required: False
+# description: Seconds between status polls while waiting for Ready.
 mtv_provider_provider_wait_poll: 10
 
-# Desired state of the provider — present or absent.
+# title: Provider State
+# required: False
+# description: Desired state of the provider — present or absent.
 mtv_provider_provider_state: present
 
-# Forklift API version for Provider CRs.
+# title: Forklift API Version
+# required: False
+# description: Forklift API version for Provider CRs.
 mtv_provider_api_version: forklift.konveyor.io/v1beta1
 
-# Override configuration merged into the Provider CR spec.
+# title: Provider Override
+# required: False
+# description: Override configuration merged into the Provider CR spec.
 mtv_provider_provider_override: {}
 
-# Whether to automatically retrieve the source TLS certificate
-# when insecureSkipTlsVerify is false and no certificate is provided.
+# title: Auto Retrieve Certificate
+# required: False
+# description: >-
+#   Whether to automatically retrieve the source TLS certificate
+#   when insecureSkipTlsVerify is false and no certificate is provided.
 mtv_provider_auto_retrieve_cert: true
 
-# ---------------------------------------------------------------------------
-# Source metadata — resolved from AAP inventory host vars
-# ---------------------------------------------------------------------------
+# title: Source Type
+# required: False
+# description: >-
+#   Type of the source environment. Resolved from the source host's
+#   type variable in the AAP inventory. Supported values: vmware, ovirt.
 mtv_provider_source_type: >-
   {{ hostvars[source_name]['type'] | default('vmware') }}
 
+# title: Source Host
+# required: True
+# description: >-
+#   Hostname or URL of the source hypervisor. Resolved from the
+#   source host's host variable in the AAP inventory.
 mtv_provider_source_host: >-
   {{ hostvars[source_name]['host'] }}
 
+# title: Source SDK Endpoint
+# required: False
+# description: SDK endpoint path appended to the source host URL for VMware providers.
 mtv_provider_source_sdk_endpoint: >-
   {{ hostvars[source_name]['sdk_endpoint'] | default('/sdk') }}
 
+# title: Source VDDK Configuration
+# required: False
+# description: VDDK configuration dictionary from the source host vars.
 mtv_provider_source_vddk: "{{ hostvars[source_name]['vddk'] | default({}) }}"
+
+# title: Managed By Label
+# required: False
+# description: Value of the app.kubernetes.io/managed-by label applied to CRs.
+mtv_provider_managed_by_label: ansible-migration-factory
 ...

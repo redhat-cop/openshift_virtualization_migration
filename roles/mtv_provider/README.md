@@ -1,8 +1,7 @@
 <!-- STATIC CONTENT START -->
 # mtv_provider
 
-Creates MTV/Forklift source Provider CRs on OpenShift target clusters.
-Designed to run from AAP with credential injection.
+Create MTV/Forklift source provider CRs on OpenShift target clusters.
 
 <!-- STATIC CONTENT END -->
 <!-- DOCSIBLE START -->
@@ -96,47 +95,50 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`mtv_provider_api_version`](defaults/main.yml#L26)   | str   | `forklift.konveyor.io/v1beta1` |  None  |   None  |  None |
-| [`mtv_provider_auto_retrieve_cert`](defaults/main.yml#L33)   | bool   | `True` |  None  |   None  |  None |
-| [`mtv_provider_provider_namespace`](defaults/main.yml#L10)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`mtv_provider_provider_override`](defaults/main.yml#L29)   | dict   | `{}` |  None  |   None  |  None |
-| [`mtv_provider_provider_state`](defaults/main.yml#L23)   | str   | `present` |  None  |   None  |  None |
-| [`mtv_provider_provider_wait`](defaults/main.yml#L14)   | bool   | `True` |  None  |   None  |  None |
-| [`mtv_provider_provider_wait_poll`](defaults/main.yml#L20)   | int   | `10` |  None  |   None  |  None |
-| [`mtv_provider_provider_wait_timeout`](defaults/main.yml#L17)   | int   | `120` |  None  |   None  |  None |
-| [`mtv_provider_secure_logging`](defaults/main.yml#L2)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
-| [`mtv_provider_source_host`](defaults/main.yml#L41)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`mtv_provider_source_sdk_endpoint`](defaults/main.yml#L44)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`mtv_provider_source_type`](defaults/main.yml#L38)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`mtv_provider_source_vddk`](defaults/main.yml#L47)   | str   | `{{ hostvars[source_name]['vddk'] ¦ default({}) }}` |  None  |   None  |  None |
+| [`mtv_provider_api_version`](defaults/main.yml#L39)   | str   | `forklift.konveyor.io/v1beta1` |  None  |   False  |  Forklift API Version |
+| [`mtv_provider_auto_retrieve_cert`](defaults/main.yml#L51)   | bool   | `True` |  None  |   False  |  Auto Retrieve Certificate |
+| [`mtv_provider_managed_by_label`](defaults/main.yml#L83)   | str   | `ansible-migration-factory` |  None  |   False  |  Managed By Label |
+| [`mtv_provider_provider_namespace`](defaults/main.yml#L13)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Provider Namespace |
+| [`mtv_provider_provider_override`](defaults/main.yml#L44)   | dict   | `{}` |  None  |   False  |  Provider Override |
+| [`mtv_provider_provider_state`](defaults/main.yml#L34)   | str   | `present` |  None  |   False  |  Provider State |
+| [`mtv_provider_provider_wait`](defaults/main.yml#L19)   | bool   | `True` |  None  |   False  |  Wait for Provider Ready |
+| [`mtv_provider_provider_wait_poll`](defaults/main.yml#L29)   | int   | `10` |  None  |   False  |  Provider Wait Poll Interval |
+| [`mtv_provider_provider_wait_timeout`](defaults/main.yml#L24)   | int   | `120` |  None  |   False  |  Provider Wait Timeout |
+| [`mtv_provider_secure_logging`](defaults/main.yml#L6)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   False  |  Secure Logging |
+| [`mtv_provider_source_host`](defaults/main.yml#L66)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  Source Host |
+| [`mtv_provider_source_sdk_endpoint`](defaults/main.yml#L72)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Source SDK Endpoint |
+| [`mtv_provider_source_type`](defaults/main.yml#L58)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Source Type |
+| [`mtv_provider_source_vddk`](defaults/main.yml#L78)   | str   | `{{ hostvars[source_name]['vddk'] ¦ default({}) }}` |  None  |   False  |  Source VDDK Configuration |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
-<b>`mtv_provider_api_version`:</b> None
+<b>`mtv_provider_api_version`:</b> Forklift API version for Provider CRs.
 <br>
-<b>`mtv_provider_auto_retrieve_cert`:</b> None
+<b>`mtv_provider_auto_retrieve_cert`:</b> >-
 <br>
-<b>`mtv_provider_provider_namespace`:</b> None
+<b>`mtv_provider_managed_by_label`:</b> Value of the app.kubernetes.io/managed-by label applied to CRs.
 <br>
-<b>`mtv_provider_provider_override`:</b> None
+<b>`mtv_provider_provider_namespace`:</b> >-
 <br>
-<b>`mtv_provider_provider_state`:</b> None
+<b>`mtv_provider_provider_override`:</b> Override configuration merged into the Provider CR spec.
 <br>
-<b>`mtv_provider_provider_wait`:</b> None
+<b>`mtv_provider_provider_state`:</b> Desired state of the provider — present or absent.
 <br>
-<b>`mtv_provider_provider_wait_poll`:</b> None
+<b>`mtv_provider_provider_wait`:</b> Whether to wait for the Provider CR to reach Ready status after creation.
 <br>
-<b>`mtv_provider_provider_wait_timeout`:</b> None
+<b>`mtv_provider_provider_wait_poll`:</b> Seconds between status polls while waiting for Ready.
 <br>
-<b>`mtv_provider_secure_logging`:</b> None
+<b>`mtv_provider_provider_wait_timeout`:</b> Seconds to wait for the Provider to become Ready before failing.
 <br>
-<b>`mtv_provider_source_host`:</b> None
+<b>`mtv_provider_secure_logging`:</b> Whether to enable secure logging for sensitive tasks.
 <br>
-<b>`mtv_provider_source_sdk_endpoint`:</b> None
+<b>`mtv_provider_source_host`:</b> >-
 <br>
-<b>`mtv_provider_source_type`:</b> None
+<b>`mtv_provider_source_sdk_endpoint`:</b> SDK endpoint path appended to the source host URL for VMware providers.
 <br>
-<b>`mtv_provider_source_vddk`:</b> None
+<b>`mtv_provider_source_type`:</b> >-
+<br>
+<b>`mtv_provider_source_vddk`:</b> VDDK configuration dictionary from the source host vars.
 <br>
 <br>
 

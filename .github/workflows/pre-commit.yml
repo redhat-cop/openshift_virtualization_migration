@@ -4,37 +4,36 @@ name: Pre-commit Checks
 # WORKFLOW: PRE-COMMIT VALIDATION
 # ============================================================================
 #
-# This workflow runs all pre-commit hooks configured in .pre-commit-config.yaml
-# to validate PRs. This ensures that external contributors who may not have
-# pre-commit hooks installed locally still get the same validation feedback.
+# This workflow runs all pre-commit hooks configured in .pre-commit-config.yaml.
+# It provides immediate feedback to contributors on both PRs and push events.
 #
 # CHECKS PERFORMED:
 # -----------------
 # All hooks from .pre-commit-config.yaml including:
 # - Documentation generation and validation (README.md + role READMEs)
 # - Markdown linting (markdownlint-cli2)
-# - Ansible linting (ansible-lint)
+# - Ansible linting (ansible-lint) — skipped here, runs in ansible-lint.yml
 # - Secret scanning (gitleaks)
 # - Merge conflict detection
 # - Trailing whitespace
 # - No direct commits to main branch
 # - Other standard pre-commit hooks
 #
-# DESIGN RATIONALE:
-# -----------------
-# Uses pull_request event for BOTH internal and external PRs because:
-# 1. Pre-commit hooks are READ-ONLY operations (no secrets needed)
-# 2. No write permissions required (workflow just fails the check)
-# 3. Provides immediate feedback to external contributors (no approval gate)
-# 4. Simpler than duplicating logic in custom CI steps
+# TRIGGER DESIGN:
+# ---------------
+# - pull_request: runs for ALL PRs (internal and fork), no approval needed
+# - push (branches except main/v2): runs in fork repositories only, allowing
+#   contributors to catch issues before opening a PR to upstream
+#
+# The job-level 'if' condition ensures push events in the upstream repository
+# are skipped (internal contributors already get feedback via pull_request).
 #
 # SECURITY:
 # ---------
-# Safe for external PRs because:
+# Safe for all contexts because:
 # - No repository secrets accessed
 # - Only read permissions (contents: read)
 # - Runs same validations as local pre-commit hooks
-# - Workflow failure is the feedback mechanism
 #
 # ============================================================================
 
@@ -42,6 +41,14 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches: ["main", "v2"]
+  push:
+    branches-ignore:
+      - main
+      - v2
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read  # Only read access needed for checkout and validation
@@ -49,9 +56,10 @@ permissions:
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.repository != 'redhat-cop/openshift_virtualization_migration'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -86,7 +94,8 @@ jobs:
           echo ""
           echo "Note: ansible-lint is skipped in this workflow because it requires"
           echo "      the collection to be built and installed with all dependencies."
-          echo "      It runs in the main CI workflow with proper setup."
+          echo "      It runs in tolerant mode in ansible-lint.yml (Tier 1) and"
+          echo "      with full validation in the main CI workflow (Tier 2)."
           echo ""
 
           # Run pre-commit hooks, skipping ansible-lint

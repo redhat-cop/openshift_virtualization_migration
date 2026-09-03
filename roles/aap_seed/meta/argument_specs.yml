@@ -67,6 +67,8 @@ argument_specs:
           Suppress task output for credential loops to prevent
           secrets from leaking to logs.  Set to C(false) when
           debugging credential construction.
+          Defaults to C(secure_logging) from inventory, or
+          C(true) if unset.
 
       aap_seed_org_name:
         type: str
@@ -184,6 +186,107 @@ argument_specs:
           Passphrase to unlock the SSH key.
           Defaults to C(aap_git_ssh_key_unlock) from inventory.
 
+      aap_seed_execution_environment_description:
+        type: str
+        required: false
+        description: >-
+          Description for the execution environment created in AAP.
+          Defaults to C(aap_execution_environment_description)
+          from inventory.
+
+      aap_seed_execution_environment_image:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Container image for the execution environment
+          (e.g. C(quay.io/org/ee:latest)).
+          Defaults to C(aap_execution_environment_image) from
+          inventory.
+
+      aap_seed_execution_environment_pull:
+        type: str
+        required: false
+        default: missing
+        description: >-
+          Pull policy for the execution environment image.
+          Valid values are C(always), C(missing), or C(never).
+          Defaults to C(aap_execution_environment_pull) from
+          inventory, or C(missing) if unset.
+
+      aap_seed_execution_environment_credential:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Name of the container registry credential to create
+          and attach to the execution environment. Leave empty
+          to skip credential creation.
+          Defaults to C(aap_execution_environment_credential)
+          from inventory.
+
+      aap_seed_execution_environment_credential_description:
+        type: str
+        required: false
+        default: Migration Factory Registry Credential
+        description: >-
+          Description for the registry credential.
+          Defaults to C(aap_execution_environment_credential_description)
+          from inventory.
+
+      aap_seed_execution_environment_credential_host:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Hostname of the container registry for authentication.
+          Defaults to C(aap_execution_environment_credential_host)
+          from inventory.
+
+      aap_seed_execution_environment_credential_username:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Username for container registry authentication.
+          Defaults to C(aap_execution_environment_credential_username)
+          from inventory.
+
+      aap_seed_execution_environment_credential_password:
+        type: str
+        required: false
+        no_log: true
+        default: ""
+        description: >-
+          Password for container registry authentication.
+          Defaults to
+          C(aap_execution_environment_credential_password)
+          from inventory.
+
+      aap_seed_execution_environment_credential_verify_ssl:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to verify SSL when connecting to the container
+          registry. Defaults to
+          C(aap_execution_environment_credential_verify_ssl)
+          from inventory, or C(true) if unset.
+
+      aap_seed_migrate_template_name:
+        type: str
+        required: false
+        default: OpenShift Virtualization Migration - Migrate
+        description: >-
+          Name of the Migrate job template created in AAP.
+
+      aap_seed_migrate_playbook:
+        type: str
+        required: false
+        default: playbooks/vmf_migrate.yml
+        description: >-
+          Playbook path for the Migrate job template.
+
       aap_seed_mtv_provider_template_name:
         type: str
         required: false
@@ -280,6 +383,14 @@ argument_specs:
         description: >-
           Create job templates. Set to C(false) to skip.
 
+      aap_seed_common_survey_spec:
+        type: dict
+        required: false
+        description: >-
+          Survey specification attached to job templates.
+          Defaults to a survey prompting for C(source_name)
+          and C(target_name).
+
       aap_seed_controller_organizations:
         type: list
         required: false
@@ -290,14 +401,27 @@ argument_specs:
           Each entry follows the
           C(infra.aap_configuration.gateway_organizations) schema.
 
+      aap_seed_controller_credential_types:
+        type: list
+        required: false
+        description: >-
+          List of AAP credential type definitions. Defaults to
+          a single custom type for source hypervisor
+          environments. Override to replace the default entry.
+          Each entry follows the
+          C(infra.aap_configuration.credential_types) schema.
+
       aap_seed_controller_execution_environments:
         type: list
         required: false
-        default: []
         description: >-
-          List of AAP execution environment definitions. Empty by
-          default; populate to create custom EEs. Each entry follows
-          the C(infra.aap_configuration.controller_execution_environments)
+          List of AAP execution environment definitions.
+          Defaults to a single entry built from
+          I(aap_seed_execution_environment),
+          I(aap_seed_execution_environment_image), and related
+          variables. Override to replace the default entry.
+          Each entry follows the
+          C(infra.aap_configuration.controller_execution_environments)
           schema (name, image, etc.).
 
       aap_seed_controller_inventories:

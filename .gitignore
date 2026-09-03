@@ -201,3 +201,5 @@ ansible-navigator.yml
 # Secrets and certificates
 *.pem
 *.key
+.cursor/
+.docsible
