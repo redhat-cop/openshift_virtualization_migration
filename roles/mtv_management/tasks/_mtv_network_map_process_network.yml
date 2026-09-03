@@ -23,7 +23,8 @@
     mtv_management_mtv_network_networkattachmentdefinition: >-
       {{ mtv_networkattachmentdefinitions | json_query(__mtv_management_query) }}
   vars:
-    __mtv_management_query: "{{ '[?object.metadata.annotations.\"' + mtv_management_nad_source_portgroup_annotation + '\"==`' + mtv_vmware_network.name + '`]' }}" # noqa: yaml[line-length]
+    __mtv_management_nad_override_ns: "{{ (mtv_management_mtv_vmware_network_overrides['network_attachment_definition'] | ansible.builtin.split('/'))[0] if 'network_attachment_definition' in mtv_management_mtv_vmware_network_overrides and (mtv_management_mtv_vmware_network_overrides['network_attachment_definition'] | ansible.builtin.split('/') | length) == 2 else '' }}" # noqa: yaml[line-length]
+    __mtv_management_query: "{{ '[?object.metadata.annotations.\"' + mtv_management_nad_source_portgroup_annotation + '\"==`' + mtv_vmware_network.name + '`' + (' && object.metadata.namespace==`' + (__mtv_management_nad_override_ns | trim) + '`' if (__mtv_management_nad_override_ns | default('') | trim) | length > 0 else '') + ']' }}" # noqa: yaml[line-length]
   when: mtv_vmware_network is defined
 
 - name: _mtv_network_map_process_network | Locate Ovirt NetworkAttachmentDefinition
@@ -31,7 +32,8 @@
     mtv_management_mtv_network_networkattachmentdefinition: >-
       {{ mtv_networkattachmentdefinitions | json_query(__mtv_management_query) }}
   vars:
-    __mtv_management_query: "{{ '[?object.metadata.annotations.\"' + mtv_management_nad_source_portgroup_annotation + '\"==`' + mtv_ovirt_network.name + '`]' }}" # noqa: yaml[line-length]
+    __mtv_management_nad_override_ns: "{{ (mtv_management_mtv_ovirt_network_overrides['network_attachment_definition'] | ansible.builtin.split('/'))[0] if 'network_attachment_definition' in mtv_management_mtv_ovirt_network_overrides and (mtv_management_mtv_ovirt_network_overrides['network_attachment_definition'] | ansible.builtin.split('/') | length) == 2 else '' }}" # noqa: yaml[line-length]
+    __mtv_management_query: "{{ '[?object.metadata.annotations.\"' + mtv_management_nad_source_portgroup_annotation + '\"==`' + mtv_ovirt_network.name + '`' + (' && object.metadata.namespace==`' + (__mtv_management_nad_override_ns | trim) + '`' if (__mtv_management_nad_override_ns | default('') | trim) | length > 0 else '') + ']' }}" # noqa: yaml[line-length]
   when: mtv_ovirt_network is defined
 
 - name: _mtv_network_map_process_network | Validate Found VMware NetworkAttachmentDefinitions
