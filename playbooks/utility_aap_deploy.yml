@@ -7,5 +7,5 @@
   tasks:
     - name: Invoke utility_aap_deploy role
       ansible.builtin.include_role:
-        name: utility_aap_deploy
+        name: infra.openshift_virtualization_migration.utility_aap_deploy
 ...
