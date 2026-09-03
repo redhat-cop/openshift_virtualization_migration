@@ -10,7 +10,8 @@ Thank you for your interest in contributing! Please check our [main documentatio
 4. [PR Title Requirements](#pr-title-requirements)
 5. [Changelog Fragments](#changelog-fragments)
 6. [Development Workflow](#development-workflow)
-7. [Release Process (Maintainers Only)](#release-process-maintainers-only)
+7. [Running Full CI in Your Fork](#running-full-ci-in-your-fork)
+8. [Release Process (Maintainers Only)](#release-process-maintainers-only)
 
 ## Getting Started
 
@@ -24,13 +25,26 @@ Click the link below to launch your IDE hosted in the Developer Sandbox:
 
 ## Pull Request Guidelines
 
-### External Contributors
+### CI Architecture
 
-All pull requests from forks require manual approval from a maintainer before CI runs. This is a security measure to protect against malicious code execution. A maintainer will review and approve your PR, after which automated tests will run.
+This project uses a two-tier CI system designed to balance immediate feedback with security requirements:
 
-### Internal Contributors
+**Tier 1 — Instant Checks (no approval required)**
 
-Pull requests from branches within the main repository run CI automatically.
+These checks run automatically on all PRs, including those from forks:
+
+- **Ansible Lint** — Runs ansible-lint in tolerant mode with public dependencies only. Catches naming conventions, YAML formatting, FQCN usage, task structure, and more.
+- **Pre-commit Checks** — YAML linting, markdown linting, secret scanning (gitleaks), documentation validation, trailing whitespace, and merge conflict detection.
+- **PR Title Validation** — Ensures PR titles follow Conventional Commits format.
+- **Gitleaks** — Scans for accidentally committed secrets.
+
+**Tier 2 — Full CI (maintainer approval required for fork PRs)**
+
+Full CI includes collection build with all dependencies, ansible-lint with full argument validation, sanity tests, and integration tests. This tier requires `AUTOMATION_HUB_TOKEN` to install private Red Hat Certified and Validated collection dependencies (`redhat.openshift_virtualization`, `redhat.openshift`, `ansible.controller`, etc.) which are not available on public Ansible Galaxy.
+
+For fork PRs, a maintainer must approve the run via the `external-ci` GitHub Environment before Tier 2 checks execute. This is a GitHub Actions security constraint — secrets are not available to `pull_request` events from forks, so `pull_request_target` with an approval gate is required to safely provide secrets.
+
+Internal PRs (from branches within the main repository) run both tiers automatically without approval.
 
 ### PR Checklist
 
@@ -297,8 +311,57 @@ If a hook fails, fix the issue and commit again. Some hooks can auto-fix issues 
 2. Make your changes
 3. Run tests locally
 4. Commit with conventional commit messages
-5. Push to your fork/branch
+5. Push to your fork — if you have configured `AUTOMATION_HUB_TOKEN` in your fork's secrets, full CI runs automatically (see [Running Full CI in Your Fork](#running-full-ci-in-your-fork))
 6. Create a pull request with a conventional commit title
+
+## Running Full CI in Your Fork
+
+Contributors can run the complete CI test suite directly in their fork before opening a PR to upstream. This provides full CI feedback (ansible-lint with all dependencies, sanity tests) without waiting for maintainer approval.
+
+### Prerequisites
+
+You need a [Red Hat account](https://developers.redhat.com/register) to access Red Hat Automation Hub and obtain a token. A free Red Hat Developer account is sufficient.
+
+### Setup Steps
+
+**Step 1: Enable GitHub Actions in your fork**
+
+Forks have Actions disabled by default. In your fork on GitHub:
+
+1. Click the **Actions** tab
+2. Click **I understand my workflows, go ahead and enable them**
+
+**Step 2: Obtain a Red Hat Automation Hub token**
+
+1. Log in to [console.redhat.com](https://console.redhat.com)
+2. Navigate to **Automation Hub** → **Connect to Hub**
+3. Click **Load Token** and copy the token value
+
+**Step 3: Configure the secret in your fork**
+
+1. In your fork on GitHub, go to **Settings** → **Secrets and variables** → **Actions**
+2. Click **New repository secret**
+3. Name: `AUTOMATION_HUB_TOKEN`
+4. Value: paste the token from Step 2
+5. Click **Add secret**
+
+**Step 4: Push and verify**
+
+Push to any feature branch (not `main` or `v2`). The **Fork CI** workflow starts automatically. Results appear in the **Actions** tab of your fork.
+
+You can also trigger it manually: **Actions** → **Fork CI** → **Run workflow**.
+
+### What runs in Fork CI
+
+- Full collection build with all Red Hat Certified and Validated collection dependencies
+- ansible-lint with complete argument validation (no mocks)
+- Ansible sanity tests
+
+### Notes
+
+- Results appear only in your fork's Actions tab, not as status checks on the upstream PR
+- The workflow does not publish to Automation Hub (`publish_to_automation_hub: false`)
+- If `AUTOMATION_HUB_TOKEN` is not configured, the workflow fails during dependency installation with a clear authentication error
 
 ## Release Process (Maintainers Only)
 

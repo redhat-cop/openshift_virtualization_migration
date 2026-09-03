@@ -1,0 +1,69 @@
+---
+# .ansible-lint-ci
+#
+# CI-specific ansible-lint configuration for Tier 1 (instant feedback) workflows.
+# Mirrors .ansible-lint but adds mock_modules and mock_roles for private Red Hat
+# collection dependencies that are unavailable without AUTOMATION_HUB_TOKEN.
+#
+# This allows ansible-lint to run on pull_request events (including forks)
+# without requiring secrets, catching the majority of lint issues while
+# tolerating missing private dependencies.
+
+profile: production
+
+exclude_paths:
+  - .ansible
+  - .cache/
+  - .github/
+  - changelogs/
+  - collections/
+  - docs/
+  - plugins/
+  - scripts/
+  - .pre-commit-config.yaml
+  - .markdownlint-cli2.yaml
+  - devfile.yaml
+
+loop_var_prefix: ^(__|{role}_)
+
+var_naming_pattern: ^[a-z_][a-z0-9_]*$
+
+use_default_rules: true
+
+skip_list:
+  - fqcn[canonical]
+
+enable_list:
+  - empty-string-compare
+  - no-log-password
+  - no-same-owner
+  - name[prefix]
+  - yaml
+
+warn_list:
+  - yaml[line-length]
+
+offline: true
+
+kinds:
+  - yaml: "**/*.yaml-too"
+
+task_name_prefix: "{stem} | "
+
+# Mock modules from private Red Hat collections (require AUTOMATION_HUB_TOKEN)
+mock_modules:
+  - ansible.controller.subscriptions
+  - ansible.controller.license
+  - redhat.openshift.k8s
+  - redhat.openshift.openshift_auth
+
+# Mock roles from private Red Hat collections (require AUTOMATION_HUB_TOKEN)
+mock_roles:
+  - infra.aap_configuration.controller_projects
+  - infra.aap_configuration.controller_project_update
+  - infra.aap_configuration.dispatch
+  - infra.aap_utilities.aap_ocp_install
+  - infra.aap_utilities.aap_setup_download
+  - infra.aap_utilities.aap_setup_prepare
+  - infra.aap_utilities.aap_setup_install
+...

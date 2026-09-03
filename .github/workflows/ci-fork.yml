@@ -1,0 +1,105 @@
+name: Fork CI
+
+# ============================================================================
+# WORKFLOW: FULL CI FOR FORK CONTRIBUTORS
+# ============================================================================
+#
+# Enables contributors to run the full CI test suite in their own forks
+# before creating a PR to upstream. Requires AUTOMATION_HUB_TOKEN configured
+# in the fork's repository secrets.
+#
+# HOW IT WORKS:
+# -------------
+# 1. Triggers on push to any feature branch (excludes main/v2)
+# 2. Only runs in fork repositories (skips silently in upstream)
+# 3. Syncs the latest upstream version tag to the fork (required for
+#    changelog-lint version resolution — runs automatically before ci)
+# 4. Calls the same reusable CI workflow used by the upstream CI
+# 5. Uses the fork's own AUTOMATION_HUB_TOKEN secret
+# 6. Disables release and publishing operations
+#
+# SETUP (for contributors):
+# -------------------------
+# 1. Enable GitHub Actions in your fork (Actions tab > enable workflows)
+# 2. Add AUTOMATION_HUB_TOKEN to your fork's repository secrets
+#    (Settings > Secrets and variables > Actions > New repository secret)
+# 3. Push to any feature branch — this workflow runs automatically
+#
+# See CONTRIBUTING.md for detailed setup instructions.
+#
+# ============================================================================
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - v2
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync-tags:
+    runs-on: ubuntu-latest
+    if: github.repository != 'redhat-cop/openshift_virtualization_migration'
+    continue-on-error: true
+    permissions:
+      contents: write
+    steps:
+      - name: Create upstream version tag in fork for changelog-lint version resolution
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch the latest semver tag name from upstream (public repo — no auth needed)
+          LATEST_TAG=$(gh api repos/redhat-cop/openshift_virtualization_migration/tags \
+            --jq '[.[] | select(.name | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | .[0].name')
+
+          if [[ -z "$LATEST_TAG" || "$LATEST_TAG" == "null" ]]; then
+            echo "::warning::Could not determine the latest upstream tag. Changelog-lint may fail."
+            exit 0
+          fi
+
+          echo "Latest upstream release: ${LATEST_TAG}"
+
+          # Point the tag at the fork's default branch HEAD.
+          # The default branch HEAD has the same workflow files as the branch itself,
+          # so GITHUB_TOKEN (which lacks the 'workflow' OAuth scope) can create this
+          # tag without being rejected — unlike tags pointing to upstream release
+          # commits, which may reference older/different workflow file versions.
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          MAIN_SHA=$(gh api "repos/${{ github.repository }}/commits/${DEFAULT_BRANCH}" \
+            --jq '.sha')
+
+          echo "Tagging ${LATEST_TAG} → ${MAIN_SHA} (fork's ${DEFAULT_BRANCH} HEAD)"
+
+          # Create the tag; silently skip if it already exists (HTTP 422)
+          if gh api --method POST "repos/${{ github.repository }}/git/refs" \
+              -f "ref=refs/tags/${LATEST_TAG}" \
+              -f "sha=${MAIN_SHA}" 2>/dev/null; then
+            echo "Tag ${LATEST_TAG} created successfully in fork"
+          else
+            echo "Tag ${LATEST_TAG} already exists in fork (skipping)"
+          fi
+
+  ci:
+    needs: sync-tags
+    if: github.repository != 'redhat-cop/openshift_virtualization_migration'
+    uses: redhat-cop/openshift_virtualization_migration_ci/.github/workflows/ci-ansible-collection.yml@v2
+    permissions:
+      contents: write
+      packages: write
+      security-events: write
+      actions: read
+      pull-requests: write
+    with:
+      ref: ${{ github.sha }}
+      repo: ${{ github.repository }}
+      trigger_release: false
+      auto_merge: false
+      publish_to_automation_hub: false
+    secrets:
+      automation_hub_token: ${{ secrets.AUTOMATION_HUB_TOKEN }}
+      release_app_id: ${{ secrets.RELEASE_APP_ID }}
+      release_app_private_key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}

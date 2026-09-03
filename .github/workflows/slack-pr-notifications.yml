@@ -1,5 +1,22 @@
 name: Slack PR Notifications
 
+# ============================================================================
+# WORKFLOW: SLACK PR NOTIFICATIONS
+# ============================================================================
+#
+# Sends Slack notifications for PR lifecycle events (opened, closed, merged,
+# review submitted). This is an informational workflow — it is NOT a required
+# quality gate and does NOT block PR merges.
+#
+# FAILURE HANDLING:
+# -----------------
+# The Slack send step uses continue-on-error: true so that transient failures
+# (expired webhook URL, Slack outage, etc.) do not surface as a red ✗ status
+# that could be mistaken for a code quality issue. On failure, a warning step
+# logs a clear message with actionable guidance for maintainers.
+#
+# ============================================================================
+
 on:
   pull_request_target:
     types: [opened, closed, reopened]
@@ -12,6 +29,7 @@ permissions: {}
 jobs:
   notify:
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'pull_request_target' }}
     steps:
       - name: Set notification details
         id: details
@@ -55,7 +73,9 @@ jobs:
           fi
 
           # Build the Slack message text safely
-          MSG="*${TITLE}*\n${BODY}\n*Repo:* \`${REPO_NAME}\`\n*Branch:* \`${PR_HEAD_REF}\` -> \`${PR_BASE_REF}\`\n<${PR_URL}|View Pull Request>"
+          # Use $'...' quoting so \n is interpreted as a real newline by bash,
+          # which jq then encodes as the JSON \n that Slack renders as a line break.
+          MSG=$"*${TITLE}*"$'\n'"${BODY}"$'\n'"*Repo:* \`${REPO_NAME}\`"$'\n'"*Branch:* \`${PR_HEAD_REF}\` -> \`${PR_BASE_REF}\`"$'\n'"<${PR_URL}|View Pull Request>"
 
           # Use JSON-safe encoding via jq to prevent injection
           {
@@ -68,8 +88,23 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Send Slack notification
+        id: slack
+        continue-on-error: true
         uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a  # v2.1.1
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: ${{ steps.details.outputs.payload }}
+
+      - name: Slack notification warning
+        if: steps.slack.outcome == 'failure'
+        run: |
+          echo "::warning::Slack notification could not be delivered."
+          echo ""
+          echo "This is an infrastructure issue, not a code problem."
+          echo "Possible causes:"
+          echo "  - SLACK_WEBHOOK_URL secret has expired or been rotated"
+          echo "  - Slack service is temporarily unavailable"
+          echo ""
+          echo "Action required for maintainers: verify the SLACK_WEBHOOK_URL"
+          echo "secret in Settings > Secrets and variables > Actions."
