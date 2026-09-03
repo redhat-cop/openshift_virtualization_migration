@@ -89,7 +89,7 @@
   ansible.builtin.debug:
     msg: >-
       StorageMap '{{ _mtv_maps_current_storage_map_name }}' applied in
-      namespace '{{ mtv_maps_namespace }}' with
+      namespace '{{ mtv_maps_storage_map_namespace }}' with
       {{ _mtv_maps_storage_map_entries | length }} mapping(s).
 
 ...

@@ -80,8 +80,23 @@ argument_specs:
         required: false
         default: openshift-mtv
         description: >-
-          Namespace where the StorageMap and NetworkMap CRs will be created.
-          Resolved from the target host's mtv_namespace variable by default.
+          MTV namespace where the inventory service and providers are
+          running. Resolved from the target host's mtv_namespace
+          variable by default.
+
+      mtv_maps_storage_map_namespace:
+        type: str
+        required: false
+        description: >-
+          Namespace where StorageMap CRs will be created.
+          Defaults to mtv_maps_namespace.
+
+      mtv_maps_network_map_namespace:
+        type: str
+        required: false
+        description: >-
+          Namespace where NetworkMap CRs will be created.
+          Defaults to mtv_maps_namespace.
 
       mtv_maps_source_provider_name:
         type: str

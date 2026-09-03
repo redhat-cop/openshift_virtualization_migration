@@ -7,7 +7,7 @@
     api_version: "{{ mtv_maps_api_version }}"
     kind: StorageMap
     name: "{{ _mtv_maps_storage_map_name | default('') }}"
-    namespace: "{{ mtv_maps_namespace }}"
+    namespace: "{{ mtv_maps_storage_map_namespace }}"
   register: _mtv_maps_failed_storagemap
   ignore_errors: true
   when:
@@ -22,7 +22,7 @@
     api_version: "{{ mtv_maps_api_version }}"
     kind: NetworkMap
     name: "{{ _mtv_maps_network_map_name | default('') }}"
-    namespace: "{{ mtv_maps_namespace }}"
+    namespace: "{{ mtv_maps_network_map_namespace }}"
   register: _mtv_maps_failed_networkmap
   ignore_errors: true
   when:
@@ -46,7 +46,9 @@
       Configuration:
         Source provider:  {{ mtv_maps_source_provider_name | default('unknown') }}
         Dest provider:    {{ mtv_maps_destination_provider_name | default('unknown') }}
-        Namespace:        {{ mtv_maps_namespace }}
+        MTV namespace:    {{ mtv_maps_namespace }}
+        StorageMap ns:    {{ mtv_maps_storage_map_namespace }}
+        NetworkMap ns:    {{ mtv_maps_network_map_namespace }}
         Source type:      {{ _mtv_maps_source_type | default('unknown') }}
         Storage maps:     {{ mtv_maps_create_storage_maps }}
         Network maps:     {{ mtv_maps_create_network_maps }}

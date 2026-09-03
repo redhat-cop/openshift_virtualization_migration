@@ -54,10 +54,24 @@ mtv_maps_create_network_maps: true
 # title: Namespace
 # required: False
 # description: >-
-#   Namespace where StorageMap and NetworkMap CRs will be created.
+#   MTV namespace where the inventory service and providers are running.
 #   Resolved from the target host's mtv_namespace variable by default.
 mtv_maps_namespace: >-
   {{ hostvars[target_name]['mtv_namespace'] | default('openshift-mtv') }}
+
+# title: Storage Map Namespace
+# required: False
+# description: >-
+#   Namespace where StorageMap CRs will be created.
+#   Defaults to mtv_maps_namespace.
+mtv_maps_storage_map_namespace: "{{ mtv_maps_namespace }}"
+
+# title: Network Map Namespace
+# required: False
+# description: >-
+#   Namespace where NetworkMap CRs will be created.
+#   Defaults to mtv_maps_namespace.
+mtv_maps_network_map_namespace: "{{ mtv_maps_namespace }}"
 
 # title: Source Provider Name
 # required: False

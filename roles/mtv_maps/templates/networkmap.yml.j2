@@ -2,7 +2,7 @@ apiVersion: {{ mtv_maps_api_version }}
 kind: NetworkMap
 metadata:
   name: {{ _mtv_maps_network_map_name | to_json }}
-  namespace: {{ mtv_maps_namespace | to_json }}
+  namespace: {{ mtv_maps_network_map_namespace | to_json }}
   labels:
     app.kubernetes.io/managed-by: {{ mtv_maps_managed_by_label }}
 spec:
