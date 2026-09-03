@@ -105,12 +105,26 @@ argument_specs:
           Name of the source provider in the MTV inventory.
           Defaults to the rfc1123-sanitised source_name.
 
+      mtv_maps_source_provider_namespace:
+        type: str
+        required: false
+        description: >-
+          Namespace where the source provider is located.
+          Defaults to mtv_maps_namespace.
+
       mtv_maps_destination_provider_name:
         type: str
         required: false
         default: host
         description: >-
           Name of the destination (OpenShift) provider in the MTV inventory.
+
+      mtv_maps_destination_provider_namespace:
+        type: str
+        required: false
+        description: >-
+          Namespace where the destination provider is located.
+          Defaults to mtv_maps_namespace.
 
       mtv_maps_api_version:
         type: str

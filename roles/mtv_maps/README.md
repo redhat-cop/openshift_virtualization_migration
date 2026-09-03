@@ -51,6 +51,11 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
     * **Type**: str
     * **Default**: host
     * **Description**: Name of the destination (OpenShift) provider in the MTV inventory.
+  * **mtv_maps_destination_provider_namespace**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: none
+    * **Description**: Namespace where the destination provider is located. Defaults to mtv_maps_namespace.
   * **mtv_maps_inventory_retrieval_method**:
     * **Required**: False
     * **Type**: str
@@ -119,6 +124,11 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
     * **Type**: str
     * **Default**: none
     * **Description**: Name of the source provider in the MTV inventory. Defaults to the rfc1123-sanitised source_name.
+  * **mtv_maps_source_provider_namespace**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: none
+    * **Description**: Namespace where the source provider is located. Defaults to mtv_maps_namespace.
   * **mtv_maps_storage_map_namespace**:
     * **Required**: False
     * **Type**: str
@@ -150,27 +160,29 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`mtv_maps_api_version`](defaults/main.yml#L92)   | str   | `forklift.konveyor.io/v1beta1` |  None  |   False  |  Forklift API Version |
+| [`mtv_maps_api_version`](defaults/main.yml#L106)   | str   | `forklift.konveyor.io/v1beta1` |  None  |   False  |  Forklift API Version |
 | [`mtv_maps_create_network_maps`](defaults/main.yml#L52)   | bool   | `True` |  None  |   False  |  Create Network Maps |
 | [`mtv_maps_create_storage_maps`](defaults/main.yml#L47)   | bool   | `True` |  None  |   False  |  Create Storage Maps |
-| [`mtv_maps_default_storage_class`](defaults/main.yml#L99)   | str   | `` |  None  |   False  |  Default Storage Class |
-| [`mtv_maps_destination_provider_name`](defaults/main.yml#L87)   | str   | `host` |  None  |   False  |  Destination Provider Name |
-| [`mtv_maps_inventory_retrieval_method`](defaults/main.yml#L138)   | str   | `api` |  None  |   False  |  Inventory Retrieval Method |
-| [`mtv_maps_managed_by_label`](defaults/main.yml#L153)   | str   | `ansible-migration-factory` |  None  |   False  |  Managed By Label |
-| [`mtv_maps_multiple_storage_maps`](defaults/main.yml#L115)   | dict   | `{}` |  None  |   False  |  Multiple Storage Maps |
-| [`mtv_maps_nad_source_annotation`](defaults/main.yml#L130)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  NAD Source Annotation |
+| [`mtv_maps_default_storage_class`](defaults/main.yml#L113)   | str   | `` |  None  |   False  |  Default Storage Class |
+| [`mtv_maps_destination_provider_name`](defaults/main.yml#L94)   | str   | `host` |  None  |   False  |  Destination Provider Name |
+| [`mtv_maps_destination_provider_namespace`](defaults/main.yml#L101)   | str   | `{{ mtv_maps_namespace }}` |  None  |   False  |  Destination Provider Namespace |
+| [`mtv_maps_inventory_retrieval_method`](defaults/main.yml#L152)   | str   | `api` |  None  |   False  |  Inventory Retrieval Method |
+| [`mtv_maps_managed_by_label`](defaults/main.yml#L167)   | str   | `ansible-migration-factory` |  None  |   False  |  Managed By Label |
+| [`mtv_maps_multiple_storage_maps`](defaults/main.yml#L129)   | dict   | `{}` |  None  |   False  |  Multiple Storage Maps |
+| [`mtv_maps_nad_source_annotation`](defaults/main.yml#L144)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  NAD Source Annotation |
 | [`mtv_maps_namespace`](defaults/main.yml#L59)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Namespace |
 | [`mtv_maps_network_map_namespace`](defaults/main.yml#L74)   | str   | `{{ mtv_maps_namespace }}` |  None  |   False  |  Network Map Namespace |
-| [`mtv_maps_network_map_overrides`](defaults/main.yml#L123)   | list   | `[]` |  None  |   False  |  Network Map Overrides |
+| [`mtv_maps_network_map_overrides`](defaults/main.yml#L137)   | list   | `[]` |  None  |   False  |  Network Map Overrides |
 | [`mtv_maps_openshift_api_key`](defaults/main.yml#L23)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
 | [`mtv_maps_openshift_host`](defaults/main.yml#L13)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift Host |
 | [`mtv_maps_openshift_verify_ssl`](defaults/main.yml#L38)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  OpenShift Verify SSL |
-| [`mtv_maps_query_delay`](defaults/main.yml#L148)   | int   | `5` |  None  |   False  |  Query Delay |
-| [`mtv_maps_query_retries`](defaults/main.yml#L143)   | int   | `5` |  None  |   False  |  Query Retries |
+| [`mtv_maps_query_delay`](defaults/main.yml#L162)   | int   | `5` |  None  |   False  |  Query Delay |
+| [`mtv_maps_query_retries`](defaults/main.yml#L157)   | int   | `5` |  None  |   False  |  Query Retries |
 | [`mtv_maps_secure_logging`](defaults/main.yml#L6)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   False  |  Secure Logging |
 | [`mtv_maps_source_provider_name`](defaults/main.yml#L81)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Source Provider Name |
+| [`mtv_maps_source_provider_namespace`](defaults/main.yml#L89)   | str   | `{{ mtv_maps_namespace }}` |  None  |   False  |  Source Provider Namespace |
 | [`mtv_maps_storage_map_namespace`](defaults/main.yml#L67)   | str   | `{{ mtv_maps_namespace }}` |  None  |   False  |  Storage Map Namespace |
-| [`mtv_maps_storage_map_overrides`](defaults/main.yml#L107)   | list   | `[]` |  None  |   False  |  Storage Map Overrides |
+| [`mtv_maps_storage_map_overrides`](defaults/main.yml#L121)   | list   | `[]` |  None  |   False  |  Storage Map Overrides |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
@@ -183,6 +195,8 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
 <b>`mtv_maps_default_storage_class`:</b> >-
 <br>
 <b>`mtv_maps_destination_provider_name`:</b> Name of the destination (OpenShift) provider in the MTV inventory.
+<br>
+<b>`mtv_maps_destination_provider_namespace`:</b> >-
 <br>
 <b>`mtv_maps_inventory_retrieval_method`:</b> >-
 <br>
@@ -211,6 +225,8 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
 <b>`mtv_maps_secure_logging`:</b> Whether to enable secure logging for sensitive tasks.
 <br>
 <b>`mtv_maps_source_provider_name`:</b> >-
+<br>
+<b>`mtv_maps_source_provider_namespace`:</b> >-
 <br>
 <b>`mtv_maps_storage_map_namespace`:</b> >-
 <br>
