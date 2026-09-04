@@ -1,0 +1,21 @@
+---
+- name: Invoke AAP Using an MTV Hook
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    aap_credentials_secret: "mtv-aap-credentials"
+    aap_organization: Default
+    aap_job_template: mtv-migration-job-template
+    aap_job_template_extra_vars: {}
+  tasks:
+    - name: Create MTV provider for source-target pair
+      ansible.builtin.import_role:
+        name: infra.openshift_virtualization_migration.mtv_hook_invoke_aap
+      vars:
+        mtv_hook_invoke_aap_credentials_secret: "{{ aap_credentials_secret }}"
+        mtv_hook_invoke_aap_organization: "{{ aap_organization }}"
+        mtv_hook_invoke_aap_job_template: "{{ aap_job_template }}"
+        mtv_hook_invoke_aap_job_template_extra_vars: "{{ aap_job_template_extra_vars }}"
+
+...
