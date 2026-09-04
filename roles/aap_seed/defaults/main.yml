@@ -205,6 +205,16 @@ aap_seed_mtv_maps_template_name: OpenShift Virtualization Migration - MTV Maps
 # description: Playbook path for the MTV maps job template.
 aap_seed_mtv_maps_playbook: playbooks/vmf_mtv_maps.yml
 
+# title: MTV Plans Template Name
+# required: False
+# description: Name of the MTV plans job template created in AAP.
+aap_seed_mtv_plans_template_name: OpenShift Virtualization Migration - MTV Plans
+
+# title: MTV Plans Playbook
+# required: False
+# description: Playbook path for the MTV plans job template.
+aap_seed_mtv_plans_playbook: playbooks/vmf_mtv_plans.yml
+
 # title: Common Survey Spec
 # required: False
 # description: >-
@@ -381,6 +391,17 @@ aap_seed_controller_templates:
     organization: "{{ aap_seed_org_name }}"
     project: "{{ aap_seed_project_name }}"
     playbook: "{{ aap_seed_mtv_maps_playbook }}"
+    inventory: "{{ aap_seed_inventory_name }}"
+    execution_environment: "{{ aap_seed_execution_environment }}"
+    ask_credential_on_launch: true
+    ask_variables_on_launch: true
+    verbosity: 0
+    survey_enabled: true
+    survey_spec: "{{ aap_seed_common_survey_spec }}"
+  - name: "{{ aap_seed_mtv_plans_template_name }}"
+    organization: "{{ aap_seed_org_name }}"
+    project: "{{ aap_seed_project_name }}"
+    playbook: "{{ aap_seed_mtv_plans_playbook }}"
     inventory: "{{ aap_seed_inventory_name }}"
     execution_environment: "{{ aap_seed_execution_environment }}"
     ask_credential_on_launch: true
