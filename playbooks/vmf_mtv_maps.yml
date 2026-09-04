@@ -1,0 +1,12 @@
+---
+- name: Create MTV Storage and Network Maps
+  hosts: "{{ migration_clusters | default('migration_clusters') }}"
+  gather_facts: false
+  tasks:
+    - name: Create maps for source-target pair
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.mtv_maps
+        apply:
+          delegate_to: localhost
+      when: inventory_hostname == target_name
+...

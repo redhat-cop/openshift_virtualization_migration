@@ -1,0 +1,79 @@
+---
+- name: rescue_maps | Fetch StorageMap status
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_maps_openshift_host }}"
+    api_key: "{{ mtv_maps_openshift_api_key }}"
+    validate_certs: "{{ mtv_maps_openshift_verify_ssl }}"
+    api_version: "{{ mtv_maps_api_version }}"
+    kind: StorageMap
+    name: "{{ _mtv_maps_storage_map_name | default('') }}"
+    namespace: "{{ mtv_maps_storage_map_namespace }}"
+  register: _mtv_maps_failed_storagemap
+  ignore_errors: true
+  when:
+    - mtv_maps_create_storage_maps | bool
+    - _mtv_maps_storage_map_name | default('') | length > 0
+
+- name: rescue_maps | Fetch NetworkMap status
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_maps_openshift_host }}"
+    api_key: "{{ mtv_maps_openshift_api_key }}"
+    validate_certs: "{{ mtv_maps_openshift_verify_ssl }}"
+    api_version: "{{ mtv_maps_api_version }}"
+    kind: NetworkMap
+    name: "{{ _mtv_maps_network_map_name | default('') }}"
+    namespace: "{{ mtv_maps_network_map_namespace }}"
+  register: _mtv_maps_failed_networkmap
+  ignore_errors: true
+  when:
+    - mtv_maps_create_network_maps | bool
+    - _mtv_maps_network_map_name | default('') | length > 0
+
+- name: rescue_maps | Warn if cluster query failed
+  ansible.builtin.debug:
+    msg: >-
+      Could not query map status from the target cluster. The cluster
+      may be unreachable.
+  when: >-
+    (_mtv_maps_failed_storagemap is defined and _mtv_maps_failed_storagemap is failed)
+    or (_mtv_maps_failed_networkmap is defined and _mtv_maps_failed_networkmap is failed)
+
+- name: rescue_maps | Display error context
+  ansible.builtin.debug:
+    msg: |
+      MTV Maps creation failed for source '{{ source_name }}' -> target '{{ target_name }}'.
+
+      Configuration:
+        Source provider:  {{ mtv_maps_source_provider_name | default('unknown') }}
+        Dest provider:    {{ mtv_maps_destination_provider_name | default('unknown') }}
+        MTV namespace:    {{ mtv_maps_namespace }}
+        StorageMap ns:    {{ mtv_maps_storage_map_namespace }}
+        NetworkMap ns:    {{ mtv_maps_network_map_namespace }}
+        Source type:      {{ _mtv_maps_source_type | default('unknown') }}
+        Storage maps:     {{ mtv_maps_create_storage_maps }}
+        Network maps:     {{ mtv_maps_create_network_maps }}
+
+      StorageMap '{{ _mtv_maps_storage_map_name | default('N/A') }}':
+      {{ (_mtv_maps_failed_storagemap.resources[0].status | default({})) | to_nice_yaml
+         if (_mtv_maps_failed_storagemap.resources | default([]) | length > 0)
+         else '  (not found or not queried)' }}
+
+      NetworkMap '{{ _mtv_maps_network_map_name | default('N/A') }}':
+      {{ (_mtv_maps_failed_networkmap.resources[0].status | default({})) | to_nice_yaml
+         if (_mtv_maps_failed_networkmap.resources | default([]) | length > 0)
+         else '  (not found or not queried)' }}
+
+      Troubleshooting:
+        - Verify the source and destination providers are Ready
+        - Check that datastores/networks are visible in the MTV inventory
+        - Confirm MTV/Forklift operator is installed and running
+
+      Original error: {{ ansible_failed_result.msg | default('unknown') }}
+
+- name: rescue_maps | Fail with summary
+  ansible.builtin.fail:
+    msg: >-
+      Failed to create MTV maps for source '{{ source_name }}'
+      on target '{{ target_name }}'.
+      Check the debug output above for details.
+...

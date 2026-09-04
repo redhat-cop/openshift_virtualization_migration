@@ -1,0 +1,54 @@
+---
+# Creates one or more StorageMap CRs based on the queried inventory data
+# and user overrides.
+
+- name: create_storage_map | Detect default storage class
+  ansible.builtin.set_fact:
+    _mtv_maps_resolved_default_sc: >-
+      {{ mtv_maps_default_storage_class
+         if (mtv_maps_default_storage_class | length > 0)
+         else (_mtv_maps_storageclasses
+               | selectattr('object.metadata.annotations', 'defined')
+               | json_query(_default_sc_query)
+               | map(attribute='name')
+               | first
+               | default(''))
+      }}
+  vars:
+    _default_sc_query: >-
+      [?object.metadata.annotations."kubernetes.io/is-default-class"=='true'
+      || object.metadata.annotations."storageclass.kubernetes.io/is-default-class"=='true']
+
+- name: create_storage_map | Assert a default storage class is available
+  ansible.builtin.assert:
+    that:
+      - _mtv_maps_resolved_default_sc | length > 0
+    fail_msg: >-
+      No default storage class found on the destination cluster and
+      mtv_maps_default_storage_class is not set. Either set a default
+      StorageClass on the cluster or provide mtv_maps_default_storage_class.
+    quiet: true
+
+# --- Multiple storage maps mode ---
+
+- name: create_storage_map | Create multiple named storage maps
+  ansible.builtin.include_tasks: _build_and_apply_storage_map.yml
+  loop: "{{ mtv_maps_multiple_storage_maps | dict2items }}"
+  loop_control:
+    loop_var: _mtv_maps_multi_entry
+  vars:
+    _mtv_maps_current_storage_map_name: >-
+      {{ _mtv_maps_multi_entry.key
+         | infra.openshift_virtualization_migration.rfc1123 }}
+    _mtv_maps_current_overrides: "{{ _mtv_maps_multi_entry.value }}"
+  when: mtv_maps_multiple_storage_maps | length > 0
+
+# --- Single storage map mode ---
+
+- name: create_storage_map | Create single storage map
+  ansible.builtin.include_tasks: _build_and_apply_storage_map.yml
+  vars:
+    _mtv_maps_current_storage_map_name: "{{ _mtv_maps_storage_map_name }}"
+    _mtv_maps_current_overrides: "{{ mtv_maps_storage_map_overrides }}"
+  when: mtv_maps_multiple_storage_maps | length == 0
+...

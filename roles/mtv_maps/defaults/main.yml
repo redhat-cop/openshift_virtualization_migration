@@ -1,0 +1,168 @@
+---
+
+# title: Secure Logging
+# required: False
+# description: Whether to enable secure logging for sensitive tasks.
+mtv_maps_secure_logging: "{{ secure_logging | default(true) }}"
+
+# title: OpenShift Host
+# required: True
+# description: >-
+#   OpenShift host URL. Cascades from K8S_AUTH_HOST env var
+#   or openshift_host inventory variable.
+mtv_maps_openshift_host: >-
+  {{
+    lookup('env', 'K8S_AUTH_HOST') | default(openshift_host, true)
+  }}
+
+# title: OpenShift API Key
+# required: True
+# description: >-
+#   OpenShift API key / bearer token. Cascades from K8S_AUTH_API_KEY
+#   env var or inventory variables.
+mtv_maps_openshift_api_key: >-
+  {{
+    lookup('env', 'K8S_AUTH_API_KEY')
+    | default(
+        openshift_credential.openshift_api_key
+        | default(openshift_credential.openshift_temporary_api_key)
+        if openshift_credential is defined
+        else openshift_api_key | default(openshift_temporary_api_key),
+        true
+      )
+  }}
+
+# title: OpenShift Verify SSL
+# required: False
+# description: Whether to verify SSL certificates for OpenShift connections.
+mtv_maps_openshift_verify_ssl: >-
+  {{
+    lookup('env', 'K8S_AUTH_VERIFY_SSL')
+    | default(openshift_verify_ssl | default(true), true)
+  }}
+
+# title: Create Storage Maps
+# required: False
+# description: Whether to create StorageMap CRs.
+mtv_maps_create_storage_maps: true
+
+# title: Create Network Maps
+# required: False
+# description: Whether to create NetworkMap CRs.
+mtv_maps_create_network_maps: true
+
+# title: Namespace
+# required: False
+# description: >-
+#   MTV namespace where the inventory service and providers are running.
+#   Resolved from the target host's mtv_namespace variable by default.
+mtv_maps_namespace: >-
+  {{ hostvars[target_name]['mtv_namespace'] | default('openshift-mtv') }}
+
+# title: Storage Map Namespace
+# required: False
+# description: >-
+#   Namespace where StorageMap CRs will be created.
+#   Defaults to mtv_maps_namespace.
+mtv_maps_storage_map_namespace: "{{ mtv_maps_namespace }}"
+
+# title: Network Map Namespace
+# required: False
+# description: >-
+#   Namespace where NetworkMap CRs will be created.
+#   Defaults to mtv_maps_namespace.
+mtv_maps_network_map_namespace: "{{ mtv_maps_namespace }}"
+
+# title: Source Provider Name
+# required: False
+# description: >-
+#   Name of the source provider in the MTV inventory. Defaults to the
+#   rfc1123-sanitised source_name.
+mtv_maps_source_provider_name: >-
+  {{ source_name | infra.openshift_virtualization_migration.rfc1123 }}
+
+# title: Source Provider Namespace
+# required: False
+# description: >-
+#   Namespace where the source provider is located.
+#   Defaults to mtv_maps_namespace.
+mtv_maps_source_provider_namespace: "{{ mtv_maps_namespace }}"
+
+# title: Destination Provider Name
+# required: False
+# description: Name of the destination (OpenShift) provider in the MTV inventory.
+mtv_maps_destination_provider_name: host
+
+# title: Destination Provider Namespace
+# required: False
+# description: >-
+#   Namespace where the destination provider is located.
+#   Defaults to mtv_maps_namespace.
+mtv_maps_destination_provider_namespace: "{{ mtv_maps_namespace }}"
+
+# title: Forklift API Version
+# required: False
+# description: Forklift API version for map CRs.
+mtv_maps_api_version: forklift.konveyor.io/v1beta1
+
+# title: Default Storage Class
+# required: False
+# description: >-
+#   Default storage class on the destination cluster. If empty,
+#   auto-detected from the cluster's default StorageClass annotation.
+mtv_maps_default_storage_class: ""
+
+# title: Storage Map Overrides
+# required: False
+# description: >-
+#   Per-datastore overrides for the single storage map. Each entry may
+#   contain id, storageClass, exclude, and include. Ignored when
+#   mtv_maps_multiple_storage_maps is populated.
+mtv_maps_storage_map_overrides: []
+
+# title: Multiple Storage Maps
+# required: False
+# description: >-
+#   Dictionary of named storage maps. Keys are map names (sanitised to
+#   RFC 1123), values are lists of per-datastore overrides. Takes
+#   precedence over mtv_maps_storage_map_overrides.
+mtv_maps_multiple_storage_maps: {}
+
+# title: Network Map Overrides
+# required: False
+# description: >-
+#   Per-network overrides for the network map. Each entry may contain
+#   id, destination_type (pod/multus/ignored), nad (namespace/name or
+#   just name), exclude, and include.
+mtv_maps_network_map_overrides: []
+
+# title: NAD Source Annotation
+# required: False
+# description: >-
+#   Annotation on NetworkAttachmentDefinitions used for auto-matching
+#   source portgroups to destination NADs.
+mtv_maps_nad_source_annotation: >-
+  infra.openshift-virtualization-migration/source-portgroup
+
+# title: Inventory Retrieval Method
+# required: False
+# description: >-
+#   Method used by mtv_query_inventory to retrieve data from the MTV
+#   inventory service. Valid options are 'api' and 'exec'.
+mtv_maps_inventory_retrieval_method: api
+
+# title: Query Retries
+# required: False
+# description: Number of retries for inventory queries.
+mtv_maps_query_retries: 5
+
+# title: Query Delay
+# required: False
+# description: Delay in seconds between inventory query retries.
+mtv_maps_query_delay: 5
+
+# title: Managed By Label
+# required: False
+# description: Value of the app.kubernetes.io/managed-by label applied to CRs.
+mtv_maps_managed_by_label: ansible-migration-factory
+...

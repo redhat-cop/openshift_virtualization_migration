@@ -1,0 +1,15 @@
+apiVersion: {{ mtv_maps_api_version }}
+kind: StorageMap
+metadata:
+  name: {{ _mtv_maps_current_storage_map_name | to_json }}
+  namespace: {{ mtv_maps_storage_map_namespace | to_json }}
+  labels:
+    app.kubernetes.io/managed-by: {{ mtv_maps_managed_by_label }}
+spec:
+  provider:
+    source:
+      name: {{ _mtv_maps_source_provider.name | to_json }}
+      namespace: {{ _mtv_maps_source_provider.namespace | to_json }}
+    destination:
+      name: {{ _mtv_maps_dest_provider.name | to_json }}
+      namespace: {{ _mtv_maps_dest_provider.namespace | to_json }}

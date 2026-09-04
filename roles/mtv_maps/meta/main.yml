@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  role_name: mtv_maps
+  author: Red Hat
+  description: >-
+    Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift
+    target clusters for a given source-target pair.
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.15"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+  galaxy_tags:
+    - openshift
+    - virtualization
+    - migration
+    - mtv
+    - forklift
+
+dependencies: []
+...
