@@ -7,5 +7,5 @@
   tasks:
     - name: Invoke mtv_plans role
       ansible.builtin.include_role:
-        name: mtv_plans
+        name: infra.openshift_virtualization_migration.mtv_plans
 ...

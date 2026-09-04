@@ -7,5 +7,5 @@
   tasks:
     - name: Sync project and push CaC objects to AAP
       ansible.builtin.import_role:
-        name: aap_seed
+        name: infra.openshift_virtualization_migration.aap_seed
 ...
