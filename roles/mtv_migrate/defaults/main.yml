@@ -1,0 +1,90 @@
+---
+
+# title: OpenShift Host
+# required: True
+# description: OpenShift host.
+mtv_migrate_openshift_host: >-
+  {{
+    lookup('env', 'K8S_AUTH_HOST') | default(openshift_host, true)
+  }}
+
+# title: OpenShift API Key
+# required: True
+# description: OpenShift API key.
+mtv_migrate_openshift_api_key: >-
+  {{
+    lookup('env', 'K8S_AUTH_API_KEY')
+    | default(
+        openshift_credential.openshift_api_key
+        | default(openshift_credential.openshift_temporary_api_key)
+        if openshift_credential is defined
+        else openshift_api_key | default(openshift_temporary_api_key),
+        true
+      )
+  }}
+
+# title: OpenShift CA Certificate Path
+# required: False
+# description: Path to the OpenShift CA Certificate.
+mtv_migrate_openshift_ca_cert_path: >-
+  {{
+    lookup('env', 'K8S_AUTH_SSL_CA_CERT')
+    | default(openshift_ca_cert_path | default(omit), true)
+  }}
+
+# title: OpenShift Verify SSL
+# required: False
+# description: Whether to verify SSL certificates.
+mtv_migrate_openshift_verify_ssl: >-
+  {{
+    lookup('env', 'K8S_AUTH_VERIFY_SSL')
+    | default(openshift_verify_ssl | default(true), true)
+  }}
+
+# title: Migration Plan Name
+# required: True
+# description: Name of the MTV plan.
+mtv_migrate_plan_name: ""
+
+# title: Migration Plan Namespace
+# required: True
+# description: Namespace of the MTV plan.
+mtv_migrate_plan_namespace: ""
+
+# title: Warm Cutover Time
+# required: False
+# description: >-
+#  ISO 8601 timestamp time for the warm cutover to occur (e.g., '2026-04-07T02:00:00Z').
+# If empty, uses current time.
+mtv_migrate_warm_cutover_time: ""
+
+# title: Warm Precopy Only
+# required: False
+# description: Whether to perform only the precopy phase for warm migrations.
+mtv_migrate_warm_precopy_only: false
+
+# title: Managed By Label
+# required: False
+# description: Value of the app.kubernetes.io/managed-by label applied to resources.
+mtv_migrate_managed_by_label: "ansible-migration-factory"
+
+# title: Verify Complete
+# required: False
+# description: Whether to verify completion
+mtv_migrate_verify_complete: false
+
+# title: Verify Complete Retries
+# required: False
+# description: Number of retries when waiting for completion
+mtv_migrate_verify_retries: 360
+
+# title: Verify Complete Delay
+# required: False
+# description: Seconds to wait between retries
+mtv_migrate_verify_delay: 20
+
+# title: Verify Per VM Status
+# required: False
+# description: Whether to display per-VM migration details on each poll cycle.
+mtv_migrate_verify_per_vm_status: false
+...

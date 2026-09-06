@@ -1,0 +1,20 @@
+apiVersion: forklift.konveyor.io/v1beta1
+kind: Migration
+metadata:
+  name: "{{ __mtv_migrate_plan.metadata.name | infra.openshift_virtualization_migration.rfc1123 }}"
+  namespace: "{{ __mtv_migrate_plan.metadata.namespace }}"
+  labels:
+    app.kubernetes.io/managed-by: "{{ mtv_migrate_managed_by_label }}"
+  ownerReferences:
+    - apiVersion: forklift.konveyor.io/v1beta1
+      kind: Plan
+      name: "{{ __mtv_migrate_plan.metadata.name }}"
+      uid: "{{ __mtv_migrate_plan.metadata.uid }}"
+spec:
+{% if _mtv_migrate_mtv_warm | bool and _mtv_migrate_mtv_cutover | default('', true) | length > 0 %}
+  cutover: "{{ _mtv_migrate_mtv_cutover }}"
+{% endif %}
+  plan:
+    name: "{{ __mtv_migrate_plan.metadata.name }}"
+    namespace: "{{ __mtv_migrate_plan.metadata.namespace }}"
+    uid: "{{ __mtv_migrate_plan.metadata.uid }}"
