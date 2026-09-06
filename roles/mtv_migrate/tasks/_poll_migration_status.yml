@@ -1,0 +1,70 @@
+---
+
+- name: _poll_migration_status | Wait Before Polling
+  ansible.builtin.pause:
+    seconds: "{{ mtv_migrate_verify_delay }}"
+    prompt: >-
+      Waiting for {{ __mtv_migrate_migration_status.total_vms | int -
+      __mtv_migrate_migration_status.completed_vms | int -
+      __mtv_migrate_migration_status.failed_vms | int }}
+      of {{ __mtv_migrate_migration_status.total_vms }} VM(s) to complete migration
+  when: __mtv_migrate_poll_attempt | int > 0
+
+- name: _poll_migration_status | Query Migration Status
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_migrate_openshift_host }}"
+    api_key: "{{ mtv_migrate_openshift_api_key }}"
+    validate_certs: "{{ mtv_migrate_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_migrate_openshift_ca_cert_path | default(omit) }}"
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Migration
+    name: "{{ __mtv_migrate_migration_name }}"
+    namespace: "{{ __mtv_migrate_migration_namespace }}"
+  register: __mtv_migrate_migration_query
+
+- name: _poll_migration_status | Interpret Migration Status
+  infra.openshift_virtualization_migration.mtv_migration_status:
+    resource: "{{ __mtv_migrate_migration_query.resources | first }}"
+  register: __mtv_migrate_migration_status
+  when: __mtv_migrate_migration_query.resources | length > 0
+
+- name: _poll_migration_status | Display Migration Progress Summary
+  ansible.builtin.debug:
+    msg:
+      migration: "{{ __mtv_migrate_migration_status.migration_name }}"
+      status: "{{ __mtv_migrate_migration_status.status }}"
+      total_vms: "{{ __mtv_migrate_migration_status.total_vms }}"
+      completed_vms: "{{ __mtv_migrate_migration_status.completed_vms }}"
+      failed_vms: "{{ __mtv_migrate_migration_status.failed_vms }}"
+  when: __mtv_migrate_migration_status is defined
+
+- name: _poll_migration_status | Display Per-VM Migration Status
+  ansible.builtin.debug:
+    msg: "{{ __mtv_migrate_vm }}"
+  loop: "{{ __mtv_migrate_migration_status.vms | default([]) }}"
+  loop_control:
+    loop_var: __mtv_migrate_vm
+    label: "{{ __mtv_migrate_vm.name | default('unknown') }}"
+  when:
+    - __mtv_migrate_migration_status is defined
+    - mtv_migrate_verify_per_vm_status | bool
+
+- name: _poll_migration_status | Update Completion Facts
+  ansible.builtin.set_fact:
+    __mtv_migrate_migration_complete: >-
+      {{ __mtv_migrate_migration_status.complete | bool }}
+    __mtv_migrate_migration_succeeded: >-
+      {{ __mtv_migrate_migration_status.succeeded | bool }}
+  when: __mtv_migrate_migration_status is defined
+
+- name: _poll_migration_status | Increment Poll Attempt
+  ansible.builtin.set_fact:
+    __mtv_migrate_poll_attempt: "{{ __mtv_migrate_poll_attempt | int + 1 }}"
+  when: not (__mtv_migrate_migration_complete | bool)
+
+- name: _poll_migration_status | Recurse
+  ansible.builtin.include_tasks: _poll_migration_status.yml
+  when:
+    - not (__mtv_migrate_migration_complete | bool)
+    - __mtv_migrate_poll_attempt | int < mtv_migrate_verify_retries | int
+...

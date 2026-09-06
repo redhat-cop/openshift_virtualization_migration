@@ -175,16 +175,6 @@ aap_seed_execution_environment_credential_verify_ssl: >-
   {{ aap_execution_environment_credential_verify_ssl |
      default(true) }}
 
-# title: Migrate Template Name
-# required: False
-# description: Name of the migration job template created in AAP.
-aap_seed_migrate_template_name: OpenShift Virtualization Migration - Migrate
-
-# title: Migrate Playbook
-# required: False
-# description: Playbook path for the migration job template.
-aap_seed_migrate_playbook: playbooks/vmf_migrate.yml
-
 # title: MTV Provider Template Name
 # required: False
 # description: Name of the MTV provider job template created in AAP.
@@ -214,6 +204,16 @@ aap_seed_mtv_plans_template_name: OpenShift Virtualization Migration - MTV Plans
 # required: False
 # description: Playbook path for the MTV plans job template.
 aap_seed_mtv_plans_playbook: playbooks/vmf_mtv_plans.yml
+
+# title: MTV Migrate Template Name
+# required: False
+# description: Name of the MTV migrate job template created in AAP.
+aap_seed_mtv_migrate_template_name: OpenShift Virtualization Migration - MTV Migrate
+
+# title: MTV Migrate Playbook
+# required: False
+# description: Playbook path for the MTV migrate job template.
+aap_seed_mtv_migrate_playbook: playbooks/vmf_migrate.yml
 
 # title: Common Survey Spec
 # required: False
@@ -365,17 +365,6 @@ aap_seed_controller_execution_environments:
 #   List of AAP job template definitions. Default creates the migrate
 #   and MTV provider templates.
 aap_seed_controller_templates:
-  - name: "{{ aap_seed_migrate_template_name }}"
-    organization: "{{ aap_seed_org_name }}"
-    project: "{{ aap_seed_project_name }}"
-    playbook: "{{ aap_seed_migrate_playbook }}"
-    inventory: "{{ aap_seed_inventory_name }}"
-    execution_environment: "{{ aap_seed_execution_environment }}"
-    ask_credential_on_launch: true
-    ask_variables_on_launch: true
-    verbosity: 0
-    survey_enabled: true
-    survey_spec: "{{ aap_seed_common_survey_spec }}"
   - name: "{{ aap_seed_mtv_provider_template_name }}"
     organization: "{{ aap_seed_org_name }}"
     project: "{{ aap_seed_project_name }}"
@@ -409,4 +398,30 @@ aap_seed_controller_templates:
     verbosity: 0
     survey_enabled: true
     survey_spec: "{{ aap_seed_common_survey_spec }}"
+  - name: "{{ aap_seed_mtv_migrate_template_name }}"
+    organization: "{{ aap_seed_org_name }}"
+    project: "{{ aap_seed_project_name }}"
+    playbook: "{{ aap_seed_mtv_migrate_playbook }}"
+    inventory: "{{ aap_seed_inventory_name }}"
+    execution_environment: "{{ aap_seed_execution_environment }}"
+    ask_credential_on_launch: true
+    ask_variables_on_launch: true
+    verbosity: 0
+    survey_enabled: true
+    survey_spec:
+      name: ""
+      description: ""
+      spec:
+        - question_name: Plan Name
+          question_description: >-
+            Name of the migration Plan.
+          variable: mtv_migrate_plan_name
+          type: text
+          required: true
+        - question_name: Plan Namespace
+          question_description: >-
+            Namespace of the migration Plan.
+          variable: mtv_migrate_plan_namespace
+          type: text
+          required: true
 ...
