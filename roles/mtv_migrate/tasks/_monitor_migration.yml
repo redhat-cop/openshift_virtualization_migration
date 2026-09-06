@@ -1,0 +1,33 @@
+---
+
+- name: _monitor_migration | Set Migration Identity
+  ansible.builtin.set_fact:
+    __mtv_migrate_migration_name: >-
+      {{ __mtv_migrate_migration_result.result.metadata.name }}
+    __mtv_migrate_migration_namespace: >-
+      {{ __mtv_migrate_migration_result.result.metadata.namespace }}
+    __mtv_migrate_migration_complete: false
+    __mtv_migrate_migration_succeeded: false
+    __mtv_migrate_poll_attempt: 0
+
+- name: _monitor_migration | Poll Migration Status
+  ansible.builtin.include_tasks: _poll_migration_status.yml
+
+- name: _monitor_migration | Fail When Migration Timed Out
+  ansible.builtin.fail:
+    msg: >-
+      Migration '{{ __mtv_migrate_migration_name }}' did not complete
+      within {{ mtv_migrate_verify_retries }} attempts
+      ({{ mtv_migrate_verify_retries | int * mtv_migrate_verify_delay | int }} seconds).
+  when: not (__mtv_migrate_migration_complete | bool)
+
+- name: _monitor_migration | Fail When Migration Did Not Succeed
+  ansible.builtin.fail:
+    msg: >-
+      Migration '{{ __mtv_migrate_migration_name }}' completed but did not succeed.
+      Failed VMs: {{ __mtv_migrate_migration_status.failed_vm_names
+        | join(', ') | default('unknown', true) }}
+  when:
+    - __mtv_migrate_migration_complete | bool
+    - not (__mtv_migrate_migration_succeeded | bool)
+...

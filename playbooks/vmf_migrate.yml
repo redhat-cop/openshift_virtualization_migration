@@ -1,14 +1,11 @@
 ---
-- name: OpenShift Virtualization Migration - Migrate
-  hosts: localhost
-  connection: local
-  gather_facts: false
 
+- name: OpenShift Virtualization Migration - Migrate
+  hosts: "{{ migration_clusters | default('migration_clusters') }}"
+  gather_facts: false
+  connection: local
   tasks:
-    - name: Placeholder
-      ansible.builtin.debug:
-        msg: >-
-          Migration playbook -
-          source: {{ source_name | default('not set') }},
-          target: {{ target_name | default('not set') }}
+    - name: Invoke mtv_migrate role
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.mtv_migrate
 ...

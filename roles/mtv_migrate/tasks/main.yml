@@ -1,0 +1,78 @@
+---
+
+- name: Verify Plan Name and Namespace Provided
+  ansible.builtin.assert:
+    that:
+      - mtv_migrate_plan_name | default('', true) | length > 0
+      - mtv_migrate_plan_namespace | default('', true) | length > 0
+    fail_msg: Plan Name and Namespace must be provided.
+    quiet: true
+
+- name: Retrieve MTV Plan
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_migrate_openshift_host }}"
+    api_key: "{{ mtv_migrate_openshift_api_key }}"
+    validate_certs: "{{ mtv_migrate_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_migrate_openshift_ca_cert_path | default(omit) }}"
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Plan
+    namespace: "{{ mtv_migrate_plan_namespace }}"
+    name: "{{ mtv_migrate_plan_name }}"
+  register: __mtv_migrate_created_plan_status
+
+- name: Verify Plan Exists
+  ansible.builtin.assert:
+    that:
+      - __mtv_migrate_created_plan_status is defined
+      - "'resources' in __mtv_migrate_created_plan_status"
+      - __mtv_migrate_created_plan_status.resources | length == 1
+    fail_msg: >-
+      Could not locate Plan '{{ mtv_migrate_plan_name }}'
+      in namespace '{{ mtv_migrate_plan_namespace }}'.
+    quiet: true
+
+- name: Set Plan Fact
+  ansible.builtin.set_fact:
+    __mtv_migrate_plan: "{{ __mtv_migrate_created_plan_status.resources | first }}"
+
+- name: Set Warm Migration Fact
+  ansible.builtin.set_fact:
+    _mtv_migrate_mtv_warm: >-
+      {{
+        (
+          __mtv_migrate_plan.spec.type | default('') == 'warm'
+          or
+          __mtv_migrate_plan.spec.warm | default(false) | bool
+        )
+        and
+        not (mtv_migrate_warm_precopy_only | bool)
+      }}
+
+- name: Fail When Plan Not Ready for Migration
+  ansible.builtin.fail:
+    msg: >-
+      Migration Plan '{{ mtv_migrate_plan_name }}'
+      in namespace '{{ mtv_migrate_plan_namespace }}'
+      is not ready for migration.
+  when: >-
+    __mtv_migrate_plan.status.migration | default('', true) | length == 0
+    and
+    (__mtv_migrate_plan.status.conditions
+    | default([])
+    | selectattr('type', 'defined')
+    | selectattr('status', 'defined')
+    | selectattr('type', 'equalto', 'Ready')
+    | selectattr('status', 'equalto', 'True')
+    | list | length != 1)
+
+- name: Create Migration
+  redhat.openshift.k8s:
+    definition: "{{ lookup('template', 'migration.yml.j2') | from_yaml }}"
+    state: present
+    apply: true
+  register: __mtv_migrate_migration_result
+
+- name: Monitor Migration Progress
+  ansible.builtin.include_tasks: _monitor_migration.yml
+  when: mtv_migrate_verify_complete | bool
+...

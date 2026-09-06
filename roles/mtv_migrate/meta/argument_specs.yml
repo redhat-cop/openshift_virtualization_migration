@@ -1,0 +1,95 @@
+---
+# argument spec file for infra.openshift_virtualization_migration.mtv_migrate
+
+argument_specs:
+  main:
+    short_description: Executes a Migration Toolkit for Virtualization (MTV) migration.
+    description:
+      - This role executes a migration for an existing MTV Plan resource.
+      - It creates a Migration resource and optionally monitors its progress to completion.
+      - Supports both warm and cold migration types.
+    options:
+      mtv_migrate_openshift_host:
+        type: str
+        required: true
+        description: OpenShift cluster host/API endpoint.
+
+      mtv_migrate_openshift_api_key:
+        type: str
+        required: true
+        description: OpenShift API token for authentication.
+
+      mtv_migrate_openshift_ca_cert_path:
+        type: str
+        required: false
+        description: Path to the OpenShift CA certificate file for SSL verification.
+
+      mtv_migrate_openshift_verify_ssl:
+        type: bool
+        required: false
+        default: true
+        description: Whether to verify SSL certificates when connecting to OpenShift.
+
+      mtv_migrate_plan_name:
+        type: str
+        required: true
+        description: Name of the existing MTV Plan resource to execute.
+
+      mtv_migrate_plan_namespace:
+        type: str
+        required: true
+        description: Namespace containing the MTV Plan resource.
+
+      mtv_migrate_warm_cutover_time:
+        type: str
+        required: false
+        default: ""
+        description:
+          - ISO 8601 timestamp for when the warm cutover should occur (e.g., '2026-04-07T02:00:00Z').
+          - If empty, uses the current time for immediate cutover.
+          - Only applicable for warm migrations.
+
+      mtv_migrate_warm_precopy_only:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Whether to perform only the precopy phase for warm migrations.
+          - When true, stops after precopy without performing the final cutover.
+
+      mtv_migrate_managed_by_label:
+        type: str
+        required: false
+        default: "ansible-migration-factory"
+        description: Value for the app.kubernetes.io/managed-by label applied to created resources.
+
+      mtv_migrate_verify_complete:
+        type: bool
+        required: false
+        default: false
+        description: Whether to monitor the migration and wait for completion.
+
+      mtv_migrate_verify_retries:
+        type: int
+        required: false
+        default: 360
+        description:
+          - Maximum number of polling attempts when waiting for migration completion.
+          - Only used when mtv_migrate_verify_complete is true.
+
+      mtv_migrate_verify_delay:
+        type: int
+        required: false
+        default: 20
+        description:
+          - Seconds to wait between polling attempts.
+          - Only used when mtv_migrate_verify_complete is true.
+
+      mtv_migrate_verify_per_vm_status:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Whether to display detailed per-VM migration status during monitoring.
+          - Only used when mtv_migrate_verify_complete is true.
+...
