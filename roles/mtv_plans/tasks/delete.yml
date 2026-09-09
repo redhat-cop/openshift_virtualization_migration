@@ -1,0 +1,69 @@
+---
+
+- name: delete | Verify Delete Parameters
+  ansible.builtin.assert:
+    that:
+      - (mtv_plans_plan_name | default('', true) | length > 0) or
+        (mtv_plans_plan_labels | default([], true) | length > 0)
+    quiet: true
+    fail_msg: >-
+      At least one of mtv_plans_plan_name or
+      mtv_plans_plan_labels must be provided.
+
+- name: delete | Query Plans by Name
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_plans_openshift_host }}"
+    api_key: "{{ mtv_plans_openshift_api_key }}"
+    validate_certs: "{{ mtv_plans_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_plans_openshift_ca_cert_path | default(omit) }}"
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Plan
+    name: "{{ mtv_plans_plan_name }}"
+    namespace: "{{ mtv_plans_plan_namespace }}"
+  register: __mtv_plans_delete_name_results
+  when: mtv_plans_plan_name | default('', true) | length > 0
+
+- name: delete | Query Plans by Labels
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_plans_openshift_host }}"
+    api_key: "{{ mtv_plans_openshift_api_key }}"
+    validate_certs: "{{ mtv_plans_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_plans_openshift_ca_cert_path | default(omit) }}"
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Plan
+    label_selectors: "{{ mtv_plans_plan_labels }}"
+    namespace: "{{ mtv_plans_plan_namespace }}"
+  register: __mtv_plans_delete_label_results
+  when: mtv_plans_plan_labels | default([], true) | length > 0
+
+- name: delete | Combine Query Results
+  ansible.builtin.set_fact:
+    __mtv_plans_delete_plans: >-
+      {{
+        ((__mtv_plans_delete_name_results.resources | default([])) +
+        (__mtv_plans_delete_label_results.resources | default([])))
+        | unique(attribute='metadata.uid')
+      }}
+
+- name: delete | Delete Plans
+  redhat.openshift.k8s:
+    host: "{{ mtv_plans_openshift_host }}"
+    api_key: "{{ mtv_plans_openshift_api_key }}"
+    validate_certs: "{{ mtv_plans_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_plans_openshift_ca_cert_path | default(omit) }}"
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Plan
+    name: "{{ __mtv_plans_delete_plan.metadata.name }}"
+    namespace: "{{ __mtv_plans_delete_plan.metadata.namespace }}"
+    state: absent
+  loop: "{{ __mtv_plans_delete_plans }}"
+  loop_control:
+    loop_var: __mtv_plans_delete_plan
+    label: "Deleted Plan {{ __mtv_plans_delete_plan.metadata.name }}"
+  when: __mtv_plans_delete_plans | length > 0
+
+- name: delete | Verify Plans Deleted
+  ansible.builtin.include_tasks:
+    file: verify_deleted.yml
+  when: mtv_plans_verify_deleted | bool
+...

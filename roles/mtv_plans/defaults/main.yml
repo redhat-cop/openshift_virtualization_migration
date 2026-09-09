@@ -80,10 +80,40 @@ mtv_plans_migration_request: {
 #     exclude: true # Exclude the folder and all subfolders from plans
 }
 
+# title: Action to perform
+# required: False
+# description: Action to take. Choices include: create, archive. Defaults to create.
+mtv_plans_action: create
+
 # title: MTV Migrate Annotation
 # required: False
 # description: Label assigned to the MTV plan name
-mtv_plans_base_name_annotation: infra.openshift-virtualization-migration/plan-name
+mtv_plans_base_name_label: infra.openshift-virtualization-migration/plan-name
+
+# title: MTV Plan Name
+# required: False
+# description: Name of the plan to target
+mtv_plans_plan_name: ""
+
+# title: MTV Plan Namespace
+# required: False
+# description: Namespace of the plan to target
+mtv_plans_plan_namespace: ""
+
+# title: MTV Plan Labels
+# required: False
+# description: Labels of the plan to target
+mtv_plans_plan_labels: []
+
+# title: MTV Verify Archived
+# required: False
+# description: Verifies Plans are in an Archived state after archiving
+mtv_plans_verify_archived: true
+
+# title: MTV Verify Deleted
+# required: False
+# description: Verifies Plans have been deleted
+mtv_plans_verify_deleted: true
 
 # title: Managed By Label
 # required: False
@@ -93,9 +123,9 @@ mtv_plans_managed_by_label: "ansible-migration-factory"
 # title: MTV Migration Verify Plans Ready Retries
 # required: False
 # description: Number of retries to verify plans are ready
-mtv_plans_verify_plans_ready_retries: 180
+mtv_plans_verify_retries: 180
 # title: MTV Migration Verify Plans Ready Delay
 # required: False
 # description: Amount of time to wait between retries to verify plans are ready
-mtv_plans_verify_plans_ready_delay: 20
+mtv_plans_verify_delay: 20
 ...

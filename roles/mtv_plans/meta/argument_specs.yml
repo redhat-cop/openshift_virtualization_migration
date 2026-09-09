@@ -230,7 +230,58 @@ argument_specs:
                 default: false
                 description: Exclude the folder and all subfolders from plans. Defaults to C(false).
 
-      mtv_plans_base_name_annotation:
+      mtv_plans_action:
+        type: str
+        required: false
+        default: "create"
+        choices:
+          - create
+          - archive
+          - delete
+        description: Action to perform on the MTV plan.
+
+      mtv_plans_plan_name:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Name of the plan to target.
+          Used when I(mtv_plans_action) is C(archive) or C(delete).
+
+      mtv_plans_plan_namespace:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Namespace of the plan to target.
+          Used when I(mtv_plans_action) is C(archive) or C(delete).
+
+      mtv_plans_plan_labels:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: >-
+          Label selectors for plans to target (eg. C(app=myapp), C(env=prod)).
+          Used when I(mtv_plans_action) is C(archive) or C(delete).
+
+      mtv_plans_verify_archived:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Verifies plans are in an C(Archived) state after archiving.
+          Used when I(mtv_plans_action) is C(archive).
+
+      mtv_plans_verify_deleted:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Verifies plans have been deleted from the cluster.
+          Used when I(mtv_plans_action) is C(delete).
+
+      mtv_plans_base_name_label:
         type: str
         required: false
         default: "infra.openshift-virtualization-migration/plan-name"
@@ -242,13 +293,13 @@ argument_specs:
         default: "ansible-migration-factory"
         description: Value of the C(app.kubernetes.io/managed-by) label applied to resources.
 
-      mtv_plans_verify_plans_ready_retries:
+      mtv_plans_verify_retries:
         type: int
         required: false
         default: 180
         description: Number of retries to verify plans are ready.
 
-      mtv_plans_verify_plans_ready_delay:
+      mtv_plans_verify_delay:
         type: int
         required: false
         default: 20

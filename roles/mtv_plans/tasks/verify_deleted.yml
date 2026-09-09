@@ -1,0 +1,67 @@
+---
+
+- name: verify_deleted | Query Plans by Name
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_plans_openshift_host }}"
+    api_key: "{{ mtv_plans_openshift_api_key }}"
+    validate_certs: "{{ mtv_plans_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_plans_openshift_ca_cert_path | default(omit) }}"
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Plan
+    name: "{{ mtv_plans_plan_name }}"
+    namespace: "{{ mtv_plans_plan_namespace }}"
+  register: __mtv_plans_verify_delete_name_results
+  when: mtv_plans_plan_name | default('', true) | length > 0
+
+- name: verify_deleted | Query Plans by Labels
+  kubernetes.core.k8s_info:
+    host: "{{ mtv_plans_openshift_host }}"
+    api_key: "{{ mtv_plans_openshift_api_key }}"
+    validate_certs: "{{ mtv_plans_openshift_verify_ssl }}"
+    ca_cert: "{{ mtv_plans_openshift_ca_cert_path | default(omit) }}"
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Plan
+    label_selectors: "{{ mtv_plans_plan_labels }}"
+    namespace: "{{ mtv_plans_plan_namespace }}"
+  register: __mtv_plans_verify_delete_label_results
+  when: mtv_plans_plan_labels | default([], true) | length > 0
+
+- name: verify_deleted | Combine and Check Results
+  ansible.builtin.set_fact:
+    __mtv_plans_verify_delete_results: >-
+      {{
+        ((__mtv_plans_verify_delete_name_results.resources | default([])) +
+        (__mtv_plans_verify_delete_label_results.resources | default([])))
+        | unique(attribute='metadata.uid')
+      }}
+    __mtv_plans_verify_delete_retries_count: >-
+      {{ (__mtv_plans_verify_delete_retries_count | default(0) | int) + 1 }}
+
+- name: verify_deleted | Evaluate Deleted Status
+  ansible.builtin.set_fact:
+    __mtv_plans_all_deleted: >-
+      {{ __mtv_plans_verify_delete_results | length == 0 }}
+
+- name: verify_deleted | Fail if Retries Exceeded
+  ansible.builtin.fail:
+    msg: >-
+      Not all plans were deleted within
+      {{ mtv_plans_verify_retries }} retries.
+  when:
+    - not __mtv_plans_all_deleted | bool
+    - __mtv_plans_verify_delete_retries_count | int >= mtv_plans_verify_retries | int
+
+- name: verify_deleted | Wait Before Retry
+  ansible.builtin.pause:
+    seconds: "{{ mtv_plans_verify_delay }}"
+  when:
+    - not __mtv_plans_all_deleted | bool
+    - __mtv_plans_verify_delete_retries_count | int < mtv_plans_verify_retries | int
+
+- name: verify_deleted | Retry Verification
+  ansible.builtin.include_tasks:
+    file: verify_deleted.yml
+  when:
+    - not __mtv_plans_all_deleted | bool
+    - __mtv_plans_verify_delete_retries_count | int < mtv_plans_verify_retries | int
+...
