@@ -4,7 +4,7 @@ metadata:
   name: ""
   namespace: "{{ __mtv_plans_migration_namespace }}"
   labels:
-    "{{ mtv_plans_base_name_annotation }}": "{{ __mtv_plans_mtv_plan_base_name }}"
+    "{{ mtv_plans_base_name_label }}": "{{ __mtv_plans_mtv_plan_base_name }}"
     app.kubernetes.io/managed-by: "{{ mtv_plans_managed_by_label }}"
 spec:
   map:

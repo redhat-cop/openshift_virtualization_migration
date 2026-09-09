@@ -145,6 +145,48 @@ Create a warm migration plan and wait until it reaches a `Ready` state before co
         - name: app-server-02
 ```
 
+### Archive plans
+
+Archive a plan by name.
+
+```yaml
+- name: Archive a migration plan
+  ansible.builtin.include_role:
+    name: mtv_plans
+  vars:
+    mtv_plans_action: archive
+    mtv_plans_plan_name: my-migration-plan
+    mtv_plans_plan_namespace: openshift-mtv
+```
+
+### Delete plans
+
+Delete a plan by name.
+
+```yaml
+- name: Delete a migration plan
+  ansible.builtin.include_role:
+    name: mtv_plans
+  vars:
+    mtv_plans_action: delete
+    mtv_plans_plan_name: my-migration-plan
+    mtv_plans_plan_namespace: openshift-mtv
+```
+
+Delete plans by label selectors.
+
+```yaml
+- name: Delete plans by label
+  ansible.builtin.include_role:
+    name: mtv_plans
+  vars:
+    mtv_plans_action: delete
+    mtv_plans_plan_namespace: openshift-mtv
+    mtv_plans_plan_labels:
+      - app=myapp
+      - env=dev
+```
+
 <!-- STATIC CONTENT END -->
 <!-- Everything below will be overwritten by Docsible -->
 <!-- DOCSIBLE START -->
@@ -169,7 +211,16 @@ Description: Manages MTV migration plans.
 
 * **Description**: Manages MTV (Migration Toolkit for Virtualization) migration plans.
 * **Options**:
-  * **mtv_plans_base_name_annotation**:
+  * **mtv_plans_action**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: create
+    * **Description**: Action to perform on the MTV plan.
+    * **Choices**:
+      * create
+      * archive
+      * delete
+  * **mtv_plans_base_name_label**:
     * **Required**: False
     * **Type**: str
     * **Default**: infra.openshift-virtualization-migration/plan-name
@@ -313,12 +364,37 @@ Description: Manages MTV migration plans.
     * **Type**: bool
     * **Default**: True
     * **Description**: Whether to verify SSL certificates. Set to C(false) to disable verification.
-  * **mtv_plans_verify_plans_ready_delay**:
+  * **mtv_plans_plan_labels**:
+    * **Required**: False
+    * **Type**: list
+    * **Default**: []
+    * **Description**: Label selectors for plans to target (eg. C(app=myapp), C(env=prod)). Used when I(mtv_plans_action) is C(archive) or C(delete).
+  * **mtv_plans_plan_name**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**:
+    * **Description**: Name of the plan to target. Used when I(mtv_plans_action) is C(archive) or C(delete).
+  * **mtv_plans_plan_namespace**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**:
+    * **Description**: Namespace of the plan to target. Used when I(mtv_plans_action) is C(archive) or C(delete).
+  * **mtv_plans_verify_archived**:
+    * **Required**: False
+    * **Type**: bool
+    * **Default**: True
+    * **Description**: Verifies plans are in an C(Archived) state after archiving. Used when I(mtv_plans_action) is C(archive).
+  * **mtv_plans_verify_delay**:
     * **Required**: False
     * **Type**: int
     * **Default**: 20
     * **Description**: Amount of time in seconds to wait between retries to verify plans are ready.
-  * **mtv_plans_verify_plans_ready_retries**:
+  * **mtv_plans_verify_deleted**:
+    * **Required**: False
+    * **Type**: bool
+    * **Default**: True
+    * **Description**: Verifies plans have been deleted from the cluster. Used when I(mtv_plans_action) is C(delete).
+  * **mtv_plans_verify_retries**:
     * **Required**: False
     * **Type**: int
     * **Default**: 180
@@ -334,19 +410,27 @@ Description: Manages MTV migration plans.
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`mtv_plans_base_name_annotation`](defaults/main.yml#L86)   | str   | `infra.openshift-virtualization-migration/plan-name` |  None  |   False  |  MTV Migrate Annotation |
-| [`mtv_plans_managed_by_label`](defaults/main.yml#L91)   | str   | `ansible-migration-factory` |  None  |   False  |  Managed By Label |
+| [`mtv_plans_action`](defaults/main.yml#L86)   | str   | `create` |  None  |   False  |  Action to perform |
+| [`mtv_plans_base_name_label`](defaults/main.yml#L91)   | str   | `infra.openshift-virtualization-migration/plan-name` |  None  |   False  |  MTV Migrate Annotation |
+| [`mtv_plans_managed_by_label`](defaults/main.yml#L121)   | str   | `ansible-migration-factory` |  None  |   False  |  Managed By Label |
 | [`mtv_plans_migration_request`](defaults/main.yml#L47)   | dict   | `{}` |  None  |   True  |  Plan Migration Request |
 | [`mtv_plans_openshift_api_key`](defaults/main.yml#L14)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
 | [`mtv_plans_openshift_ca_cert_path`](defaults/main.yml#L29)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  OpenShift CA Certificate Path |
 | [`mtv_plans_openshift_host`](defaults/main.yml#L6)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift Host |
 | [`mtv_plans_openshift_verify_ssl`](defaults/main.yml#L38)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  OpenShift Verify SSL |
-| [`mtv_plans_verify_plans_ready_delay`](defaults/main.yml#L100)   | int   | `20` |  None  |   False  |  MTV Migration Verify Plans Ready Delay |
-| [`mtv_plans_verify_plans_ready_retries`](defaults/main.yml#L96)   | int   | `180` |  None  |   False  |  MTV Migration Verify Plans Ready Retries |
+| [`mtv_plans_plan_labels`](defaults/main.yml#L106)   | list   | `[]` |  None  |   False  |  MTV Plan Labels |
+| [`mtv_plans_plan_name`](defaults/main.yml#L96)   | str   | `` |  None  |   False  |  MTV Plan Name |
+| [`mtv_plans_plan_namespace`](defaults/main.yml#L101)   | str   | `` |  None  |   False  |  MTV Plan Namespace |
+| [`mtv_plans_verify_archived`](defaults/main.yml#L111)   | bool   | `True` |  None  |   False  |  MTV Verify Archived |
+| [`mtv_plans_verify_delay`](defaults/main.yml#L130)   | int   | `20` |  None  |   False  |  MTV Migration Verify Plans Ready Delay |
+| [`mtv_plans_verify_deleted`](defaults/main.yml#L116)   | bool   | `True` |  None  |   False  |  MTV Verify Deleted |
+| [`mtv_plans_verify_retries`](defaults/main.yml#L126)   | int   | `180` |  None  |   False  |  MTV Migration Verify Plans Ready Retries |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
-<b>`mtv_plans_base_name_annotation`:</b> Label assigned to the MTV plan name
+<b>`mtv_plans_action`:</b> Action to take. Choices include: create, archive. Defaults to create.
+<br>
+<b>`mtv_plans_base_name_label`:</b> Label assigned to the MTV plan name
 <br>
 <b>`mtv_plans_managed_by_label`:</b> Value of the app.kubernetes.io/managed-by label applied to resources.
 <br>
@@ -360,9 +444,19 @@ Description: Manages MTV migration plans.
 <br>
 <b>`mtv_plans_openshift_verify_ssl`:</b> Whether to verify SSL certificates.
 <br>
-<b>`mtv_plans_verify_plans_ready_delay`:</b> Amount of time to wait between retries to verify plans are ready
+<b>`mtv_plans_plan_labels`:</b> Labels of the plan to target
 <br>
-<b>`mtv_plans_verify_plans_ready_retries`:</b> Number of retries to verify plans are ready
+<b>`mtv_plans_plan_name`:</b> Name of the plan to target
+<br>
+<b>`mtv_plans_plan_namespace`:</b> Namespace of the plan to target
+<br>
+<b>`mtv_plans_verify_archived`:</b> Verifies Plans are in an Archived state after archiving
+<br>
+<b>`mtv_plans_verify_delay`:</b> Amount of time to wait between retries to verify plans are ready
+<br>
+<b>`mtv_plans_verify_deleted`:</b> Verifies Plans have been deleted
+<br>
+<b>`mtv_plans_verify_retries`:</b> Number of retries to verify plans are ready
 <br>
 <br>
 
@@ -397,34 +491,178 @@ Description: Manages MTV migration plans.
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| Verify Request Provided | `ansible.builtin.assert` | False |
-| Verify VMs or Folders Provided | `ansible.builtin.assert` | False |
-| Process Request (MTV Namespace) | `ansible.builtin.set_fact` | False |
-| Process Request (Migration Namespace) | `ansible.builtin.set_fact` | False |
-| Process Request (Baseline) | `ansible.builtin.set_fact` | False |
-| Process Request (Maps) | `ansible.builtin.set_fact` | False |
-| Verify Split Plan Value is Positive | `ansible.builtin.assert` | True |
-| Set Plan Base Name | `ansible.builtin.set_fact` | False |
-| Retrieve Configured providers | `ansible.builtin.include_role` | False |
-| Set Source Provider | `ansible.builtin.set_fact` | False |
-| Verify Source Provider | `ansible.builtin.assert` | False |
-| Set Destination Provider | `ansible.builtin.set_fact` | False |
-| Verify Destination Provider | `ansible.builtin.assert` | False |
-| Retrieve StorageMap | `kubernetes.core.k8s_info` | False |
-| Verify StorageMap | `ansible.builtin.assert` | False |
-| Retrieve NetworkMap | `kubernetes.core.k8s_info` | False |
-| Verify NetworkMap | `ansible.builtin.assert` | False |
-| Process Plan Skeleton | `ansible.builtin.set_fact` | False |
-| Get Inventory vms | `ansible.builtin.include_role` | False |
-| Get Inventory folders | `ansible.builtin.include_role` | True |
-| Process VMs and Generate Plans | `infra.openshift_virtualization_migration.mtv_process_vms` | False |
-| Set Plans from processed results | `ansible.builtin.set_fact` | False |
-| Create and Verify Plans | `block` | True |
-| Create Plans | `redhat.openshift.k8s` | False |
-| Verify Plans Ready | `kubernetes.core.k8s_info` | True |
-| Display Plans (Dry Run) | `ansible.builtin.debug` | True |
+| Invoke Plan Creation | `ansible.builtin.include_tasks` | True |
+| Invoke Plan Archival | `ansible.builtin.include_tasks` | True |
+| Invoke Plan Deletion | `ansible.builtin.include_tasks` | True |
+
+#### File: tasks/archive.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| archive ¦ Verify Archive Parameters | `ansible.builtin.assert` | False |
+| archive ¦ Query Plans by Name | `kubernetes.core.k8s_info` | True |
+| archive ¦ Query Plans by Labels | `kubernetes.core.k8s_info` | True |
+| archive ¦ Combine Query Results | `ansible.builtin.set_fact` | False |
+| archive ¦ Archive Plans | `redhat.openshift.k8s` | True |
+| archive ¦ Verify Plans Archived | `ansible.builtin.include_tasks` | True |
+
+#### File: tasks/create.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| create ¦ Verify Request Provided | `ansible.builtin.assert` | False |
+| create ¦ Verify VMs or Folders Provided | `ansible.builtin.assert` | False |
+| create ¦ Process Request (MTV Namespace) | `ansible.builtin.set_fact` | False |
+| create ¦ Process Request (Migration Namespace) | `ansible.builtin.set_fact` | False |
+| create ¦ Process Request (Baseline) | `ansible.builtin.set_fact` | False |
+| create ¦ Process Request (Maps) | `ansible.builtin.set_fact` | False |
+| create ¦ Verify Split Plan Value is Positive | `ansible.builtin.assert` | True |
+| create ¦ Set Plan Base Name | `ansible.builtin.set_fact` | False |
+| create ¦ Retrieve Configured providers | `ansible.builtin.include_role` | False |
+| create ¦ Set Source Provider | `ansible.builtin.set_fact` | False |
+| create ¦ Verify Source Provider | `ansible.builtin.assert` | False |
+| create ¦ Set Destination Provider | `ansible.builtin.set_fact` | False |
+| create ¦ Verify Destination Provider | `ansible.builtin.assert` | False |
+| create ¦ Retrieve StorageMap | `kubernetes.core.k8s_info` | False |
+| create ¦ Verify StorageMap | `ansible.builtin.assert` | False |
+| create ¦ Retrieve NetworkMap | `kubernetes.core.k8s_info` | False |
+| create ¦ Verify NetworkMap | `ansible.builtin.assert` | False |
+| create ¦ Process Plan Skeleton | `ansible.builtin.set_fact` | False |
+| create ¦ Get Inventory vms | `ansible.builtin.include_role` | False |
+| create ¦ Get Inventory folders | `ansible.builtin.include_role` | True |
+| create ¦ Process VMs and Generate Plans | `infra.openshift_virtualization_migration.mtv_process_vms` | False |
+| create ¦ Set Plans from processed results | `ansible.builtin.set_fact` | False |
+| create ¦ Create and Verify Plans | `block` | True |
+| create ¦ Create Plans | `redhat.openshift.k8s` | False |
+| create ¦ Verify Plans Ready | `kubernetes.core.k8s_info` | True |
+| create ¦ Display Plans (Dry Run) | `ansible.builtin.debug` | True |
+
+#### File: tasks/delete.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| delete ¦ Verify Delete Parameters | `ansible.builtin.assert` | False |
+| delete ¦ Query Plans by Name | `kubernetes.core.k8s_info` | True |
+| delete ¦ Query Plans by Labels | `kubernetes.core.k8s_info` | True |
+| delete ¦ Combine Query Results | `ansible.builtin.set_fact` | False |
+| delete ¦ Delete Plans | `redhat.openshift.k8s` | True |
+| delete ¦ Verify Plans Deleted | `ansible.builtin.include_tasks` | True |
+
+#### File: tasks/verify_archived.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| verify_archived ¦ Query Plans by Name | `kubernetes.core.k8s_info` | True |
+| verify_archived ¦ Query Plans by Labels | `kubernetes.core.k8s_info` | True |
+| verify_archived ¦ Combine and Check Results | `ansible.builtin.set_fact` | False |
+| verify_archived ¦ Evaluate Archived Status | `ansible.builtin.set_fact` | False |
+| verify_archived ¦ Fail if Retries Exceeded | `ansible.builtin.fail` | True |
+| verify_archived ¦ Wait Before Retry | `ansible.builtin.pause` | True |
+| verify_archived ¦ Retry Verification | `ansible.builtin.include_tasks` | True |
+
+#### File: tasks/verify_deleted.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| verify_deleted ¦ Query Plans by Name | `kubernetes.core.k8s_info` | True |
+| verify_deleted ¦ Query Plans by Labels | `kubernetes.core.k8s_info` | True |
+| verify_deleted ¦ Combine and Check Results | `ansible.builtin.set_fact` | False |
+| verify_deleted ¦ Evaluate Deleted Status | `ansible.builtin.set_fact` | False |
+| verify_deleted ¦ Fail if Retries Exceeded | `ansible.builtin.fail` | True |
+| verify_deleted ¦ Wait Before Retry | `ansible.builtin.pause` | True |
+| verify_deleted ¦ Retry Verification | `ansible.builtin.include_tasks` | True |
 
 ## Task Flow Graphs
+
+### Graph for archive.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| archive___Verify_Archive_Parameters0[archive   verify archive parameters]:::task
+  archive___Verify_Archive_Parameters0-->|Task| archive___Query_Plans_by_Name1[archive   query plans by name<br>When: **mtv plans plan name   default     true    length  <br>0**]:::task
+  archive___Query_Plans_by_Name1-->|Task| archive___Query_Plans_by_Labels2[archive   query plans by labels<br>When: **mtv plans plan labels   default     true    length<br>  0**]:::task
+  archive___Query_Plans_by_Labels2-->|Task| archive___Combine_Query_Results3[archive   combine query results]:::task
+  archive___Combine_Query_Results3-->|Task| archive___Archive_Plans4[archive   archive plans<br>When: **mtv plans archive plans   length   0**]:::task
+  archive___Archive_Plans4-->|Include task| archive___Verify_Plans_Archived_verify_archived_yml_5[archive   verify plans archived<br>When: **mtv plans verify archived   bool**<br>include_task: verify archived yml]:::includeTasks
+  archive___Verify_Plans_Archived_verify_archived_yml_5-->End
+```
+
+### Graph for create.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| create___Verify_Request_Provided0[create   verify request provided]:::task
+  create___Verify_Request_Provided0-->|Task| create___Verify_VMs_or_Folders_Provided1[create   verify vms or folders provided]:::task
+  create___Verify_VMs_or_Folders_Provided1-->|Task| create___Process_Request__MTV_Namespace_2[create   process request  mtv namespace ]:::task
+  create___Process_Request__MTV_Namespace_2-->|Task| create___Process_Request__Migration_Namespace_3[create   process request  migration namespace ]:::task
+  create___Process_Request__Migration_Namespace_3-->|Task| create___Process_Request__Baseline_4[create   process request  baseline ]:::task
+  create___Process_Request__Baseline_4-->|Task| create___Process_Request__Maps_5[create   process request  maps ]:::task
+  create___Process_Request__Maps_5-->|Task| create___Verify_Split_Plan_Value_is_Positive6[create   verify split plan value is positive<br>When: **mtv plans mtv split plans   bool**]:::task
+  create___Verify_Split_Plan_Value_is_Positive6-->|Task| create___Set_Plan_Base_Name7[create   set plan base name]:::task
+  create___Set_Plan_Base_Name7-->|Include role| create___Retrieve_Configured_providers_mtv_query_inventory_8(create   retrieve configured providers<br>include_role: mtv query inventory):::includeRole
+  create___Retrieve_Configured_providers_mtv_query_inventory_8-->|Task| create___Set_Source_Provider9[create   set source provider]:::task
+  create___Set_Source_Provider9-->|Task| create___Verify_Source_Provider10[create   verify source provider]:::task
+  create___Verify_Source_Provider10-->|Task| create___Set_Destination_Provider11[create   set destination provider]:::task
+  create___Set_Destination_Provider11-->|Task| create___Verify_Destination_Provider12[create   verify destination provider]:::task
+  create___Verify_Destination_Provider12-->|Task| create___Retrieve_StorageMap13[create   retrieve storagemap]:::task
+  create___Retrieve_StorageMap13-->|Task| create___Verify_StorageMap14[create   verify storagemap]:::task
+  create___Verify_StorageMap14-->|Task| create___Retrieve_NetworkMap15[create   retrieve networkmap]:::task
+  create___Retrieve_NetworkMap15-->|Task| create___Verify_NetworkMap16[create   verify networkmap]:::task
+  create___Verify_NetworkMap16-->|Task| create___Process_Plan_Skeleton17[create   process plan skeleton]:::task
+  create___Process_Plan_Skeleton17-->|Include role| create___Get_Inventory_vms_mtv_query_inventory_18(create   get inventory vms<br>include_role: mtv query inventory):::includeRole
+  create___Get_Inventory_vms_mtv_query_inventory_18-->|Include role| create___Get_Inventory_folders_mtv_query_inventory_19(create   get inventory folders<br>When: **folders  in mtv plans migration request and mtv<br>plans migration request  folders     default      <br>length   0**<br>include_role: mtv query inventory):::includeRole
+  create___Get_Inventory_folders_mtv_query_inventory_19-->|Task| create___Process_VMs_and_Generate_Plans20[create   process vms and generate plans]:::task
+  create___Process_VMs_and_Generate_Plans20-->|Task| create___Set_Plans_from_processed_results21[create   set plans from processed results]:::task
+  create___Set_Plans_from_processed_results21-->|Block Start| create___Create_and_Verify_Plans22_block_start_0[[create   create and verify plans<br>When: **not   mtv plans mtv dry run bool**]]:::block
+  create___Create_and_Verify_Plans22_block_start_0-->|Task| create___Create_Plans0[create   create plans]:::task
+  create___Create_Plans0-->|Task| create___Verify_Plans_Ready1[create   verify plans ready<br>When: **mtv plans mtv verify plans ready bool**]:::task
+  create___Verify_Plans_Ready1-.->|End of Block| create___Create_and_Verify_Plans22_block_start_0
+  create___Verify_Plans_Ready1-->|Task| create___Display_Plans__Dry_Run_23[create   display plans  dry run <br>When: **mtv plans mtv dry run bool**]:::task
+  create___Display_Plans__Dry_Run_23-->End
+```
+
+### Graph for delete.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| delete___Verify_Delete_Parameters0[delete   verify delete parameters]:::task
+  delete___Verify_Delete_Parameters0-->|Task| delete___Query_Plans_by_Name1[delete   query plans by name<br>When: **mtv plans plan name   default     true    length  <br>0**]:::task
+  delete___Query_Plans_by_Name1-->|Task| delete___Query_Plans_by_Labels2[delete   query plans by labels<br>When: **mtv plans plan labels   default     true    length<br>  0**]:::task
+  delete___Query_Plans_by_Labels2-->|Task| delete___Combine_Query_Results3[delete   combine query results]:::task
+  delete___Combine_Query_Results3-->|Task| delete___Delete_Plans4[delete   delete plans<br>When: **mtv plans delete plans   length   0**]:::task
+  delete___Delete_Plans4-->|Include task| delete___Verify_Plans_Deleted_verify_deleted_yml_5[delete   verify plans deleted<br>When: **mtv plans verify deleted   bool**<br>include_task: verify deleted yml]:::includeTasks
+  delete___Verify_Plans_Deleted_verify_deleted_yml_5-->End
+```
 
 ### Graph for main.yml
 
@@ -440,34 +678,58 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| Verify_Request_Provided0[verify request provided]:::task
-  Verify_Request_Provided0-->|Task| Verify_VMs_or_Folders_Provided1[verify vms or folders provided]:::task
-  Verify_VMs_or_Folders_Provided1-->|Task| Process_Request__MTV_Namespace_2[process request  mtv namespace ]:::task
-  Process_Request__MTV_Namespace_2-->|Task| Process_Request__Migration_Namespace_3[process request  migration namespace ]:::task
-  Process_Request__Migration_Namespace_3-->|Task| Process_Request__Baseline_4[process request  baseline ]:::task
-  Process_Request__Baseline_4-->|Task| Process_Request__Maps_5[process request  maps ]:::task
-  Process_Request__Maps_5-->|Task| Verify_Split_Plan_Value_is_Positive6[verify split plan value is positive<br>When: **mtv plans mtv split plans   bool**]:::task
-  Verify_Split_Plan_Value_is_Positive6-->|Task| Set_Plan_Base_Name7[set plan base name]:::task
-  Set_Plan_Base_Name7-->|Include role| Retrieve_Configured_providers_mtv_query_inventory_8(retrieve configured providers<br>include_role: mtv query inventory):::includeRole
-  Retrieve_Configured_providers_mtv_query_inventory_8-->|Task| Set_Source_Provider9[set source provider]:::task
-  Set_Source_Provider9-->|Task| Verify_Source_Provider10[verify source provider]:::task
-  Verify_Source_Provider10-->|Task| Set_Destination_Provider11[set destination provider]:::task
-  Set_Destination_Provider11-->|Task| Verify_Destination_Provider12[verify destination provider]:::task
-  Verify_Destination_Provider12-->|Task| Retrieve_StorageMap13[retrieve storagemap]:::task
-  Retrieve_StorageMap13-->|Task| Verify_StorageMap14[verify storagemap]:::task
-  Verify_StorageMap14-->|Task| Retrieve_NetworkMap15[retrieve networkmap]:::task
-  Retrieve_NetworkMap15-->|Task| Verify_NetworkMap16[verify networkmap]:::task
-  Verify_NetworkMap16-->|Task| Process_Plan_Skeleton17[process plan skeleton]:::task
-  Process_Plan_Skeleton17-->|Include role| Get_Inventory_vms_mtv_query_inventory_18(get inventory vms<br>include_role: mtv query inventory):::includeRole
-  Get_Inventory_vms_mtv_query_inventory_18-->|Include role| Get_Inventory_folders_mtv_query_inventory_19(get inventory folders<br>When: **folders  in mtv plans migration request and mtv<br>plans migration request  folders     default      <br>length   0**<br>include_role: mtv query inventory):::includeRole
-  Get_Inventory_folders_mtv_query_inventory_19-->|Task| Process_VMs_and_Generate_Plans20[process vms and generate plans]:::task
-  Process_VMs_and_Generate_Plans20-->|Task| Set_Plans_from_processed_results21[set plans from processed results]:::task
-  Set_Plans_from_processed_results21-->|Block Start| Create_and_Verify_Plans22_block_start_0[[create and verify plans<br>When: **not   mtv plans mtv dry run bool**]]:::block
-  Create_and_Verify_Plans22_block_start_0-->|Task| Create_Plans0[create plans]:::task
-  Create_Plans0-->|Task| Verify_Plans_Ready1[verify plans ready<br>When: **mtv plans mtv verify plans ready bool**]:::task
-  Verify_Plans_Ready1-.->|End of Block| Create_and_Verify_Plans22_block_start_0
-  Verify_Plans_Ready1-->|Task| Display_Plans__Dry_Run_23[display plans  dry run <br>When: **mtv plans mtv dry run bool**]:::task
-  Display_Plans__Dry_Run_23-->End
+  Start-->|Include task| Invoke_Plan_Creation_create_yml_0[invoke plan creation<br>When: **mtv plans action     create**<br>include_task: create yml]:::includeTasks
+  Invoke_Plan_Creation_create_yml_0-->|Include task| Invoke_Plan_Archival_archive_yml_1[invoke plan archival<br>When: **mtv plans action     archive**<br>include_task: archive yml]:::includeTasks
+  Invoke_Plan_Archival_archive_yml_1-->|Include task| Invoke_Plan_Deletion_delete_yml_2[invoke plan deletion<br>When: **mtv plans action     delete**<br>include_task: delete yml]:::includeTasks
+  Invoke_Plan_Deletion_delete_yml_2-->End
+```
+
+### Graph for verify_archived.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| verify_archived___Query_Plans_by_Name0[verify archived   query plans by name<br>When: **mtv plans plan name   default     true    length  <br>0**]:::task
+  verify_archived___Query_Plans_by_Name0-->|Task| verify_archived___Query_Plans_by_Labels1[verify archived   query plans by labels<br>When: **mtv plans plan labels   default     true    length<br>  0**]:::task
+  verify_archived___Query_Plans_by_Labels1-->|Task| verify_archived___Combine_and_Check_Results2[verify archived   combine and check results]:::task
+  verify_archived___Combine_and_Check_Results2-->|Task| verify_archived___Evaluate_Archived_Status3[verify archived   evaluate archived status]:::task
+  verify_archived___Evaluate_Archived_Status3-->|Task| verify_archived___Fail_if_Retries_Exceeded4[verify archived   fail if retries exceeded<br>When: **not   mtv plans all archived   bool and   mtv<br>plans verify retries count   int    mtv plans<br>verify retries   int**]:::task
+  verify_archived___Fail_if_Retries_Exceeded4-->|Task| verify_archived___Wait_Before_Retry5[verify archived   wait before retry<br>When: **not   mtv plans all archived   bool and   mtv<br>plans verify retries count   int   mtv plans<br>verify retries   int**]:::task
+  verify_archived___Wait_Before_Retry5-->|Include task| verify_archived___Retry_Verification_verify_archived_yml_6[verify archived   retry verification<br>When: **not   mtv plans all archived   bool and   mtv<br>plans verify retries count   int   mtv plans<br>verify retries   int**<br>include_task: verify archived yml]:::includeTasks
+  verify_archived___Retry_Verification_verify_archived_yml_6-->End
+```
+
+### Graph for verify_deleted.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| verify_deleted___Query_Plans_by_Name0[verify deleted   query plans by name<br>When: **mtv plans plan name   default     true    length  <br>0**]:::task
+  verify_deleted___Query_Plans_by_Name0-->|Task| verify_deleted___Query_Plans_by_Labels1[verify deleted   query plans by labels<br>When: **mtv plans plan labels   default     true    length<br>  0**]:::task
+  verify_deleted___Query_Plans_by_Labels1-->|Task| verify_deleted___Combine_and_Check_Results2[verify deleted   combine and check results]:::task
+  verify_deleted___Combine_and_Check_Results2-->|Task| verify_deleted___Evaluate_Deleted_Status3[verify deleted   evaluate deleted status]:::task
+  verify_deleted___Evaluate_Deleted_Status3-->|Task| verify_deleted___Fail_if_Retries_Exceeded4[verify deleted   fail if retries exceeded<br>When: **not   mtv plans all deleted   bool and   mtv plans<br>verify delete retries count   int    mtv plans<br>verify retries   int**]:::task
+  verify_deleted___Fail_if_Retries_Exceeded4-->|Task| verify_deleted___Wait_Before_Retry5[verify deleted   wait before retry<br>When: **not   mtv plans all deleted   bool and   mtv plans<br>verify delete retries count   int   mtv plans<br>verify retries   int**]:::task
+  verify_deleted___Wait_Before_Retry5-->|Include task| verify_deleted___Retry_Verification_verify_deleted_yml_6[verify deleted   retry verification<br>When: **not   mtv plans all deleted   bool and   mtv plans<br>verify delete retries count   int   mtv plans<br>verify retries   int**<br>include_task: verify deleted yml]:::includeTasks
+  verify_deleted___Retry_Verification_verify_deleted_yml_6-->End
 ```
 
 ## Author Information
