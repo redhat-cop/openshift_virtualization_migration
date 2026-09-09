@@ -47,6 +47,21 @@
   loop_control:
     loop_var: nad
 
+- name: manual | Validate per-NAD MTU range
+  ansible.builtin.assert:
+    that:
+      - nad.mtu | int >= 68
+      - nad.mtu | int <= 9000
+    fail_msg: >-
+      MTU for NAD '{{ nad.name }}' must be between 68 and 9000,
+      got {{ nad.mtu }}.
+  loop: "{{ network_mgmt_manual_nad_list }}"
+  when:
+    - network_mgmt_openshift_network_bridge_mode == 'ovn-layer2'
+    - nad.mtu is defined
+  loop_control:
+    loop_var: nad
+
 ## Only create the NNCP if the bridge and the bond is defined, the template looks for the ports to put in the bond.
 - name: manual | Apply NodeNetworkConfigurationPolicy
   redhat.openshift.k8s:
