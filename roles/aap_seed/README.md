@@ -246,7 +246,7 @@ Description: Seed AAP with Migration Factory Configuration as Code content
     * **Required**: False
     * **Type**: list
     * **Default**: none
-    * **Description**: List of AAP job template definitions. Override to replace the default Migrate, MTV Provider, MTV Maps, and MTV Plans templates.
+    * **Description**: List of AAP job template definitions. Override to replace the default MTV Provider, MTV Maps, MTV Plans, and MTV Migrate templates.
   * **aap_seed_credential_types_create**:
     * **Required**: False
     * **Type**: bool
@@ -261,7 +261,7 @@ Description: Seed AAP with Migration Factory Configuration as Code content
     * **Required**: False
     * **Type**: str
     * **Default**: Default execution environment
-    * **Description**: Execution environment assigned to job templates.
+    * **Description**: Execution environment assigned to job templates. Defaults to C(aap_execution_environment) from inventory.
   * **aap_seed_execution_environment_credential**:
     * **Required**: False
     * **Type**: str
@@ -295,7 +295,7 @@ Description: Seed AAP with Migration Factory Configuration as Code content
   * **aap_seed_execution_environment_description**:
     * **Required**: False
     * **Type**: str
-    * **Default**: none
+    * **Default**:
     * **Description**: Description for the execution environment created in AAP. Defaults to C(aap_execution_environment_description) from inventory.
   * **aap_seed_execution_environment_image**:
     * **Required**: False
@@ -306,12 +306,16 @@ Description: Seed AAP with Migration Factory Configuration as Code content
     * **Required**: False
     * **Type**: str
     * **Default**: missing
-    * **Description**: Pull policy for the execution environment image. Valid values are C(always), C(missing), or C(never). Defaults to C(aap_execution_environment_pull) from inventory, or C(missing) if unset.
+    * **Description**: Pull policy for the execution environment image. Defaults to C(aap_execution_environment_pull) from inventory, or C(missing) if unset.
+    * **Choices**:
+      * always
+      * missing
+      * never
   * **aap_seed_execution_environments_create**:
     * **Required**: False
     * **Type**: bool
     * **Default**: True
-    * **Description**: Create execution environments in AAP. Set to C(false) to skip.  Only applies when I(aap_seed_controller_execution_environments) is non-empty.
+    * **Description**: Create execution environments in AAP. Set to C(false) to skip. Only applies when I(aap_seed_controller_execution_environments) is non-empty.
   * **aap_seed_git_password**:
     * **Required**: False
     * **Type**: str
@@ -352,16 +356,6 @@ Description: Seed AAP with Migration Factory Configuration as Code content
     * **Type**: str
     * **Default**: OpenShift Virtualization Migration
     * **Description**: Name of the inventory created in AAP. Source and target hosts are added to this inventory.
-  * **aap_seed_migrate_playbook**:
-    * **Required**: False
-    * **Type**: str
-    * **Default**: playbooks/vmf_migrate.yml
-    * **Description**: Playbook path for the Migrate job template.
-  * **aap_seed_migrate_template_name**:
-    * **Required**: False
-    * **Type**: str
-    * **Default**: OpenShift Virtualization Migration - Migrate
-    * **Description**: Name of the Migrate job template created in AAP.
   * **aap_seed_mtv_maps_playbook**:
     * **Required**: False
     * **Type**: str
@@ -372,6 +366,16 @@ Description: Seed AAP with Migration Factory Configuration as Code content
     * **Type**: str
     * **Default**: OpenShift Virtualization Migration - MTV Maps
     * **Description**: Name of the MTV Maps job template created in AAP.
+  * **aap_seed_mtv_migrate_playbook**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: playbooks/vmf_migrate.yml
+    * **Description**: Playbook path for the MTV Migrate job template.
+  * **aap_seed_mtv_migrate_template_name**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**: OpenShift Virtualization Migration - MTV Migrate
+    * **Description**: Name of the MTV Migrate job template created in AAP.
   * **aap_seed_mtv_plans_playbook**:
     * **Required**: False
     * **Type**: str
@@ -441,7 +445,7 @@ Description: Seed AAP with Migration Factory Configuration as Code content
     * **Required**: False
     * **Type**: bool
     * **Default**: True
-    * **Description**: Suppress task output for credential loops to prevent secrets from leaking to logs.  Set to C(false) when debugging credential construction. Defaults to C(secure_logging) from inventory, or C(true) if unset.
+    * **Description**: Suppress task output for credential loops to prevent secrets from leaking to logs. Set to C(false) when debugging credential construction. Defaults to C(secure_logging) from inventory, or C(true) if unset.
   * **aap_seed_source_credential_type**:
     * **Required**: False
     * **Type**: str
@@ -578,9 +582,9 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 | [`aap_seed_controller_templates.0.ask_variables_on_launch`](defaults/main.yml#L375)   | bool   | `True` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.0.execution_environment`](defaults/main.yml#L373)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.0.inventory`](defaults/main.yml#L372)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.name`](defaults/main.yml#L368)   | str   | `{{ aap_seed_migrate_template_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.0.name`](defaults/main.yml#L368)   | str   | `{{ aap_seed_mtv_provider_template_name }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.0.organization`](defaults/main.yml#L369)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.playbook`](defaults/main.yml#L371)   | str   | `{{ aap_seed_migrate_playbook }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.0.playbook`](defaults/main.yml#L371)   | str   | `{{ aap_seed_mtv_provider_playbook }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.0.project`](defaults/main.yml#L370)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.0.survey_enabled`](defaults/main.yml#L377)   | bool   | `True` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.0.survey_spec`](defaults/main.yml#L378)   | str   | `{{ aap_seed_common_survey_spec }}` |  None  |   None  |  None |
@@ -590,9 +594,9 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 | [`aap_seed_controller_templates.1.ask_variables_on_launch`](defaults/main.yml#L386)   | bool   | `True` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.execution_environment`](defaults/main.yml#L384)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.inventory`](defaults/main.yml#L383)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.name`](defaults/main.yml#L379)   | str   | `{{ aap_seed_mtv_provider_template_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.name`](defaults/main.yml#L379)   | str   | `{{ aap_seed_mtv_maps_template_name }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.organization`](defaults/main.yml#L380)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.playbook`](defaults/main.yml#L382)   | str   | `{{ aap_seed_mtv_provider_playbook }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.playbook`](defaults/main.yml#L382)   | str   | `{{ aap_seed_mtv_maps_playbook }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.project`](defaults/main.yml#L381)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.survey_enabled`](defaults/main.yml#L388)   | bool   | `True` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.1.survey_spec`](defaults/main.yml#L389)   | str   | `{{ aap_seed_common_survey_spec }}` |  None  |   None  |  None |
@@ -602,9 +606,9 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 | [`aap_seed_controller_templates.2.ask_variables_on_launch`](defaults/main.yml#L397)   | bool   | `True` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.2.execution_environment`](defaults/main.yml#L395)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.2.inventory`](defaults/main.yml#L394)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.name`](defaults/main.yml#L390)   | str   | `{{ aap_seed_mtv_maps_template_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2.name`](defaults/main.yml#L390)   | str   | `{{ aap_seed_mtv_plans_template_name }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.2.organization`](defaults/main.yml#L391)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.playbook`](defaults/main.yml#L393)   | str   | `{{ aap_seed_mtv_maps_playbook }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2.playbook`](defaults/main.yml#L393)   | str   | `{{ aap_seed_mtv_plans_playbook }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.2.project`](defaults/main.yml#L392)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.2.survey_enabled`](defaults/main.yml#L399)   | bool   | `True` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.2.survey_spec`](defaults/main.yml#L400)   | str   | `{{ aap_seed_common_survey_spec }}` |  None  |   None  |  None |
@@ -614,12 +618,27 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 | [`aap_seed_controller_templates.3.ask_variables_on_launch`](defaults/main.yml#L408)   | bool   | `True` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.3.execution_environment`](defaults/main.yml#L406)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.3.inventory`](defaults/main.yml#L405)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.name`](defaults/main.yml#L401)   | str   | `{{ aap_seed_mtv_plans_template_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.name`](defaults/main.yml#L401)   | str   | `{{ aap_seed_mtv_migrate_template_name }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.3.organization`](defaults/main.yml#L402)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.playbook`](defaults/main.yml#L404)   | str   | `{{ aap_seed_mtv_plans_playbook }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.playbook`](defaults/main.yml#L404)   | str   | `{{ aap_seed_mtv_migrate_playbook }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.3.project`](defaults/main.yml#L403)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.3.survey_enabled`](defaults/main.yml#L410)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec`](defaults/main.yml#L411)   | str   | `{{ aap_seed_common_survey_spec }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec`](defaults/main.yml#L411)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.description`](defaults/main.yml#L413)   | str   | `` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.name`](defaults/main.yml#L412)   | str   | `` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec`](defaults/main.yml#L414)   | list   | `[]` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0`](defaults/main.yml#L415)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0.question_description`](defaults/main.yml#L416)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0.question_name`](defaults/main.yml#L415)   | str   | `Plan Name` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0.required`](defaults/main.yml#L420)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0.type`](defaults/main.yml#L419)   | str   | `text` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0.variable`](defaults/main.yml#L418)   | str   | `mtv_migrate_plan_name` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1`](defaults/main.yml#L421)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1.question_description`](defaults/main.yml#L422)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1.question_name`](defaults/main.yml#L421)   | str   | `Plan Namespace` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1.required`](defaults/main.yml#L426)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1.type`](defaults/main.yml#L425)   | str   | `text` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1.variable`](defaults/main.yml#L424)   | str   | `mtv_migrate_plan_namespace` |  None  |   None  |  None |
 | [`aap_seed_controller_templates.3.verbosity`](defaults/main.yml#L409)   | int   | `0` |  None  |   None  |  None |
 | [`aap_seed_credential_types_create`](defaults/main.yml#L252)   | bool   | `True` |  None  |   False  |  Create Credential Types |
 | [`aap_seed_credentials_create`](defaults/main.yml#L257)   | bool   | `True` |  None  |   False  |  Create Credentials |
@@ -642,14 +661,14 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 | [`aap_seed_hosts_create`](defaults/main.yml#L267)   | bool   | `True` |  None  |   False  |  Create Hosts |
 | [`aap_seed_inventories_create`](defaults/main.yml#L262)   | bool   | `True` |  None  |   False  |  Create Inventories |
 | [`aap_seed_inventory_name`](defaults/main.yml#L65)   | str   | `OpenShift Virtualization Migration` |  None  |   False  |  Inventory Name |
-| [`aap_seed_migrate_playbook`](defaults/main.yml#L186)   | str   | `playbooks/vmf_migrate.yml` |  None  |   False  |  Migrate Playbook |
-| [`aap_seed_migrate_template_name`](defaults/main.yml#L181)   | str   | `OpenShift Virtualization Migration - Migrate` |  None  |   False  |  Migrate Template Name |
-| [`aap_seed_mtv_maps_playbook`](defaults/main.yml#L206)   | str   | `playbooks/vmf_mtv_maps.yml` |  None  |   False  |  MTV Maps Playbook |
-| [`aap_seed_mtv_maps_template_name`](defaults/main.yml#L201)   | str   | `OpenShift Virtualization Migration - MTV Maps` |  None  |   False  |  MTV Maps Template Name |
-| [`aap_seed_mtv_plans_playbook`](defaults/main.yml#L216)   | str   | `playbooks/vmf_mtv_plans.yml` |  None  |   False  |  MTV Plans Playbook |
-| [`aap_seed_mtv_plans_template_name`](defaults/main.yml#L211)   | str   | `OpenShift Virtualization Migration - MTV Plans` |  None  |   False  |  MTV Plans Template Name |
-| [`aap_seed_mtv_provider_playbook`](defaults/main.yml#L196)   | str   | `playbooks/vmf_mtv_provider.yml` |  None  |   False  |  MTV Provider Playbook |
-| [`aap_seed_mtv_provider_template_name`](defaults/main.yml#L191)   | str   | `OpenShift Virtualization Migration - MTV Provider` |  None  |   False  |  MTV Provider Template Name |
+| [`aap_seed_mtv_maps_playbook`](defaults/main.yml#L196)   | str   | `playbooks/vmf_mtv_maps.yml` |  None  |   False  |  MTV Maps Playbook |
+| [`aap_seed_mtv_maps_template_name`](defaults/main.yml#L191)   | str   | `OpenShift Virtualization Migration - MTV Maps` |  None  |   False  |  MTV Maps Template Name |
+| [`aap_seed_mtv_migrate_playbook`](defaults/main.yml#L216)   | str   | `playbooks/vmf_migrate.yml` |  None  |   False  |  MTV Migrate Playbook |
+| [`aap_seed_mtv_migrate_template_name`](defaults/main.yml#L211)   | str   | `OpenShift Virtualization Migration - MTV Migrate` |  None  |   False  |  MTV Migrate Template Name |
+| [`aap_seed_mtv_plans_playbook`](defaults/main.yml#L206)   | str   | `playbooks/vmf_mtv_plans.yml` |  None  |   False  |  MTV Plans Playbook |
+| [`aap_seed_mtv_plans_template_name`](defaults/main.yml#L201)   | str   | `OpenShift Virtualization Migration - MTV Plans` |  None  |   False  |  MTV Plans Template Name |
+| [`aap_seed_mtv_provider_playbook`](defaults/main.yml#L186)   | str   | `playbooks/vmf_mtv_provider.yml` |  None  |   False  |  MTV Provider Playbook |
+| [`aap_seed_mtv_provider_template_name`](defaults/main.yml#L181)   | str   | `OpenShift Virtualization Migration - MTV Provider` |  None  |   False  |  MTV Provider Template Name |
 | [`aap_seed_org_name`](defaults/main.yml#L38)   | str   | `Default` |  None  |   False  |  Organization Name |
 | [`aap_seed_organizations_create`](defaults/main.yml#L247)   | bool   | `True` |  None  |   False  |  Create Organizations |
 | [`aap_seed_password`](defaults/main.yml#L16)   | str   | `{{ aap_password ¦ default(omit) }}` |  None  |   False  |  AAP Password |
@@ -925,6 +944,36 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <br>
 <b>`aap_seed_controller_templates.3.survey_spec`:</b> None
 <br>
+<b>`aap_seed_controller_templates.3.survey_spec.description`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.name`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.0`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.0.question_description`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.0.question_name`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.0.required`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.0.type`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.0.variable`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.1`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.1.question_description`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.1.question_name`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.1.required`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.1.type`:</b> None
+<br>
+<b>`aap_seed_controller_templates.3.survey_spec.spec.1.variable`:</b> None
+<br>
 <b>`aap_seed_controller_templates.3.verbosity`:</b> None
 <br>
 <b>`aap_seed_credential_types_create`:</b> Whether to create custom credential type objects in AAP.
@@ -969,13 +1018,13 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <br>
 <b>`aap_seed_inventory_name`:</b> Name of the AAP inventory created for migration hosts.
 <br>
-<b>`aap_seed_migrate_playbook`:</b> Playbook path for the migration job template.
-<br>
-<b>`aap_seed_migrate_template_name`:</b> Name of the migration job template created in AAP.
-<br>
 <b>`aap_seed_mtv_maps_playbook`:</b> Playbook path for the MTV maps job template.
 <br>
 <b>`aap_seed_mtv_maps_template_name`:</b> Name of the MTV maps job template created in AAP.
+<br>
+<b>`aap_seed_mtv_migrate_playbook`:</b> Playbook path for the MTV migrate job template.
+<br>
+<b>`aap_seed_mtv_migrate_template_name`:</b> Name of the MTV migrate job template created in AAP.
 <br>
 <b>`aap_seed_mtv_plans_playbook`:</b> Playbook path for the MTV plans job template.
 <br>
