@@ -12,6 +12,19 @@
     - mtv_management_network_map_overrides | selectattr('include', 'defined') | list | length > 0
     - mtv_management_network_map_overrides | selectattr('exclude', 'defined') | list | length > 0
 
+- name: _mtv_network_map | Validate no duplicate IDs in network map overrides
+  ansible.builtin.assert:
+    that:
+      - >-
+        (mtv_management_network_map_overrides | map(attribute='id') | list | length) ==
+        (mtv_management_network_map_overrides | map(attribute='id') | list | unique | list | length)
+    fail_msg: >-
+      Duplicate IDs found in mtv_management_network_map_overrides.
+      Each network ID must appear only once.
+  when:
+    - mtv_management_network_map_overrides is defined
+    - mtv_management_network_map_overrides | length > 0
+
 - name: _mtv_network_map | Query for VMWare Networks from Source Provider
   ansible.builtin.include_tasks: mtv_query_inventory.yml
   vars:
