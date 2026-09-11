@@ -82,6 +82,13 @@ network_mgmt_nad_namespace: default
 # the existing OCP bridge we want to use in our NADs.
 network_mgmt_nad_auto_bridge_name: ""
 
+# title: NAD MTU
+# required: False
+# description: >-
+#   Global MTU for ovn-layer2 NADs. Can be overridden per NAD
+#   via the mtu field in network_mgmt_manual_nad_list items.
+# network_mgmt_nad_mtu:
+
 # NAD must start with a lower alpha character
 # use the prefix net- for any migrated portgroup that starts with a number
 # title: NAD Name Prefix

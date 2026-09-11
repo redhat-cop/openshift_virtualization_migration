@@ -16,4 +16,7 @@ spec:
         "type": "ovn-k8s-cni-overlay",
         "netAttachDefName": "{{ network_mgmt_nad_namespace }}/{{ portgroup.name | infra.openshift_virtualization_migration.rfc1123(network_mgmt_nad_name_prefix, "^[\d]+") }}",
         "topology": "{{ network_mgmt_ovn_topology }}"
+{%- if portgroup.mtu is defined or network_mgmt_nad_mtu is defined %},
+        "mtu": {{ portgroup.mtu | default(network_mgmt_nad_mtu) | int }}
+{%- endif %}
     }

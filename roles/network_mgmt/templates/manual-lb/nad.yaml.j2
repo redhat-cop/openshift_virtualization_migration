@@ -55,5 +55,8 @@ spec:
         "type": "ovn-k8s-cni-overlay",
         "netAttachDefName": "{{ nad.namespace | default(network_mgmt_nad_namespace) }}/{{ nad.name }}",
         "topology": "{{ network_mgmt_ovn_topology }}"
+{%- if nad.mtu is defined or network_mgmt_nad_mtu is defined %},
+        "mtu": {{ nad.mtu | default(network_mgmt_nad_mtu) | int }}
+{%- endif %}
     }
 {% endif %}

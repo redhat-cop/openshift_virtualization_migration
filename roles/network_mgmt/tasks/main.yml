@@ -1,4 +1,15 @@
 ---
+- name: Validate global MTU range
+  ansible.builtin.assert:
+    that:
+      - network_mgmt_nad_mtu | int >= 68
+      - network_mgmt_nad_mtu | int <= 9000
+    fail_msg: >-
+      network_mgmt_nad_mtu must be between 68 and 9000,
+      got {{ network_mgmt_nad_mtu }}.
+  when:
+    - network_mgmt_nad_mtu is defined
+
 - name: Use automatic mode
   ansible.builtin.include_tasks:
     file: automatic.yml
