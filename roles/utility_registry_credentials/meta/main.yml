@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  role_name: utility_registry_credentials
+  author: Red Hat
+  description: Manages registry credentials in an OpenShift namespace.
+  company: "Red Hat"
+  license: GPL-3.0-only
+  min_ansible_version: 2.15.0
+  galaxy_tags: []
+dependencies: []
+...

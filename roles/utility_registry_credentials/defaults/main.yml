@@ -1,0 +1,94 @@
+---
+
+# title: Secure Logging
+# required: False
+# description: Whether to enable secure logging for sensitive tasks.
+utility_registry_credentials_secure_logging: "{{ secure_logging | default(true) }}"
+
+# title: OpenShift Host
+# required: True
+# description: >-
+#   OpenShift host URL. Cascades from K8S_AUTH_HOST env var
+#   or openshift_host inventory variable.
+utility_registry_credentials_openshift_host: >-
+  {{
+    lookup('env', 'K8S_AUTH_HOST') | default(openshift_host, true)
+  }}
+
+# title: OpenShift API Key
+# required: True
+# description: >-
+#   OpenShift API key / bearer token. Cascades from K8S_AUTH_API_KEY
+#   env var or inventory variables.
+utility_registry_credentials_openshift_api_key: >-
+  {{
+    lookup('env', 'K8S_AUTH_API_KEY')
+    | default(
+        openshift_credential.openshift_api_key
+        | default(openshift_credential.openshift_temporary_api_key)
+        if openshift_credential is defined
+        else openshift_api_key | default(openshift_temporary_api_key),
+        true
+      )
+  }}
+
+# title: OpenShift Verify SSL
+# required: False
+# description: Whether to verify SSL certificates for OpenShift connections.
+utility_registry_credentials_openshift_verify_ssl: >-
+  {{
+    lookup('env', 'K8S_AUTH_VERIFY_SSL')
+    | default(openshift_verify_ssl | default(true), true)
+  }}
+
+# title: OpenShift CA Certificate Path
+# required: False
+# description: Path to the OpenShift CA Certificate.
+utility_registry_credentials_openshift_ca_cert_path: >-
+  {{
+    lookup('env', 'K8S_AUTH_SSL_CA_CERT')
+    | default(openshift_ca_cert_path | default(omit), true)
+  }}
+
+# title: Service Account Name
+# required: False
+# description: Name of the service account to associate with the registry
+#              credentials.
+utility_registry_credentials_service_account_name: "default"
+
+# title: Service Account Creation
+# required: False
+# description: Whether to create the service account for the registry
+#              credentials.
+utility_registry_credentials_service_account_create: false
+
+# title: Namespace
+# required: False
+# description: Namespace containing the resources.
+utility_registry_credentials_namespace: "virtualization-migration"
+
+# title: Secret Name
+# required: False
+# description: Name of the secret containing the registry credentials.
+utility_registry_credentials_secret_name: "registry-credentials"
+
+# title: Registry Host
+# required: False
+# description: Host associated with the registry credentials.
+utility_registry_credentials_registry_host: ""
+
+# title: Registry Username
+# required: False
+# description: Username for the registry credentials.
+utility_registry_credentials_registry_username: ""
+
+# title: Registry Password
+# required: False
+# description: Password for the registry credentials.
+utility_registry_credentials_registry_password: ""
+
+# title: Managed By Label
+# required: False
+# description: Value of the app.kubernetes.io/managed-by label applied to CRs.
+utility_registry_credentials_managed_by_label: ansible-migration-factory
+...

@@ -1,0 +1,103 @@
+---
+# argument spec file for
+# infra.openshift_virtualization_migration.utility_registry_credentials
+
+argument_specs:
+  main:
+    short_description: Manages registry credentials in an OpenShift namespace.
+    version_added: "1.0.0"
+    options:
+      utility_registry_credentials_secure_logging:
+        type: bool
+        description: >-
+          Whether to enable secure logging (no_log) for tasks that handle
+          sensitive registry credentials. Cascades from secure_logging variable.
+        default: true
+
+      utility_registry_credentials_openshift_host:
+        type: str
+        description: >-
+          OpenShift host URL. Cascades from K8S_AUTH_HOST environment variable
+          or openshift_host inventory variable.
+        required: true
+
+      utility_registry_credentials_openshift_api_key:
+        type: str
+        description: >-
+          OpenShift API key / bearer token. Cascades from K8S_AUTH_API_KEY
+          environment variable or openshift credential inventory variables.
+        required: true
+
+      utility_registry_credentials_openshift_verify_ssl:
+        type: bool
+        description: >-
+          Whether to verify SSL certificates for OpenShift connections.
+          Cascades from K8S_AUTH_VERIFY_SSL environment variable or
+          openshift_verify_ssl inventory variable.
+        default: true
+
+      utility_registry_credentials_openshift_ca_cert_path:
+        type: str
+        description: >-
+          Path to the OpenShift CA Certificate. Cascades from
+          K8S_AUTH_SSL_CA_CERT environment variable or openshift_ca_cert_path
+          inventory variable.
+
+      utility_registry_credentials_service_account_name:
+        type: str
+        description: >-
+          Name of the service account to associate with the registry
+          credentials.
+        default: "default"
+
+      utility_registry_credentials_service_account_create:
+        type: bool
+        description: >-
+          Whether to create the service account for the registry credentials
+          if it doesn't exist. When false, the role will fail if the service
+          account doesn't exist.
+        default: false
+
+      utility_registry_credentials_namespace:
+        type: str
+        description: Namespace containing the resources.
+        default: "virtualization-migration"
+
+      utility_registry_credentials_secret_name:
+        type: str
+        description: Name of the secret containing the registry credentials.
+        default: "registry-credentials"
+
+      utility_registry_credentials_registry_host:
+        type: str
+        description: >-
+          Registry host URL (e.g., registry.redhat.io). When provided,
+          utility_registry_credentials_registry_username and
+          utility_registry_credentials_registry_password must also be provided
+          to create or update registry credentials. Leave all three empty to
+          skip credential creation.
+
+      utility_registry_credentials_registry_username:
+        type: str
+        description: >-
+          Username for authenticating with the registry. Must be provided along
+          with utility_registry_credentials_registry_host and
+          utility_registry_credentials_registry_password when creating or
+          updating registry credentials.
+
+      utility_registry_credentials_registry_password:
+        type: str
+        description: >-
+          Password or token for authenticating with the registry. Must be provided
+          along with utility_registry_credentials_registry_host and
+          utility_registry_credentials_registry_username when creating or updating
+          registry credentials.
+        no_log: true
+
+      utility_registry_credentials_managed_by_label:
+        type: str
+        description: >-
+          Value of the app.kubernetes.io/managed-by label applied to created
+          resources.
+        default: "ansible-migration-factory"
+...

@@ -50,6 +50,7 @@ This collection includes the following roles for managing OpenShift Virtualizati
 * [mtv_query_inventory](roles/mtv_query_inventory/README.md) - Queries MTV inventory.
 * [utility_aap_deploy](roles/utility_aap_deploy/README.md) - Deploys an instance of Ansible Automation Platform.
 * [utility_openshift_target_credential](roles/utility_openshift_target_credential/README.md) - A utility role to manage OpenShift target cluster credentials for migration
+* [utility_registry_credentials](roles/utility_registry_credentials/README.md) - Manages registry credentials in an OpenShift namespace.
 <!--ROLES_LIST_END-->
 
 ## Requirements

@@ -1,0 +1,148 @@
+---
+
+- name: Retrieve existing registry credentials secret
+  kubernetes.core.k8s_info:
+    host: "{{ utility_registry_credentials_openshift_host }}"
+    api_key: "{{ utility_registry_credentials_openshift_api_key }}"
+    validate_certs: "{{ utility_registry_credentials_openshift_verify_ssl }}"
+    ca_cert: "{{ utility_registry_credentials_openshift_ca_cert_path | default(omit) }}"
+    kind: Secret
+    api_version: v1
+    name: "{{ utility_registry_credentials_secret_name }}"
+    namespace: "{{ utility_registry_credentials_namespace }}"
+  register: __utility_registry_credentials_secret
+
+- name: Retrieve existing service account
+  kubernetes.core.k8s_info:
+    host: "{{ utility_registry_credentials_openshift_host }}"
+    api_key: "{{ utility_registry_credentials_openshift_api_key }}"
+    validate_certs: "{{ utility_registry_credentials_openshift_verify_ssl }}"
+    ca_cert: "{{ utility_registry_credentials_openshift_ca_cert_path | default(omit) }}"
+    kind: ServiceAccount
+    api_version: v1
+    name: "{{ utility_registry_credentials_service_account_name }}"
+    namespace: "{{ utility_registry_credentials_namespace }}"
+  register: __utility_registry_credentials_service_account
+
+- name: Validate service account exists when creation is disabled
+  ansible.builtin.fail:
+    msg: >-
+      Service account '{{ utility_registry_credentials_service_account_name }}'
+      does not exist in namespace '{{ utility_registry_credentials_namespace }}'
+      and utility_registry_credentials_service_account_create is set to false.
+      Either set utility_registry_credentials_service_account_create=true to
+      create it, or ensure the service account exists before running this role.
+  when:
+    - __utility_registry_credentials_service_account.resources | length == 0
+    - not (utility_registry_credentials_service_account_create | bool)
+
+- name: Assert required parameters when creating registry credentials
+  ansible.builtin.assert:
+    that:
+      - utility_registry_credentials_registry_host | default("", true) | length > 0
+      - utility_registry_credentials_registry_username | default("", true) | length > 0
+      - utility_registry_credentials_registry_password | default("", true) | length > 0
+    fail_msg: >-
+      Registry host, username, and password are required when creating or
+      updating registry credentials
+    quiet: true
+  when:
+    - >-
+      __utility_registry_credentials_secret.resources | length == 0 or
+      (utility_registry_credentials_registry_host is defined and
+       utility_registry_credentials_registry_username is defined and
+       utility_registry_credentials_registry_password is defined)
+
+- name: Create registry credentials secret
+  kubernetes.core.k8s:
+    host: "{{ utility_registry_credentials_openshift_host }}"
+    api_key: "{{ utility_registry_credentials_openshift_api_key }}"
+    validate_certs: "{{ utility_registry_credentials_openshift_verify_ssl }}"
+    ca_cert: "{{ utility_registry_credentials_openshift_ca_cert_path | default(omit) }}"
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ utility_registry_credentials_secret_name }}"
+        namespace: "{{ utility_registry_credentials_namespace }}"
+        labels:
+          app.kubernetes.io/managed-by: "{{ utility_registry_credentials_managed_by_label }}"
+      type: kubernetes.io/dockerconfigjson
+      data:
+        .dockerconfigjson: >-
+          {{
+            {
+              'auths': {
+                utility_registry_credentials_registry_host: {
+                  'username': utility_registry_credentials_registry_username,
+                  'password': utility_registry_credentials_registry_password,
+                  'auth': (utility_registry_credentials_registry_username + ':' +
+                           utility_registry_credentials_registry_password) | b64encode
+                }
+              }
+            } | to_json | b64encode
+          }}
+  when:
+    - >-
+      __utility_registry_credentials_secret.resources | length == 0 or
+      (utility_registry_credentials_registry_host | default("", true) | length > 0 and
+       utility_registry_credentials_registry_username | default("", true) | length > 0 and
+       utility_registry_credentials_registry_password | default("", true) | length > 0)
+  no_log: "{{ utility_registry_credentials_secure_logging | bool }}"
+
+- name: Ensure service account exists
+  kubernetes.core.k8s:
+    host: "{{ utility_registry_credentials_openshift_host }}"
+    api_key: "{{ utility_registry_credentials_openshift_api_key }}"
+    validate_certs: "{{ utility_registry_credentials_openshift_verify_ssl }}"
+    ca_cert: "{{ utility_registry_credentials_openshift_ca_cert_path | default(omit) }}"
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: "{{ utility_registry_credentials_service_account_name }}"
+        namespace: "{{ utility_registry_credentials_namespace }}"
+        labels:
+          app.kubernetes.io/managed-by: "{{ utility_registry_credentials_managed_by_label }}"
+  when:
+    - __utility_registry_credentials_service_account.resources | length == 0
+    - utility_registry_credentials_service_account_create | bool
+
+- name: Re-query service account
+  kubernetes.core.k8s_info:
+    host: "{{ utility_registry_credentials_openshift_host }}"
+    api_key: "{{ utility_registry_credentials_openshift_api_key }}"
+    validate_certs: "{{ utility_registry_credentials_openshift_verify_ssl }}"
+    ca_cert: "{{ utility_registry_credentials_openshift_ca_cert_path | default(omit) }}"
+    kind: ServiceAccount
+    api_version: v1
+    name: "{{ utility_registry_credentials_service_account_name }}"
+    namespace: "{{ utility_registry_credentials_namespace }}"
+  register: __utility_registry_credentials_service_account
+
+- name: Link registry credentials secret to service account
+  kubernetes.core.k8s:
+    host: "{{ utility_registry_credentials_openshift_host }}"
+    api_key: "{{ utility_registry_credentials_openshift_api_key }}"
+    validate_certs: "{{ utility_registry_credentials_openshift_verify_ssl }}"
+    ca_cert: "{{ utility_registry_credentials_openshift_ca_cert_path | default(omit) }}"
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: "{{ utility_registry_credentials_service_account_name }}"
+        namespace: "{{ utility_registry_credentials_namespace }}"
+      imagePullSecrets:
+        - name: "{{ utility_registry_credentials_secret_name }}"
+    merge_type: strategic-merge
+  when:
+    - __utility_registry_credentials_service_account.resources | length > 0
+    - >-
+      utility_registry_credentials_secret_name not in (
+        __utility_registry_credentials_service_account.resources[0].imagePullSecrets
+        | default([]) | map(attribute='name') | list
+      )
+...
