@@ -1,5 +1,5 @@
 ---
-- name: validate | Assert required survey variables are defined
+- name: validate | Assert required variables are defined
   ansible.builtin.assert:
     that:
       - source_name is defined
@@ -7,8 +7,9 @@
       - target_name is defined
       - target_name | length > 0
     fail_msg: >-
-      Both source_name and target_name must be provided as survey
-      variables when launching this job template.
+      Both source_name and target_name must be available. These are
+      injected by the source and target credentials attached to the
+      job template launch.
     quiet: true
 
 - name: validate | Assert target exists in AAP inventory

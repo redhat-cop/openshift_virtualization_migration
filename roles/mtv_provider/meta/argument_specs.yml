@@ -9,10 +9,10 @@ argument_specs:
         on a target OpenShift cluster for a given source environment.
       - >-
         Designed to run from AAP with credential injection. The source
-        credential injects mf_source_username, mf_source_password, and
-        mf_source_certificate as extra vars. OpenShift connection is
-        provided by the AAP OpenShift credential which sets K8S_AUTH_*
-        environment variables.
+        credential injects VMWARE_* environment variables and
+        C(source_name) as an extra var. OpenShift connection is
+        provided by the AAP target credential which sets K8S_AUTH_*
+        environment variables and C(target_name) as an extra var.
       - >-
         For targets with multiple sources, launch the job template once
         per source-target pair.
@@ -101,6 +101,47 @@ argument_specs:
         default: true
         description: >-
           Whether to automatically retrieve the source TLS certificate
-          when insecureSkipTlsVerify is false and no certificate is
-          provided.
+          when verify_ssl is true and no certificate is provided.
+
+      mtv_provider_source_username:
+        type: str
+        required: true
+        description: >-
+          Username for the source hypervisor. Cascades from
+          C(VMWARE_USER) env var or C(mf_source_username).
+
+      mtv_provider_source_password:
+        type: str
+        required: true
+        no_log: true
+        description: >-
+          Password for the source hypervisor. Cascades from
+          C(VMWARE_PASSWORD) env var or C(mf_source_password).
+
+      mtv_provider_source_certificate:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          TLS CA certificate for the source hypervisor. Cascades
+          from C(VMWARE_CA_CERT) env var or
+          C(mf_source_certificate).
+
+      mtv_provider_source_verify_ssl:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to verify TLS certificates for the source
+          hypervisor. Cascades from C(VMWARE_VALIDATE_CERTS)
+          env var; falls back to the inverse of
+          C(mf_insecure_skip_tls_verify) if set, or C(true).
+
+      mtv_provider_managed_by_label:
+        type: str
+        required: false
+        default: ansible-migration-factory
+        description: >-
+          Value of the app.kubernetes.io/managed-by label
+          applied to Provider and Secret CRs.
 ...

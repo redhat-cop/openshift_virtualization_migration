@@ -88,7 +88,7 @@ vm_sources:
       sdk_endpoint: /sdk
       username: administrator@vsphere.local
       password: changeme
-      # insecure_skip_tls_verify: true   # default: false
+      # validate_certs: false             # default: true
       # certificate: |
       #   -----BEGIN CERTIFICATE-----
       #   ...

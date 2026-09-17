@@ -48,7 +48,7 @@
           reachable from the OpenShift cluster
         - Check that the source credentials are correct
         - If using TLS, verify the certificate or set
-          insecure_skip_tls_verify: true on the source
+          validate_certs: false on the source credential
         - Confirm MTV/Forklift operator is installed and running
 
 - name: rescue_provider | Fail with summary
