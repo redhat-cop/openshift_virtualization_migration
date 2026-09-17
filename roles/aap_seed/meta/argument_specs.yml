@@ -10,8 +10,9 @@ argument_specs:
       - Object types managed include credential types, credentials,
         inventories, hosts, groups, projects, job templates,
         execution environments, and organizations.
-      - Target cluster credentials use the built-in AAP credential
-        type "OpenShift or Kubernetes API Bearer Token".
+      - Target cluster credentials use a custom AAP credential
+        type that injects K8S_AUTH_* environment variables and
+        target_name as an extra var.
       - Each object type can be skipped with a C(_create) toggle or
         replaced entirely by overriding the corresponding
         C(aap_seed_controller_*) variable.
@@ -131,16 +132,19 @@ argument_specs:
         default: Migration Factory - Source Environment
         description: >-
           Name of the custom credential type created in AAP for
-          source hypervisor environments (vSphere, RHV).
+          source hypervisor environments (vSphere, RHV). Injects
+          VMWARE_* environment variables and C(source_name) as
+          an extra var.
 
       aap_seed_target_credential_type:
         type: str
         required: false
-        default: OpenShift or Kubernetes API Bearer Token
+        default: Migration Factory - Target Environment
         description: >-
-          AAP credential type used for target OpenShift clusters.
-          Defaults to the built-in bearer token type. Each target
-          host should set I(openshift_api_key) or
+          Name of the custom credential type created in AAP for
+          target OpenShift clusters. Injects K8S_AUTH_*
+          environment variables and C(target_name) as an extra var.
+          Each target host should set I(openshift_api_key) or
           I(openshift_temporary_api_key).
 
       aap_seed_source_inventory_group:
@@ -366,8 +370,8 @@ argument_specs:
         required: false
         default: true
         description: >-
-          Create the custom source credential type in AAP.
-          Set to C(false) to skip.
+          Create the custom credential types in AAP (source and
+          target). Set to C(false) to skip.
 
       aap_seed_credentials_create:
         type: bool
@@ -420,9 +424,9 @@ argument_specs:
         type: dict
         required: false
         description: >-
-          Survey specification attached to job templates.
-          Defaults to a survey prompting for C(source_name)
-          and C(target_name).
+          Shared survey specification. Empty by default since
+          C(source_name) and C(target_name) are now injected
+          by the source and target credentials respectively.
 
       aap_seed_controller_organizations:
         type: list
@@ -439,9 +443,10 @@ argument_specs:
         required: false
         description: >-
           List of AAP credential type definitions. Defaults to
-          a single custom type for source hypervisor
-          environments. Override to replace the default entry.
-          Each entry follows the
+          custom types for source hypervisor environments
+          (VMWARE_* env vars + source_name) and target OpenShift
+          clusters (K8S_AUTH_* env vars + target_name). Override
+          to replace the defaults. Each entry follows the
           C(infra.aap_configuration.credential_types) schema.
 
       aap_seed_controller_execution_environments:

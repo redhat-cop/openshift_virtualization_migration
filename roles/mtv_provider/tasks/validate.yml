@@ -1,5 +1,5 @@
 ---
-- name: validate | Assert required survey variables are defined
+- name: validate | Assert required variables are defined
   ansible.builtin.assert:
     that:
       - source_name is defined
@@ -7,8 +7,9 @@
       - target_name is defined
       - target_name | length > 0
     fail_msg: >-
-      Both source_name and target_name must be provided as survey
-      variables when launching this job template.
+      Both source_name and target_name must be available. These are
+      injected by the source and target credentials attached to the
+      job template launch.
     quiet: true
 
 - name: validate | Assert target exists in AAP inventory
@@ -51,17 +52,16 @@
       hypervisor.
     quiet: true
 
-- name: validate | Assert source credentials are injected
+- name: validate | Assert source credentials are available
   ansible.builtin.assert:
     that:
-      - mf_source_username is defined
-      - mf_source_username | length > 0
-      - mf_source_password is defined
-      - mf_source_password | length > 0
+      - mtv_provider_source_username | length > 0
+      - mtv_provider_source_password | length > 0
     fail_msg: >-
-      Source credentials (mf_source_username, mf_source_password) were
-      not injected. Ensure the '{{ source_name }}' credential is
-      attached to this job template launch.
+      Source credentials were not found. Ensure VMWARE_USER and
+      VMWARE_PASSWORD environment variables are injected by the
+      '{{ source_name }}' credential, or that mf_source_username
+      and mf_source_password are set.
     quiet: true
   no_log: true
 
@@ -119,8 +119,8 @@
 - name: validate | Retrieve source TLS certificate
   when:
     - mtv_provider_auto_retrieve_cert | bool
-    - not (mf_insecure_skip_tls_verify | default(false) | bool)
-    - mf_source_certificate | default('') | trim | length == 0
+    - mtv_provider_source_verify_ssl | bool
+    - mtv_provider_source_certificate | trim | length == 0
   block:
     - name: validate | Retrieve remote certificate from source
       community.crypto.get_certificate:
@@ -137,5 +137,5 @@
   ansible.builtin.set_fact:
     _mtv_provider_source_certificate: >-
       {{ _mtv_provider_source_certificate
-         | default(mf_source_certificate | default('')) }}
+         | default(mtv_provider_source_certificate) }}
 ...

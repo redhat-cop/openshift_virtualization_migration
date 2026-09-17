@@ -78,8 +78,10 @@ aap_seed_source_credential_type: Migration Factory - Source Environment
 
 # title: Target Credential Type
 # required: False
-# description: Name of the built-in credential type used for OpenShift target clusters.
-aap_seed_target_credential_type: OpenShift or Kubernetes API Bearer Token
+# description: >-
+#   Name of the custom credential type created for target OpenShift
+#   clusters. Injects K8S_AUTH_* environment variables and target_name.
+aap_seed_target_credential_type: Migration Factory - Target Environment
 
 # title: Source Inventory Group
 # required: False
@@ -228,28 +230,10 @@ aap_seed_mtv_pre_migration_vm_playbook: playbooks/vmf_pre_migration_vm.yml
 # title: Common Survey Spec
 # required: False
 # description: >-
-#   Shared survey specification used by job templates. Contains the
-#   source_name and target_name prompts.
-aap_seed_common_survey_spec:
-  name: ""
-  description: ""
-  spec:
-    - question_name: Source Name
-      question_description: >-
-        Name of the source environment as it appears in the AAP
-        inventory (e.g. vcenter-prod). Must be in the target's
-        vm_sources list.
-      variable: source_name
-      type: text
-      required: true
-    - question_name: Target Name
-      question_description: >-
-        Name of the target OpenShift cluster as it appears in the
-        AAP inventory (e.g. ocp-prod). Must be in the
-        migration_clusters group.
-      variable: target_name
-      type: text
-      required: true
+#   Shared survey specification used by job templates. Previously
+#   contained source_name and target_name prompts; those are now
+#   injected by the source and target credentials.
+aap_seed_common_survey_spec: {}
 
 # title: Create Organizations
 # required: False
@@ -307,6 +291,12 @@ aap_seed_controller_credential_types:
     kind: cloud
     inputs:
       fields:
+        - id: source_name
+          type: string
+          label: Source Name
+          help_text: >-
+            Inventory hostname of this source environment
+            (must match the AAP inventory host and MTV provider name).
         - id: host
           type: string
           label: Hostname or IP
@@ -322,20 +312,62 @@ aap_seed_controller_credential_types:
           label: SSL/TLS CA Certificate
           multiline: true
           secret: true
-        - id: insecure_skip_tls_verify
+        - id: validate_certs
           type: boolean
-          label: Insecure Skip TLS Verify
+          label: Validate Certificates
       required:
+        - source_name
         - host
         - username
         - password
     injectors:
+      env:
+        VMWARE_HOST: "{% raw %}{  { host }}{% endraw %}"
+        VMWARE_USER: "{% raw %}{  { username }}{% endraw %}"
+        VMWARE_PASSWORD: "{% raw %}{  { password }}{% endraw %}"
+        VMWARE_VALIDATE_CERTS: "{% raw %}{  { validate_certs }}{% endraw %}"
+        VMWARE_CA_CERT: "{% raw %}{  { certificate }}{% endraw %}"
       extra_vars:
-        mf_source_host: "{% raw %}{  { host }}{% endraw %}"
-        mf_source_username: "{% raw %}{  { username }}{% endraw %}"
-        mf_source_password: "{% raw %}{  { password }}{% endraw %}"
+        source_name: "{% raw %}{  { source_name }}{% endraw %}"
         mf_source_certificate: "{% raw %}{  { certificate }}{% endraw %}"
-        mf_insecure_skip_tls_verify: "{% raw %}{  { insecure_skip_tls_verify }}{% endraw %}"
+  - name: "{{ aap_seed_target_credential_type }}"
+    organization: "{{ aap_seed_org_name }}"
+    kind: cloud
+    inputs:
+      fields:
+        - id: target_name
+          type: string
+          label: Target Name
+          help_text: >-
+            Inventory hostname of this target cluster
+            (must match the AAP inventory host and MTV provider name).
+        - id: host
+          type: string
+          label: OpenShift API URL
+        - id: api_key
+          type: string
+          label: API Key / Bearer Token
+          secret: true
+        - id: ca_cert
+          type: string
+          label: CA Certificate
+          multiline: true
+          secret: true
+        - id: verify_ssl
+          type: boolean
+          label: Verify SSL
+      required:
+        - target_name
+        - host
+        - api_key
+    injectors:
+      env:
+        K8S_AUTH_HOST: "{% raw %}{  { host }}{% endraw %}"
+        K8S_AUTH_API_KEY: "{% raw %}{  { api_key }}{% endraw %}"
+        K8S_AUTH_SSL_CA_CERT: "{% raw %}{  { ca_cert }}{% endraw %}"
+        K8S_AUTH_VERIFY_SSL: "{% raw %}{  { verify_ssl }}{% endraw %}"
+      extra_vars:
+        target_name: "{% raw %}{  { target_name }}{% endraw %}"
 
 # title: Controller Inventories
 # required: False
@@ -384,8 +416,6 @@ aap_seed_controller_templates:
     ask_credential_on_launch: true
     ask_variables_on_launch: true
     verbosity: 0
-    survey_enabled: true
-    survey_spec: "{{ aap_seed_common_survey_spec }}"
   - name: "{{ aap_seed_mtv_maps_template_name }}"
     organization: "{{ aap_seed_org_name }}"
     project: "{{ aap_seed_project_name }}"
@@ -395,8 +425,6 @@ aap_seed_controller_templates:
     ask_credential_on_launch: true
     ask_variables_on_launch: true
     verbosity: 0
-    survey_enabled: true
-    survey_spec: "{{ aap_seed_common_survey_spec }}"
   - name: "{{ aap_seed_mtv_plans_template_name }}"
     organization: "{{ aap_seed_org_name }}"
     project: "{{ aap_seed_project_name }}"
@@ -406,8 +434,6 @@ aap_seed_controller_templates:
     ask_credential_on_launch: true
     ask_variables_on_launch: true
     verbosity: 0
-    survey_enabled: true
-    survey_spec: "{{ aap_seed_common_survey_spec }}"
   - name: "{{ aap_seed_mtv_migrate_template_name }}"
     organization: "{{ aap_seed_org_name }}"
     project: "{{ aap_seed_project_name }}"
