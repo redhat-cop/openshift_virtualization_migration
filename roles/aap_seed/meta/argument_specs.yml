@@ -241,6 +241,15 @@ argument_specs:
           Defaults to C(aap_execution_environment_pull) from
           inventory, or C(missing) if unset.
 
+      aap_seed_execution_environment_organization:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Organization to scope the execution environment to.
+          Leave empty to omit (globally available). Defaults to
+          C(aap_execution_environment_organization) from inventory.
+
       aap_seed_execution_environment_credential:
         type: str
         required: false

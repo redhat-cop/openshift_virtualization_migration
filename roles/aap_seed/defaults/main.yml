@@ -135,6 +135,14 @@ aap_seed_execution_environment_image: "{{ aap_execution_environment_image | defa
 # description: Image pull policy for the execution environment. Cascades from aap_execution_environment_pull.
 aap_seed_execution_environment_pull: "{{ aap_execution_environment_pull | default('missing') }}"
 
+# title: EE Organization
+# required: False
+# description: >-
+#   Organization for the execution environment. Cascades from
+#   aap_execution_environment_organization. Omit to leave unscoped.
+aap_seed_execution_environment_organization: >-
+  {{ aap_execution_environment_organization | default('') }}
+
 # title: EE Registry Credential
 # required: False
 # description: >-
@@ -397,7 +405,7 @@ aap_seed_controller_execution_environments:
   - name: "{{ aap_seed_execution_environment }}"
     description: "{{ aap_seed_execution_environment_description }}"
     image: "{{ aap_seed_execution_environment_image }}"
-    organization: "{{ aap_seed_org_name }}"
+    organization: "{{ aap_seed_execution_environment_organization | default(omit, true) }}"
     pull: "{{ aap_seed_execution_environment_pull }}"
     credential: "{{ aap_seed_execution_environment_credential | default(omit, true) }}"
 
