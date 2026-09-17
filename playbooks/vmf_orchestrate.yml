@@ -33,13 +33,15 @@
         _orchestrate_provider_jobs: >-
           {% set jobs = [] -%}
           {% for target in groups['migration_clusters'] | default([]) -%}
-            {% for source in hostvars[target]['vm_sources'] | default([]) -%}
-              {% set _ = jobs.append({
-                'source_name': source,
-                'target_name': target,
-                'credentials': [source, target]
-              }) -%}
-            {% endfor -%}
+            {% if inventory_hostname in (hostvars[target]['aap_hosts'] | default([inventory_hostname])) -%}
+              {% for source in hostvars[target]['vm_sources'] | default([]) -%}
+                {% set _ = jobs.append({
+                  'source_name': source,
+                  'target_name': target,
+                  'credentials': [source, target]
+                }) -%}
+              {% endfor -%}
+            {% endif -%}
           {% endfor -%}
           {{ jobs }}
 
