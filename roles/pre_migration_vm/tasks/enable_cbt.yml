@@ -1,0 +1,99 @@
+---
+
+- name: enable_cbt | Verify that the required variables are provided
+  ansible.builtin.assert:
+    that:
+      - pre_migration_vm_vmware_host | default('', true) | length > 0
+      - pre_migration_vm_vmware_username | default('', true) | length > 0
+      - pre_migration_vm_vmware_password | default('', true) | length > 0
+      - pre_migration_vm_vmware_vm_datacenter | default('', true) | length > 0
+    fail_msg: VMware host, username and password and vm datacenter must be provided.
+    quiet: true
+
+- name: enable_cbt | Fail if VM name, MoID, and UUID are all empty
+  ansible.builtin.fail:
+    msg: >-
+      At least one of pre_migration_vm_vmware_vm_name, pre_migration_vm_vmware_vm_moid,
+      or pre_migration_vm_vmware_vm_uuid must be provided.
+  when:
+    - pre_migration_vm_vmware_vm_name | default('', true) | length == 0
+    - pre_migration_vm_vmware_vm_moid | default('', true) | length == 0
+    - pre_migration_vm_vmware_vm_uuid | default('', true) | length == 0
+
+- name: enable_cbt | Check if CBT is enabled on the virtual machine
+  vmware.vmware.guest_info:
+    hostname: "{{ pre_migration_vm_vmware_host }}"
+    username: "{{ pre_migration_vm_vmware_username }}"
+    password: "{{ pre_migration_vm_vmware_password }}"
+    validate_certs: "{{ pre_migration_vm_vmware_verify_ssl }}"
+    folder: "{{ pre_migration_vm_vmware_vm_folder | default(omit, true) }}"
+    datacenter: "{{ pre_migration_vm_vmware_vm_datacenter | default(omit, true) }}"
+    name: "{{ pre_migration_vm_vmware_vm_name | default(omit, true) }}"
+    moid: "{{ pre_migration_vm_vmware_vm_moid | default(omit, true) }}"
+    uuid: "{{ pre_migration_vm_vmware_vm_uuid | default(omit, true) }}"
+  register: __pre_migration_vm_guest_info_results
+  no_log: "{{ pre_migration_vm_secure_logging | bool }}"
+
+- name: enable_cbt | Verify that a single virtual machine was found
+  ansible.builtin.assert:
+    that:
+      - __pre_migration_vm_guest_info_results.guests is defined
+      - __pre_migration_vm_guest_info_results.guests | length == 1
+    fail_msg: >-
+      Expected exactly one virtual machine but found
+      {{ __pre_migration_vm_guest_info_results.guests | default([]) | length }}.
+    quiet: true
+
+- name: enable_cbt | Enable CBT on the virtual machine
+  when: >-
+    __pre_migration_vm_guest_info_results.guests[0].advanced_settings is not defined
+    or (__pre_migration_vm_guest_info_results.guests[0].advanced_settings['scsi0:0.ctkEnabled']
+    | default('')) != 'TRUE'
+    or (__pre_migration_vm_guest_info_results.guests[0].advanced_settings['ctkEnabled']
+    | default('')) != 'TRUE'
+  block:
+    - name: enable_cbt | Power off the virtual machine
+      vmware.vmware.vm_powerstate:
+        hostname: "{{ pre_migration_vm_vmware_host }}"
+        username: "{{ pre_migration_vm_vmware_username }}"
+        password: "{{ pre_migration_vm_vmware_password }}"
+        validate_certs: "{{ pre_migration_vm_vmware_verify_ssl }}"
+        folder: "{{ pre_migration_vm_vmware_vm_folder | default(omit, true) }}"
+        datacenter: "{{ pre_migration_vm_vmware_vm_datacenter | default(omit, true) }}"
+        name: "{{ pre_migration_vm_vmware_vm_name | default(omit, true) }}"
+        moid: "{{ pre_migration_vm_vmware_vm_moid | default(omit, true) }}"
+        uuid: "{{ pre_migration_vm_vmware_vm_uuid | default(omit, true) }}"
+        state: powered-off
+      no_log: "{{ pre_migration_vm_secure_logging | bool }}"
+
+    - name: enable_cbt | Enable CBT on the virtual machine
+      vmware.vmware.vm_advanced_settings:
+        hostname: "{{ pre_migration_vm_vmware_host }}"
+        username: "{{ pre_migration_vm_vmware_username }}"
+        password: "{{ pre_migration_vm_vmware_password }}"
+        validate_certs: "{{ pre_migration_vm_vmware_verify_ssl }}"
+        folder: "{{ pre_migration_vm_vmware_vm_folder | default(omit, true) }}"
+        datacenter: "{{ pre_migration_vm_vmware_vm_datacenter | default(omit, true) }}"
+        name: "{{ pre_migration_vm_vmware_vm_name | default(omit, true) }}"
+        moid: "{{ pre_migration_vm_vmware_vm_moid | default(omit, true) }}"
+        uuid: "{{ pre_migration_vm_vmware_vm_uuid | default(omit, true) }}"
+        settings:
+          "ctkEnabled": "TRUE"
+          "scsi0:0.ctkEnabled": "TRUE"
+      no_log: "{{ pre_migration_vm_secure_logging | bool }}"
+
+    - name: enable_cbt | Power on the virtual machine
+      vmware.vmware.vm_powerstate:
+        hostname: "{{ pre_migration_vm_vmware_host }}"
+        username: "{{ pre_migration_vm_vmware_username }}"
+        password: "{{ pre_migration_vm_vmware_password }}"
+        validate_certs: "{{ pre_migration_vm_vmware_verify_ssl }}"
+        folder: "{{ pre_migration_vm_vmware_vm_folder | default(omit, true) }}"
+        datacenter: "{{ pre_migration_vm_vmware_vm_datacenter | default(omit, true) }}"
+        name: "{{ pre_migration_vm_vmware_vm_name | default(omit, true) }}"
+        moid: "{{ pre_migration_vm_vmware_vm_moid | default(omit, true) }}"
+        uuid: "{{ pre_migration_vm_vmware_vm_uuid | default(omit, true) }}"
+        state: powered-on
+      when: pre_migration_vm_enable_cbt_power_on_post_enable | bool
+      no_log: "{{ pre_migration_vm_secure_logging | bool }}"
+...

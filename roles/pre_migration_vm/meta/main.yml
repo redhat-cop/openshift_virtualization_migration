@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  role_name: pre_migration_vm
+  author: Red Hat
+  description: Perform VM related activities prior to a migration
+  company: Red Hat
+  license: GPL-3.0-only
+  min_ansible_version: "2.16"
+
+dependencies: []
+...

@@ -1,0 +1,95 @@
+---
+
+# title: Pre Migration Action
+# required: True
+# description: Action to be performed against the VM. Aligns to the name of the specific task
+pre_migration_vm_action: ""
+
+# title: Secure Logging
+# required: False
+# description: Whether to enable secure logging for sensitive tasks.
+pre_migration_vm_secure_logging: "{{ secure_logging | default(true) }}"
+
+# title: VMware Host
+# required: True
+# description: >-
+#   VMware host. Cascades from VMWARE_HOST env var
+#   or mf_source_host inventory variable.
+pre_migration_vm_vmware_host: >-
+  {{
+    lookup('env', 'VMWARE_HOST') | default(mf_source_host, true)
+  }}
+
+# title: VMware Username
+# required: True
+# description: >-
+#   VMware username. Cascades from VMWARE_USER env var
+#   or mf_source_username inventory variable.
+pre_migration_vm_vmware_username: >-
+  {{
+    lookup('env', 'VMWARE_USER') | default(mf_source_username, true)
+  }}
+
+# title: VMware Password
+# required: True
+# description: >-
+#   VMware password. Cascades from VMWARE_PASSWORD env var
+#   or mf_source_password inventory variable.
+pre_migration_vm_vmware_password: >-
+  {{
+    lookup('env', 'VMWARE_PASSWORD') | default(mf_source_password, true)
+  }}
+
+# title: VMware CA Certificate Path
+# required: False
+# description: Path to the VMware CA Certificate.
+pre_migration_vm_vmware_ca_cert_path: >-
+  {{
+    lookup('env', 'VMWARE_CA_CERT')
+    | default(mf_source_certificate | default(omit), true)
+  }}
+
+# title: VMware Verify SSL
+# required: False
+# description: Whether to verify VMware SSL certificates.
+pre_migration_vm_vmware_verify_ssl: >-
+  {{
+    lookup('env', 'VMWARE_VALIDATE_CERTS')
+    | default(not mf_insecure_skip_tls_verify | default(false), true)
+  }}
+
+# title: VMware VM Datacenter
+# required: False
+# description: VMware VM Datacenter.
+pre_migration_vm_vmware_vm_datacenter: ""
+
+# title: VMware VM Folder
+# required: False
+# description: VMware VM Folder.
+pre_migration_vm_vmware_vm_folder: ""
+
+# title: VMware VM Name
+# required: False
+# description: VMware VM Name.
+pre_migration_vm_vmware_vm_name: ""
+
+# title: VMware VM MoID
+# required: False
+# description: VMware VM MoID.
+pre_migration_vm_vmware_vm_moid: ""
+
+# title: VMware VM UUID
+# required: False
+# description: VMware VM UUID.
+pre_migration_vm_vmware_vm_uuid: ""
+
+##########################
+# VMWare Change Block Tracking (CBT) #
+##########################
+
+# title: Enable CBT Power On Post Enable
+# required: False
+# description: Power on the VM after enabling CBT
+pre_migration_vm_enable_cbt_power_on_post_enable: false
+
+...

@@ -1,0 +1,16 @@
+---
+
+- name: Verify the premigration action exists
+  ansible.builtin.stat:
+    path: "{{ role_path }}/tasks/{{ pre_migration_vm_action }}.yml"
+  register: pre_migration_vm_file_check
+
+- name: Fail if premigration action does not exist
+  ansible.builtin.fail:
+    msg: "The premigration action {{ pre_migration_vm_action }} does not exist."
+  when: not pre_migration_vm_file_check.stat.exists
+
+- name: Execute the premigration action
+  ansible.builtin.include_tasks:
+    file: "{{ pre_migration_vm_action }}.yml"
+...

@@ -67,4 +67,4 @@ regex = '''(?i)(container[_-]?password|registry[_-]?password)\s*[:=]\s*['"]?([^\
 keywords = ["container_password", "registry_password"]
 [rules.allowlist]
 regexes = ['''changeme''', '''\{\{.*\}\}''', '''<b>.*</b>''']
-paths = ['''defaults/main\.yml$''', '''inventory\.yml$''', '''README\.md$''']
+paths = ['''defaults/main\.yml$''', '''inventory\.yml$''', '''README\.md$''', '''argument_specs\.yml$''']

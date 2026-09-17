@@ -1,0 +1,91 @@
+---
+# argument spec file for infra.openshift_virtualization_migration.pre_migration_vm
+
+argument_specs:
+  main:
+    short_description: Executes pre-migration actions against a virtual machine.
+    description:
+      - This role performs pre-migration actions against a virtual machine in VMware.
+      - The specific action is determined by the pre_migration_vm_action variable.
+    options:
+      pre_migration_vm_action:
+        type: str
+        required: true
+        description: >-
+          Action to be performed against the VM.
+          Aligns to the name of the specific task file.
+
+      pre_migration_vm_secure_logging:
+        type: bool
+        required: false
+        default: true
+        description: Whether to enable secure logging for sensitive tasks.
+
+      pre_migration_vm_vmware_host:
+        type: str
+        required: true
+        description: >-
+          VMware host.
+          Cascades from VMWARE_HOST env var or mf_source_host inventory variable.
+
+      pre_migration_vm_vmware_username:
+        type: str
+        required: true
+        description: >-
+          VMware username.
+          Cascades from VMWARE_USER env var or mf_source_username inventory variable.
+
+      pre_migration_vm_vmware_password:
+        type: str
+        required: true
+        description: >-
+          VMware password.
+          Cascades from VMWARE_PASSWORD env var or mf_source_password inventory variable.
+
+      pre_migration_vm_vmware_ca_cert_path:
+        type: str
+        required: false
+        description: Path to the VMware CA Certificate.
+
+      pre_migration_vm_vmware_verify_ssl:
+        type: bool
+        required: false
+        default: true
+        description: Whether to verify VMware SSL certificates.
+
+      pre_migration_vm_vmware_vm_datacenter:
+        type: str
+        required: false
+        default: ""
+        description: VMware VM Datacenter.
+
+      pre_migration_vm_vmware_vm_folder:
+        type: str
+        required: false
+        default: ""
+        description: VMware VM Folder.
+
+      pre_migration_vm_vmware_vm_name:
+        type: str
+        required: false
+        default: ""
+        description: VMware VM Name.
+
+      pre_migration_vm_vmware_vm_moid:
+        type: str
+        required: false
+        default: ""
+        description: VMware VM MoID.
+
+      pre_migration_vm_vmware_vm_uuid:
+        type: str
+        required: false
+        default: ""
+        description: VMware VM UUID.
+
+      pre_migration_vm_enable_cbt_power_on_post_enable:
+        type: bool
+        required: false
+        default: false
+        description: Power on the VM after enabling CBT.
+...

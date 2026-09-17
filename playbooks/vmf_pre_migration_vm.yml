@@ -1,0 +1,11 @@
+---
+
+- name: Perform pre-migration actions against vms
+  hosts: "{{ vm_sources | default('vm_sources') }}"
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Invoke pre_migration_vm role
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.pre_migration_vm
+...
