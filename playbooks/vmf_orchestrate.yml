@@ -54,7 +54,7 @@
               credentials: {{ job.credentials | join(', ') }}
           {% endfor %}
 
-    - name: Launch MTV Provider job template for each pair
+    - name: Launch MTV Provider job template for each pair # noqa: syntax-check[unknown-module]
       ansible.controller.job_launch:
         name: "{{ _orchestrate_template }}"
         credentials: "{{ item.credentials }}"
@@ -64,6 +64,7 @@
         controller_password: "{{ aap_password | default(omit) }}"
         controller_oauthtoken: "{{ aap_token | default(omit) }}"
         validate_certs: "{{ aap_validate_certs | default(true) }}"
+      no_log: "{{ aap_seed_secure_logging | default(secure_logging) | default(true) }}"
       loop: "{{ _orchestrate_provider_jobs }}"
       loop_control:
         label: "{{ item.source_name }} → {{ item.target_name }}"
