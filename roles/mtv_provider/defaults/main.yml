@@ -47,7 +47,7 @@ mtv_provider_provider_override: {}
 # required: False
 # description: >-
 #   Whether to automatically retrieve the source TLS certificate
-#   when insecureSkipTlsVerify is false and no certificate is provided.
+#   when verify_ssl is true and no certificate is provided.
 mtv_provider_auto_retrieve_cert: true
 
 # title: Source Type
@@ -65,6 +65,54 @@ mtv_provider_source_type: >-
 #   source host's host variable in the AAP inventory.
 mtv_provider_source_host: >-
   {{ hostvars[source_name]['host'] }}
+
+# title: Source Username
+# required: True
+# description: >-
+#   Username for the source hypervisor. Cascades from VMWARE_USER
+#   env var or mf_source_username inventory variable.
+mtv_provider_source_username: >-
+  {{
+    lookup('env', 'VMWARE_USER')
+    | default(mf_source_username | default(''), true)
+  }}
+
+# title: Source Password
+# required: True
+# description: >-
+#   Password for the source hypervisor. Cascades from
+#   VMWARE_PASSWORD env var or mf_source_password inventory variable.
+mtv_provider_source_password: >-
+  {{
+    lookup('env', 'VMWARE_PASSWORD')
+    | default(mf_source_password | default(''), true)
+  }}
+
+# title: Source Certificate
+# required: False
+# description: >-
+#   TLS CA certificate for the source hypervisor. Cascades from
+#   VMWARE_CA_CERT env var or mf_source_certificate inventory variable.
+mtv_provider_source_certificate: >-
+  {{
+    lookup('env', 'VMWARE_CA_CERT')
+    | default(mf_source_certificate | default(''), true)
+  }}
+
+# title: Source Verify SSL
+# required: False
+# description: >-
+#   Whether to verify TLS certificates for the source hypervisor.
+#   Cascades from VMWARE_VALIDATE_CERTS env var; falls back to the
+#   inverse of mf_insecure_skip_tls_verify if set, or true.
+mtv_provider_source_verify_ssl: >-
+  {{
+    lookup('env', 'VMWARE_VALIDATE_CERTS')
+    | default(
+        not (mf_insecure_skip_tls_verify | default(false) | bool),
+        true
+      )
+  }}
 
 # title: Source SDK Endpoint
 # required: False
