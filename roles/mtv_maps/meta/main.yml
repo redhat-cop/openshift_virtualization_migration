@@ -5,7 +5,7 @@ galaxy_info:
   description: >-
     Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift
     target clusters for a given source-target pair.
-  license: GPL-3.0-or-later
+  license: GPL-3.0-only
   min_ansible_version: "2.15"
   platforms:
     - name: EL

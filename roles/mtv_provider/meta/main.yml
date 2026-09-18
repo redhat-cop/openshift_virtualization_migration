@@ -6,7 +6,7 @@ galaxy_info:
     Create MTV/Forklift source provider CRs on OpenShift target clusters.
     Designed to run from AAP with credential injection.
   company: Red Hat
-  license: GPL-3.0-or-later
+  license: GPL-3.0-only
   min_ansible_version: "2.16"
 
 dependencies: []
