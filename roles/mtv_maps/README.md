@@ -320,7 +320,7 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| validate ¦ Assert required survey variables are defined | `ansible.builtin.assert` | False |
+| validate ¦ Assert required variables are defined | `ansible.builtin.assert` | False |
 | validate ¦ Assert target exists in AAP inventory | `ansible.builtin.assert` | False |
 | validate ¦ Assert source exists in AAP inventory | `ansible.builtin.assert` | False |
 | validate ¦ Assert source is mapped to this target | `ansible.builtin.assert` | False |
@@ -517,8 +517,8 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| validate___Assert_required_survey_variables_are_defined0[validate   assert required survey variables are<br>defined]:::task
-  validate___Assert_required_survey_variables_are_defined0-->|Task| validate___Assert_target_exists_in_AAP_inventory1[validate   assert target exists in aap inventory]:::task
+  Start-->|Task| validate___Assert_required_variables_are_defined0[validate   assert required variables are defined]:::task
+  validate___Assert_required_variables_are_defined0-->|Task| validate___Assert_target_exists_in_AAP_inventory1[validate   assert target exists in aap inventory]:::task
   validate___Assert_target_exists_in_AAP_inventory1-->|Task| validate___Assert_source_exists_in_AAP_inventory2[validate   assert source exists in aap inventory]:::task
   validate___Assert_source_exists_in_AAP_inventory2-->|Task| validate___Assert_source_is_mapped_to_this_target3[validate   assert source is mapped to this target]:::task
   validate___Assert_source_is_mapped_to_this_target3-->|Task| validate___Assert_mutually_exclusive_storage_map_overrides4[validate   assert mutually exclusive storage map<br>overrides<br>When: **mtv maps create storage maps   bool**]:::task

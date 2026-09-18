@@ -210,18 +210,18 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 
 #### Key: main
 
-* **Description**: ['Dynamically builds all AAP Configuration as Code objects from the Ansible inventory and role defaults, syncs the SCM project, and pushes everything to AAP via infra.aap_configuration.dispatch.', 'Object types managed include credential types, credentials, inventories, hosts, groups, projects, job templates, execution environments, and organizations.', 'Target cluster credentials use the built-in AAP credential type "OpenShift or Kubernetes API Bearer Token".', 'Each object type can be skipped with a C(_create) toggle or replaced entirely by overriding the corresponding C(aap_seed_controller_*) variable.']
+* **Description**: ['Dynamically builds all AAP Configuration as Code objects from the Ansible inventory and role defaults, syncs the SCM project, and pushes everything to AAP via infra.aap_configuration.dispatch.', 'Object types managed include credential types, credentials, inventories, hosts, groups, projects, job templates, execution environments, and organizations.', 'Target cluster credentials use a custom AAP credential type that injects K8S_AUTH_* environment variables and target_name as an extra var.', 'Each object type can be skipped with a C(_create) toggle or replaced entirely by overriding the corresponding C(aap_seed_controller_*) variable.']
 * **Options**:
   * **aap_seed_common_survey_spec**:
     * **Required**: False
     * **Type**: dict
     * **Default**: none
-    * **Description**: Survey specification attached to job templates. Defaults to a survey prompting for C(source_name) and C(target_name).
+    * **Description**: Shared survey specification. Empty by default since C(source_name) and C(target_name) are now injected by the source and target credentials respectively.
   * **aap_seed_controller_credential_types**:
     * **Required**: False
     * **Type**: list
     * **Default**: none
-    * **Description**: List of AAP credential type definitions. Defaults to a single custom type for source hypervisor environments. Override to replace the default entry. Each entry follows the C(infra.aap_configuration.credential_types) schema.
+    * **Description**: List of AAP credential type definitions. Defaults to custom types for source hypervisor environments (VMWARE_* env vars + source_name) and target OpenShift clusters (K8S_AUTH_* env vars + target_name). Override to replace the defaults. Each entry follows the C(infra.aap_configuration.credential_types) schema.
   * **aap_seed_controller_execution_environments**:
     * **Required**: False
     * **Type**: list
@@ -251,7 +251,7 @@ Description: Seed AAP with Migration Factory Configuration as Code content
     * **Required**: False
     * **Type**: bool
     * **Default**: True
-    * **Description**: Create the custom source credential type in AAP. Set to C(false) to skip.
+    * **Description**: Create the custom credential types in AAP (source and target). Set to C(false) to skip.
   * **aap_seed_credentials_create**:
     * **Required**: False
     * **Type**: bool
@@ -302,6 +302,11 @@ Description: Seed AAP with Migration Factory Configuration as Code content
     * **Type**: str
     * **Default**:
     * **Description**: Container image for the execution environment (e.g. C(quay.io/org/ee:latest)). Defaults to C(aap_execution_environment_image) from inventory.
+  * **aap_seed_execution_environment_organization**:
+    * **Required**: False
+    * **Type**: str
+    * **Default**:
+    * **Description**: Organization to scope the execution environment to. Leave empty to omit (globally available). Defaults to C(aap_execution_environment_organization) from inventory.
   * **aap_seed_execution_environment_pull**:
     * **Required**: False
     * **Type**: str
@@ -450,7 +455,7 @@ Description: Seed AAP with Migration Factory Configuration as Code content
     * **Required**: False
     * **Type**: str
     * **Default**: Migration Factory - Source Environment
-    * **Description**: Name of the custom credential type created in AAP for source hypervisor environments (vSphere, RHV).
+    * **Description**: Name of the custom credential type created in AAP for source hypervisor environments (vSphere, RHV). Injects VMWARE_* environment variables and C(source_name) as an extra var.
   * **aap_seed_source_inventory_group**:
     * **Required**: False
     * **Type**: str
@@ -459,8 +464,8 @@ Description: Seed AAP with Migration Factory Configuration as Code content
   * **aap_seed_target_credential_type**:
     * **Required**: False
     * **Type**: str
-    * **Default**: OpenShift or Kubernetes API Bearer Token
-    * **Description**: AAP credential type used for target OpenShift clusters. Defaults to the built-in bearer token type. Each target host should set I(openshift_api_key) or I(openshift_temporary_api_key).
+    * **Default**: Migration Factory - Target Environment
+    * **Description**: Name of the custom credential type created in AAP for target OpenShift clusters. Injects K8S_AUTH_* environment variables and C(target_name) as an extra var. Each target host should set I(openshift_api_key) or I(openshift_temporary_api_key).
   * **aap_seed_target_inventory_group**:
     * **Required**: False
     * **Type**: str
@@ -497,216 +502,247 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`aap_seed_common_survey_spec`](defaults/main.yml#L233)   | dict   | `{}` |  None  |   False  |  Common Survey Spec |
-| [`aap_seed_common_survey_spec.description`](defaults/main.yml#L235)   | str   | `` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.name`](defaults/main.yml#L234)   | str   | `` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec`](defaults/main.yml#L236)   | list   | `[]` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.0`](defaults/main.yml#L237)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.0.question_description`](defaults/main.yml#L238)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.0.question_name`](defaults/main.yml#L237)   | str   | `Source Name` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.0.required`](defaults/main.yml#L244)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.0.type`](defaults/main.yml#L243)   | str   | `text` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.0.variable`](defaults/main.yml#L242)   | str   | `source_name` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.1`](defaults/main.yml#L245)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.1.question_description`](defaults/main.yml#L246)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.1.question_name`](defaults/main.yml#L245)   | str   | `Target Name` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.1.required`](defaults/main.yml#L252)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.1.type`](defaults/main.yml#L251)   | str   | `text` |  None  |   None  |  None |
-| [`aap_seed_common_survey_spec.spec.1.variable`](defaults/main.yml#L250)   | str   | `target_name` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types`](defaults/main.yml#L304)   | list   | `[]` |  None  |   False  |  Controller Credential Types |
-| [`aap_seed_controller_credential_types.0`](defaults/main.yml#L305)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.injectors`](defaults/main.yml#L332)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.injectors.extra_vars`](defaults/main.yml#L333)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.injectors.extra_vars.mf_insecure_skip_tls_verify`](defaults/main.yml#L338)   | str   | `{% raw %}{  { insecure_skip_tls_verify }}{% endraw %}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.injectors.extra_vars.mf_source_certificate`](defaults/main.yml#L337)   | str   | `{% raw %}{  { certificate }}{% endraw %}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.injectors.extra_vars.mf_source_host`](defaults/main.yml#L334)   | str   | `{% raw %}{  { host }}{% endraw %}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.injectors.extra_vars.mf_source_password`](defaults/main.yml#L336)   | str   | `{% raw %}{  { password }}{% endraw %}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.injectors.extra_vars.mf_source_username`](defaults/main.yml#L335)   | str   | `{% raw %}{  { username }}{% endraw %}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs`](defaults/main.yml#L308)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields`](defaults/main.yml#L309)   | list   | `[]` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.0`](defaults/main.yml#L310)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.0.id`](defaults/main.yml#L310)   | str   | `host` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.0.label`](defaults/main.yml#L312)   | str   | `Hostname or IP` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.0.type`](defaults/main.yml#L311)   | str   | `string` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.1`](defaults/main.yml#L313)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.1.id`](defaults/main.yml#L313)   | str   | `username` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.1.label`](defaults/main.yml#L315)   | str   | `Username` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.1.type`](defaults/main.yml#L314)   | str   | `string` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.2`](defaults/main.yml#L316)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.2.id`](defaults/main.yml#L316)   | str   | `password` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.2.label`](defaults/main.yml#L318)   | str   | `Password` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.2.secret`](defaults/main.yml#L319)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.2.type`](defaults/main.yml#L317)   | str   | `string` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.3`](defaults/main.yml#L320)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.3.id`](defaults/main.yml#L320)   | str   | `certificate` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.3.label`](defaults/main.yml#L322)   | str   | `SSL/TLS CA Certificate` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.3.multiline`](defaults/main.yml#L323)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.3.secret`](defaults/main.yml#L324)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.3.type`](defaults/main.yml#L321)   | str   | `string` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.4`](defaults/main.yml#L325)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.4.id`](defaults/main.yml#L325)   | str   | `insecure_skip_tls_verify` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.4.label`](defaults/main.yml#L327)   | str   | `Insecure Skip TLS Verify` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.fields.4.type`](defaults/main.yml#L326)   | str   | `boolean` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.required`](defaults/main.yml#L328)   | list   | `[]` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.required.0`](defaults/main.yml#L329)   | str   | `host` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.required.1`](defaults/main.yml#L330)   | str   | `username` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.inputs.required.2`](defaults/main.yml#L331)   | str   | `password` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.kind`](defaults/main.yml#L307)   | str   | `cloud` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.name`](defaults/main.yml#L305)   | str   | `{{ aap_seed_source_credential_type }}` |  None  |   None  |  None |
-| [`aap_seed_controller_credential_types.0.organization`](defaults/main.yml#L306)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_execution_environments`](defaults/main.yml#L364)   | list   | `[]` |  None  |   False  |  Controller Execution Environments |
-| [`aap_seed_controller_execution_environments.0`](defaults/main.yml#L365)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_execution_environments.0.credential`](defaults/main.yml#L370)   | str   | `{{ aap_seed_execution_environment_credential ¦ default(omit, true) }}` |  None  |   None  |  None |
-| [`aap_seed_controller_execution_environments.0.description`](defaults/main.yml#L366)   | str   | `{{ aap_seed_execution_environment_description }}` |  None  |   None  |  None |
-| [`aap_seed_controller_execution_environments.0.image`](defaults/main.yml#L367)   | str   | `{{ aap_seed_execution_environment_image }}` |  None  |   None  |  None |
-| [`aap_seed_controller_execution_environments.0.name`](defaults/main.yml#L365)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
-| [`aap_seed_controller_execution_environments.0.organization`](defaults/main.yml#L368)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_execution_environments.0.pull`](defaults/main.yml#L369)   | str   | `{{ aap_seed_execution_environment_pull }}` |  None  |   None  |  None |
-| [`aap_seed_controller_inventories`](defaults/main.yml#L343)   | list   | `[]` |  None  |   False  |  Controller Inventories |
-| [`aap_seed_controller_inventories.0`](defaults/main.yml#L344)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_inventories.0.name`](defaults/main.yml#L344)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_inventories.0.organization`](defaults/main.yml#L345)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_organizations`](defaults/main.yml#L297)   | list   | `[]` |  None  |   False  |  Controller Organizations |
-| [`aap_seed_controller_projects`](defaults/main.yml#L350)   | list   | `[]` |  None  |   False  |  Controller Projects |
-| [`aap_seed_controller_projects.0`](defaults/main.yml#L351)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_projects.0.credential`](defaults/main.yml#L357)   | str   | `{{ aap_seed_project_credential ¦ default(omit, true) }}` |  None  |   None  |  None |
-| [`aap_seed_controller_projects.0.name`](defaults/main.yml#L351)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_projects.0.organization`](defaults/main.yml#L352)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_projects.0.scm_branch`](defaults/main.yml#L355)   | str   | `{{ aap_seed_project_scm_branch }}` |  None  |   None  |  None |
-| [`aap_seed_controller_projects.0.scm_type`](defaults/main.yml#L353)   | str   | `git` |  None  |   None  |  None |
-| [`aap_seed_controller_projects.0.scm_update_on_launch`](defaults/main.yml#L356)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_projects.0.scm_url`](defaults/main.yml#L354)   | str   | `{{ aap_seed_project_scm_url }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates`](defaults/main.yml#L377)   | list   | `[]` |  None  |   False  |  Controller Templates |
-| [`aap_seed_controller_templates.0`](defaults/main.yml#L378)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.ask_credential_on_launch`](defaults/main.yml#L384)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.ask_variables_on_launch`](defaults/main.yml#L385)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.execution_environment`](defaults/main.yml#L383)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.inventory`](defaults/main.yml#L382)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.name`](defaults/main.yml#L378)   | str   | `{{ aap_seed_mtv_provider_template_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.organization`](defaults/main.yml#L379)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.playbook`](defaults/main.yml#L381)   | str   | `{{ aap_seed_mtv_provider_playbook }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.project`](defaults/main.yml#L380)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.survey_enabled`](defaults/main.yml#L387)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.survey_spec`](defaults/main.yml#L388)   | str   | `{{ aap_seed_common_survey_spec }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.0.verbosity`](defaults/main.yml#L386)   | int   | `0` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1`](defaults/main.yml#L389)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.ask_credential_on_launch`](defaults/main.yml#L395)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.ask_variables_on_launch`](defaults/main.yml#L396)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.execution_environment`](defaults/main.yml#L394)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.inventory`](defaults/main.yml#L393)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.name`](defaults/main.yml#L389)   | str   | `{{ aap_seed_mtv_maps_template_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.organization`](defaults/main.yml#L390)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.playbook`](defaults/main.yml#L392)   | str   | `{{ aap_seed_mtv_maps_playbook }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.project`](defaults/main.yml#L391)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.survey_enabled`](defaults/main.yml#L398)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.survey_spec`](defaults/main.yml#L399)   | str   | `{{ aap_seed_common_survey_spec }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.1.verbosity`](defaults/main.yml#L397)   | int   | `0` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2`](defaults/main.yml#L400)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.ask_credential_on_launch`](defaults/main.yml#L406)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.ask_variables_on_launch`](defaults/main.yml#L407)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.execution_environment`](defaults/main.yml#L405)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.inventory`](defaults/main.yml#L404)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.name`](defaults/main.yml#L400)   | str   | `{{ aap_seed_mtv_plans_template_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.organization`](defaults/main.yml#L401)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.playbook`](defaults/main.yml#L403)   | str   | `{{ aap_seed_mtv_plans_playbook }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.project`](defaults/main.yml#L402)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.survey_enabled`](defaults/main.yml#L409)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.survey_spec`](defaults/main.yml#L410)   | str   | `{{ aap_seed_common_survey_spec }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.2.verbosity`](defaults/main.yml#L408)   | int   | `0` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3`](defaults/main.yml#L411)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.ask_credential_on_launch`](defaults/main.yml#L417)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.ask_variables_on_launch`](defaults/main.yml#L418)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.execution_environment`](defaults/main.yml#L416)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.inventory`](defaults/main.yml#L415)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.name`](defaults/main.yml#L411)   | str   | `{{ aap_seed_mtv_migrate_template_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.organization`](defaults/main.yml#L412)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.playbook`](defaults/main.yml#L414)   | str   | `{{ aap_seed_mtv_migrate_playbook }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.project`](defaults/main.yml#L413)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_enabled`](defaults/main.yml#L420)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec`](defaults/main.yml#L421)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.description`](defaults/main.yml#L423)   | str   | `` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.name`](defaults/main.yml#L422)   | str   | `` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec`](defaults/main.yml#L424)   | list   | `[]` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.0`](defaults/main.yml#L425)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.0.question_description`](defaults/main.yml#L426)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.0.question_name`](defaults/main.yml#L425)   | str   | `Plan Name` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.0.required`](defaults/main.yml#L430)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.0.type`](defaults/main.yml#L429)   | str   | `text` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.0.variable`](defaults/main.yml#L428)   | str   | `mtv_migrate_plan_name` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.1`](defaults/main.yml#L431)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.1.question_description`](defaults/main.yml#L432)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.1.question_name`](defaults/main.yml#L431)   | str   | `Plan Namespace` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.1.required`](defaults/main.yml#L436)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.1.type`](defaults/main.yml#L435)   | str   | `text` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.survey_spec.spec.1.variable`](defaults/main.yml#L434)   | str   | `mtv_migrate_plan_namespace` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.3.verbosity`](defaults/main.yml#L419)   | int   | `0` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4`](defaults/main.yml#L437)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.ask_credential_on_launch`](defaults/main.yml#L443)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.ask_variables_on_launch`](defaults/main.yml#L444)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.execution_environment`](defaults/main.yml#L442)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.inventory`](defaults/main.yml#L441)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.name`](defaults/main.yml#L437)   | str   | `{{ aap_seed_mtv_pre_migration_vm_template_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.organization`](defaults/main.yml#L438)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.playbook`](defaults/main.yml#L440)   | str   | `{{ aap_seed_mtv_pre_migration_vm_playbook }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.project`](defaults/main.yml#L439)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.survey_enabled`](defaults/main.yml#L446)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.survey_spec`](defaults/main.yml#L447)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.survey_spec.description`](defaults/main.yml#L449)   | str   | `` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.survey_spec.name`](defaults/main.yml#L448)   | str   | `` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.survey_spec.spec`](defaults/main.yml#L450)   | list   | `[]` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.survey_spec.spec.0`](defaults/main.yml#L451)   | dict   | `{}` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.survey_spec.spec.0.question_description`](defaults/main.yml#L452)   | str   | `Action to perform against the VM` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.survey_spec.spec.0.question_name`](defaults/main.yml#L451)   | str   | `Pre-Migration VM Action` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.survey_spec.spec.0.required`](defaults/main.yml#L455)   | bool   | `True` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.survey_spec.spec.0.type`](defaults/main.yml#L454)   | str   | `text` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.survey_spec.spec.0.variable`](defaults/main.yml#L453)   | str   | `pre_migration_vm_action` |  None  |   None  |  None |
-| [`aap_seed_controller_templates.4.verbosity`](defaults/main.yml#L445)   | int   | `0` |  None  |   None  |  None |
-| [`aap_seed_credential_types_create`](defaults/main.yml#L262)   | bool   | `True` |  None  |   False  |  Create Credential Types |
-| [`aap_seed_credentials_create`](defaults/main.yml#L267)   | bool   | `True` |  None  |   False  |  Create Credentials |
+| [`aap_seed_common_survey_spec`](defaults/main.yml#L244)   | dict   | `{}` |  None  |   False  |  Common Survey Spec |
+| [`aap_seed_controller_credential_types`](defaults/main.yml#L296)   | list   | `[]` |  None  |   False  |  Controller Credential Types |
+| [`aap_seed_controller_credential_types.0`](defaults/main.yml#L297)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.injectors`](defaults/main.yml#L331)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.injectors.env`](defaults/main.yml#L332)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.injectors.env.VMWARE_CA_CERT`](defaults/main.yml#L337)   | str   | `{% raw %}{  { certificate }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.injectors.env.VMWARE_HOST`](defaults/main.yml#L333)   | str   | `{% raw %}{  { host }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.injectors.env.VMWARE_PASSWORD`](defaults/main.yml#L335)   | str   | `{% raw %}{  { password }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.injectors.env.VMWARE_USER`](defaults/main.yml#L334)   | str   | `{% raw %}{  { username }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.injectors.env.VMWARE_VALIDATE_CERTS`](defaults/main.yml#L336)   | str   | `{% raw %}{  { validate_certs }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.injectors.extra_vars`](defaults/main.yml#L338)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.injectors.extra_vars.mf_source_certificate`](defaults/main.yml#L340)   | str   | `{% raw %}{  { certificate }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.injectors.extra_vars.source_name`](defaults/main.yml#L339)   | str   | `{% raw %}{  { source_name }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs`](defaults/main.yml#L300)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields`](defaults/main.yml#L301)   | list   | `[]` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.0`](defaults/main.yml#L302)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.0.help_text`](defaults/main.yml#L305)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.0.id`](defaults/main.yml#L302)   | str   | `source_name` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.0.label`](defaults/main.yml#L304)   | str   | `Source Name` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.0.type`](defaults/main.yml#L303)   | str   | `string` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.1`](defaults/main.yml#L308)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.1.id`](defaults/main.yml#L308)   | str   | `host` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.1.label`](defaults/main.yml#L310)   | str   | `Hostname or IP` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.1.type`](defaults/main.yml#L309)   | str   | `string` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.2`](defaults/main.yml#L311)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.2.id`](defaults/main.yml#L311)   | str   | `username` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.2.label`](defaults/main.yml#L313)   | str   | `Username` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.2.type`](defaults/main.yml#L312)   | str   | `string` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.3`](defaults/main.yml#L314)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.3.id`](defaults/main.yml#L314)   | str   | `password` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.3.label`](defaults/main.yml#L316)   | str   | `Password` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.3.secret`](defaults/main.yml#L317)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.3.type`](defaults/main.yml#L315)   | str   | `string` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.4`](defaults/main.yml#L318)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.4.id`](defaults/main.yml#L318)   | str   | `certificate` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.4.label`](defaults/main.yml#L320)   | str   | `SSL/TLS CA Certificate` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.4.multiline`](defaults/main.yml#L321)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.4.secret`](defaults/main.yml#L322)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.4.type`](defaults/main.yml#L319)   | str   | `string` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.5`](defaults/main.yml#L323)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.5.id`](defaults/main.yml#L323)   | str   | `validate_certs` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.5.label`](defaults/main.yml#L325)   | str   | `Validate Certificates` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.fields.5.type`](defaults/main.yml#L324)   | str   | `boolean` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.required`](defaults/main.yml#L326)   | list   | `[]` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.required.0`](defaults/main.yml#L327)   | str   | `source_name` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.required.1`](defaults/main.yml#L328)   | str   | `host` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.required.2`](defaults/main.yml#L329)   | str   | `username` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.inputs.required.3`](defaults/main.yml#L330)   | str   | `password` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.kind`](defaults/main.yml#L299)   | str   | `cloud` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.name`](defaults/main.yml#L297)   | str   | `{{ aap_seed_source_credential_type }}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.0.organization`](defaults/main.yml#L298)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1`](defaults/main.yml#L341)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.injectors`](defaults/main.yml#L371)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.injectors.env`](defaults/main.yml#L372)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.injectors.env.K8S_AUTH_API_KEY`](defaults/main.yml#L374)   | str   | `{% raw %}{  { api_key }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.injectors.env.K8S_AUTH_HOST`](defaults/main.yml#L373)   | str   | `{% raw %}{  { host }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.injectors.env.K8S_AUTH_SSL_CA_CERT`](defaults/main.yml#L375)   | str   | `{% raw %}{  { ca_cert }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.injectors.env.K8S_AUTH_VERIFY_SSL`](defaults/main.yml#L376)   | str   | `{% raw %}{  { verify_ssl }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.injectors.extra_vars`](defaults/main.yml#L377)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.injectors.extra_vars.target_name`](defaults/main.yml#L378)   | str   | `{% raw %}{  { target_name }}{% endraw %}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs`](defaults/main.yml#L344)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields`](defaults/main.yml#L345)   | list   | `[]` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.0`](defaults/main.yml#L346)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.0.help_text`](defaults/main.yml#L349)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.0.id`](defaults/main.yml#L346)   | str   | `target_name` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.0.label`](defaults/main.yml#L348)   | str   | `Target Name` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.0.type`](defaults/main.yml#L347)   | str   | `string` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.1`](defaults/main.yml#L352)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.1.id`](defaults/main.yml#L352)   | str   | `host` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.1.label`](defaults/main.yml#L354)   | str   | `OpenShift API URL` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.1.type`](defaults/main.yml#L353)   | str   | `string` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.2`](defaults/main.yml#L355)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.2.id`](defaults/main.yml#L355)   | str   | `api_key` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.2.label`](defaults/main.yml#L357)   | str   | `API Key / Bearer Token` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.2.secret`](defaults/main.yml#L358)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.2.type`](defaults/main.yml#L356)   | str   | `string` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.3`](defaults/main.yml#L359)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.3.id`](defaults/main.yml#L359)   | str   | `ca_cert` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.3.label`](defaults/main.yml#L361)   | str   | `CA Certificate` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.3.multiline`](defaults/main.yml#L362)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.3.secret`](defaults/main.yml#L363)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.3.type`](defaults/main.yml#L360)   | str   | `string` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.4`](defaults/main.yml#L364)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.4.id`](defaults/main.yml#L364)   | str   | `verify_ssl` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.4.label`](defaults/main.yml#L366)   | str   | `Verify SSL` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.fields.4.type`](defaults/main.yml#L365)   | str   | `boolean` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.required`](defaults/main.yml#L367)   | list   | `[]` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.required.0`](defaults/main.yml#L368)   | str   | `target_name` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.required.1`](defaults/main.yml#L369)   | str   | `host` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.inputs.required.2`](defaults/main.yml#L370)   | str   | `api_key` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.kind`](defaults/main.yml#L343)   | str   | `cloud` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.name`](defaults/main.yml#L341)   | str   | `{{ aap_seed_target_credential_type }}` |  None  |   None  |  None |
+| [`aap_seed_controller_credential_types.1.organization`](defaults/main.yml#L342)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_execution_environments`](defaults/main.yml#L404)   | list   | `[]` |  None  |   False  |  Controller Execution Environments |
+| [`aap_seed_controller_execution_environments.0`](defaults/main.yml#L405)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_execution_environments.0.credential`](defaults/main.yml#L410)   | str   | `{{ aap_seed_execution_environment_credential ¦ default(omit, true) }}` |  None  |   None  |  None |
+| [`aap_seed_controller_execution_environments.0.description`](defaults/main.yml#L406)   | str   | `{{ aap_seed_execution_environment_description }}` |  None  |   None  |  None |
+| [`aap_seed_controller_execution_environments.0.image`](defaults/main.yml#L407)   | str   | `{{ aap_seed_execution_environment_image }}` |  None  |   None  |  None |
+| [`aap_seed_controller_execution_environments.0.name`](defaults/main.yml#L405)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
+| [`aap_seed_controller_execution_environments.0.organization`](defaults/main.yml#L408)   | str   | `{{ aap_seed_execution_environment_organization ¦ default(omit, true) }}` |  None  |   None  |  None |
+| [`aap_seed_controller_execution_environments.0.pull`](defaults/main.yml#L409)   | str   | `{{ aap_seed_execution_environment_pull }}` |  None  |   None  |  None |
+| [`aap_seed_controller_inventories`](defaults/main.yml#L383)   | list   | `[]` |  None  |   False  |  Controller Inventories |
+| [`aap_seed_controller_inventories.0`](defaults/main.yml#L384)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_inventories.0.name`](defaults/main.yml#L384)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_inventories.0.organization`](defaults/main.yml#L385)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_organizations`](defaults/main.yml#L289)   | list   | `[]` |  None  |   False  |  Controller Organizations |
+| [`aap_seed_controller_projects`](defaults/main.yml#L390)   | list   | `[]` |  None  |   False  |  Controller Projects |
+| [`aap_seed_controller_projects.0`](defaults/main.yml#L391)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_projects.0.credential`](defaults/main.yml#L397)   | str   | `{{ aap_seed_project_credential ¦ default(omit, true) }}` |  None  |   None  |  None |
+| [`aap_seed_controller_projects.0.name`](defaults/main.yml#L391)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_projects.0.organization`](defaults/main.yml#L392)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_projects.0.scm_branch`](defaults/main.yml#L395)   | str   | `{{ aap_seed_project_scm_branch }}` |  None  |   None  |  None |
+| [`aap_seed_controller_projects.0.scm_type`](defaults/main.yml#L393)   | str   | `git` |  None  |   None  |  None |
+| [`aap_seed_controller_projects.0.scm_update_on_launch`](defaults/main.yml#L396)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_projects.0.scm_url`](defaults/main.yml#L394)   | str   | `{{ aap_seed_project_scm_url }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates`](defaults/main.yml#L417)   | list   | `[]` |  None  |   False  |  Controller Templates |
+| [`aap_seed_controller_templates.0`](defaults/main.yml#L418)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.0.ask_credential_on_launch`](defaults/main.yml#L424)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.0.ask_variables_on_launch`](defaults/main.yml#L425)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.0.execution_environment`](defaults/main.yml#L423)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.0.inventory`](defaults/main.yml#L422)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.0.name`](defaults/main.yml#L418)   | str   | `{{ aap_seed_mtv_provider_template_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.0.organization`](defaults/main.yml#L419)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.0.playbook`](defaults/main.yml#L421)   | str   | `{{ aap_seed_mtv_provider_playbook }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.0.project`](defaults/main.yml#L420)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.0.verbosity`](defaults/main.yml#L426)   | int   | `0` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1`](defaults/main.yml#L427)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.ask_credential_on_launch`](defaults/main.yml#L433)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.ask_variables_on_launch`](defaults/main.yml#L434)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.execution_environment`](defaults/main.yml#L432)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.inventory`](defaults/main.yml#L431)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.name`](defaults/main.yml#L427)   | str   | `{{ aap_seed_mtv_maps_template_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.organization`](defaults/main.yml#L428)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.playbook`](defaults/main.yml#L430)   | str   | `{{ aap_seed_mtv_maps_playbook }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.project`](defaults/main.yml#L429)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.1.verbosity`](defaults/main.yml#L435)   | int   | `0` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2`](defaults/main.yml#L436)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2.ask_credential_on_launch`](defaults/main.yml#L442)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2.ask_variables_on_launch`](defaults/main.yml#L443)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2.execution_environment`](defaults/main.yml#L441)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2.inventory`](defaults/main.yml#L440)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2.name`](defaults/main.yml#L436)   | str   | `{{ aap_seed_mtv_plans_template_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2.organization`](defaults/main.yml#L437)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2.playbook`](defaults/main.yml#L439)   | str   | `{{ aap_seed_mtv_plans_playbook }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2.project`](defaults/main.yml#L438)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.2.verbosity`](defaults/main.yml#L444)   | int   | `0` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3`](defaults/main.yml#L445)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.ask_credential_on_launch`](defaults/main.yml#L451)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.ask_variables_on_launch`](defaults/main.yml#L452)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.execution_environment`](defaults/main.yml#L450)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.inventory`](defaults/main.yml#L449)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.name`](defaults/main.yml#L445)   | str   | `{{ aap_seed_mtv_migrate_template_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.organization`](defaults/main.yml#L446)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.playbook`](defaults/main.yml#L448)   | str   | `{{ aap_seed_mtv_migrate_playbook }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.project`](defaults/main.yml#L447)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_enabled`](defaults/main.yml#L454)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec`](defaults/main.yml#L455)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.description`](defaults/main.yml#L457)   | str   | `` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.name`](defaults/main.yml#L456)   | str   | `` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec`](defaults/main.yml#L458)   | list   | `[]` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0`](defaults/main.yml#L459)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0.question_description`](defaults/main.yml#L460)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0.question_name`](defaults/main.yml#L459)   | str   | `Plan Name` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0.required`](defaults/main.yml#L464)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0.type`](defaults/main.yml#L463)   | str   | `text` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.0.variable`](defaults/main.yml#L462)   | str   | `mtv_migrate_plan_name` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1`](defaults/main.yml#L465)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1.question_description`](defaults/main.yml#L466)   | str   | `<multiline value: folded_strip>` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1.question_name`](defaults/main.yml#L465)   | str   | `Plan Namespace` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1.required`](defaults/main.yml#L470)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1.type`](defaults/main.yml#L469)   | str   | `text` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.survey_spec.spec.1.variable`](defaults/main.yml#L468)   | str   | `mtv_migrate_plan_namespace` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.3.verbosity`](defaults/main.yml#L453)   | int   | `0` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4`](defaults/main.yml#L471)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.ask_credential_on_launch`](defaults/main.yml#L477)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.ask_variables_on_launch`](defaults/main.yml#L478)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.execution_environment`](defaults/main.yml#L476)   | str   | `{{ aap_seed_execution_environment }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.inventory`](defaults/main.yml#L475)   | str   | `{{ aap_seed_inventory_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.name`](defaults/main.yml#L471)   | str   | `{{ aap_seed_mtv_pre_migration_vm_template_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.organization`](defaults/main.yml#L472)   | str   | `{{ aap_seed_org_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.playbook`](defaults/main.yml#L474)   | str   | `{{ aap_seed_mtv_pre_migration_vm_playbook }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.project`](defaults/main.yml#L473)   | str   | `{{ aap_seed_project_name }}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.survey_enabled`](defaults/main.yml#L480)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.survey_spec`](defaults/main.yml#L481)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.survey_spec.description`](defaults/main.yml#L483)   | str   | `` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.survey_spec.name`](defaults/main.yml#L482)   | str   | `` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.survey_spec.spec`](defaults/main.yml#L484)   | list   | `[]` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.survey_spec.spec.0`](defaults/main.yml#L485)   | dict   | `{}` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.survey_spec.spec.0.question_description`](defaults/main.yml#L486)   | str   | `Action to perform against the VM` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.survey_spec.spec.0.question_name`](defaults/main.yml#L485)   | str   | `Pre-Migration VM Action` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.survey_spec.spec.0.required`](defaults/main.yml#L489)   | bool   | `True` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.survey_spec.spec.0.type`](defaults/main.yml#L488)   | str   | `text` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.survey_spec.spec.0.variable`](defaults/main.yml#L487)   | str   | `pre_migration_vm_action` |  None  |   None  |  None |
+| [`aap_seed_controller_templates.4.verbosity`](defaults/main.yml#L479)   | int   | `0` |  None  |   None  |  None |
+| [`aap_seed_credential_types_create`](defaults/main.yml#L254)   | bool   | `True` |  None  |   False  |  Create Credential Types |
+| [`aap_seed_credentials_create`](defaults/main.yml#L259)   | bool   | `True` |  None  |   False  |  Create Credentials |
 | [`aap_seed_execution_environment`](defaults/main.yml#L70)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Execution Environment |
-| [`aap_seed_execution_environment_credential`](defaults/main.yml#L141)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential |
-| [`aap_seed_execution_environment_credential_description`](defaults/main.yml#L147)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential Description |
-| [`aap_seed_execution_environment_credential_host`](defaults/main.yml#L154)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential Host |
-| [`aap_seed_execution_environment_credential_password`](defaults/main.yml#L166)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential Password |
-| [`aap_seed_execution_environment_credential_username`](defaults/main.yml#L160)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential Username |
-| [`aap_seed_execution_environment_credential_verify_ssl`](defaults/main.yml#L174)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential Verify SSL |
-| [`aap_seed_execution_environment_description`](defaults/main.yml#L122)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Description |
-| [`aap_seed_execution_environment_image`](defaults/main.yml#L129)   | str   | `{{ aap_execution_environment_image ¦ default('') }}` |  None  |   False  |  EE Image |
-| [`aap_seed_execution_environment_pull`](defaults/main.yml#L134)   | str   | `{{ aap_execution_environment_pull ¦ default('missing') }}` |  None  |   False  |  EE Pull Policy |
-| [`aap_seed_execution_environments_create`](defaults/main.yml#L287)   | bool   | `True` |  None  |   False  |  Create Execution Environments |
-| [`aap_seed_git_password`](defaults/main.yml#L107)   | str   | `{{ aap_git_password ¦ default('') }}` |  None  |   False  |  Git Password |
-| [`aap_seed_git_ssh_key`](defaults/main.yml#L112)   | str   | `{{ aap_git_ssh_key ¦ default('') }}` |  None  |   False  |  Git SSH Key |
-| [`aap_seed_git_ssh_key_unlock`](defaults/main.yml#L117)   | str   | `{{ aap_git_ssh_key_unlock ¦ default('') }}` |  None  |   False  |  Git SSH Key Unlock |
-| [`aap_seed_git_username`](defaults/main.yml#L102)   | str   | `{{ aap_git_username ¦ default('') }}` |  None  |   False  |  Git Username |
+| [`aap_seed_execution_environment_credential`](defaults/main.yml#L151)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential |
+| [`aap_seed_execution_environment_credential_description`](defaults/main.yml#L157)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential Description |
+| [`aap_seed_execution_environment_credential_host`](defaults/main.yml#L164)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential Host |
+| [`aap_seed_execution_environment_credential_password`](defaults/main.yml#L176)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential Password |
+| [`aap_seed_execution_environment_credential_username`](defaults/main.yml#L170)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential Username |
+| [`aap_seed_execution_environment_credential_verify_ssl`](defaults/main.yml#L184)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Registry Credential Verify SSL |
+| [`aap_seed_execution_environment_description`](defaults/main.yml#L124)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Description |
+| [`aap_seed_execution_environment_image`](defaults/main.yml#L131)   | str   | `{{ aap_execution_environment_image ¦ default('') }}` |  None  |   False  |  EE Image |
+| [`aap_seed_execution_environment_organization`](defaults/main.yml#L143)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  EE Organization |
+| [`aap_seed_execution_environment_pull`](defaults/main.yml#L136)   | str   | `{{ aap_execution_environment_pull ¦ default('missing') }}` |  None  |   False  |  EE Pull Policy |
+| [`aap_seed_execution_environments_create`](defaults/main.yml#L279)   | bool   | `True` |  None  |   False  |  Create Execution Environments |
+| [`aap_seed_git_password`](defaults/main.yml#L109)   | str   | `{{ aap_git_password ¦ default('') }}` |  None  |   False  |  Git Password |
+| [`aap_seed_git_ssh_key`](defaults/main.yml#L114)   | str   | `{{ aap_git_ssh_key ¦ default('') }}` |  None  |   False  |  Git SSH Key |
+| [`aap_seed_git_ssh_key_unlock`](defaults/main.yml#L119)   | str   | `{{ aap_git_ssh_key_unlock ¦ default('') }}` |  None  |   False  |  Git SSH Key Unlock |
+| [`aap_seed_git_username`](defaults/main.yml#L104)   | str   | `{{ aap_git_username ¦ default('') }}` |  None  |   False  |  Git Username |
 | [`aap_seed_hostname`](defaults/main.yml#L6)   | str   | `{{ aap_hostname }}` |  None  |   True  |  AAP Hostname |
-| [`aap_seed_hosts_create`](defaults/main.yml#L277)   | bool   | `True` |  None  |   False  |  Create Hosts |
-| [`aap_seed_inventories_create`](defaults/main.yml#L272)   | bool   | `True` |  None  |   False  |  Create Inventories |
+| [`aap_seed_hosts_create`](defaults/main.yml#L269)   | bool   | `True` |  None  |   False  |  Create Hosts |
+| [`aap_seed_inventories_create`](defaults/main.yml#L264)   | bool   | `True` |  None  |   False  |  Create Inventories |
 | [`aap_seed_inventory_name`](defaults/main.yml#L65)   | str   | `OpenShift Virtualization Migration` |  None  |   False  |  Inventory Name |
-| [`aap_seed_mtv_maps_playbook`](defaults/main.yml#L196)   | str   | `playbooks/vmf_mtv_maps.yml` |  None  |   False  |  MTV Maps Playbook |
-| [`aap_seed_mtv_maps_template_name`](defaults/main.yml#L191)   | str   | `OpenShift Virtualization Migration - MTV Maps` |  None  |   False  |  MTV Maps Template Name |
-| [`aap_seed_mtv_migrate_playbook`](defaults/main.yml#L216)   | str   | `playbooks/vmf_migrate.yml` |  None  |   False  |  MTV Migrate Playbook |
-| [`aap_seed_mtv_migrate_template_name`](defaults/main.yml#L211)   | str   | `OpenShift Virtualization Migration - MTV Migrate` |  None  |   False  |  MTV Migrate Template Name |
-| [`aap_seed_mtv_plans_playbook`](defaults/main.yml#L206)   | str   | `playbooks/vmf_mtv_plans.yml` |  None  |   False  |  MTV Plans Playbook |
-| [`aap_seed_mtv_plans_template_name`](defaults/main.yml#L201)   | str   | `OpenShift Virtualization Migration - MTV Plans` |  None  |   False  |  MTV Plans Template Name |
-| [`aap_seed_mtv_pre_migration_vm_playbook`](defaults/main.yml#L226)   | str   | `playbooks/vmf_pre_migration_vm.yml` |  None  |   False  |  Pre-Migration VM Playbook |
-| [`aap_seed_mtv_pre_migration_vm_template_name`](defaults/main.yml#L221)   | str   | `OpenShift Virtualization Migration - Pre-Migration VM Operations` |  None  |   False  |  Pre-Migration VM Template Name |
-| [`aap_seed_mtv_provider_playbook`](defaults/main.yml#L186)   | str   | `playbooks/vmf_mtv_provider.yml` |  None  |   False  |  MTV Provider Playbook |
-| [`aap_seed_mtv_provider_template_name`](defaults/main.yml#L181)   | str   | `OpenShift Virtualization Migration - MTV Provider` |  None  |   False  |  MTV Provider Template Name |
+| [`aap_seed_mtv_maps_playbook`](defaults/main.yml#L206)   | str   | `playbooks/vmf_mtv_maps.yml` |  None  |   False  |  MTV Maps Playbook |
+| [`aap_seed_mtv_maps_template_name`](defaults/main.yml#L201)   | str   | `OpenShift Virtualization Migration - MTV Maps` |  None  |   False  |  MTV Maps Template Name |
+| [`aap_seed_mtv_migrate_playbook`](defaults/main.yml#L226)   | str   | `playbooks/vmf_migrate.yml` |  None  |   False  |  MTV Migrate Playbook |
+| [`aap_seed_mtv_migrate_template_name`](defaults/main.yml#L221)   | str   | `OpenShift Virtualization Migration - MTV Migrate` |  None  |   False  |  MTV Migrate Template Name |
+| [`aap_seed_mtv_plans_playbook`](defaults/main.yml#L216)   | str   | `playbooks/vmf_mtv_plans.yml` |  None  |   False  |  MTV Plans Playbook |
+| [`aap_seed_mtv_plans_template_name`](defaults/main.yml#L211)   | str   | `OpenShift Virtualization Migration - MTV Plans` |  None  |   False  |  MTV Plans Template Name |
+| [`aap_seed_mtv_pre_migration_vm_playbook`](defaults/main.yml#L236)   | str   | `playbooks/vmf_pre_migration_vm.yml` |  None  |   False  |  Pre-Migration VM Playbook |
+| [`aap_seed_mtv_pre_migration_vm_template_name`](defaults/main.yml#L231)   | str   | `OpenShift Virtualization Migration - Pre-Migration VM Operations` |  None  |   False  |  Pre-Migration VM Template Name |
+| [`aap_seed_mtv_provider_playbook`](defaults/main.yml#L196)   | str   | `playbooks/vmf_mtv_provider.yml` |  None  |   False  |  MTV Provider Playbook |
+| [`aap_seed_mtv_provider_template_name`](defaults/main.yml#L191)   | str   | `OpenShift Virtualization Migration - MTV Provider` |  None  |   False  |  MTV Provider Template Name |
 | [`aap_seed_org_name`](defaults/main.yml#L38)   | str   | `Default` |  None  |   False  |  Organization Name |
-| [`aap_seed_organizations_create`](defaults/main.yml#L257)   | bool   | `True` |  None  |   False  |  Create Organizations |
+| [`aap_seed_organizations_create`](defaults/main.yml#L249)   | bool   | `True` |  None  |   False  |  Create Organizations |
 | [`aap_seed_password`](defaults/main.yml#L16)   | str   | `{{ aap_password ¦ default(omit) }}` |  None  |   False  |  AAP Password |
-| [`aap_seed_project_credential`](defaults/main.yml#L97)   | str   | `{{ aap_project_credential ¦ default('') }}` |  None  |   False  |  Project Credential |
+| [`aap_seed_project_credential`](defaults/main.yml#L99)   | str   | `{{ aap_project_credential ¦ default('') }}` |  None  |   False  |  Project Credential |
 | [`aap_seed_project_name`](defaults/main.yml#L43)   | str   | `OpenShift Virtualization Migration` |  None  |   False  |  Project Name |
 | [`aap_seed_project_scm_branch`](defaults/main.yml#L55)   | str   | `{{ aap_project_scm_branch ¦ default('v2') }}` |  None  |   False  |  Project SCM Branch |
 | [`aap_seed_project_scm_url`](defaults/main.yml#L48)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Project SCM URL |
 | [`aap_seed_project_sync_timeout`](defaults/main.yml#L60)   | int   | `120` |  None  |   False  |  Project Sync Timeout |
-| [`aap_seed_projects_create`](defaults/main.yml#L282)   | bool   | `True` |  None  |   False  |  Create Projects |
+| [`aap_seed_projects_create`](defaults/main.yml#L274)   | bool   | `True` |  None  |   False  |  Create Projects |
 | [`aap_seed_secure_logging`](defaults/main.yml#L33)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   False  |  Secure Logging |
 | [`aap_seed_source_credential_type`](defaults/main.yml#L77)   | str   | `Migration Factory - Source Environment` |  None  |   False  |  Source Credential Type |
-| [`aap_seed_source_inventory_group`](defaults/main.yml#L87)   | str   | `vm_sources` |  None  |   False  |  Source Inventory Group |
-| [`aap_seed_target_credential_type`](defaults/main.yml#L82)   | str   | `OpenShift or Kubernetes API Bearer Token` |  None  |   False  |  Target Credential Type |
-| [`aap_seed_target_inventory_group`](defaults/main.yml#L92)   | str   | `migration_clusters` |  None  |   False  |  Target Inventory Group |
-| [`aap_seed_templates_create`](defaults/main.yml#L292)   | bool   | `True` |  None  |   False  |  Create Templates |
+| [`aap_seed_source_inventory_group`](defaults/main.yml#L89)   | str   | `vm_sources` |  None  |   False  |  Source Inventory Group |
+| [`aap_seed_target_credential_type`](defaults/main.yml#L84)   | str   | `Migration Factory - Target Environment` |  None  |   False  |  Target Credential Type |
+| [`aap_seed_target_inventory_group`](defaults/main.yml#L94)   | str   | `migration_clusters` |  None  |   False  |  Target Inventory Group |
+| [`aap_seed_templates_create`](defaults/main.yml#L284)   | bool   | `True` |  None  |   False  |  Create Templates |
 | [`aap_seed_token`](defaults/main.yml#L21)   | str   | `{{ aap_token ¦ default(omit) }}` |  None  |   False  |  AAP Token |
 | [`aap_seed_username`](defaults/main.yml#L11)   | str   | `{{ aap_username ¦ default(omit) }}` |  None  |   False  |  AAP Username |
 | [`aap_seed_validate_certs`](defaults/main.yml#L26)   | str   | `{{ aap_validate_certs ¦ default(true) }}` |  None  |   False  |  Validate Certificates |
@@ -715,59 +751,37 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <br>
 <b>`aap_seed_common_survey_spec`:</b> >-
 <br>
-<b>`aap_seed_common_survey_spec.description`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.name`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.0`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.0.question_description`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.0.question_name`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.0.required`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.0.type`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.0.variable`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.1`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.1.question_description`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.1.question_name`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.1.required`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.1.type`:</b> None
-<br>
-<b>`aap_seed_common_survey_spec.spec.1.variable`:</b> None
-<br>
 <b>`aap_seed_controller_credential_types`:</b> >-
 <br>
 <b>`aap_seed_controller_credential_types.0`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.injectors`:</b> None
 <br>
-<b>`aap_seed_controller_credential_types.0.injectors.extra_vars`:</b> None
+<b>`aap_seed_controller_credential_types.0.injectors.env`:</b> None
 <br>
-<b>`aap_seed_controller_credential_types.0.injectors.extra_vars.mf_insecure_skip_tls_verify`:</b> None
+<b>`aap_seed_controller_credential_types.0.injectors.env.VMWARE_CA_CERT`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.0.injectors.env.VMWARE_HOST`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.0.injectors.env.VMWARE_PASSWORD`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.0.injectors.env.VMWARE_USER`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.0.injectors.env.VMWARE_VALIDATE_CERTS`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.0.injectors.extra_vars`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.injectors.extra_vars.mf_source_certificate`:</b> None
 <br>
-<b>`aap_seed_controller_credential_types.0.injectors.extra_vars.mf_source_host`:</b> None
-<br>
-<b>`aap_seed_controller_credential_types.0.injectors.extra_vars.mf_source_password`:</b> None
-<br>
-<b>`aap_seed_controller_credential_types.0.injectors.extra_vars.mf_source_username`:</b> None
+<b>`aap_seed_controller_credential_types.0.injectors.extra_vars.source_name`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.inputs`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.inputs.fields`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.inputs.fields.0`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.0.inputs.fields.0.help_text`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.inputs.fields.0.id`:</b> None
 <br>
@@ -789,8 +803,6 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <br>
 <b>`aap_seed_controller_credential_types.0.inputs.fields.2.label`:</b> None
 <br>
-<b>`aap_seed_controller_credential_types.0.inputs.fields.2.secret`:</b> None
-<br>
 <b>`aap_seed_controller_credential_types.0.inputs.fields.2.type`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.inputs.fields.3`:</b> None
@@ -798,8 +810,6 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <b>`aap_seed_controller_credential_types.0.inputs.fields.3.id`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.inputs.fields.3.label`:</b> None
-<br>
-<b>`aap_seed_controller_credential_types.0.inputs.fields.3.multiline`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.inputs.fields.3.secret`:</b> None
 <br>
@@ -811,7 +821,19 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <br>
 <b>`aap_seed_controller_credential_types.0.inputs.fields.4.label`:</b> None
 <br>
+<b>`aap_seed_controller_credential_types.0.inputs.fields.4.multiline`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.0.inputs.fields.4.secret`:</b> None
+<br>
 <b>`aap_seed_controller_credential_types.0.inputs.fields.4.type`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.0.inputs.fields.5`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.0.inputs.fields.5.id`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.0.inputs.fields.5.label`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.0.inputs.fields.5.type`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.inputs.required`:</b> None
 <br>
@@ -821,11 +843,97 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <br>
 <b>`aap_seed_controller_credential_types.0.inputs.required.2`:</b> None
 <br>
+<b>`aap_seed_controller_credential_types.0.inputs.required.3`:</b> None
+<br>
 <b>`aap_seed_controller_credential_types.0.kind`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.name`:</b> None
 <br>
 <b>`aap_seed_controller_credential_types.0.organization`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.injectors`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.injectors.env`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.injectors.env.K8S_AUTH_API_KEY`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.injectors.env.K8S_AUTH_HOST`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.injectors.env.K8S_AUTH_SSL_CA_CERT`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.injectors.env.K8S_AUTH_VERIFY_SSL`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.injectors.extra_vars`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.injectors.extra_vars.target_name`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.0`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.0.help_text`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.0.id`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.0.label`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.0.type`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.1`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.1.id`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.1.label`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.1.type`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.2`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.2.id`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.2.label`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.2.secret`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.2.type`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.3`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.3.id`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.3.label`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.3.multiline`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.3.secret`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.3.type`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.4`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.4.id`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.4.label`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.fields.4.type`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.required`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.required.0`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.required.1`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.inputs.required.2`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.kind`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.name`:</b> None
+<br>
+<b>`aap_seed_controller_credential_types.1.organization`:</b> None
 <br>
 <b>`aap_seed_controller_execution_environments`:</b> >-
 <br>
@@ -891,10 +999,6 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <br>
 <b>`aap_seed_controller_templates.0.project`:</b> None
 <br>
-<b>`aap_seed_controller_templates.0.survey_enabled`:</b> None
-<br>
-<b>`aap_seed_controller_templates.0.survey_spec`:</b> None
-<br>
 <b>`aap_seed_controller_templates.0.verbosity`:</b> None
 <br>
 <b>`aap_seed_controller_templates.1`:</b> None
@@ -915,10 +1019,6 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <br>
 <b>`aap_seed_controller_templates.1.project`:</b> None
 <br>
-<b>`aap_seed_controller_templates.1.survey_enabled`:</b> None
-<br>
-<b>`aap_seed_controller_templates.1.survey_spec`:</b> None
-<br>
 <b>`aap_seed_controller_templates.1.verbosity`:</b> None
 <br>
 <b>`aap_seed_controller_templates.2`:</b> None
@@ -938,10 +1038,6 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <b>`aap_seed_controller_templates.2.playbook`:</b> None
 <br>
 <b>`aap_seed_controller_templates.2.project`:</b> None
-<br>
-<b>`aap_seed_controller_templates.2.survey_enabled`:</b> None
-<br>
-<b>`aap_seed_controller_templates.2.survey_spec`:</b> None
 <br>
 <b>`aap_seed_controller_templates.2.verbosity`:</b> None
 <br>
@@ -1063,6 +1159,8 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <br>
 <b>`aap_seed_execution_environment_image`:</b> Container image for the custom execution environment. Cascades from aap_execution_environment_image.
 <br>
+<b>`aap_seed_execution_environment_organization`:</b> >-
+<br>
 <b>`aap_seed_execution_environment_pull`:</b> Image pull policy for the execution environment. Cascades from aap_execution_environment_pull.
 <br>
 <b>`aap_seed_execution_environments_create`:</b> Whether to create execution environment objects in AAP.
@@ -1127,7 +1225,7 @@ Description: Seed AAP with Migration Factory Configuration as Code content
 <br>
 <b>`aap_seed_source_inventory_group`:</b> AAP inventory group name containing source hypervisor hosts.
 <br>
-<b>`aap_seed_target_credential_type`:</b> Name of the built-in credential type used for OpenShift target clusters.
+<b>`aap_seed_target_credential_type`:</b> >-
 <br>
 <b>`aap_seed_target_inventory_group`:</b> AAP inventory group name containing target OpenShift cluster hosts.
 <br>
