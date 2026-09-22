@@ -122,18 +122,53 @@
     - mtv_provider_source_verify_ssl | bool
     - mtv_provider_source_certificate | trim | length == 0
   block:
-    - name: validate | Retrieve remote certificate chain from source
+    - name: validate | Retrieve leaf certificate from source
       community.crypto.get_certificate:
-        host: "{{ mtv_provider_source_host | regex_replace(':[0-9]+$', '') }}"
+        host: "{{ _mtv_provider_source_hostname }}"
         port: >-
           {{ (mtv_provider_source_host | regex_search(':([0-9]+)$', '\1') | default(['443'], true))[0] | int }}
-        get_certificate_chain: true
       register: _mtv_provider_remote_cert
+      vars:
+        _mtv_provider_source_hostname: >-
+          {{ mtv_provider_source_host | regex_replace(':[0-9]+$', '') }}
 
-    - name: validate | Store retrieved certificate chain
+    - name: validate | Fetch CA certificate from VMCA endpoint
+      when: mtv_provider_source_type == 'vmware'
+      block:
+        - name: validate | Download VMCA CA certificate (DER format)
+          ansible.builtin.uri:
+            url: "https://{{ _mtv_provider_source_hostname }}/afd/vecs/ca"
+            validate_certs: false
+            return_content: false
+            dest: "{{ _mtv_provider_vmca_der_path }}"
+          vars:
+            _mtv_provider_source_hostname: >-
+              {{ mtv_provider_source_host | regex_replace(':[0-9]+$', '') }}
+          register: _mtv_provider_vmca_fetch
+
+        - name: validate | Convert VMCA CA certificate from DER to PEM
+          ansible.builtin.command:
+            cmd: >-
+              openssl x509 -inform DER
+              -in {{ _mtv_provider_vmca_der_path }}
+              -outform PEM
+          register: _mtv_provider_vmca_pem
+          changed_when: false
+          when: _mtv_provider_vmca_fetch is succeeded
+
+        - name: validate | Store full certificate chain (leaf + CA)
+          ansible.builtin.set_fact:
+            _mtv_provider_source_certificate: >-
+              {{ _mtv_provider_remote_cert.cert ~ '\n' ~ _mtv_provider_vmca_pem.stdout ~ '\n' }}
+          when: _mtv_provider_vmca_pem is succeeded
+      vars:
+        _mtv_provider_vmca_der_path: /tmp/.mtv_provider_vmca_ca.der
+
+    - name: validate | Store leaf certificate (non-VMware or VMCA fallback)
       ansible.builtin.set_fact:
         _mtv_provider_source_certificate: >-
-          {{ _mtv_provider_remote_cert.unverified_chain | default([_mtv_provider_remote_cert.cert]) | join('\n') }}
+          {{ _mtv_provider_remote_cert.cert }}
+      when: _mtv_provider_source_certificate is not defined
 
 - name: validate | Resolve effective certificate
   ansible.builtin.set_fact:
