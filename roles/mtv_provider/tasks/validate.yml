@@ -156,10 +156,10 @@
           changed_when: false
           when: _mtv_provider_vmca_fetch is succeeded
 
-        - name: validate | Store full certificate chain (leaf + CA)
+        - name: validate | Store VMCA root CA certificate
           ansible.builtin.set_fact:
             _mtv_provider_source_certificate: >-
-              {{ _mtv_provider_remote_cert.cert ~ '\n' ~ _mtv_provider_vmca_pem.stdout ~ '\n' }}
+              {{ _mtv_provider_vmca_pem.stdout ~ '\n' }}
           when: _mtv_provider_vmca_pem is succeeded
       vars:
         _mtv_provider_vmca_der_path: /tmp/.mtv_provider_vmca_ca.der
