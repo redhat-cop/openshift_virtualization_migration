@@ -224,8 +224,12 @@ Description: Create MTV/Forklift source provider CRs on OpenShift target cluster
 | validate ¦ Assert MTV operator is installed | `ansible.builtin.assert` | False |
 | validate ¦ Resolve provider variables | `ansible.builtin.set_fact` | False |
 | validate ¦ Retrieve source TLS certificate | `block` | True |
-| validate ¦ Retrieve remote certificate from source | `community.crypto.get_certificate` | False |
-| validate ¦ Store retrieved certificate | `ansible.builtin.set_fact` | False |
+| validate ¦ Retrieve leaf certificate from source | `community.crypto.get_certificate` | False |
+| validate ¦ Fetch CA certificate from VMCA endpoint | `block` | True |
+| validate ¦ Download VMCA CA certificate (DER format) | `ansible.builtin.uri` | False |
+| validate ¦ Convert VMCA CA certificate from DER to PEM | `ansible.builtin.command` | True |
+| validate ¦ Store VMCA root CA certificate | `ansible.builtin.set_fact` | True |
+| validate ¦ Store leaf certificate (non-VMware or VMCA fallback) | `ansible.builtin.set_fact` | True |
 | validate ¦ Resolve effective certificate | `ansible.builtin.set_fact` | False |
 
 ## Task Flow Graphs
@@ -323,10 +327,15 @@ classDef rescue stroke:#665352,stroke-width:2px;
   validate___Check_Forklift_CRD_exists_on_target_cluster8-->|Task| validate___Assert_MTV_operator_is_installed9[validate   assert mtv operator is installed]:::task
   validate___Assert_MTV_operator_is_installed9-->|Task| validate___Resolve_provider_variables10[validate   resolve provider variables]:::task
   validate___Resolve_provider_variables10-->|Block Start| validate___Retrieve_source_TLS_certificate11_block_start_0[[validate   retrieve source tls certificate<br>When: **mtv provider auto retrieve cert   bool and mtv<br>provider source verify ssl   bool and mtv provider<br>source certificate   trim   length    0**]]:::block
-  validate___Retrieve_source_TLS_certificate11_block_start_0-->|Task| validate___Retrieve_remote_certificate_from_source0[validate   retrieve remote certificate from source]:::task
-  validate___Retrieve_remote_certificate_from_source0-->|Task| validate___Store_retrieved_certificate1[validate   store retrieved certificate]:::task
-  validate___Store_retrieved_certificate1-.->|End of Block| validate___Retrieve_source_TLS_certificate11_block_start_0
-  validate___Store_retrieved_certificate1-->|Task| validate___Resolve_effective_certificate12[validate   resolve effective certificate]:::task
+  validate___Retrieve_source_TLS_certificate11_block_start_0-->|Task| validate___Retrieve_leaf_certificate_from_source0[validate   retrieve leaf certificate from source]:::task
+  validate___Retrieve_leaf_certificate_from_source0-->|Block Start| validate___Fetch_CA_certificate_from_VMCA_endpoint1_block_start_1[[validate   fetch ca certificate from vmca endpoint<br>When: **mtv provider source type     vmware**]]:::block
+  validate___Fetch_CA_certificate_from_VMCA_endpoint1_block_start_1-->|Task| validate___Download_VMCA_CA_certificate__DER_format_0[validate   download vmca ca certificate  der<br>format ]:::task
+  validate___Download_VMCA_CA_certificate__DER_format_0-->|Task| validate___Convert_VMCA_CA_certificate_from_DER_to_PEM1[validate   convert vmca ca certificate from der to<br>pem<br>When: **mtv provider vmca fetch is succeeded**]:::task
+  validate___Convert_VMCA_CA_certificate_from_DER_to_PEM1-->|Task| validate___Store_VMCA_root_CA_certificate2[validate   store vmca root ca certificate<br>When: **mtv provider vmca pem is succeeded**]:::task
+  validate___Store_VMCA_root_CA_certificate2-.->|End of Block| validate___Fetch_CA_certificate_from_VMCA_endpoint1_block_start_1
+  validate___Store_VMCA_root_CA_certificate2-->|Task| validate___Store_leaf_certificate__non_VMware_or_VMCA_fallback_2[validate   store leaf certificate  non vmware or<br>vmca fallback <br>When: **mtv provider source certificate is not defined**]:::task
+  validate___Store_leaf_certificate__non_VMware_or_VMCA_fallback_2-.->|End of Block| validate___Retrieve_source_TLS_certificate11_block_start_0
+  validate___Store_leaf_certificate__non_VMware_or_VMCA_fallback_2-->|Task| validate___Resolve_effective_certificate12[validate   resolve effective certificate]:::task
   validate___Resolve_effective_certificate12-->End
 ```
 
