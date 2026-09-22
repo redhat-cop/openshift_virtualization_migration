@@ -4,8 +4,11 @@
     - name: Validate inputs and resolve provider variables
       ansible.builtin.include_tasks: validate.yml
 
-    - name: Create provider secret and CR on target cluster
-      ansible.builtin.include_tasks: create_provider.yml
+    - name: Ensure host (openshift) provider exists on target cluster
+      ansible.builtin.include_tasks: create_provider_openshift.yml
+
+    - name: Create source provider secret and CR on target cluster
+      ansible.builtin.include_tasks: create_provider_vmware.yml
 
   rescue:
     - name: Gather provider error details and fail

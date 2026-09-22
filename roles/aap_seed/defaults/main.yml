@@ -235,6 +235,16 @@ aap_seed_mtv_pre_migration_vm_template_name: OpenShift Virtualization Migration 
 # description: Playbook path for the pre-migration VM job template.
 aap_seed_mtv_pre_migration_vm_playbook: playbooks/vmf_pre_migration_vm.yml
 
+# title: Registry Credentials Template Name
+# required: False
+# description: Name of the registry credentials job template created in AAP.
+aap_seed_registry_credentials_template_name: OpenShift Virtualization Migration - Registry Credentials
+
+# title: Registry Credentials Playbook
+# required: False
+# description: Playbook path for the registry credentials job template.
+aap_seed_registry_credentials_playbook: playbooks/utility_registry_credentials.yml
+
 # title: Common Survey Spec
 # required: False
 # description: >-
@@ -487,4 +497,13 @@ aap_seed_controller_templates:
           variable: pre_migration_vm_action
           type: text
           required: true
+  - name: "{{ aap_seed_registry_credentials_template_name }}"
+    organization: "{{ aap_seed_org_name }}"
+    project: "{{ aap_seed_project_name }}"
+    playbook: "{{ aap_seed_registry_credentials_playbook }}"
+    inventory: "{{ aap_seed_inventory_name }}"
+    execution_environment: "{{ aap_seed_execution_environment }}"
+    ask_credential_on_launch: true
+    ask_variables_on_launch: true
+    verbosity: 0
 ...
