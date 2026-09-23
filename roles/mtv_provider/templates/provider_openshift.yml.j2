@@ -1,0 +1,11 @@
+apiVersion: {{ mtv_provider_api_version }}
+kind: Provider
+metadata:
+  name: {{ mtv_provider_openshift_provider_name | to_json }}
+  namespace: {{ mtv_provider_provider_namespace | to_json }}
+  labels:
+    app.kubernetes.io/managed-by: {{ mtv_provider_managed_by_label }}
+spec:
+  type: "openshift"
+  url: ""
+  secret: {}

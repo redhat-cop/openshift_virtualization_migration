@@ -122,16 +122,58 @@
     - mtv_provider_source_verify_ssl | bool
     - mtv_provider_source_certificate | trim | length == 0
   block:
-    - name: validate | Retrieve remote certificate from source
+    - name: validate | Retrieve leaf certificate from source
       community.crypto.get_certificate:
-        host: "{{ mtv_provider_source_host | regex_replace(':[0-9]+$', '') }}"
+        host: "{{ _mtv_provider_source_hostname }}"
         port: >-
           {{ (mtv_provider_source_host | regex_search(':([0-9]+)$', '\1') | default(['443'], true))[0] | int }}
       register: _mtv_provider_remote_cert
+      vars:
+        _mtv_provider_source_hostname: >-
+          {{ mtv_provider_source_host | regex_replace(':[0-9]+$', '') }}
 
-    - name: validate | Store retrieved certificate
+    - name: validate | Fetch CA certificate from VMCA endpoint
+      when: mtv_provider_source_type == 'vmware'
+      vars:
+        _mtv_provider_vmca_der_path: /tmp/.mtv_provider_vmca_ca.der
+      block:
+        - name: validate | Download VMCA CA certificate (DER format)
+          ansible.builtin.uri:
+            url: "https://{{ _mtv_provider_source_hostname }}/afd/vecs/ca"
+            validate_certs: false
+            return_content: false
+            dest: "{{ _mtv_provider_vmca_der_path }}"
+          vars:
+            _mtv_provider_source_hostname: >-
+              {{ mtv_provider_source_host | regex_replace(':[0-9]+$', '') }}
+          register: _mtv_provider_vmca_fetch
+
+        - name: validate | Convert VMCA CA certificate from DER to PEM
+          ansible.builtin.command:
+            cmd: >-
+              openssl x509 -inform DER
+              -in {{ _mtv_provider_vmca_der_path }}
+              -outform PEM
+          register: _mtv_provider_vmca_pem
+          changed_when: false
+
+        - name: validate | Store VMCA root CA certificate
+          ansible.builtin.set_fact:
+            _mtv_provider_source_certificate: >-
+              {{ _mtv_provider_vmca_pem.stdout ~ '\n' }}
+      rescue:
+        - name: validate | VMCA endpoint unavailable, falling back to leaf cert
+          ansible.builtin.debug:
+            msg: >-
+              VMCA CA endpoint was not available on
+              '{{ mtv_provider_source_host }}'. Falling back to the
+              leaf certificate.
+
+    - name: validate | Store leaf certificate (non-VMware or VMCA fallback)
       ansible.builtin.set_fact:
-        _mtv_provider_source_certificate: "{{ _mtv_provider_remote_cert.cert }}"
+        _mtv_provider_source_certificate: >-
+          {{ _mtv_provider_remote_cert.cert }}
+      when: _mtv_provider_source_certificate is not defined
 
 - name: validate | Resolve effective certificate
   ansible.builtin.set_fact:

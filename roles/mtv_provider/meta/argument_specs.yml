@@ -2,11 +2,13 @@
 argument_specs:
   main:
     short_description: >-
-      Create MTV/Forklift source provider CRs on OpenShift target clusters
+      Ensure host OpenShift provider and source provider CRs exist on
+      target clusters
     description:
       - >-
-        Creates a Forklift Provider custom resource and its backing Secret
-        on a target OpenShift cluster for a given source environment.
+        Ensures the host OpenShift provider exists in the target
+        namespace, then creates a Forklift Provider custom resource
+        and its backing Secret for a given source environment.
       - >-
         Designed to run from AAP with credential injection. The source
         credential injects VMWARE_* environment variables and
@@ -86,6 +88,15 @@ argument_specs:
         description: >-
           Forklift API version for Provider CRs.
 
+      mtv_provider_openshift_provider_name:
+        type: str
+        required: false
+        default: host
+        description: >-
+          Name of the host OpenShift provider CR created in the
+          target namespace. Defaults to C(host) to match the
+          Forklift convention.
+
       mtv_provider_provider_override:
         type: dict
         required: false
@@ -101,7 +112,27 @@ argument_specs:
         default: true
         description: >-
           Whether to automatically retrieve the source TLS certificate
-          when verify_ssl is true and no certificate is provided.
+          when verify_ssl is true and no certificate is provided. Set
+          to C(false) to skip all certificate retrieval and rely on
+          the user-provided certificate or insecureSkipVerify.
+
+      mtv_provider_source_type:
+        type: str
+        required: false
+        default: vmware
+        choices:
+          - vmware
+          - ovirt
+        description: >-
+          Type of the source environment. Resolved from the source
+          host's C(type) variable in the AAP inventory.
+
+      mtv_provider_source_host:
+        type: str
+        required: true
+        description: >-
+          Hostname or URL of the source hypervisor. Resolved from
+          the source host's C(host) variable in the AAP inventory.
 
       mtv_provider_source_username:
         type: str
@@ -136,6 +167,24 @@ argument_specs:
           hypervisor. Cascades from C(VMWARE_VALIDATE_CERTS)
           env var; falls back to the inverse of
           C(mf_insecure_skip_tls_verify) if set, or C(true).
+
+      mtv_provider_source_sdk_endpoint:
+        type: str
+        required: false
+        default: /sdk
+        description: >-
+          SDK endpoint path appended to the source host URL for
+          VMware providers. Resolved from the source host's
+          C(sdk_endpoint) variable by default.
+
+      mtv_provider_source_vddk:
+        type: dict
+        required: false
+        default: {}
+        description: >-
+          VDDK configuration dictionary from the source host vars.
+          When the C(image) key is set, the VDDK init image is
+          included in the Provider CR settings.
 
       mtv_provider_managed_by_label:
         type: str

@@ -1,0 +1,54 @@
+---
+- name: create_provider_openshift | Check if host provider exists
+  kubernetes.core.k8s_info:
+    api_version: "{{ mtv_provider_api_version }}"
+    kind: Provider
+    name: "{{ mtv_provider_openshift_provider_name }}"
+    namespace: "{{ mtv_provider_provider_namespace }}"
+  register: _mtv_provider_host_provider
+
+- name: create_provider_openshift | Create host provider
+  when: _mtv_provider_host_provider.resources | length == 0
+  block:
+    - name: create_provider_openshift | Ensure host provider CR exists
+      redhat.openshift.k8s:
+        state: present
+        apply: true
+        definition: >-
+          {{ lookup('template', 'provider_openshift.yml.j2') | from_yaml }}
+
+    - name: create_provider_openshift | Wait for host provider to become Ready
+      kubernetes.core.k8s_info:
+        api_version: "{{ mtv_provider_api_version }}"
+        kind: Provider
+        name: "{{ mtv_provider_openshift_provider_name }}"
+        namespace: "{{ mtv_provider_provider_namespace }}"
+      register: _mtv_provider_host_result
+      until: >-
+        _mtv_provider_host_result.resources | length > 0 and
+        (_mtv_provider_host_result.resources[0].status.conditions
+         | default([])
+         | selectattr('type', 'equalto', 'Ready')
+         | selectattr('status', 'equalto', 'True')
+         | list
+         | length > 0)
+      retries: >-
+        {{ ((mtv_provider_provider_wait_timeout | int) /
+            (mtv_provider_provider_wait_poll | int)) | int }}
+      delay: "{{ mtv_provider_provider_wait_poll }}"
+      when: mtv_provider_provider_wait | bool
+
+    - name: create_provider_openshift | Host provider created successfully
+      ansible.builtin.debug:
+        msg: >-
+          Provider '{{ mtv_provider_openshift_provider_name }}' (openshift)
+          is Ready in namespace '{{ mtv_provider_provider_namespace }}'
+          on target '{{ target_name }}'.
+
+- name: create_provider_openshift | Host provider already exists
+  ansible.builtin.debug:
+    msg: >-
+      Provider '{{ mtv_provider_openshift_provider_name }}' already exists
+      in namespace '{{ mtv_provider_provider_namespace }}' — skipping creation.
+  when: _mtv_provider_host_provider.resources | length > 0
+...

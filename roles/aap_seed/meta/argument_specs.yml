@@ -365,6 +365,20 @@ argument_specs:
         description: >-
           Playbook path for the MTV Migrate job template.
 
+      aap_seed_registry_credentials_template_name:
+        type: str
+        required: false
+        default: OpenShift Virtualization Migration - Registry Credentials
+        description: >-
+          Name of the Registry Credentials job template created in AAP.
+
+      aap_seed_registry_credentials_playbook:
+        type: str
+        required: false
+        default: playbooks/utility_registry_credentials.yml
+        description: >-
+          Playbook path for the Registry Credentials job template.
+
       aap_seed_organizations_create:
         type: bool
         required: false

@@ -3,8 +3,8 @@ galaxy_info:
   role_name: mtv_provider
   author: Red Hat
   description: >-
-    Create MTV/Forklift source provider CRs on OpenShift target clusters.
-    Designed to run from AAP with credential injection.
+    Ensure host OpenShift provider and source provider CRs exist on
+    target clusters. Designed to run from AAP with credential injection.
   company: Red Hat
   license: GPL-3.0-only
   min_ansible_version: "2.16"

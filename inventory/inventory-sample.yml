@@ -88,6 +88,8 @@ vm_sources:
       sdk_endpoint: /sdk
       username: administrator@vsphere.local
       password: changeme
+      #   vddk:
+      #     image: registry.example.com/vddk:8.0
       # validate_certs: false             # default: true
       # certificate: |
       #   -----BEGIN CERTIFICATE-----

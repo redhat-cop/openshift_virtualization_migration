@@ -47,7 +47,7 @@ This collection includes the following roles for managing OpenShift Virtualizati
 * [mtv_maps](roles/mtv_maps/README.md) - Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift target clusters for a given source-target pair.
 * [mtv_migrate](roles/mtv_migrate/README.md) - MTV Migrate.
 * [mtv_plans](roles/mtv_plans/README.md) - Manages MTV migration plans.
-* [mtv_provider](roles/mtv_provider/README.md) - Create MTV/Forklift source provider CRs on OpenShift target clusters. Designed to run from AAP with credential injection.
+* [mtv_provider](roles/mtv_provider/README.md) - Ensure host OpenShift provider and source provider CRs exist on target clusters. Designed to run from AAP with credential injection.
 * [mtv_query_inventory](roles/mtv_query_inventory/README.md) - Queries MTV inventory.
 * [pre_migration_vm](roles/pre_migration_vm/README.md) - Perform VM related activities prior to a migration
 * [utility_aap_deploy](roles/utility_aap_deploy/README.md) - Deploys an instance of Ansible Automation Platform.

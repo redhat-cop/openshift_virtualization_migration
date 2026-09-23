@@ -38,6 +38,13 @@ mtv_provider_provider_state: present
 # description: Forklift API version for Provider CRs.
 mtv_provider_api_version: forklift.konveyor.io/v1beta1
 
+# title: OpenShift Provider Name
+# required: False
+# description: >-
+#   Name of the host OpenShift provider CR created in the target namespace.
+#   Defaults to 'host' to match the Forklift convention.
+mtv_provider_openshift_provider_name: host
+
 # title: Provider Override
 # required: False
 # description: Override configuration merged into the Provider CR spec.
@@ -47,7 +54,9 @@ mtv_provider_provider_override: {}
 # required: False
 # description: >-
 #   Whether to automatically retrieve the source TLS certificate
-#   when verify_ssl is true and no certificate is provided.
+#   when verify_ssl is true and no certificate is provided. Set to
+#   false to skip all certificate retrieval and rely on the
+#   user-provided certificate or insecureSkipVerify.
 mtv_provider_auto_retrieve_cert: true
 
 # title: Source Type
