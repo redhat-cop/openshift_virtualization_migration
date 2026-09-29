@@ -89,6 +89,7 @@ vm_sources:
       username: administrator@vsphere.local
       password: changeme
       #   vddk:
+      #     # image must include the registry hostname, e.g. registry.example.com/vddk:8.0
       #     image: registry.example.com/vddk:8.0
       # validate_certs: false             # default: true
       # certificate: |
@@ -104,6 +105,7 @@ vm_sources:
     #   username: administrator@vsphere.local
     #   password: changeme
     #   vddk:
+    #     # image must include the registry hostname, e.g. registry.example.com/vddk:8.0
     #     image: registry.example.com/vddk:8.0
     #   esxi_hosts:
     #     - id: host-1
@@ -147,6 +149,7 @@ migration_clusters:
       mtv_namespace: openshift-mtv
       default_target_namespace: vm-workloads
       configure_mtv: true
+      install_aap: true # Deploy an opinionated Automation Platform instance
 
     # -- Staging cluster with temporary token ------------------------------------
     # ocp-staging:

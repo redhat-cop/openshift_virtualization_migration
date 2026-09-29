@@ -1,0 +1,92 @@
+---
+
+- name: Deploy AAP
+  ansible.builtin.import_playbook: utility_aap_deploy.yml
+
+- name: Add Ansible Group
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Add hosts to Ansible group
+      no_log: "{{ secure_logging | default(true) }}"
+      ansible.builtin.add_host:
+        name: "aap_{{ aap_clusters_host }}"
+        groups: migration_aap
+        aap_hostname: "https://{{ hostvars[aap_clusters_host]['__utility_aap_deploy_aap_hostname'] }}"
+        aap_validate_certs: "{{ hostvars[aap_clusters_host]['__utility_aap_deploy_aap_validate_certs'] }}"
+        aap_username: "{{ hostvars[aap_clusters_host]['__utility_aap_deploy_aap_username'] }}"
+        aap_password: "{{ hostvars[aap_clusters_host]['__utility_aap_deploy_aap_password'] }}"
+      loop_control:
+        loop_var: aap_clusters_host
+      loop: "{{ groups['aap_clusters'] | default([]) + groups['migration_clusters'] | default([]) }}"
+      when:
+        - >-
+          aap_clusters_host in groups['aap_clusters'] | default([]) or
+          (aap_clusters_host in groups['migration_clusters'] and
+          hostvars[aap_clusters_host]['install_aap'] | default(false) | bool)
+
+- name: Set Up Migration Clusters
+  hosts: migration_clusters
+  connection: local
+  tasks:
+    - name: Generate openshift_api_key if not defined
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.utility_openshift_target_credential
+      when:
+        - openshift_api_key | default('', true) | length == 0
+        - openshift_temporary_api_key | default('', true) | length > 0
+
+    - name: Set up Namespace on migration cluster
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.e2e_testing
+        tasks_from: namespace_prepare
+      loop_control:
+        loop_var: migration_aap_host
+      when:
+        - hostvars[inventory_hostname]['aap_hosts'] is defined
+        - migration_aap_host in hostvars[inventory_hostname]['aap_hosts']
+      loop: "{{ groups['migration_aap'] }}"
+
+- name: Seed AAP
+  ansible.builtin.import_playbook: vmf_seed_aap.yml
+
+- name: Configure Registry Credentials
+  hosts: migration_aap
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Configure VDDK Credentials if required
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.e2e_testing
+        tasks_from: configure_vddk_credentials
+      loop_control:
+        loop_var: migration_cluster_host
+      loop: "{{ groups['migration_clusters'] }}"
+      when:
+        - hostvars[migration_cluster_host]['aap_hosts'] is defined
+        - inventory_hostname in hostvars[migration_cluster_host]['aap_hosts']
+      vars:
+        e2e_testing_openshift_ansible_host: "{{ migration_cluster_host }}"
+
+- name: Execute Migration Activities
+  hosts: migration_aap
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Run Migration activities against the migration clusters
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.e2e_testing
+        tasks_from: run_openshift_cluster
+      loop_control:
+        loop_var: migration_cluster_host
+      loop: >-
+        {{
+          groups['migration_clusters'] |
+            map('extract', hostvars) |
+            selectattr('aap_hosts', 'defined') |
+            selectattr('aap_hosts', 'contains', inventory_hostname) |
+            map(attribute='inventory_hostname')
+        }}
+      vars:
+        e2e_testing_openshift_ansible_host: "{{ migration_cluster_host }}"
+...

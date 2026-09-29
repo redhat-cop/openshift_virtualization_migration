@@ -1,0 +1,109 @@
+---
+argument_specs:
+  main:
+    short_description: >-
+      End-to-end testing of OpenShift Virtualization migrations via AAP
+    description:
+      - >-
+        Orchestrates end-to-end migration testing by invoking AAP job
+        templates for MTV provider configuration, network/storage
+        mapping, plan creation, migration execution, and optional
+        plan archival and deletion.
+      - >-
+        Requires AAP credentials and inventory hosts configured with
+        VM source environments. OpenShift connection details are
+        resolved from environment variables or inventory variables.
+    options:
+      e2e_testing_openshift_host:
+        type: str
+        required: true
+        description: >-
+          OpenShift host URL. Cascades from K8S_AUTH_HOST env var
+          or openshift_host inventory variable.
+
+      e2e_testing_openshift_api_key:
+        type: str
+        required: true
+        description: >-
+          OpenShift API key / bearer token. Cascades from
+          K8S_AUTH_API_KEY env var or inventory variables.
+
+      e2e_testing_openshift_ca_cert_path:
+        type: str
+        required: false
+        description: >-
+          Path to the OpenShift CA certificate. Cascades from
+          K8S_AUTH_SSL_CA_CERT env var or openshift_ca_cert_path
+          inventory variable.
+
+      e2e_testing_openshift_verify_ssl:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to verify SSL certificates for OpenShift
+          connections. Cascades from K8S_AUTH_VERIFY_SSL env var
+          or openshift_verify_ssl inventory variable.
+
+      e2e_testing_target_namespace:
+        type: str
+        required: false
+        default: e2e-testing
+        description: >-
+          Namespace where e2e testing resources are created.
+
+      e2e_testing_openshift_ansible_host:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Name of the inventory host associated with the target
+          OpenShift cluster.
+
+      e2e_testing_openshift_aap_organization:
+        type: str
+        required: false
+        default: Default
+        description: >-
+          Name of the AAP organization used when launching job
+          templates.
+
+      e2e_testing_openshift_plans_request:
+        type: dict
+        required: false
+        default: {}
+        description: >-
+          Data structure representing a plan migration request.
+          Must contain either a 'vms' or 'folders' key when
+          provided.
+
+      e2e_testing_destination_name:
+        type: str
+        required: false
+        default: host
+        description: >-
+          Name of the destination MTV provider.
+
+      e2e_testing_migration_plan_name:
+        type: str
+        required: false
+        default: e2e-test
+        description: >-
+          Name of the MTV Plan to create for e2e testing.
+
+      e2e_testing_archive_plan:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to archive the MTV Plan after migration
+          completes.
+
+      e2e_testing_delete_plan:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to delete the MTV Plan after migration
+          completes.
+...

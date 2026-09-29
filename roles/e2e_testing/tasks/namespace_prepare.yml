@@ -1,0 +1,31 @@
+---
+
+- name: namespace_prepare | Check if e2e namespace exists
+  kubernetes.core.k8s_info:
+    host: "{{ e2e_testing_openshift_host }}"
+    api_key: "{{ e2e_testing_openshift_api_key }}"
+    validate_certs: "{{ e2e_testing_openshift_verify_ssl }}"
+    ca_cert: "{{ e2e_testing_openshift_ca_cert_path | default(omit) }}"
+    api_version: v1
+    kind: Namespace
+    name: "{{ e2e_testing_target_namespace }}"
+  register: __e2e_testing_namespace_exists
+  no_log: "{{ e2e_testing_secure_logging }}"
+
+- name: namespace_prepare | Create e2e namespace if it does not exist
+  redhat.openshift.k8s:
+    host: "{{ e2e_testing_openshift_host }}"
+    api_key: "{{ e2e_testing_openshift_api_key }}"
+    validate_certs: "{{ e2e_testing_openshift_verify_ssl }}"
+    ca_cert: "{{ e2e_testing_openshift_ca_cert_path | default(omit) }}"
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ e2e_testing_target_namespace }}"
+  when: __e2e_testing_namespace_exists.resources | length == 0
+  no_log: "{{ e2e_testing_secure_logging }}"
+
+...
