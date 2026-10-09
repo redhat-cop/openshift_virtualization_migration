@@ -46,6 +46,51 @@ For fork PRs, a maintainer must approve the run via the `external-ci` GitHub Env
 
 Internal PRs (from branches within the main repository) run both tiers automatically without approval.
 
+#### Mocking Unavailable Modules and Roles
+
+Tier 1 builds and installs this collection from source before running ansible-lint. To
+prevent failures on FQCNs that can't be resolved at lint time, `.ansible-lint-ci` maintains
+`mock_modules` and `mock_roles` lists that tell ansible-lint to accept those FQCNs without
+resolving them.
+
+**`mock_modules` — when to update:**
+
+Modules are resolved from the installed collection, so own-collection modules are always
+resolvable. Only modules from **private collections unavailable without `AUTOMATION_HUB_TOKEN`**
+need mocking:
+
+```yaml
+mock_modules:
+  - namespace.private_collection.new_module  # <-- add new entry here
+```
+
+**`mock_roles` — when to update:**
+
+Role resolution depends on how the role is invoked:
+
+- **`ansible.builtin.include_role:`** — resolved at **runtime**, skipped by syntax-check.
+  No mocking needed for own-collection roles.
+- **`ansible.builtin.import_role:`** — resolved at **parse time** by
+  `ansible-playbook --syntax-check`. The subprocess may not find the installed collection,
+  so own-collection roles invoked this way can fail with:
+
+  ```
+  syntax-check[specific]: the role '<fqcn>' was not found
+  ```
+
+Add to `mock_roles` any role that triggers `syntax-check[specific]`, whether it belongs to
+a private collection or to this collection and is invoked via `import_role`:
+
+```yaml
+mock_roles:
+  - namespace.private_collection.role_name      # private — needs token
+  - namespace.this_collection.role_via_import   # own role via import_role
+```
+
+**Do not** add entries to `.ansible-lint` (the full config used by local development and
+Tier 2 CI). That config installs real dependencies and validates without mocks — adding
+mocks there would suppress validation in Tier 2.
+
 ### PR Checklist
 
 Before submitting your pull request:

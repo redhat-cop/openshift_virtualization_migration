@@ -50,14 +50,17 @@ kinds:
 
 task_name_prefix: "{stem} | "
 
-# Mock modules from private Red Hat collections (require AUTOMATION_HUB_TOKEN)
+# Mock modules and roles unavailable at lint time:
+# - Private Red Hat collections require AUTOMATION_HUB_TOKEN
+# - Own collection modules and roles: offline: true skips the auto-install-from-source
+#   step that ansible-compat normally performs, so FQCN resolution falls back
+#   to whatever is already installed — which may be stale or absent locally.
 mock_modules:
   - ansible.controller.subscriptions
   - ansible.controller.license
   - redhat.openshift.k8s
   - redhat.openshift.openshift_auth
 
-# Mock roles from private Red Hat collections (require AUTOMATION_HUB_TOKEN)
 mock_roles:
   - infra.aap_configuration.controller_projects
   - infra.aap_configuration.controller_project_update
@@ -66,4 +69,8 @@ mock_roles:
   - infra.aap_utilities.aap_setup_download
   - infra.aap_utilities.aap_setup_prepare
   - infra.aap_utilities.aap_setup_install
+  # following mocks are required due to ansible.builtin.import_role in playbooks
+  - infra.openshift_virtualization_migration.aap_seed
+  - infra.openshift_virtualization_migration.mtv_hook_invoke_aap
+  - infra.openshift_virtualization_migration.mtv_provider
 ...
