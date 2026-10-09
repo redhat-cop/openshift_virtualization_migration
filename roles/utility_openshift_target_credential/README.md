@@ -129,9 +129,9 @@ Description: A utility role to manage OpenShift target cluster credentials for m
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
 | Create OpenShift target credential resources | `redhat.openshift.k8s` | False |
-| Display credential | `block` | True |
 | Wait for credential token to be populated | `kubernetes.core.k8s_info` | False |
-| Display credential token which can be used to authenticate to the target OpenShift cluster | `ansible.builtin.debug` | False |
+| Set openshift_api_key Fact | `ansible.builtin.set_fact` | False |
+| Display credential token which can be used to authenticate to the target OpenShift cluster | `ansible.builtin.debug` | True |
 
 ## Task Flow Graphs
 
@@ -150,11 +150,10 @@ classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
   Start-->|Task| Create_OpenShift_target_credential_resources0[create openshift target credential resources]:::task
-  Create_OpenShift_target_credential_resources0-->|Block Start| Display_credential1_block_start_0[[display credential<br>When: **utility openshift target credential display<br>credential   bool**]]:::block
-  Display_credential1_block_start_0-->|Task| Wait_for_credential_token_to_be_populated0[wait for credential token to be populated]:::task
-  Wait_for_credential_token_to_be_populated0-->|Task| Display_credential_token_which_can_be_used_to_authenticate_to_the_target_OpenShift_cluster1[display credential token which can be used to<br>authenticate to the target openshift cluster]:::task
-  Display_credential_token_which_can_be_used_to_authenticate_to_the_target_OpenShift_cluster1-.->|End of Block| Display_credential1_block_start_0
-  Display_credential_token_which_can_be_used_to_authenticate_to_the_target_OpenShift_cluster1-->End
+  Create_OpenShift_target_credential_resources0-->|Task| Wait_for_credential_token_to_be_populated1[wait for credential token to be populated]:::task
+  Wait_for_credential_token_to_be_populated1-->|Task| Set_openshift_api_key_Fact2[set openshift api key fact]:::task
+  Set_openshift_api_key_Fact2-->|Task| Display_credential_token_which_can_be_used_to_authenticate_to_the_target_OpenShift_cluster3[display credential token which can be used to<br>authenticate to the target openshift cluster<br>When: **utility openshift target credential display<br>credential   bool**]:::task
+  Display_credential_token_which_can_be_used_to_authenticate_to_the_target_OpenShift_cluster3-->End
 ```
 
 ## Author Information

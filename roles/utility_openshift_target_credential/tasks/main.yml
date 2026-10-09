@@ -21,30 +21,33 @@
       label: Cluster Role Binding
   no_log: "{{ utility_openshift_target_credential_secure_logging }}"
 
-- name: Display credential
+- name: Wait for credential token to be populated
+  kubernetes.core.k8s_info:
+    host: "{{ utility_openshift_target_credential_openshift_host }}"
+    api_key: "{{ utility_openshift_target_credential_openshift_api_key }}"
+    validate_certs: "{{ utility_openshift_target_credential_openshift_verify_ssl }}"
+    ca_cert: "{{ utility_openshift_target_credential_openshift_ca_cert_path | default(omit) }}"
+    api_version: v1
+    kind: Secret
+    name: "{{ utility_openshift_target_credential_resource_name }}"
+    namespace: "{{ utility_openshift_target_credential_resource_namespace }}"
+  register: __utility_openshift_target_credential_secret
+  until: >-
+    __utility_openshift_target_credential_secret.resources | length > 0
+    and __utility_openshift_target_credential_secret.resources[0].data.token is defined
+    and __utility_openshift_target_credential_secret.resources[0].data.token | length > 0
+  retries: 30
+  delay: 5
+  no_log: "{{ utility_openshift_target_credential_secure_logging }}"
+
+- name: Set openshift_api_key Fact # noqa: var-naming[no-role-prefix]
+  ansible.builtin.set_fact:
+    openshift_api_key: >-
+      {{ __utility_openshift_target_credential_secret.resources[0].data.token | b64decode }}
+  no_log: "{{ utility_openshift_target_credential_secure_logging }}"
+
+- name: Display credential token which can be used to authenticate to the target OpenShift cluster
+  ansible.builtin.debug:
+    msg: "{{ __utility_openshift_target_credential_secret.resources[0].data.token | b64decode }}"
   when: utility_openshift_target_credential_display_credential | bool
-  block:
-
-    - name: Wait for credential token to be populated
-      kubernetes.core.k8s_info:
-        host: "{{ utility_openshift_target_credential_openshift_host }}"
-        api_key: "{{ utility_openshift_target_credential_openshift_api_key }}"
-        validate_certs: "{{ utility_openshift_target_credential_openshift_verify_ssl }}"
-        ca_cert: "{{ utility_openshift_target_credential_openshift_ca_cert_path | default(omit) }}"
-        api_version: v1
-        kind: Secret
-        name: "{{ utility_openshift_target_credential_resource_name }}"
-        namespace: "{{ utility_openshift_target_credential_resource_namespace }}"
-      register: __utility_openshift_target_credential_secret
-      until: >-
-        __utility_openshift_target_credential_secret.resources | length > 0
-        and __utility_openshift_target_credential_secret.resources[0].data.token is defined
-        and __utility_openshift_target_credential_secret.resources[0].data.token | length > 0
-      retries: 30
-      delay: 5
-      no_log: "{{ utility_openshift_target_credential_secure_logging }}"
-
-    - name: Display credential token which can be used to authenticate to the target OpenShift cluster
-      ansible.builtin.debug:
-        msg: "{{ __utility_openshift_target_credential_secret.resources[0].data.token | b64decode }}"
 ...

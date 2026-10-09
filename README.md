@@ -43,6 +43,7 @@ This collection includes the following roles for managing OpenShift Virtualizati
 
 <!--ROLES_LIST_START-->
 * [aap_seed](roles/aap_seed/README.md) - Seed AAP with Migration Factory Configuration as Code content
+* [e2e_testing](roles/e2e_testing/README.md) - Tooling to support E2E testing activities.
 * [mtv_hook_invoke_aap](roles/mtv_hook_invoke_aap/README.md) - Triggers AAP automation as part of an MTV hook.
 * [mtv_maps](roles/mtv_maps/README.md) - Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift target clusters for a given source-target pair.
 * [mtv_migrate](roles/mtv_migrate/README.md) - MTV Migrate.

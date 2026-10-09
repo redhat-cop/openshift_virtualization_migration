@@ -1,0 +1,8 @@
+---
+
+- name: run_openshift_cluster | Run cluster tasks against a VM source environment
+  ansible.builtin.include_tasks: run_openshift_cluster_vm_source.yml
+  loop_control:
+    loop_var: __e2e_testing_vm_source
+  loop: "{{ hostvars[e2e_testing_openshift_ansible_host]['vm_sources'] | default([]) }}"
+...

@@ -147,6 +147,7 @@ migration_clusters:
       mtv_namespace: openshift-mtv
       default_target_namespace: vm-workloads
       configure_mtv: true
+      install_aap: true # Deploy an opinionated Automation Platform instance
 
     # -- Staging cluster with temporary token ------------------------------------
     # ocp-staging:
