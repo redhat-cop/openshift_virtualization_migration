@@ -1,0 +1,51 @@
+---
+# Probe vCenter connectivity and authentication.
+# vmware.vmware_rest.vcenter_datacenter_info is certified content; listing
+# datacenters is the lightest operation that proves both connectivity and
+# authentication against the configured source. The check only applies to
+# vmware sources — other source types (ovirt) skip it.
+
+- name: validate_vcenter | List vCenter datacenters to prove connectivity and authentication
+  when: preflight_vcenter_hostname | length > 0
+    and (preflight_source_type | length == 0 or preflight_source_type == 'vmware')
+  vmware.vmware_rest.vcenter_datacenter_info:
+    vcenter_hostname: "{{ preflight_vcenter_hostname }}"
+    vcenter_username: "{{ preflight_vcenter_username }}"
+    vcenter_password: "{{ preflight_vcenter_password }}"
+    vcenter_validate_certs: "{{ preflight_vcenter_validate_certs }}"
+  register: __preflight_vcenter
+  failed_when: false
+  no_log: "{{ preflight_secure_logging }}"
+
+- name: validate_vcenter | Record the vCenter connectivity check result
+  ansible.builtin.set_fact:
+    __preflight_result_vcenter:
+      ran: true
+      passed: "{{ (preflight_source_type | length > 0 and preflight_source_type != 'vmware')
+        or ((preflight_vcenter_hostname | length > 0)
+        and (__preflight_vcenter.value is defined)
+        and (__preflight_vcenter.value | length) > 0) }}"
+      detail: >-
+        {% if preflight_source_type | length > 0 and preflight_source_type != 'vmware' %}
+        Skipped — source type is {{ preflight_source_type }}, not vmware;
+        the vCenter check does not apply
+        {% elif preflight_vcenter_hostname | length == 0 %}
+        Not configured — set host/username/password on the source host
+        (or run from AAP where the source credential injects VMWARE_*) to
+        enable the vCenter check
+        {% elif __preflight_vcenter.value is defined
+        and (__preflight_vcenter.value | length) > 0 %}
+        HTTP session established at {{ preflight_vcenter_hostname }}
+        ({{ (__preflight_vcenter.value | length) }} datacenters visible)
+        {% elif __preflight_vcenter.value is defined
+        and (__preflight_vcenter.value | length) == 0 %}
+        Connected to {{ preflight_vcenter_hostname }} but no datacenters
+        are visible — a migration source needs at least one
+        {% else %}
+        vCenter authentication or connectivity failed at
+        {{ preflight_vcenter_hostname }} — re-run the vCenter check alone
+        (--tags vcenter) as a one-off CLI run with
+        preflight_secure_logging=false to see the fault, then rotate the
+        exposed credential
+        {% endif %}
+...

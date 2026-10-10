@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  role_name: preflight
+  author: Red Hat
+  description: >-
+    Validate the migration environment before seeding AAP — OpenShift API
+    authentication, OpenShift Virtualization and MTV operator health, AAP
+    access, vCenter connectivity, and VDDK init image configuration.
+  company: Red Hat
+  license: GPL-3.0-only
+  min_ansible_version: "2.16"
+
+dependencies: []
+...

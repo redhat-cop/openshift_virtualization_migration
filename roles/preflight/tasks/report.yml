@@ -1,0 +1,67 @@
+---
+# Collect every check result and fail the play if any ran check failed.
+# Check files register __preflight_result_* facts with ran: true; the
+# summary assert only covers checks that ran, so an isolated --tags debug
+# run ends green when the targeted check passed. A check that never ran
+# (unexpected failure in a full run) still shows FAIL with "check did
+# not run" in the summary, so the report never lies.
+#
+# The record tasks' passed values round-trip as real booleans on
+# ansible-core 2.16 (a full-string-expression set_fact preserves the
+# native type, verified), while the un-run defaults carry the string
+# "False" — the | bool filter accepts both forms. Note: the bare
+# `falsy` test does NOT convert the string "False" — pass
+# convert_bool=true (selectattr(..., 'falsy', true)) when filtering
+# summary values by key, as the fail_msg does.
+
+- name: report | Build the preflight summary
+  ansible.builtin.set_fact:
+    __preflight_summary:
+      OpenShift API auth: >-
+        {{ __preflight_result_openshift | default({'ran': false, 'passed': 'False', 'detail': 'check did not run'}) }}
+      OpenShift Virtualization operator: >-
+        {{ __preflight_result_cnv | default({'ran': false, 'passed': 'False', 'detail': 'check did not run'}) }}
+      MTV operator: >-
+        {{ __preflight_result_mtv | default({'ran': false, 'passed': 'False', 'detail': 'check did not run'}) }}
+      AAP access: >-
+        {{ __preflight_result_aap | default({'ran': false, 'passed': 'False', 'detail': 'check did not run'}) }}
+      vCenter connectivity: >-
+        {{ __preflight_result_vcenter | default({'ran': false, 'passed': 'False', 'detail': 'check did not run'}) }}
+      VDDK init image: >-
+        {{ __preflight_result_vddk | default({'ran': false, 'passed': 'False', 'detail': 'check did not run'}) }}
+
+- name: report | Display the preflight summary
+  ansible.builtin.debug:
+    msg: >-
+      {{ __preflight_check.value.passed | bool | ternary('PASS', 'FAIL') }} |
+      {{ __preflight_check.key }}: {{ __preflight_check.value.detail }}
+  loop: "{{ __preflight_summary | dict2items }}"
+  loop_control:
+    loop_var: __preflight_check
+    label: "{{ __preflight_check.key }}"
+
+- name: report | Assert every ran preflight check passed
+  ansible.builtin.assert:
+    that:
+      - >-
+        __preflight_summary | dict2items
+        | selectattr('value.ran', 'equalto', true)
+        | map(attribute='value.passed')
+        | map('bool')
+        | select('equalto', false)
+        | list | length == 0
+    fail_msg: >-
+      Preflight validation FAILED:
+      {{ __preflight_summary | dict2items
+         | selectattr('value.ran', 'equalto', true)
+         | selectattr('value.passed', 'falsy', true)
+         | map(attribute='key') | join(', ') }}.
+      Fix each failed check before seeding — do not seed to paper over a
+      missing operator.
+    success_msg: >-
+      Preflight validation passed: all
+      {{ __preflight_summary | dict2items
+         | selectattr('value.ran', 'equalto', true) | list | length }}
+      checks green. The environment is ready to seed.
+    quiet: true
+...

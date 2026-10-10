@@ -1,0 +1,192 @@
+---
+argument_specs:
+  main:
+    short_description: >-
+      Validate the migration environment before seeding AAP
+    description:
+      - >-
+        Runs every preflight check and reports a summary, then fails the
+        play if any check failed. Checks: OpenShift API authentication,
+        OpenShift Virtualization (CNV) operator health, MTV operator
+        health, AAP access, vCenter connectivity, and VDDK init image
+        configuration.
+      - >-
+        Designed to run from an AAP job template (the target credential
+        injects K8S_AUTH_* environment variables, the source credential
+        injects VMWARE_*, and the controller injects CONTROLLER_HOST and
+        CONTROLLER_API_TOKEN) or from a controller with the sample
+        inventory. Connection variables cascade from environment
+        variables to inventory host variables resolved through
+        preflight_target_name, preflight_source_name, and
+        preflight_aap_name.
+      - >-
+        All checks run on every invocation. A check whose target is not
+        configured (for example no vCenter credentials) fails that check
+        with a message describing what to set rather than crashing the
+        play, so one run reports everything that needs attention.
+    options:
+      preflight_secure_logging:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to enable secure logging for tasks that handle
+          credentials. Set to false to debug failed probes. Never set
+          false on a persistent AAP job template — the credential-bearing
+          probe results would persist in job output; rotate any token
+          exposed in debug output.
+
+      preflight_target_name:
+        type: str
+        required: false
+        description: >-
+          Inventory host whose variables feed the OpenShift checks.
+          Defaults to the target_name extra var (injected by the seeded
+          credentials) or the first migration_clusters host.
+
+      preflight_source_name:
+        type: str
+        required: false
+        description: >-
+          Inventory host whose variables feed the vCenter and VDDK
+          checks. Defaults to the source_name extra var (injected by the
+          seeded credentials) or the first vm_sources host.
+
+      preflight_aap_name:
+        type: str
+        required: false
+        description: >-
+          Inventory host whose aap_* variables feed the AAP check.
+          Defaults to the first migration_aap host.
+
+      preflight_openshift_host:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          OpenShift API endpoint. Resolves from K8S_AUTH_HOST env var or
+          the openshift_host variable on the target cluster host
+          (preflight_target_name). Required — the preflight aborts
+          without it.
+
+      preflight_openshift_api_key:
+        type: str
+        required: false
+        default: ""
+        no_log: true
+        description: >-
+          OpenShift API token. Resolves from K8S_AUTH_API_KEY env var or
+          the openshift_api_key variable on the target cluster host
+          (preflight_target_name). Required — the preflight aborts
+          without it.
+
+      preflight_openshift_verify_ssl:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Validate the OpenShift API TLS certificate.
+
+      preflight_vcenter_hostname:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          vCenter endpoint for the connectivity check. Resolves from
+          VMWARE_HOST env var or the host variable on the source host
+          (preflight_source_name). The check applies to vmware sources;
+          other source types skip it. When unset, the vCenter check fails
+          with instructions.
+
+      preflight_vcenter_username:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          vCenter username. Resolves from VMWARE_USER env var or the
+          username variable on the source host (preflight_source_name).
+
+      preflight_vcenter_password:
+        type: str
+        required: false
+        default: ""
+        no_log: true
+        description: >-
+          vCenter password. Resolves from VMWARE_PASSWORD env var or the
+          password variable on the source host (preflight_source_name).
+
+      preflight_vcenter_validate_certs:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Validate the vCenter TLS certificate.
+
+      preflight_aap_hostname:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          AAP controller URL for the access check. Resolves from
+          AAP_HOSTNAME env var, the CONTROLLER_HOST env var injected by
+          the controller for its own jobs, or the aap_hostname variable
+          on the AAP host (preflight_aap_name). When unset, the AAP check
+          fails with instructions.
+
+      preflight_aap_username:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          AAP username for the access check.
+
+      preflight_aap_password:
+        type: str
+        required: false
+        default: ""
+        no_log: true
+        description: >-
+          AAP password for the access check when no token is set.
+
+      preflight_aap_token:
+        type: str
+        required: false
+        default: ""
+        no_log: true
+        description: >-
+          AAP OAuth2 token. Resolves from AAP_TOKEN env var, the
+          CONTROLLER_API_TOKEN env var injected by the controller for its
+          own jobs, or the aap_token variable on the AAP host. Takes
+          precedence over username/password.
+
+      preflight_aap_validate_certs:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Validate the AAP TLS certificate.
+
+      preflight_cnv_namespace:
+        type: str
+        required: false
+        default: openshift-cnv
+        description: >-
+          Namespace holding the OpenShift Virtualization operator CSV.
+
+      preflight_mtv_namespace:
+        type: str
+        required: false
+        default: openshift-mtv
+        description: >-
+          Namespace holding the MTV operator CSV. Resolves from the
+          mtv_namespace inventory variable by default.
+
+      preflight_vddk_image:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          VDDK init image for direct-source migrations. Resolves from the
+          source host's vddk.image dictionary entry or the vddk_image
+          variable. The check enforces a scheme-less reference.
+...

@@ -1,0 +1,11 @@
+---
+- name: Validate the migration environment before seeding AAP
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Run preflight validation checks
+      ansible.builtin.import_role:
+        name: infra.openshift_virtualization_migration.preflight
+...
