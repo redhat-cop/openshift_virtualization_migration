@@ -115,4 +115,13 @@ network_mgmt_manual_localnet_name: ''
 # required: True
 # description: NAD List in Manual Mode
 network_mgmt_manual_nad_list: []
+# - name: my-nad
+#   namespace: my-namespace
+#   portgroup: my-portgroup           # Single source portgroup (string)
+#   mtu: 1500                         # Optional MTU override (ovn-layer2 only)
+# - name: my-shared-nad
+#   namespace: my-namespace
+#   portgroups:                        # Multiple source portgroups (list)
+#     - portgroup-site-a               # Joined with comma in the source-portgroup annotation
+#     - portgroup-site-b
 ...
