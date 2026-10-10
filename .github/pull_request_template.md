@@ -22,3 +22,8 @@
 > Tier 1 checks (ansible-lint, pre-commit, PR title, gitleaks) run automatically on all PRs.
 > Full CI (Tier 2) requires maintainer approval for PRs from forks.
 > To run full CI before opening this PR, configure `AUTOMATION_HUB_TOKEN` in your fork's secrets — see [Running Full CI in Your Fork](../CONTRIBUTING.md#running-full-ci-in-your-fork).
+
+- [ ] If this PR adds tasks that use modules or roles from private Red Hat collections
+      (e.g., `redhat.openshift.*`) or from `infra.openshift_virtualization_migration`,
+      I have added them to `mock_modules`/`mock_roles` in `.ansible-lint-ci` — see
+      [Mocking Unavailable Modules and Roles](../CONTRIBUTING.md#mocking-unavailable-modules-and-roles).
