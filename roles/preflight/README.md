@@ -16,7 +16,7 @@ Automates the manual "Validate your environment" console checks from the journey
 
 If any check fails, fix it before you seed. Do not seed to paper over a missing operator.
 
-### Example
+## Example
 
 ```bash
 ansible-playbook playbooks/vmf_preflight.yml \
