@@ -9,6 +9,10 @@ galaxy_info:
   company: Red Hat
   license: GPL-3.0-only
   min_ansible_version: "2.16"
+  platforms:
+    - name: EL
+      versions:
+        - all
 
 dependencies: []
 ...

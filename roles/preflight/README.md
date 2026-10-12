@@ -25,6 +25,8 @@ ansible-playbook playbooks/vmf_preflight.yml \
 
 From an AAP job template the target credential injects `K8S_AUTH_*`, the source credential injects `VMWARE_*`, and the controller injects `CONTROLLER_HOST`/`CONTROLLER_API_TOKEN` — the same role runs unchanged.
 
+AAP 2.5 platform deployments serve the controller API at `/api/controller/v2/` rather than `/api/v2/` — set `preflight_aap_api_path: /api/controller/v2/` for those environments (a 404 from the AAP check means the path is wrong).
+
 With the sample inventory the connection variables resolve from the target cluster host (`openshift_host`, `openshift_api_key`), the source host (`host`, `username`, `password`, `vddk.image`), and the AAP host (`aap_hostname`, `aap_token`) — selected by `preflight_target_name`, `preflight_source_name`, and `preflight_aap_name`, which default to the `target_name`/`source_name` extra vars (injected by the seeded credentials) or the first host of each group.
 
 All checks run on every invocation, and the summary assert requires every check green — the per-check tags (`openshift`, `cnv`, `mtv`, `aap`, `vcenter`, `vddk`) exist for isolated debugging; the summary asserts only over the checks that ran, so a tagged debug run ends green when the targeted check passed. A source whose `type` is not `vmware` (for example `ovirt`) skips the vCenter and VDDK checks.
@@ -60,6 +62,7 @@ Minimum Ansible Version - 2.16
 | preflight_vcenter_password | str | no | "" | vCenter password. Resolves from VMWARE_PASSWORD env var or the password variable on the source host. |
 | preflight_vcenter_validate_certs | bool | no | true | Validate the vCenter TLS certificate. |
 | preflight_aap_hostname | str | no | "" | AAP controller URL. Resolves from AAP_HOSTNAME env var, the controller-injected CONTROLLER_HOST, or the aap_hostname variable on the AAP host. |
+| preflight_aap_api_path | str | no | /api/v2/ | API base path for the access check. AAP 2.5 platform deployments serve the controller API at /api/controller/v2/ — set that value for those environments. |
 | preflight_aap_username | str | no | "" | AAP username for the access check. |
 | preflight_aap_password | str | no | "" | AAP password for the access check when no token is set. |
 | preflight_aap_token | str | no | "" | AAP OAuth2 token. Resolves from AAP_TOKEN env var, the controller-injected CONTROLLER_API_TOKEN, or the aap_token variable on the AAP host. Takes precedence over username/password. |

@@ -124,6 +124,15 @@ preflight_aap_hostname: >-
       | default(hostvars[preflight_aap_name]['aap_hostname'] | default('', true), true), true)
   }}
 
+# title: AAP API Path
+# required: False
+# description: >-
+#   API base path appended to the AAP hostname for the access check.
+#   Defaults to /api/v2/ (AWX and AAP 2.4 and earlier). AAP 2.5 platform
+#   deployments serve the controller API at /api/controller/v2/ — set
+#   that value for those environments.
+preflight_aap_api_path: /api/v2/
+
 # title: AAP Username
 # required: False
 # description: >-

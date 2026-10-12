@@ -133,6 +133,15 @@ argument_specs:
           on the AAP host (preflight_aap_name). When unset, the AAP check
           fails with instructions.
 
+      preflight_aap_api_path:
+        type: str
+        required: false
+        default: /api/v2/
+        description: >-
+          API base path for the access check. Defaults to /api/v2/ (AWX
+          and AAP 2.4 and earlier); AAP 2.5 platform deployments serve
+          the controller API at /api/controller/v2/.
+
       preflight_aap_username:
         type: str
         required: false
