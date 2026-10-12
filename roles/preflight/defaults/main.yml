@@ -19,10 +19,6 @@ preflight_source_name: "{{ source_name
   | first | default('', true), true) }}"
 preflight_aap_name: "{{ groups['migration_aap'] | default([], true) | first | default('', true) }}"
 
-# The source host's declared type (vmware, ovirt, ...). The vCenter check
-# only applies to vmware sources; other source types skip it.
-preflight_source_type: "{{ hostvars[preflight_source_name]['type'] | default('', true) }}"
-
 # Secure logging toggle for tasks that handle credentials.
 # NEVER hardcode no_log: true — always reference this variable so failures
 # can be debugged with preflight_secure_logging=false.

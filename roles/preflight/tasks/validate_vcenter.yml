@@ -7,7 +7,7 @@
 
 - name: validate_vcenter | List vCenter datacenters to prove connectivity and authentication
   when: preflight_vcenter_hostname | length > 0
-    and (preflight_source_type | length == 0 or preflight_source_type == 'vmware')
+    and (__preflight_source_type | length == 0 or __preflight_source_type == 'vmware')
   vmware.vmware_rest.vcenter_datacenter_info:
     vcenter_hostname: "{{ preflight_vcenter_hostname }}"
     vcenter_username: "{{ preflight_vcenter_username }}"
@@ -21,13 +21,13 @@
   ansible.builtin.set_fact:
     __preflight_result_vcenter:
       ran: true
-      passed: "{{ (preflight_source_type | length > 0 and preflight_source_type != 'vmware')
+      passed: "{{ (__preflight_source_type | length > 0 and __preflight_source_type != 'vmware')
         or ((preflight_vcenter_hostname | length > 0)
         and (__preflight_vcenter.value is defined)
         and (__preflight_vcenter.value | length) > 0) }}"
       detail: >-
-        {% if preflight_source_type | length > 0 and preflight_source_type != 'vmware' %}
-        Skipped — source type is {{ preflight_source_type }}, not vmware;
+        {% if __preflight_source_type | length > 0 and __preflight_source_type != 'vmware' %}
+        Skipped — source type is {{ __preflight_source_type }}, not vmware;
         the vCenter check does not apply
         {% elif preflight_vcenter_hostname | length == 0 %}
         Not configured — set host/username/password on the source host

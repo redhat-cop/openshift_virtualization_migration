@@ -31,6 +31,10 @@ With the sample inventory the connection variables resolve from the target clust
 
 All checks run on every invocation, and the summary assert requires every check green — the per-check tags (`openshift`, `cnv`, `mtv`, `aap`, `vcenter`, `vddk`) exist for isolated debugging; the summary asserts only over the checks that ran, so a tagged debug run ends green when the targeted check passed. A source whose `type` is not `vmware` (for example `ovirt`) skips the vCenter and VDDK checks.
 
+## Check Mode
+
+Not supported. The connection probes use the `uri` module, which is skipped under `--check`, so a check-mode run reports false authentication failures for the OpenShift and AAP checks. Run the preflight without `--check` — every probe is read-only (SelfSubjectReview creates no state, `/api/v2/me/` is a GET, operator queries are list calls).
+
 <!-- STATIC CONTENT END -->
 <!-- DOCSIBLE START -->
 ## preflight
@@ -165,28 +169,27 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`__preflight_source_vddk`](defaults/main.yml#L230)   | str   | `{{ hostvars[preflight_source_name]['vddk'] ¦ default({}, true) }}` |  None  |   None  |  None |
-| [`preflight_aap_api_path`](defaults/main.yml#L134)   | str   | `/api/v2/` |  None  |   False  |  AAP API Path |
-| [`preflight_aap_hostname`](defaults/main.yml#L120)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Hostname |
+| [`__preflight_source_vddk`](defaults/main.yml#L226)   | str   | `{{ hostvars[preflight_source_name]['vddk'] ¦ default({}, true) }}` |  None  |   None  |  None |
+| [`preflight_aap_api_path`](defaults/main.yml#L130)   | str   | `/api/v2/` |  None  |   False  |  AAP API Path |
+| [`preflight_aap_hostname`](defaults/main.yml#L116)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Hostname |
 | [`preflight_aap_name`](defaults/main.yml#L20)   | str   | `{{ groups['migration_aap'] ¦ default([], true) ¦ first ¦ default('', true) }}` |  None  |   None  |  None |
-| [`preflight_aap_password`](defaults/main.yml#L152)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Password |
-| [`preflight_aap_token`](defaults/main.yml#L165)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Token |
-| [`preflight_aap_username`](defaults/main.yml#L141)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Username |
-| [`preflight_aap_validate_certs`](defaults/main.yml#L178)   | str   | `{{ (lookup('env', 'AAP_VALIDATE_CERTS') ¦ default(hostvars[preflight_aap_name]['aap_validate_certs'] ¦ default(true, true), true)) ¦ bool }}` |  None  |   False  |  AAP Verify SSL |
-| [`preflight_cnv_namespace`](defaults/main.yml#L187)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  CNV Namespace |
-| [`preflight_mtv_namespace`](defaults/main.yml#L204)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  MTV Namespace |
-| [`preflight_openshift_api_key`](defaults/main.yml#L50)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
-| [`preflight_openshift_host`](defaults/main.yml#L37)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift Host |
-| [`preflight_openshift_verify_ssl`](defaults/main.yml#L67)   | str   | `{{ (lookup('env', 'K8S_AUTH_VERIFY_SSL') ¦ default(hostvars[preflight_target_name]['openshift_verify_ssl'] ¦ default(true, true), true)) ¦ bool }}` |  None  |   False  |  OpenShift Verify SSL |
-| [`preflight_secure_logging`](defaults/main.yml#L29)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
+| [`preflight_aap_password`](defaults/main.yml#L148)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Password |
+| [`preflight_aap_token`](defaults/main.yml#L161)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Token |
+| [`preflight_aap_username`](defaults/main.yml#L137)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Username |
+| [`preflight_aap_validate_certs`](defaults/main.yml#L174)   | str   | `{{ (lookup('env', 'AAP_VALIDATE_CERTS') ¦ default(hostvars[preflight_aap_name]['aap_validate_certs'] ¦ default(true, true), true)) ¦ bool }}` |  None  |   False  |  AAP Verify SSL |
+| [`preflight_cnv_namespace`](defaults/main.yml#L183)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  CNV Namespace |
+| [`preflight_mtv_namespace`](defaults/main.yml#L200)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  MTV Namespace |
+| [`preflight_openshift_api_key`](defaults/main.yml#L46)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
+| [`preflight_openshift_host`](defaults/main.yml#L33)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift Host |
+| [`preflight_openshift_verify_ssl`](defaults/main.yml#L63)   | str   | `{{ (lookup('env', 'K8S_AUTH_VERIFY_SSL') ¦ default(hostvars[preflight_target_name]['openshift_verify_ssl'] ¦ default(true, true), true)) ¦ bool }}` |  None  |   False  |  OpenShift Verify SSL |
+| [`preflight_secure_logging`](defaults/main.yml#L25)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
 | [`preflight_source_name`](defaults/main.yml#L17)   | str   | `{{ source_name ¦ default(groups['vm_sources'] ¦ default([], true) ¦ first ¦ default('', true), true) }}` |  None  |   None  |  None |
-| [`preflight_source_type`](defaults/main.yml#L24)   | str   | `{{ hostvars[preflight_source_name]['type'] ¦ default('', true) }}` |  None  |   None  |  None |
 | [`preflight_target_name`](defaults/main.yml#L14)   | str   | `{{ target_name ¦ default(groups['migration_clusters'] ¦ default([], true) ¦ first ¦ default('', true), true) }}` |  None  |   None  |  None |
-| [`preflight_vcenter_hostname`](defaults/main.yml#L76)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Hostname |
-| [`preflight_vcenter_password`](defaults/main.yml#L98)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Password |
-| [`preflight_vcenter_username`](defaults/main.yml#L87)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Username |
-| [`preflight_vcenter_validate_certs`](defaults/main.yml#L110)   | str   | `{{ (lookup('env', 'VMWARE_VALIDATE_CERTS') ¦ default(hostvars[preflight_source_name]['validate_certs'] ¦ default(true, true), true)) ¦ bool }}` |  None  |   False  |  vCenter Verify SSL |
-| [`preflight_vddk_image`](defaults/main.yml#L221)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  VDDK Init Image |
+| [`preflight_vcenter_hostname`](defaults/main.yml#L72)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Hostname |
+| [`preflight_vcenter_password`](defaults/main.yml#L94)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Password |
+| [`preflight_vcenter_username`](defaults/main.yml#L83)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Username |
+| [`preflight_vcenter_validate_certs`](defaults/main.yml#L106)   | str   | `{{ (lookup('env', 'VMWARE_VALIDATE_CERTS') ¦ default(hostvars[preflight_source_name]['validate_certs'] ¦ default(true, true), true)) ¦ bool }}` |  None  |   False  |  vCenter Verify SSL |
+| [`preflight_vddk_image`](defaults/main.yml#L217)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  VDDK Init Image |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
@@ -220,8 +223,6 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 <br>
 <b>`preflight_source_name`:</b> None
 <br>
-<b>`preflight_source_type`:</b> None
-<br>
 <b>`preflight_target_name`:</b> None
 <br>
 <b>`preflight_vcenter_hostname`:</b> >-
@@ -235,6 +236,16 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 <b>`preflight_vddk_image`:</b> >-
 <br>
 <br>
+
+### Vars
+
+**These are variables with higher priority**
+
+#### File: vars/main.yml
+
+| Var          | Type         | Value       |
+|--------------|--------------|-------------|
+| [__preflight_source_type](vars/main.yml#L4)   | str   | `{{ hostvars[preflight_source_name]['type'] ¦ default('', true) }}` |
 
 ### Tasks
 
@@ -265,6 +276,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 | report ¦ Build the preflight summary | `ansible.builtin.set_fact` | False |
 | report ¦ Display the preflight summary | `ansible.builtin.debug` | False |
 | report ¦ Assert every ran preflight check passed | `ansible.builtin.assert` | False |
+| report ¦ Remind the operator to rotate credentials exposed in debug output | `ansible.builtin.debug` | True |
 
 #### File: tasks/validate_aap.yml
 
@@ -373,7 +385,8 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Start-->|Task| report___Build_the_preflight_summary0[report   build the preflight summary]:::task
   report___Build_the_preflight_summary0-->|Task| report___Display_the_preflight_summary1[report   display the preflight summary]:::task
   report___Display_the_preflight_summary1-->|Task| report___Assert_every_ran_preflight_check_passed2[report   assert every ran preflight check passed]:::task
-  report___Assert_every_ran_preflight_check_passed2-->End
+  report___Assert_every_ran_preflight_check_passed2-->|Task| report___Remind_the_operator_to_rotate_credentials_exposed_in_debug_output3[report   remind the operator to rotate credentials<br>exposed in debug output<br>When: **not  preflight secure logging   default true   <br>bool**]:::task
+  report___Remind_the_operator_to_rotate_credentials_exposed_in_debug_output3-->End
 ```
 
 ### Graph for validate_aap.yml
@@ -468,7 +481,7 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| validate_vcenter___List_vCenter_datacenters_to_prove_connectivity_and_authentication0[validate vcenter   list vcenter datacenters to<br>prove connectivity and authentication<br>When: **preflight vcenter hostname   length   0 and <br>preflight source type   length    0 or preflight<br>source type     vmware**]:::task
+  Start-->|Task| validate_vcenter___List_vCenter_datacenters_to_prove_connectivity_and_authentication0[validate vcenter   list vcenter datacenters to<br>prove connectivity and authentication<br>When: **preflight vcenter hostname   length   0 and   <br>preflight source type   length    0 or   preflight<br>source type     vmware**]:::task
   validate_vcenter___List_vCenter_datacenters_to_prove_connectivity_and_authentication0-->|Task| validate_vcenter___Record_the_vCenter_connectivity_check_result1[validate vcenter   record the vcenter connectivity<br>check result]:::task
   validate_vcenter___Record_the_vCenter_connectivity_check_result1-->End
 ```

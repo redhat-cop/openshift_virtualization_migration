@@ -11,12 +11,12 @@
   ansible.builtin.set_fact:
     __preflight_result_vddk:
       ran: true
-      passed: "{{ (preflight_source_type | length > 0 and preflight_source_type != 'vmware')
+      passed: "{{ (__preflight_source_type | length > 0 and __preflight_source_type != 'vmware')
         or (preflight_vddk_image | length > 0
         and not (preflight_vddk_image is match('^[A-Za-z][A-Za-z0-9+.-]*://'))) }}"
       detail: >-
-        {% if preflight_source_type | length > 0 and preflight_source_type != 'vmware' %}
-        Skipped — source type is {{ preflight_source_type }}, not vmware;
+        {% if __preflight_source_type | length > 0 and __preflight_source_type != 'vmware' %}
+        Skipped — source type is {{ __preflight_source_type }}, not vmware;
         the VDDK check does not apply
         {% elif preflight_vddk_image | length == 0 %}
         No VDDK init image configured — set vddk.image on the source host
