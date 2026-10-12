@@ -21,10 +21,10 @@
 - name: pre_validate | Reject plaintext credential-bearing endpoints
   ansible.builtin.assert:
     that:
-      - preflight_aap_hostname is not match('^http://')
-      - preflight_openshift_host is not match('^http://')
-      - preflight_aap_hostname is not match('://[^/@]+:[^/@]+@')
-      - preflight_openshift_host is not match('://[^/@]+:[^/@]+@')
+      - (preflight_aap_hostname | trim | lower) is not match('^http://')
+      - (preflight_openshift_host | trim | lower) is not match('^http://')
+      - preflight_aap_hostname is not search('://[^/@]+:[^/@]+@')
+      - preflight_openshift_host is not search('://[^/@]+:[^/@]+@')
     fail_msg: >-
       Credential-bearing endpoints must use https and must not embed
       user:pass@ in the URL — bearer tokens sent to a plaintext endpoint

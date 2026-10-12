@@ -64,4 +64,14 @@
          | selectattr('value.ran', 'equalto', true) | list | length }}
       checks green. The environment is ready to seed.
     quiet: true
+
+- name: report | Remind the operator to rotate credentials exposed in debug output
+  ansible.builtin.debug:
+    msg: >-
+      preflight_secure_logging is false — task parameters and API responses
+      were printed to job output. If this ran on a persistent AAP job
+      template, rotate the exposed credentials now: the OpenShift API key
+      (K8S_AUTH_API_KEY), the AAP token (AAP_TOKEN or
+      CONTROLLER_API_TOKEN), and the vCenter password (VMWARE_PASSWORD).
+  when: not (preflight_secure_logging | default(true) | bool)
 ...

@@ -48,4 +48,44 @@
   ansible.builtin.assert:
     that: __preflight_report_failure_observed | default(false) | bool
     quiet: true
+
+- name: Main | pre_validate accepts a clean https endpoint
+  vars:
+    preflight_openshift_host: https://api.cluster.example.com
+    preflight_openshift_api_key: test-token
+    preflight_aap_hostname: https://aap.example.com
+  ansible.builtin.include_tasks: "{{ role_path }}/../../../../roles/preflight/tasks/pre_validate.yml"
+
+- name: Main | pre_validate rejects a user:pass@ endpoint
+  block:
+    - name: Main | Run pre_validate with embedded credentials
+      vars:
+        preflight_openshift_host: https://svc-user:svc-pass@cluster.example.com
+        preflight_openshift_api_key: test-token
+        preflight_aap_hostname: https://aap.example.com
+      ansible.builtin.include_tasks: "{{ role_path }}/../../../../roles/preflight/tasks/pre_validate.yml"
+  rescue:
+    - name: Main | Mark the expected userinfo rejection observed
+      ansible.builtin.set_fact:
+        __preflight_userinfo_rejection_observed: true
+
+- name: Main | pre_validate rejects a case-variant plaintext endpoint
+  block:
+    - name: Main | Run pre_validate with an uppercase scheme
+      vars:
+        preflight_openshift_host: HTTP://api.cluster.example.com
+        preflight_openshift_api_key: test-token
+        preflight_aap_hostname: https://aap.example.com
+      ansible.builtin.include_tasks: "{{ role_path }}/../../../../roles/preflight/tasks/pre_validate.yml"
+  rescue:
+    - name: Main | Mark the expected plaintext rejection observed
+      ansible.builtin.set_fact:
+        __preflight_plaintext_rejection_observed: true
+
+- name: Main | Assert both endpoint rejections fired
+  ansible.builtin.assert:
+    that:
+      - __preflight_userinfo_rejection_observed | default(false) | bool
+      - __preflight_plaintext_rejection_observed | default(false) | bool
+    quiet: true
 ...
