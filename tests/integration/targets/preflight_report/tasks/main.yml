@@ -21,7 +21,7 @@
     __preflight_result_vddk: {ran: true, passed: 'True', detail: 'string true'}
   ansible.builtin.include_tasks: "{{ role_path }}/../../../../roles/preflight/tasks/report.yml"
 
-- name: Main | Full run — one ran check failed, the assert fails and names it
+- name: Main | Full run — ran checks failed, the assert names them
   block:
     - name: Main | Run the report with a failed check
       vars:
