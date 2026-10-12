@@ -52,7 +52,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 
 #### Key: main
 
-* **Description**: ['Runs every preflight check and reports a summary, then fails the play if any check failed. Checks: OpenShift API authentication, OpenShift Virtualization (CNV) operator health, MTV operator health, AAP access, vCenter connectivity, and VDDK init image configuration.', 'Designed to run from an AAP job template (the target credential injects K8S_AUTH_* environment variables, the source credential injects VMWARE_*, and the controller injects CONTROLLER_HOST and CONTROLLER_API_TOKEN) or from a controller with the sample inventory. Connection variables cascade from environment variables to inventory host variables resolved through preflight_target_name, preflight_source_name, and preflight_aap_name.', 'All checks run on every invocation. A check whose target is not configured (for example no vCenter credentials) fails that check with a message describing what to set rather than crashing the play, so one run reports everything that needs attention.']
+* **Description**: ['Runs every preflight check and reports a summary, then fails the play if any check failed. Checks: OpenShift API auth, CNV and MTV operator health, AAP access, vCenter connectivity, and VDDK init image configuration.', 'Designed to run from an AAP job template (credentials inject K8S_AUTH_*, VMWARE_*, CONTROLLER_HOST, CONTROLLER_API_TOKEN) or a controller with the sample inventory. Connection variables cascade from environment variables to inventory host variables.', 'All checks run on every invocation. An unconfigured target fails that check with guidance rather than crashing the play, so one run reports everything that needs attention.']
 * **Options**:
   * **preflight_aap_api_path**:
     * **Required**: False
@@ -118,7 +118,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
     * **Required**: False
     * **Type**: bool
     * **Default**: True
-    * **Description**: Whether to enable secure logging for tasks that handle credentials. Set to false to debug failed probes. Never set false on a persistent AAP job template — the credential-bearing probe results would persist in job output; rotate any token exposed in debug output.
+    * **Description**: Whether to enable secure logging for tasks that handle credentials. Set to false to debug failed probes. Prefer a one-off CLI run (--tags <check>) over flipping the toggle on a job template; if you must, rotate the exposed credential (token or password) afterwards.
   * **preflight_source_name**:
     * **Required**: False
     * **Type**: str
