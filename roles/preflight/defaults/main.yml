@@ -220,8 +220,4 @@ preflight_vddk_image: >-
     if __preflight_source_vddk is mapping
     else vddk_image | default('', true)
   }}
-
-# Internal: the source host's vddk dictionary (empty when the host or the
-# vddk entry is absent).
-__preflight_source_vddk: "{{ hostvars[preflight_source_name]['vddk'] | default({}, true) }}"
 ...

@@ -169,7 +169,6 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`__preflight_source_vddk`](defaults/main.yml#L226)   | str   | `{{ hostvars[preflight_source_name]['vddk'] ¦ default({}, true) }}` |  None  |   None  |  None |
 | [`preflight_aap_api_path`](defaults/main.yml#L130)   | str   | `/api/v2/` |  None  |   False  |  AAP API Path |
 | [`preflight_aap_hostname`](defaults/main.yml#L116)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Hostname |
 | [`preflight_aap_name`](defaults/main.yml#L20)   | str   | `{{ groups['migration_aap'] ¦ default([], true) ¦ first ¦ default('', true) }}` |  None  |   None  |  None |
@@ -192,8 +191,6 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 | [`preflight_vddk_image`](defaults/main.yml#L217)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  VDDK Init Image |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
-<br>
-<b>`__preflight_source_vddk`:</b> None
 <br>
 <b>`preflight_aap_api_path`:</b> >-
 <br>
@@ -246,6 +243,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 | Var          | Type         | Value       |
 |--------------|--------------|-------------|
 | [__preflight_source_type](vars/main.yml#L4)   | str   | `{{ hostvars[preflight_source_name]['type'] ¦ default('', true) }}` |
+| [__preflight_source_vddk](vars/main.yml#L8)   | str   | `{{ hostvars[preflight_source_name]['vddk'] ¦ default({}, true) }}` |
 
 ### Tasks
 
@@ -481,7 +479,7 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| validate_vcenter___List_vCenter_datacenters_to_prove_connectivity_and_authentication0[validate vcenter   list vcenter datacenters to<br>prove connectivity and authentication<br>When: **preflight vcenter hostname   length   0 and   <br>preflight source type   length    0 or   preflight<br>source type     vmware**]:::task
+  Start-->|Task| validate_vcenter___List_vCenter_datacenters_to_prove_connectivity_and_authentication0[validate vcenter   list vcenter datacenters to<br>prove connectivity and authentication<br>When: **preflight vcenter hostname   length   0 and  <br>preflight source type   length    0 or   preflight<br>source type     vmware**]:::task
   validate_vcenter___List_vCenter_datacenters_to_prove_connectivity_and_authentication0-->|Task| validate_vcenter___Record_the_vCenter_connectivity_check_result1[validate vcenter   record the vcenter connectivity<br>check result]:::task
   validate_vcenter___Record_the_vCenter_connectivity_check_result1-->End
 ```

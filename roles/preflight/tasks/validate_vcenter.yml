@@ -6,8 +6,9 @@
 # vmware sources — other source types (ovirt) skip it.
 
 - name: validate_vcenter | List vCenter datacenters to prove connectivity and authentication
-  when: preflight_vcenter_hostname | length > 0
-    and (__preflight_source_type | length == 0 or __preflight_source_type == 'vmware')
+  when:
+    - preflight_vcenter_hostname | length > 0
+    - __preflight_source_type | length == 0 or __preflight_source_type == 'vmware'
   vmware.vmware_rest.vcenter_datacenter_info:
     vcenter_hostname: "{{ preflight_vcenter_hostname }}"
     vcenter_username: "{{ preflight_vcenter_username }}"
