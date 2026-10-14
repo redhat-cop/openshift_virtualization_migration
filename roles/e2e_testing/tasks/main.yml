@@ -1,0 +1,6 @@
+---
+
+- name: Display task note
+  ansible.builtin.debug:
+    msg: "main task not implemented: invoke individual task files"
+...

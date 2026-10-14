@@ -1,0 +1,8 @@
+---
+
+e2e_testing_openshift_aap_registry_credentials_job_template: OpenShift Virtualization Migration - Registry Credentials
+e2e_testing_openshift_aap_mtv_provider_job_template: OpenShift Virtualization Migration - MTV Provider
+e2e_testing_openshift_aap_mtv_mapping_job_template: OpenShift Virtualization Migration - MTV Maps
+e2e_testing_openshift_aap_mtv_plans_job_template: OpenShift Virtualization Migration - MTV Plans
+e2e_testing_openshift_aap_mtv_migrate_job_template: OpenShift Virtualization Migration - MTV Migrate
+...

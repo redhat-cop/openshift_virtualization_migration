@@ -1,0 +1,134 @@
+---
+
+- name: run_openshift_cluster_vm_source | Configure MTV Providers
+  ansible.builtin.include_role:
+    name: infra.aap_configuration.controller_job_launch
+  vars:
+    controller_launch_jobs:
+      - name: "{{ e2e_testing_openshift_aap_mtv_provider_job_template }}"
+        organization: "{{ e2e_testing_openshift_aap_organization }}"
+        credentials:
+          - "{{ e2e_testing_openshift_ansible_host }}"
+          - "{{ __e2e_testing_vm_source }}"
+        extra_vars:
+          mtv_provider_provider_namespace: "{{ e2e_testing_target_namespace }}"
+        wait: true
+
+- name: run_openshift_cluster_vm_source | Configure MTV Mapping
+  ansible.builtin.include_role:
+    name: infra.aap_configuration.controller_job_launch
+  vars:
+    controller_launch_jobs:
+      - name: "{{ e2e_testing_openshift_aap_mtv_mapping_job_template }}"
+        organization: "{{ e2e_testing_openshift_aap_organization }}"
+        credentials:
+          - "{{ e2e_testing_openshift_ansible_host }}"
+          - "{{ __e2e_testing_vm_source }}"
+        extra_vars:
+          mtv_maps_storage_map_namespace: "{{ e2e_testing_target_namespace }}"
+          mtv_maps_network_map_namespace: "{{ e2e_testing_target_namespace }}"
+          mtv_maps_source_provider_namespace: "{{ e2e_testing_target_namespace }}"
+          mtv_maps_destination_provider_namespace: "{{ e2e_testing_target_namespace }}"
+        wait: true
+
+- name: run_openshift_cluster_vm_source | Configure Plans
+  when:
+    - e2e_testing_openshift_plans_request | default('', true) | length > 0
+    - >-
+      e2e_testing_openshift_plans_request['vms'] | default('', true) | length > 0
+      or e2e_testing_openshift_plans_request['folders'] | default('', true) | length > 0
+  block:
+    - name: run_openshift_cluster_vm_source | Prepare Migration Request
+      ansible.builtin.set_fact:
+        __e2e_testing_openshift_plans_request: >-
+          {{
+            __e2e_testing_openshift_plans_request_baseline
+            | ansible.builtin.combine(e2e_testing_openshift_plans_request, recursive=True)
+          }}
+      vars:
+        __e2e_testing_openshift_plans_request_baseline:
+          source: "{{ __e2e_testing_vm_source | infra.openshift_virtualization_migration.rfc1123 }}"
+          destination: "{{ e2e_testing_destination_name }}"
+          source_namespace: "{{ e2e_testing_target_namespace }}"
+          migration_namespace: "{{ e2e_testing_target_namespace }}"
+          destination_namespace: "{{ e2e_testing_target_namespace }}"
+          verify_plans_ready: true
+          plan_name: "{{ e2e_testing_migration_plan_name }}"
+          network_map: >-
+            {{
+              (__e2e_testing_vm_source + '-' + e2e_testing_destination_name)
+              | infra.openshift_virtualization_migration.rfc1123
+            }}
+          storage_map: >-
+            {{
+              (__e2e_testing_vm_source + '-' + e2e_testing_destination_name)
+              | infra.openshift_virtualization_migration.rfc1123
+            }}
+
+    - name: run_openshift_cluster_vm_source | Execute Migration Plan Job Template
+      ansible.builtin.include_role:
+        name: infra.aap_configuration.controller_job_launch
+      vars:
+        controller_launch_jobs:
+          - name: "{{ e2e_testing_openshift_aap_mtv_plans_job_template }}"
+            organization: "{{ e2e_testing_openshift_aap_organization }}"
+            credentials:
+              - "{{ e2e_testing_openshift_ansible_host }}"
+              - "{{ __e2e_testing_vm_source }}"
+            extra_vars:
+              mtv_plans_action: create
+              mtv_plans_migration_request: "{{ __e2e_testing_openshift_plans_request }}"
+            wait: true
+
+    - name: run_openshift_cluster_vm_source | Execute Migrate Job Template
+      ansible.builtin.include_role:
+        name: infra.aap_configuration.controller_job_launch
+      vars:
+        controller_launch_jobs:
+          - name: "{{ e2e_testing_openshift_aap_mtv_migrate_job_template }}"
+            organization: "{{ e2e_testing_openshift_aap_organization }}"
+            credentials:
+              - "{{ e2e_testing_openshift_ansible_host }}"
+              - "{{ __e2e_testing_vm_source }}"
+            extra_vars:
+              mtv_migrate_plan_name: "{{ e2e_testing_migration_plan_name }}"
+              mtv_migrate_plan_namespace: "{{ e2e_testing_target_namespace }}"
+              mtv_migrate_verify_complete: true
+            wait: true
+
+    - name: run_openshift_cluster_vm_source | Execute Migration Plan Archive Job Template
+      ansible.builtin.include_role:
+        name: infra.aap_configuration.controller_job_launch
+      vars:
+        controller_launch_jobs:
+          - name: "{{ e2e_testing_openshift_aap_mtv_plans_job_template }}"
+            organization: "{{ e2e_testing_openshift_aap_organization }}"
+            credentials:
+              - "{{ e2e_testing_openshift_ansible_host }}"
+              - "{{ __e2e_testing_vm_source }}"
+            extra_vars:
+              mtv_plans_action: archive
+              mtv_plans_plan_name: "{{ e2e_testing_migration_plan_name }}"
+              mtv_plans_plan_namespace: "{{ e2e_testing_target_namespace }}"
+              mtv_plans_verify_archived: true
+            wait: true
+      when: e2e_testing_archive_plan | bool
+
+    - name: run_openshift_cluster_vm_source | Execute Migration Plan Delete Job Template
+      ansible.builtin.include_role:
+        name: infra.aap_configuration.controller_job_launch
+      vars:
+        controller_launch_jobs:
+          - name: "{{ e2e_testing_openshift_aap_mtv_plans_job_template }}"
+            organization: "{{ e2e_testing_openshift_aap_organization }}"
+            credentials:
+              - "{{ e2e_testing_openshift_ansible_host }}"
+              - "{{ __e2e_testing_vm_source }}"
+            extra_vars:
+              mtv_plans_action: delete
+              mtv_plans_plan_name: "{{ e2e_testing_migration_plan_name }}"
+              mtv_plans_plan_namespace: "{{ e2e_testing_target_namespace }}"
+              mtv_plans_verify_deleted: true
+            wait: true
+      when: e2e_testing_delete_plan | bool
+...

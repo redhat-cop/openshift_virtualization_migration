@@ -1,0 +1,88 @@
+---
+
+# title: Secure Logging
+# required: False
+# description: Whether to enable secure logging for sensitive tasks.
+e2e_testing_secure_logging: "{{ secure_logging | default(true) }}"
+
+# title: OpenShift Host
+# required: True
+# description: OpenShift host.
+e2e_testing_openshift_host: >-
+  {{
+    lookup('env', 'K8S_AUTH_HOST') | default(openshift_host, true)
+  }}
+
+# title: OpenShift API Key
+# required: True
+# description: OpenShift API key.
+e2e_testing_openshift_api_key: >-
+  {{
+    lookup('env', 'K8S_AUTH_API_KEY')
+    | default(
+        openshift_credential.openshift_api_key
+        | default(openshift_credential.openshift_temporary_api_key)
+        if openshift_credential is defined
+        else openshift_api_key | default(openshift_temporary_api_key),
+        true
+      )
+  }}
+
+# title: OpenShift CA Certificate Path
+# required: False
+# description: Path to the OpenShift CA Certificate.
+e2e_testing_openshift_ca_cert_path: >-
+  {{
+    lookup('env', 'K8S_AUTH_SSL_CA_CERT')
+    | default(openshift_ca_cert_path | default(omit), true)
+  }}
+
+# title: OpenShift Verify SSL
+# required: False
+# description: Whether to verify SSL certificates.
+e2e_testing_openshift_verify_ssl: >-
+  {{
+    lookup('env', 'K8S_AUTH_VERIFY_SSL')
+    | default(openshift_verify_ssl | default(true), true)
+  }}
+
+# title: Target Namespace
+# required: False
+# description: Namespace to perform e2e testing.
+e2e_testing_target_namespace: "e2e-testing"
+
+# title: OpenShift Inventory Host
+# required: False
+# description: Name of the Inventory Host associated with OpenShift.
+e2e_testing_openshift_ansible_host: ""
+
+# title: AAP Organization
+# required: False
+# description: Name of the AAP Organization.
+e2e_testing_openshift_aap_organization: "Default"
+
+# title: Migration Plan Request
+# required: False
+# description: Data Structure Representing a Plan migration request
+e2e_testing_openshift_plans_request: {}
+
+# title: MTV Destination Provider
+# required: False
+# description: Name of the destination MTV provider
+e2e_testing_destination_name: host
+
+# title: MTV Plan Name
+# required: False
+# description: Name of the MTV Plan to create
+e2e_testing_migration_plan_name: e2e-test
+
+# title: Archive the MTV Plan Name
+# required: False
+# description: Whether to archive the MTV Plan
+e2e_testing_archive_plan: true
+
+# title: Delete the MTV Plan Name
+# required: False
+# description: Whether to delete the MTV Plan
+e2e_testing_delete_plan: true
+...

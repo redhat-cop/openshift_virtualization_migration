@@ -41,9 +41,10 @@
   ansible.builtin.set_fact:
     __mtv_plans_all_archived: >-
       {{
-        __mtv_plans_verify_results |
+        __mtv_plans_verify_results | length > 0 and
+        (__mtv_plans_verify_results |
         ansible.builtin.json_query('[?status.conditions[?type==`Archived` && status==`True`]]') |
-        length == __mtv_plans_verify_results | length
+        length == __mtv_plans_verify_results | length)
       }}
 
 - name: verify_archived | Fail if Retries Exceeded
