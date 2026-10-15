@@ -310,7 +310,9 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| validate_vcenter ¦ List vCenter datacenters to prove connectivity and authentication | `vmware.vmware_rest.vcenter_datacenter_info` | True |
+| validate_vcenter ¦ List vCenter datacenters via the REST API (vCenter 7.0+) | `vmware.vmware_rest.vcenter_datacenter_info` | True |
+| validate_vcenter ¦ Fall back to the SOAP SDK for vCenter 6.x (no REST API) | `community.vmware.vmware_datacenter_info` | True |
+| validate_vcenter ¦ Merge the REST and SOAP results into one datacenter list | `ansible.builtin.set_fact` | False |
 | validate_vcenter ¦ Record the vCenter connectivity check result | `ansible.builtin.set_fact` | False |
 
 #### File: tasks/validate_vddk.yml
@@ -479,9 +481,11 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| validate_vcenter___List_vCenter_datacenters_to_prove_connectivity_and_authentication0[validate vcenter   list vcenter datacenters to<br>prove connectivity and authentication<br>When: **preflight vcenter hostname   length   0 and  <br>preflight source type   length    0 or   preflight<br>source type     vmware**]:::task
-  validate_vcenter___List_vCenter_datacenters_to_prove_connectivity_and_authentication0-->|Task| validate_vcenter___Record_the_vCenter_connectivity_check_result1[validate vcenter   record the vcenter connectivity<br>check result]:::task
-  validate_vcenter___Record_the_vCenter_connectivity_check_result1-->End
+  Start-->|Task| validate_vcenter___List_vCenter_datacenters_via_the_REST_API__vCenter_7_0__0[validate vcenter   list vcenter datacenters via<br>the rest api  vcenter 7 0  <br>When: **preflight vcenter hostname   length   0 and  <br>preflight source type   length    0 or   preflight<br>source type     vmware**]:::task
+  validate_vcenter___List_vCenter_datacenters_via_the_REST_API__vCenter_7_0__0-->|Task| validate_vcenter___Fall_back_to_the_SOAP_SDK_for_vCenter_6_x__no_REST_API_1[validate vcenter   fall back to the soap sdk for<br>vcenter 6 x  no rest api <br>When: **preflight vcenter hostname   length   0 and  <br>preflight source type   length    0 or   preflight<br>source type     vmware  and   preflight vcenter<br>rest value is not defined or   preflight vcenter<br>rest value   length    0**]:::task
+  validate_vcenter___Fall_back_to_the_SOAP_SDK_for_vCenter_6_x__no_REST_API_1-->|Task| validate_vcenter___Merge_the_REST_and_SOAP_results_into_one_datacenter_list2[validate vcenter   merge the rest and soap results<br>into one datacenter list]:::task
+  validate_vcenter___Merge_the_REST_and_SOAP_results_into_one_datacenter_list2-->|Task| validate_vcenter___Record_the_vCenter_connectivity_check_result3[validate vcenter   record the vcenter connectivity<br>check result]:::task
+  validate_vcenter___Record_the_vCenter_connectivity_check_result3-->End
 ```
 
 ### Graph for validate_vddk.yml
