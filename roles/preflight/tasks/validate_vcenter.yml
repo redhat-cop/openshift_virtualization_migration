@@ -38,7 +38,7 @@
   when:
     - preflight_vcenter_hostname | length > 0
     - __preflight_source_type | length == 0 or __preflight_source_type == 'vmware'
-    - __preflight_vcenter_rest.value is not defined
+    - __preflight_vcenter_rest.value is not defined or __preflight_vcenter_rest.value | length == 0
   community.vmware.vmware_datacenter_info:
     hostname: "{{ preflight_vcenter_hostname }}"
     username: "{{ preflight_vcenter_username }}"
@@ -50,12 +50,18 @@
   no_log: "{{ preflight_secure_logging }}"
 
 - name: validate_vcenter | Merge the REST and SOAP results into one datacenter list
-  # Renders as an empty string when neither path returned data — the record
-  # task below distinguishes a real list (possibly empty) from '' by type.
+  # Prefers a result with datacenters (the SOAP fallback can find data the
+  # proxied REST path misses); falls back to an empty result from either
+  # path (connected but none visible), then the empty-string sentinel when
+  # neither path returned data — the record task distinguishes a real list
+  # from '' by type.
   ansible.builtin.set_fact:
-    __preflight_vcenter_dcs: "{{ [(__preflight_vcenter_rest.value | default(none)),
-                                  (__preflight_vcenter_soap.datacenter_info | default(none))]
-                                 | reject('none') | first | default(none) }}"
+    __preflight_vcenter_dcs: "{{ ([(__preflight_vcenter_rest.value | default(none)),
+                                   (__preflight_vcenter_soap.datacenter_info | default(none))]
+                                  | reject('none') | select('truthy') | first)
+      | default([(__preflight_vcenter_rest.value | default(none)),
+                 (__preflight_vcenter_soap.datacenter_info | default(none))]
+                | reject('none') | first | default(none), true) }}"
 
 - name: validate_vcenter | Record the vCenter connectivity check result
   ansible.builtin.set_fact:
@@ -76,7 +82,8 @@
         {% elif __preflight_vcenter_dcs is not string and __preflight_vcenter_dcs | length > 0 %}
         HTTP session established at {{ preflight_vcenter_hostname }}
         ({{ __preflight_vcenter_dcs | length }} datacenters visible via
-        {{ 'REST' if __preflight_vcenter_rest.value is defined else 'the SOAP SDK' }})
+        {{ 'REST' if __preflight_vcenter_rest.value is defined and __preflight_vcenter_rest.value | length > 0
+           else 'the SOAP SDK' }})
         {% elif __preflight_vcenter_dcs is not string %}
         Connected to {{ preflight_vcenter_hostname }} but no datacenters
         are visible — a migration source needs at least one
