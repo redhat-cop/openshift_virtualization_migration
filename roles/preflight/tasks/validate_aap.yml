@@ -38,7 +38,7 @@
         {% else %}
         HTTP {{ __preflight_aap.status | default('connection error') }} at
         {{ preflight_aap_hostname }} — 401/403 means the account or token is
-        wrong or expired; 404 means the API path is wrong — AAP 2.5
-        platform deployments need preflight_aap_api_path=/api/controller/v2/
+        wrong or expired; 404 means the API path is wrong — AAP 2.4
+        and earlier deployments need preflight_aap_api_path=/api/v2/
         {% endif %}
 ...

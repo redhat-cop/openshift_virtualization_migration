@@ -16,6 +16,10 @@
     vcenter_validate_certs: "{{ preflight_vcenter_validate_certs }}"
   register: __preflight_vcenter
   failed_when: false
+  # A module crash (e.g. aiohttp ContentTypeError when the endpoint answers
+  # with a non-JSON body) bypasses failed_when and would abort the run; the
+  # record task below turns the fault into a graceful check result.
+  ignore_errors: true
   no_log: "{{ preflight_secure_logging }}"
 
 - name: validate_vcenter | Record the vCenter connectivity check result

@@ -25,7 +25,7 @@ ansible-playbook playbooks/vmf_preflight.yml \
 
 From an AAP job template the target credential injects `K8S_AUTH_*`, the source credential injects `VMWARE_*`, and the controller injects `CONTROLLER_HOST`/`CONTROLLER_API_TOKEN` — the same role runs unchanged.
 
-AAP 2.5 platform deployments serve the controller API at `/api/controller/v2/` rather than `/api/v2/` — set `preflight_aap_api_path: /api/controller/v2/` for those environments (a 404 from the AAP check means the path is wrong).
+The AAP access check defaults to the AAP 2.5 platform controller API path (`/api/controller/v2/`). AAP 2.4 and earlier serve the API at `/api/v2/` — set `preflight_aap_api_path: /api/v2/` for those environments (a 404 from the AAP check means the path is wrong).
 
 With the sample inventory the connection variables resolve from the target cluster host (`openshift_host`, `openshift_api_key`), the source host (`host`, `username`, `password`, `vddk.image`), and the AAP host (`aap_hostname`, `aap_token`) — selected by `preflight_target_name`, `preflight_source_name`, and `preflight_aap_name`, which default to the `target_name`/`source_name` extra vars (injected by the seeded credentials) or the first host of each group.
 
@@ -169,7 +169,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`preflight_aap_api_path`](defaults/main.yml#L130)   | str   | `/api/v2/` |  None  |   False  |  AAP API Path |
+| [`preflight_aap_api_path`](defaults/main.yml#L130)   | str   | `/api/controller/v2/` |  None  |   False  |  AAP API Path |
 | [`preflight_aap_hostname`](defaults/main.yml#L116)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Hostname |
 | [`preflight_aap_name`](defaults/main.yml#L20)   | str   | `{{ groups['migration_aap'] ¦ default([], true) ¦ first ¦ default('', true) }}` |  None  |   None  |  None |
 | [`preflight_aap_password`](defaults/main.yml#L148)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Password |
@@ -180,7 +180,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 | [`preflight_mtv_namespace`](defaults/main.yml#L200)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  MTV Namespace |
 | [`preflight_openshift_api_key`](defaults/main.yml#L46)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
 | [`preflight_openshift_host`](defaults/main.yml#L33)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift Host |
-| [`preflight_openshift_verify_ssl`](defaults/main.yml#L63)   | str   | `{{ (lookup('env', 'K8S_AUTH_VERIFY_SSL') ¦ default(hostvars[preflight_target_name]['openshift_verify_ssl'] ¦ default(true, true), true)) ¦ bool }}` |  None  |   False  |  OpenShift Verify SSL |
+| [`preflight_openshift_verify_ssl`](defaults/main.yml#L63)   | str   | `{{ (lookup('env', 'K8S_AUTH_VERIFY_SSL') ¦ default(hostvars[preflight_target_name]['openshift_verify_ssl'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  OpenShift Verify SSL |
 | [`preflight_secure_logging`](defaults/main.yml#L25)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
 | [`preflight_source_name`](defaults/main.yml#L17)   | str   | `{{ source_name ¦ default(groups['vm_sources'] ¦ default([], true) ¦ first ¦ default('', true), true) }}` |  None  |   None  |  None |
 | [`preflight_target_name`](defaults/main.yml#L14)   | str   | `{{ target_name ¦ default(groups['migration_clusters'] ¦ default([], true) ¦ first ¦ default('', true), true) }}` |  None  |   None  |  None |

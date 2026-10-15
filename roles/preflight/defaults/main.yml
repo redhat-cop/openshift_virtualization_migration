@@ -61,7 +61,7 @@ preflight_openshift_api_key: >-
 #   the target cluster host. Defaults to true; the bool cast keeps the
 #   argument-spec type honest when a raw env string feeds the value.
 preflight_openshift_verify_ssl: "{{ (lookup('env', 'K8S_AUTH_VERIFY_SSL')
-  | default(hostvars[preflight_target_name]['openshift_verify_ssl'] | default(true, true), true)) | bool }}"
+  | default(hostvars[preflight_target_name]['openshift_verify_ssl'] | default(true), true)) | bool }}"
 
 # title: vCenter Hostname
 # required: False
@@ -124,10 +124,10 @@ preflight_aap_hostname: >-
 # required: False
 # description: >-
 #   API base path appended to the AAP hostname for the access check.
-#   Defaults to /api/v2/ (AWX and AAP 2.4 and earlier). AAP 2.5 platform
-#   deployments serve the controller API at /api/controller/v2/ — set
-#   that value for those environments.
-preflight_aap_api_path: /api/v2/
+#   Defaults to /api/controller/v2/ (AAP 2.5 platform and AWX). AAP 2.4
+#   and earlier serve the API at /api/v2/ — set that value for those
+#   environments.
+preflight_aap_api_path: /api/controller/v2/
 
 # title: AAP Username
 # required: False
