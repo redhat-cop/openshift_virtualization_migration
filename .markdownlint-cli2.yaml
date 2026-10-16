@@ -33,6 +33,7 @@ config:
   reference-links-images: false     # MD052
   table-column-style: false         # MD060
   ul-style: false                   # MD004
+  no-bare-urls: false               # MD034
 
   # Keep this item last due to length
   proper-names: false

@@ -190,6 +190,13 @@ cython_debug/
 
 **tar.gz
 
+# Ansible config (contains PAH tokens)
+ansible.cfg
+
+# Ansible Navigator
+ansible-navigator.yml
+*-artifact-*.json
+
 # Secrets and certificates
 *.pem
 *.key

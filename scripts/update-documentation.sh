@@ -48,4 +48,7 @@ rm -f "${README_TMP}" "${ROLE_LIST_FILE}"
 echo "Generating table of contents for README.md"
 md_toc --in-place github README.md
 
+# Trim whitespace
+pre-commit run trailing-whitespace --files README.md roles/*/README.md
+
 echo "Documentation update complete!"
