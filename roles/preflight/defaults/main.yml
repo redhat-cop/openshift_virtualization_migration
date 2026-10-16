@@ -1,0 +1,223 @@
+---
+# Preflight role defaults.
+#
+# Connection variables cascade from AAP-injected environment variables to
+# inventory host variables resolved through the target, source, and AAP
+# host names below, so the role runs identically from an AAP job template
+# (target credential injects K8S_AUTH_*, source credential injects
+# VMWARE_*, the controller itself injects CONTROLLER_HOST and
+# CONTROLLER_API_TOKEN) and from a controller with the sample inventory.
+
+# Resolver options — the inventory hosts whose variables feed the checks.
+# target_name and source_name match the names the seeded credentials
+# inject as extra vars; each falls back to the first host of its group.
+preflight_target_name: "{{ target_name
+  | default(groups['migration_clusters'] | default([], true)
+  | first | default('', true), true) }}"
+preflight_source_name: "{{ source_name
+  | default(groups['vm_sources'] | default([], true)
+  | first | default('', true), true) }}"
+preflight_aap_name: "{{ groups['migration_aap'] | default([], true) | first | default('', true) }}"
+
+# Secure logging toggle for tasks that handle credentials.
+# NEVER hardcode no_log: true — always reference this variable so failures
+# can be debugged with preflight_secure_logging=false.
+preflight_secure_logging: "{{ secure_logging | default(true) }}"
+
+# title: OpenShift Host
+# required: True
+# description: >-
+#   OpenShift API endpoint. Cascades from K8S_AUTH_HOST env var (injected
+#   by the AAP target credential) or the openshift_host variable on the
+#   target cluster host (preflight_target_name).
+preflight_openshift_host: >-
+  {{
+    lookup('env', 'K8S_AUTH_HOST')
+    | default(hostvars[preflight_target_name]['openshift_host'] | default('', true), true)
+  }}
+
+# title: OpenShift API Key
+# required: True
+# description: >-
+#   OpenShift API token. Cascades from K8S_AUTH_API_KEY env var (injected
+#   by the AAP target credential) or the openshift_api_key variable on the
+#   target cluster host (preflight_target_name), falling back to
+#   openshift_temporary_api_key.
+preflight_openshift_api_key: >-
+  {{
+    lookup('env', 'K8S_AUTH_API_KEY')
+    | default(
+        hostvars[preflight_target_name]['openshift_api_key']
+        | default(hostvars[preflight_target_name]['openshift_temporary_api_key'] | default('', true), true),
+        true
+      )
+  }}
+
+# title: OpenShift Verify SSL
+# required: False
+# description: >-
+#   Validate the OpenShift API TLS certificate. Cascades from
+#   K8S_AUTH_VERIFY_SSL env var or the openshift_verify_ssl variable on
+#   the target cluster host. Defaults to true; the bool cast keeps the
+#   argument-spec type honest when a raw env string feeds the value.
+preflight_openshift_verify_ssl: "{{ (lookup('env', 'K8S_AUTH_VERIFY_SSL')
+  | default(hostvars[preflight_target_name]['openshift_verify_ssl'] | default(true), true)) | bool }}"
+
+# title: vCenter Hostname
+# required: False
+# description: >-
+#   vCenter endpoint for the connectivity check. Cascades from
+#   VMWARE_HOST env var (injected by the AAP source credential) or the
+#   host variable on the source host (preflight_source_name).
+preflight_vcenter_hostname: >-
+  {{
+    lookup('env', 'VMWARE_HOST')
+    | default(hostvars[preflight_source_name]['host'] | default('', true), true)
+  }}
+
+# title: vCenter Username
+# required: False
+# description: >-
+#   vCenter username. Cascades from VMWARE_USER env var or the username
+#   variable on the source host (preflight_source_name).
+preflight_vcenter_username: >-
+  {{
+    lookup('env', 'VMWARE_USER')
+    | default(hostvars[preflight_source_name]['username'] | default('', true), true)
+  }}
+
+# title: vCenter Password
+# required: False
+# description: >-
+#   vCenter password. Cascades from VMWARE_PASSWORD env var or the
+#   password variable on the source host (preflight_source_name).
+preflight_vcenter_password: >-
+  {{
+    lookup('env', 'VMWARE_PASSWORD')
+    | default(hostvars[preflight_source_name]['password'] | default('', true), true)
+  }}
+
+# title: vCenter Verify SSL
+# required: False
+# description: >-
+#   Validate the vCenter TLS certificate. Cascades from
+#   VMWARE_VALIDATE_CERTS env var or the validate_certs variable on the
+#   source host. Defaults to true.
+preflight_vcenter_validate_certs: "{{ (lookup('env', 'VMWARE_VALIDATE_CERTS')
+  | default(hostvars[preflight_source_name]['validate_certs'] | default(true), true)) | bool }}"
+
+# title: AAP Hostname
+# required: False
+# description: >-
+#   Ansible Automation Platform controller URL for the access check.
+#   Cascades from AAP_HOSTNAME env var, the CONTROLLER_HOST env var
+#   injected by the controller for its own jobs, or the aap_hostname
+#   variable on the AAP host (preflight_aap_name).
+preflight_aap_hostname: >-
+  {{
+    lookup('env', 'AAP_HOSTNAME')
+    | default(lookup('env', 'CONTROLLER_HOST')
+      | default(hostvars[preflight_aap_name]['aap_hostname'] | default('', true), true), true)
+  }}
+
+# title: AAP API Path
+# required: False
+# description: >-
+#   API base path appended to the AAP hostname for the access check.
+#   Defaults to /api/controller/v2/ (AAP 2.5 platform and AWX). AAP 2.4
+#   and earlier serve the API at /api/v2/ — set that value for those
+#   environments.
+preflight_aap_api_path: /api/controller/v2/
+
+# title: AAP Username
+# required: False
+# description: >-
+#   AAP username. Cascades from AAP_USERNAME env var or the aap_username
+#   variable on the AAP host (preflight_aap_name).
+preflight_aap_username: >-
+  {{
+    lookup('env', 'AAP_USERNAME')
+    | default(hostvars[preflight_aap_name]['aap_username'] | default('', true), true)
+  }}
+
+# title: AAP Password
+# required: False
+# description: >-
+#   AAP password. Cascades from AAP_PASSWORD env var or the aap_password
+#   variable on the AAP host (preflight_aap_name).
+preflight_aap_password: >-
+  {{
+    lookup('env', 'AAP_PASSWORD')
+    | default(hostvars[preflight_aap_name]['aap_password'] | default('', true), true)
+  }}
+
+# title: AAP Token
+# required: False
+# description: >-
+#   AAP OAuth2 token. Cascades from AAP_TOKEN env var, the
+#   CONTROLLER_API_TOKEN env var injected by the controller for its own
+#   jobs, or the aap_token variable on the AAP host. Takes precedence
+#   over username/password.
+preflight_aap_token: >-
+  {{
+    lookup('env', 'AAP_TOKEN')
+    | default(lookup('env', 'CONTROLLER_API_TOKEN')
+      | default(hostvars[preflight_aap_name]['aap_token'] | default('', true), true), true)
+  }}
+
+# title: AAP Verify SSL
+# required: False
+# description: >-
+#   Validate the AAP TLS certificate. Cascades from AAP_VALIDATE_CERTS env
+#   var or the aap_validate_certs variable on the AAP host. Defaults to
+#   true.
+preflight_aap_validate_certs: "{{ (lookup('env', 'AAP_VALIDATE_CERTS')
+  | default(hostvars[preflight_aap_name]['aap_validate_certs'] | default(true), true)) | bool }}"
+
+# title: CNV Namespace
+# required: False
+# description: >-
+#   Namespace holding the OpenShift Virtualization (CNV) operator CSV.
+#   Resolves from the cnv_namespace variable or the target cluster
+#   host's cnv_namespace, defaulting to openshift-cnv.
+preflight_cnv_namespace: >-
+  {{
+    cnv_namespace
+    | default(
+        hostvars[preflight_target_name]['cnv_namespace']
+        | default('openshift-cnv', true),
+        true
+      )
+  }}
+
+# title: MTV Namespace
+# required: False
+# description: >-
+#   Namespace holding the Migration Toolkit for Virtualization operator
+#   CSV. Resolves from the mtv_namespace variable or the target cluster
+#   host's mtv_namespace (inventory-sample sets it on the cluster host),
+#   defaulting to openshift-mtv.
+preflight_mtv_namespace: >-
+  {{
+    mtv_namespace
+    | default(
+        hostvars[preflight_target_name]['mtv_namespace']
+        | default('openshift-mtv', true),
+        true
+      )
+  }}
+
+# title: VDDK Init Image
+# required: False
+# description: >-
+#   VDDK init image for direct-source migrations. Resolves from the
+#   source host's vddk.image dictionary entry (preflight_source_name) or
+#   the vddk_image variable. The check enforces a scheme-less reference —
+#   Forklift rejects scheme'd images with VDDKInitImageUnavailable.
+preflight_vddk_image: >-
+  {{
+    __preflight_source_vddk.get('image', vddk_image | default('', true))
+    if __preflight_source_vddk is mapping
+    else vddk_image | default('', true)
+  }}
+...

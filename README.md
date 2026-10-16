@@ -51,6 +51,7 @@ This collection includes the following roles for managing OpenShift Virtualizati
 * [mtv_provider](roles/mtv_provider/README.md) - Ensure host OpenShift provider and source provider CRs exist on target clusters. Designed to run from AAP with credential injection.
 * [mtv_query_inventory](roles/mtv_query_inventory/README.md) - Queries MTV inventory.
 * [pre_migration_vm](roles/pre_migration_vm/README.md) - Perform VM related activities prior to a migration
+* [preflight](roles/preflight/README.md) - Validate the migration environment before seeding AAP — OpenShift API authentication, OpenShift Virtualization and MTV operator health, AAP access, vCenter connectivity, and VDDK init image configuration.
 * [utility_aap_deploy](roles/utility_aap_deploy/README.md) - Deploys an instance of Ansible Automation Platform.
 * [utility_openshift_target_credential](roles/utility_openshift_target_credential/README.md) - A utility role to manage OpenShift target cluster credentials for migration
 * [utility_registry_credentials](roles/utility_registry_credentials/README.md) - Manages registry credentials in an OpenShift namespace.

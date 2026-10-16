@@ -1,0 +1,103 @@
+---
+# Regression test for the preflight report aggregation.
+# Runs the report tasks against pre-populated check facts — no real
+# endpoints — covering the three summary paths: an isolated tagged run,
+# an all-passed full run with mixed boolean forms, and a failed full run
+# whose assert names the failed checks.
+
+- name: Main | Isolated run — two checks ran, the assert covers those only
+  vars:
+    __preflight_result_openshift: {ran: true, passed: true, detail: 'isolated pass'}
+    __preflight_result_aap: {ran: true, passed: 'True', detail: 'isolated pass (string form)'}
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.preflight
+    tasks_from: report.yml
+
+- name: Main | Full run — all checks ran and passed in mixed boolean forms
+  vars:
+    __preflight_result_openshift: {ran: true, passed: true, detail: 'bool true'}
+    __preflight_result_cnv: {ran: true, passed: 'True', detail: 'string true'}
+    __preflight_result_mtv: {ran: true, passed: true, detail: 'bool true'}
+    __preflight_result_aap: {ran: true, passed: 'True', detail: 'string true'}
+    __preflight_result_vcenter: {ran: true, passed: true, detail: 'bool true'}
+    __preflight_result_vddk: {ran: true, passed: 'True', detail: 'string true'}
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.preflight
+    tasks_from: report.yml
+
+- name: Main | Full run — ran checks failed, the assert names them
+  block:
+    - name: Main | Run the report with a failed check
+      vars:
+        __preflight_result_openshift: {ran: true, passed: true, detail: 'pass'}
+        __preflight_result_cnv: {ran: true, passed: false, detail: 'failed'}
+        __preflight_result_mtv: {ran: true, passed: 'False', detail: 'string false form'}
+        __preflight_result_aap: {ran: true, passed: 'True', detail: 'pass'}
+        __preflight_result_vcenter: {ran: true, passed: true, detail: 'pass'}
+        __preflight_result_vddk: {ran: true, passed: 'True', detail: 'pass'}
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.preflight
+        tasks_from: report.yml
+  rescue:
+    - name: Main | Mark the expected failure observed
+      ansible.builtin.set_fact:
+        __preflight_report_failure_observed: true
+
+    - name: Main | Assert the summary marks both failed checks
+      ansible.builtin.assert:
+        that:
+          - not (__preflight_summary['OpenShift Virtualization operator'].passed | bool)
+          - not (__preflight_summary['MTV operator'].passed | bool)
+        quiet: true
+
+- name: Main | Assert the expected failure was observed
+  ansible.builtin.assert:
+    that: __preflight_report_failure_observed | default(false) | bool
+    quiet: true
+
+- name: Main | pre_validate accepts a clean https endpoint
+  vars:
+    preflight_openshift_host: https://api.cluster.example.com
+    preflight_openshift_api_key: test-token
+    preflight_aap_hostname: https://aap.example.com
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.preflight
+    tasks_from: pre_validate.yml
+
+- name: Main | pre_validate rejects a user:pass@ endpoint
+  block:
+    - name: Main | Run pre_validate with embedded credentials
+      vars:
+        preflight_openshift_host: https://svc-user:svc-pass@cluster.example.com
+        preflight_openshift_api_key: test-token
+        preflight_aap_hostname: https://aap.example.com
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.preflight
+        tasks_from: pre_validate.yml
+  rescue:
+    - name: Main | Mark the expected userinfo rejection observed
+      ansible.builtin.set_fact:
+        __preflight_userinfo_rejection_observed: true
+
+- name: Main | pre_validate rejects a case-variant plaintext endpoint
+  block:
+    - name: Main | Run pre_validate with an uppercase scheme
+      vars:
+        preflight_openshift_host: HTTP://api.cluster.example.com
+        preflight_openshift_api_key: test-token
+        preflight_aap_hostname: https://aap.example.com
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.preflight
+        tasks_from: pre_validate.yml
+  rescue:
+    - name: Main | Mark the expected plaintext rejection observed
+      ansible.builtin.set_fact:
+        __preflight_plaintext_rejection_observed: true
+
+- name: Main | Assert both endpoint rejections fired
+  ansible.builtin.assert:
+    that:
+      - __preflight_userinfo_rejection_observed | default(false) | bool
+      - __preflight_plaintext_rejection_observed | default(false) | bool
+    quiet: true
+...

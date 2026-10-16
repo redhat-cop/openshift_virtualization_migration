@@ -1,0 +1,9 @@
+---
+# Internal derived values — not user-facing. Users set the source host's
+# type in the inventory; this resolves it for the vCenter and VDDK gates.
+__preflight_source_type: "{{ hostvars[preflight_source_name]['type'] | default('', true) }}"
+
+# Internal: the source host's vddk dictionary (empty when the host or the
+# vddk entry is absent).
+__preflight_source_vddk: "{{ hostvars[preflight_source_name]['vddk'] | default({}, true) }}"
+...

@@ -1,0 +1,31 @@
+---
+# Validate the VDDK init image configuration for direct-source migrations.
+# The image must be non-empty and scheme-less: a scheme'd reference
+# (https://quay.io/...) reaches the provider CR and Forklift rejects it
+# with VDDKInitImageUnavailable (InvalidImageName) two stages later —
+# found live when a scheme'd image persisted through green provider jobs.
+# The check only applies to vmware sources — other source types (ovirt)
+# skip it.
+
+- name: validate_vddk | Record the VDDK init image check result
+  ansible.builtin.set_fact:
+    __preflight_result_vddk:
+      ran: true
+      passed: "{{ (__preflight_source_type | length > 0 and __preflight_source_type != 'vmware')
+        or (preflight_vddk_image | length > 0
+        and not (preflight_vddk_image is match('^[A-Za-z][A-Za-z0-9+.-]*://'))) }}"
+      detail: >-
+        {% if __preflight_source_type | length > 0 and __preflight_source_type != 'vmware' %}
+        Skipped — source type is {{ __preflight_source_type }}, not vmware;
+        the VDDK check does not apply
+        {% elif preflight_vddk_image | length == 0 %}
+        No VDDK init image configured — set vddk.image on the source host
+        (required for direct-source migrations with VDDK)
+        {% elif preflight_vddk_image is match('^[A-Za-z][A-Za-z0-9+.-]*://') %}
+        VDDK init image {{ preflight_vddk_image }} includes a scheme —
+        Forklift rejects scheme'd references (VDDKInitImageUnavailable);
+        remove the scheme prefix
+        {% else %}
+        VDDK init image configured: {{ preflight_vddk_image }}
+        {% endif %}
+...
