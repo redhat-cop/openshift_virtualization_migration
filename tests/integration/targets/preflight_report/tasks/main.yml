@@ -9,7 +9,9 @@
   vars:
     __preflight_result_openshift: {ran: true, passed: true, detail: 'isolated pass'}
     __preflight_result_aap: {ran: true, passed: 'True', detail: 'isolated pass (string form)'}
-  ansible.builtin.include_tasks: "{{ role_path }}/../../../../roles/preflight/tasks/report.yml"
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.preflight
+    tasks_from: report.yml
 
 - name: Main | Full run — all checks ran and passed in mixed boolean forms
   vars:
@@ -19,7 +21,9 @@
     __preflight_result_aap: {ran: true, passed: 'True', detail: 'string true'}
     __preflight_result_vcenter: {ran: true, passed: true, detail: 'bool true'}
     __preflight_result_vddk: {ran: true, passed: 'True', detail: 'string true'}
-  ansible.builtin.include_tasks: "{{ role_path }}/../../../../roles/preflight/tasks/report.yml"
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.preflight
+    tasks_from: report.yml
 
 - name: Main | Full run — ran checks failed, the assert names them
   block:
@@ -31,7 +35,9 @@
         __preflight_result_aap: {ran: true, passed: 'True', detail: 'pass'}
         __preflight_result_vcenter: {ran: true, passed: true, detail: 'pass'}
         __preflight_result_vddk: {ran: true, passed: 'True', detail: 'pass'}
-      ansible.builtin.include_tasks: "{{ role_path }}/../../../../roles/preflight/tasks/report.yml"
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.preflight
+        tasks_from: report.yml
   rescue:
     - name: Main | Mark the expected failure observed
       ansible.builtin.set_fact:
@@ -54,7 +60,9 @@
     preflight_openshift_host: https://api.cluster.example.com
     preflight_openshift_api_key: test-token
     preflight_aap_hostname: https://aap.example.com
-  ansible.builtin.include_tasks: "{{ role_path }}/../../../../roles/preflight/tasks/pre_validate.yml"
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.preflight
+    tasks_from: pre_validate.yml
 
 - name: Main | pre_validate rejects a user:pass@ endpoint
   block:
@@ -63,7 +71,9 @@
         preflight_openshift_host: https://svc-user:svc-pass@cluster.example.com
         preflight_openshift_api_key: test-token
         preflight_aap_hostname: https://aap.example.com
-      ansible.builtin.include_tasks: "{{ role_path }}/../../../../roles/preflight/tasks/pre_validate.yml"
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.preflight
+        tasks_from: pre_validate.yml
   rescue:
     - name: Main | Mark the expected userinfo rejection observed
       ansible.builtin.set_fact:
@@ -76,7 +86,9 @@
         preflight_openshift_host: HTTP://api.cluster.example.com
         preflight_openshift_api_key: test-token
         preflight_aap_hostname: https://aap.example.com
-      ansible.builtin.include_tasks: "{{ role_path }}/../../../../roles/preflight/tasks/pre_validate.yml"
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.preflight
+        tasks_from: pre_validate.yml
   rescue:
     - name: Main | Mark the expected plaintext rejection observed
       ansible.builtin.set_fact:
