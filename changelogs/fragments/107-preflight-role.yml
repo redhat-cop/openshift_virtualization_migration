@@ -2,4 +2,6 @@
 minor_changes:
   - Add preflight role to validate the migration environment before seeding AAP — OpenShift API authentication, OpenShift Virtualization and MTV operator health, AAP access, vCenter connectivity, and VDDK init image configuration.
   - Add vmf_preflight.yml playbook to run the preflight role from a controller or an AAP job template.
+bugfixes:
+  - Preserve an explicit false for validate_certs in the preflight role's vCenter and AAP TLS-verification cascade — the previous fallback converted it to true.
 ...

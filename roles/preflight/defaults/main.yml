@@ -104,7 +104,7 @@ preflight_vcenter_password: >-
 #   VMWARE_VALIDATE_CERTS env var or the validate_certs variable on the
 #   source host. Defaults to true.
 preflight_vcenter_validate_certs: "{{ (lookup('env', 'VMWARE_VALIDATE_CERTS')
-  | default(hostvars[preflight_source_name]['validate_certs'] | default(true, true), true)) | bool }}"
+  | default(hostvars[preflight_source_name]['validate_certs'] | default(true), true)) | bool }}"
 
 # title: AAP Hostname
 # required: False
@@ -172,7 +172,7 @@ preflight_aap_token: >-
 #   var or the aap_validate_certs variable on the AAP host. Defaults to
 #   true.
 preflight_aap_validate_certs: "{{ (lookup('env', 'AAP_VALIDATE_CERTS')
-  | default(hostvars[preflight_aap_name]['aap_validate_certs'] | default(true, true), true)) | bool }}"
+  | default(hostvars[preflight_aap_name]['aap_validate_certs'] | default(true), true)) | bool }}"
 
 # title: CNV Namespace
 # required: False

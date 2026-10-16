@@ -175,7 +175,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 | [`preflight_aap_password`](defaults/main.yml#L148)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Password |
 | [`preflight_aap_token`](defaults/main.yml#L161)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Token |
 | [`preflight_aap_username`](defaults/main.yml#L137)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Username |
-| [`preflight_aap_validate_certs`](defaults/main.yml#L174)   | str   | `{{ (lookup('env', 'AAP_VALIDATE_CERTS') ¦ default(hostvars[preflight_aap_name]['aap_validate_certs'] ¦ default(true, true), true)) ¦ bool }}` |  None  |   False  |  AAP Verify SSL |
+| [`preflight_aap_validate_certs`](defaults/main.yml#L174)   | str   | `{{ (lookup('env', 'AAP_VALIDATE_CERTS') ¦ default(hostvars[preflight_aap_name]['aap_validate_certs'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  AAP Verify SSL |
 | [`preflight_cnv_namespace`](defaults/main.yml#L183)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  CNV Namespace |
 | [`preflight_mtv_namespace`](defaults/main.yml#L200)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  MTV Namespace |
 | [`preflight_openshift_api_key`](defaults/main.yml#L46)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
@@ -187,7 +187,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 | [`preflight_vcenter_hostname`](defaults/main.yml#L72)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Hostname |
 | [`preflight_vcenter_password`](defaults/main.yml#L94)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Password |
 | [`preflight_vcenter_username`](defaults/main.yml#L83)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Username |
-| [`preflight_vcenter_validate_certs`](defaults/main.yml#L106)   | str   | `{{ (lookup('env', 'VMWARE_VALIDATE_CERTS') ¦ default(hostvars[preflight_source_name]['validate_certs'] ¦ default(true, true), true)) ¦ bool }}` |  None  |   False  |  vCenter Verify SSL |
+| [`preflight_vcenter_validate_certs`](defaults/main.yml#L106)   | str   | `{{ (lookup('env', 'VMWARE_VALIDATE_CERTS') ¦ default(hostvars[preflight_source_name]['validate_certs'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  vCenter Verify SSL |
 | [`preflight_vddk_image`](defaults/main.yml#L217)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  VDDK Init Image |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
