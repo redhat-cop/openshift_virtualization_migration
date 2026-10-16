@@ -238,6 +238,8 @@ Description: Management of network related components.
 | manual ¦ Validate linux-bridge | `ansible.builtin.assert` | True |
 | manual ¦ Validate ovn-layer2 NAD entries | `ansible.builtin.assert` | True |
 | manual ¦ Validate per-NAD MTU range | `ansible.builtin.assert` | True |
+| manual ¦ Validate mutually exclusive portgroup and portgroups | `ansible.builtin.assert` | False |
+| manual ¦ Validate portgroups entries | `ansible.builtin.assert` | True |
 | manual ¦ Apply NodeNetworkConfigurationPolicy | `redhat.openshift.k8s` | True |
 | manual ¦ Validate access port | `ansible.builtin.assert` | True |
 | manual ¦ Validate trunk ports | `ansible.builtin.assert` | True |
@@ -400,11 +402,13 @@ classDef rescue stroke:#665352,stroke-width:2px;
   manual___Validate_ovs_bridge_mode2-->|Task| manual___Validate_linux_bridge3[manual   validate linux bridge<br>When: **network mgmt openshift network bridge mode    <br>linux bridge**]:::task
   manual___Validate_linux_bridge3-->|Task| manual___Validate_ovn_layer2_NAD_entries4[manual   validate ovn layer2 nad entries<br>When: **network mgmt openshift network bridge mode     ovn<br>layer2**]:::task
   manual___Validate_ovn_layer2_NAD_entries4-->|Task| manual___Validate_per_NAD_MTU_range5[manual   validate per nad mtu range<br>When: **network mgmt openshift network bridge mode     ovn<br>layer2  and nad mtu is defined**]:::task
-  manual___Validate_per_NAD_MTU_range5-->|Task| manual___Apply_NodeNetworkConfigurationPolicy6[manual   apply nodenetworkconfigurationpolicy<br>When: **network mgmt manual bridge name   default      <br>length   0 and network mgmt manual bond name  <br>default       length   0 and network mgmt<br>openshift network bridge mode     linux bridge**]:::task
-  manual___Apply_NodeNetworkConfigurationPolicy6-->|Task| manual___Validate_access_port7[manual   validate access port<br>When: **network mgmt openshift network bridge mode     ovn<br>layer2  and   trunk  not in nad  or  not nad trunk<br>**]:::task
-  manual___Validate_access_port7-->|Task| manual___Validate_trunk_ports8[manual   validate trunk ports<br>When: **network mgmt openshift network bridge mode     ovn<br>layer2  and  trunk  in nad and nad trunk**]:::task
-  manual___Validate_trunk_ports8-->|Task| manual___Apply_NetworkAttachmentDefinitions9[manual   apply networkattachmentdefinitions]:::task
-  manual___Apply_NetworkAttachmentDefinitions9-->End
+  manual___Validate_per_NAD_MTU_range5-->|Task| manual___Validate_mutually_exclusive_portgroup_and_portgroups6[manual   validate mutually exclusive portgroup and<br>portgroups]:::task
+  manual___Validate_mutually_exclusive_portgroup_and_portgroups6-->|Task| manual___Validate_portgroups_entries7[manual   validate portgroups entries<br>When: **portgroups  in nad**]:::task
+  manual___Validate_portgroups_entries7-->|Task| manual___Apply_NodeNetworkConfigurationPolicy8[manual   apply nodenetworkconfigurationpolicy<br>When: **network mgmt manual bridge name   default      <br>length   0 and network mgmt manual bond name  <br>default       length   0 and network mgmt<br>openshift network bridge mode     linux bridge**]:::task
+  manual___Apply_NodeNetworkConfigurationPolicy8-->|Task| manual___Validate_access_port9[manual   validate access port<br>When: **network mgmt openshift network bridge mode     ovn<br>layer2  and   trunk  not in nad  or  not nad trunk<br>**]:::task
+  manual___Validate_access_port9-->|Task| manual___Validate_trunk_ports10[manual   validate trunk ports<br>When: **network mgmt openshift network bridge mode     ovn<br>layer2  and  trunk  in nad and nad trunk**]:::task
+  manual___Validate_trunk_ports10-->|Task| manual___Apply_NetworkAttachmentDefinitions11[manual   apply networkattachmentdefinitions]:::task
+  manual___Apply_NetworkAttachmentDefinitions11-->End
 ```
 
 ## Playbook

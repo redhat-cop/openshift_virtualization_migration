@@ -62,6 +62,36 @@
   loop_control:
     loop_var: nad
 
+- name: manual | Validate mutually exclusive portgroup and portgroups
+  ansible.builtin.assert:
+    that:
+      - not (('portgroup' in nad and nad.portgroup | default('', true) | trim | length > 0) and
+             ('portgroups' in nad and nad.portgroups | default([], true) | length > 0))
+    fail_msg: >-
+      NAD '{{ nad.name | default('<unnamed>') }}' defines both 'portgroup' and 'portgroups'.
+      Use 'portgroup' for a single source portgroup or 'portgroups' for several, not both.
+  loop: "{{ network_mgmt_manual_nad_list }}"
+  loop_control:
+    loop_var: nad
+
+- name: manual | Validate portgroups entries
+  ansible.builtin.assert:
+    that:
+      - nad.portgroups is iterable
+      - nad.portgroups is not string
+      - nad.portgroups is not mapping
+      - nad.portgroups | map('string') | select('search', ',') | list | length == 0
+    fail_msg: >-
+      'portgroups' for NAD '{{ nad.name | default('<unnamed>') }}' must be a list of portgroup
+      names, and no name may contain a comma: the names are joined with commas into the
+      infra.openshift-virtualization-migration/source-portgroup annotation, which uses the
+      comma as its separator.
+  loop: "{{ network_mgmt_manual_nad_list }}"
+  when:
+    - "'portgroups' in nad"
+  loop_control:
+    loop_var: nad
+
 ## Only create the NNCP if the bridge and the bond is defined, the template looks for the ports to put in the bond.
 - name: manual | Apply NodeNetworkConfigurationPolicy
   redhat.openshift.k8s:
