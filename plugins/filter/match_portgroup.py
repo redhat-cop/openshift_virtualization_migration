@@ -11,6 +11,12 @@ DOCUMENTATION = """
     - Filters a list of NetworkAttachmentDefinitions to find those whose
       source-portgroup annotation contains the given network name.
     - Supports comma-separated values in the annotation for multiple portgroups.
+    - The annotation is always split on commas, and each resulting value is
+      stripped of surrounding whitespace before being compared. A source
+      portgroup whose name contains a literal comma therefore cannot be
+      expressed in this annotation and will never match. Such portgroups must
+      be mapped explicitly with the C(network_attachment_definition) override
+      in C(mtv_management_network_map_overrides).
   options:
     _input:
       description: List of NAD objects from Forklift inventory.
@@ -54,7 +60,8 @@ RETURN = """
 def match_portgroup(nads, network_name, annotation_key, namespace=""):
     """Filter NADs whose source-portgroup annotation contains the network name.
 
-    Supports both single-value and comma-separated annotations.
+    Supports both single-value and comma-separated annotations. Portgroup names
+    containing a literal comma cannot be represented in the annotation.
     """
     results = []
     for nad in nads:
