@@ -1,0 +1,12 @@
+---
+- name: Validate migration outcomes after vmf_migrate completes
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Run postflight validation checks
+      ansible.builtin.import_role:
+        name: infra.openshift_virtualization_migration.postflight
+
+...

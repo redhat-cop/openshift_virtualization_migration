@@ -1,0 +1,89 @@
+---
+# Check the migration plan outcome: locate the Plan, resolve its latest
+# Migration object, and interpret the Migration status through the
+# collection's mtv_migration_status module — the established pattern from
+# mtv_migrate. kubernetes.core.k8s_info is the collection's established
+# pattern for cluster queries.
+
+- name: validate_plan | Query the migration Plan
+  kubernetes.core.k8s_info:
+    host: "{{ postflight_openshift_host }}"
+    api_key: "{{ postflight_openshift_api_key }}"
+    validate_certs: "{{ postflight_openshift_verify_ssl }}"
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Plan
+    name: "{{ postflight_plan_name }}"
+    namespace: "{{ postflight_plan_namespace }}"
+  register: __postflight_plan_query
+  failed_when: false
+  no_log: "{{ postflight_secure_logging }}"
+
+- name: validate_plan | Query Migration objects in the plan namespace
+  kubernetes.core.k8s_info:
+    host: "{{ postflight_openshift_host }}"
+    api_key: "{{ postflight_openshift_api_key }}"
+    validate_certs: "{{ postflight_openshift_verify_ssl }}"
+    api_version: forklift.konveyor.io/v1beta1
+    kind: Migration
+    namespace: "{{ postflight_plan_namespace }}"
+  register: __postflight_migrations_query
+  failed_when: false
+  no_log: "{{ postflight_secure_logging }}"
+
+- name: validate_plan | Resolve the latest Migration object for the plan
+  # Migration CRs reference their plan through spec.plan.name; the latest
+  # run is the newest creationTimestamp. Plan.status.migration embeds the
+  # run's status snapshot in current forklift (a dict, not the CR name),
+  # so it cannot be used for the lookup — mtv_migrate knows its Migration
+  # name because it created the object; postflight discovers it.
+  # Trust boundary: discovery trusts Migration CRs in the plan namespace;
+  # creating one requires namespace write privileges (the same principal
+  # MTV itself runs as). The per-VM checks are independent corroboration —
+  # a planted Migration cannot make absent VirtualMachines pass.
+  ansible.builtin.set_fact:
+    __postflight_latest_migration: "{{ __postflight_migrations_query.resources | default([])
+      | selectattr('spec.plan.name', 'defined')
+      | selectattr('spec.plan.name', 'equalto', postflight_plan_name)
+      | sort(attribute='metadata.creationTimestamp') | last | default({}) }}"
+
+- name: validate_plan | Record the resolved Migration object name
+  ansible.builtin.set_fact:
+    __postflight_migration_name: "{{ __postflight_latest_migration.metadata.name | default('') }}"
+
+- name: validate_plan | Interpret the Migration status
+  infra.openshift_virtualization_migration.mtv_migration_status:
+    resource: "{{ __postflight_latest_migration }}"
+  register: __postflight_migration_status
+  when: __postflight_latest_migration | length > 0
+
+- name: validate_plan | Record the plan status check result
+  ansible.builtin.set_fact:
+    __postflight_result_plan:
+      ran: true
+      passed: "{{ (__postflight_migration_status.succeeded | default(false)) | bool }}"
+      detail: >-
+        {% if __postflight_plan_query.resources is not defined %}
+        Cluster API query failed in {{ postflight_plan_namespace }} —
+        check the OpenShift connection and credentials first; the plan
+        check is inconclusive when the API is unreachable
+        {% elif __postflight_plan_query.resources | length == 0 %}
+        Plan {{ postflight_plan_name }} not found in
+        {{ postflight_plan_namespace }} — check the plan name and
+        namespace
+        {% elif __postflight_latest_migration | length == 0 %}
+        Plan {{ postflight_plan_name }} has no Migration object in
+        {{ postflight_plan_namespace }} — either vmf_migrate has not run
+        or its Migration was deleted
+        {% elif (__postflight_migration_status.status | default('')) != 'Succeeded' %}
+        Migration {{ __postflight_migration_name }} is
+        {{ __postflight_migration_status.status | default('unknown') }}
+        ({{ __postflight_migration_status.completed_vms | default(0) }} of
+        {{ __postflight_migration_status.total_vms | default(0) }} VMs
+        complete, {{ __postflight_migration_status.failed_vms | default(0) }}
+        failed) — expected Succeeded
+        {% else %}
+        Migration {{ __postflight_migration_name }} Succeeded
+        ({{ __postflight_migration_status.total_vms | default(0) }} VMs)
+        {% endif %}
+
+...

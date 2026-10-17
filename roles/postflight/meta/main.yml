@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  role_name: postflight
+  author: Red Hat
+  description: >-
+    Validate migration outcomes after vmf_migrate completes — Migration
+    status, migrated VM presence and state, target list match, guest
+    agent, IP addresses, disk topology, and the fail-closed source
+    power-off.
+  company: Red Hat
+  license: GPL-3.0-only
+  min_ansible_version: "2.16"
+  platforms:
+    - name: EL
+      versions:
+        - all
+
+dependencies: []
+
+...

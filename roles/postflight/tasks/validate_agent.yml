@@ -1,0 +1,60 @@
+---
+# Check the qemu-guest-agent is responsive in each migrated VM. KubeVirt
+# populates VMI status.guestOSInfo when the guest agent reports, so a
+# non-empty guestOSInfo is the agent signal. Warn-only: a VM without a
+# responsive agent is not a failed migration, and this check never
+# blocks the source power-off.
+
+- name: validate_agent | Query VirtualMachineInstances in the target namespace
+  kubernetes.core.k8s_info:
+    host: "{{ postflight_openshift_host }}"
+    api_key: "{{ postflight_openshift_api_key }}"
+    validate_certs: "{{ postflight_openshift_verify_ssl }}"
+    api_version: kubevirt.io/v1
+    kind: VirtualMachineInstance
+    namespace: "{{ postflight_target_namespace }}"
+  register: __postflight_vmi_query
+  failed_when: false
+  no_log: "{{ postflight_secure_logging }}"
+
+- name: validate_agent | Build the per-VM agent status map
+  ansible.builtin.set_fact:
+    __postflight_agents: >-
+      {%- set vmis = __postflight_vmi_query.resources | default([]) -%}
+      {%- set out = {} -%}
+      {%- for name in postflight_vm_list -%}
+      {%- set vmi = vmis | selectattr('metadata.name', 'equalto', name) | list | first | default({}) -%}
+      {%- set _ = out.update({name: {
+        'vmi': vmi | length > 0,
+        'agent': (vmi.status.guestOSInfo | default([])) | length > 0
+      }}) -%}
+      {%- endfor -%}
+      {{- out -}}
+
+- name: validate_agent | Record the guest agent check result
+  ansible.builtin.set_fact:
+    __postflight_result_agent:
+      ran: true
+      passed: "{{ __postflight_vmi_query.resources is defined }}"
+      detail: >-
+        {% if __postflight_vmi_query.resources is not defined %}
+        Cluster API query failed in {{ postflight_target_namespace }} —
+        check the OpenShift connection and credentials first; the agent
+        check is inconclusive when the API is unreachable
+        {% else %}
+        {% set no_agent = __postflight_agents.items()
+        | selectattr('1.agent', 'equalto', false)
+        | map(attribute='0') | list %}
+        {% if no_agent | length == 0 %}
+        Guest agent responsive in all {{ postflight_vm_list | length }}
+        VM(s) (VMI status.guestOSInfo populated)
+        {% else %}
+        Warning: no guest agent data in
+        {{ no_agent | length }} of {{ postflight_vm_list | length }}
+        VM(s): {{ no_agent | join(', ') }} — install the qemu-guest-agent
+        in the migrated VM for full guest visibility; this does not fail
+        the migration or block the power-off
+        {% endif %}
+        {% endif %}
+
+...

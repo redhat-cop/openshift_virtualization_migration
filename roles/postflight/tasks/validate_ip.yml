@@ -1,0 +1,125 @@
+---
+# Check the migrated VM's IP addresses against the source VM's address
+# from the vCenter inventory. Warn-only: DHCP can reassign a lease after
+# migration, so a mismatch is reported in the detail and never fails the
+# play or blocks the power-off. A vCenter that cannot be reached fails
+# the check — that is a probe failure, not an address mismatch.
+#
+# Module tier justification (community content): community.vmware
+# .vmware_guest_info gathers through SOAP without a REST prerequisite.
+# Certified vmware.vmware.vm_info initializes REST even for vsphere
+# schema. Unknown legacy vCenters and the demo emulator require retaining
+# this lower-tier path; no blanket compatibility claim is made.
+
+- name: validate_ip | Gather source VM facts from vCenter
+  when:
+    - postflight_vcenter_hostname | length > 0
+    - __postflight_source_type | length == 0 or __postflight_source_type == 'vmware'
+  community.vmware.vmware_guest_info:
+    hostname: "{{ postflight_vcenter_hostname }}"
+    username: "{{ postflight_vcenter_username }}"
+    password: "{{ postflight_vcenter_password }}"
+    validate_certs: "{{ postflight_vcenter_validate_certs }}"
+    name: "{{ __postflight_source_vm }}"
+    datacenter: "{{ postflight_vcenter_datacenter if postflight_vcenter_datacenter | length > 0 else omit }}"
+  loop: "{{ postflight_vm_list }}"
+  loop_control:
+    loop_var: __postflight_source_vm
+  register: __postflight_source_facts
+  # Keep failed=true so lookup faults remain visible to result accounting.
+  ignore_errors: true
+  no_log: "{{ postflight_secure_logging }}"
+
+- name: validate_ip | Query VirtualMachineInstances for the target addresses
+  kubernetes.core.k8s_info:
+    host: "{{ postflight_openshift_host }}"
+    api_key: "{{ postflight_openshift_api_key }}"
+    validate_certs: "{{ postflight_openshift_verify_ssl }}"
+    api_version: kubevirt.io/v1
+    kind: VirtualMachineInstance
+    namespace: "{{ postflight_target_namespace }}"
+  register: __postflight_ip_vmi_query
+  failed_when: false
+  no_log: "{{ postflight_secure_logging }}"
+
+- name: validate_ip | Build the per-VM address comparison map
+  ansible.builtin.set_fact:
+    __postflight_ip_state: >-
+      {%- set vmis = __postflight_ip_vmi_query.resources | default([]) -%}
+      {%- set out = {} -%}
+      {%- for r in __postflight_source_facts.results | default([]) -%}
+      {%- set name = r.__postflight_source_vm | default('') -%}
+      {%- set instance = r.instance | default({}) -%}
+      {%- set vmi = vmis | selectattr('metadata.name', 'equalto', name) | list | first | default({}) -%}
+      {%- set vmi_addrs = [] -%}
+      {%- for iface in vmi.status.interfaces | default([]) -%}
+      {%- set _ = vmi_addrs.append(iface.ipAddress | default('')) -%}
+      {%- for a in iface.ipAddresses | default([]) -%}
+      {%- set _ = vmi_addrs.append(a) -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {%- set _ = out.update({name: {
+        'source_ok': instance is mapping and instance | length > 0
+          and not (r.failed | default(false) | bool)
+          and not (r.skipped | default(false) | bool),
+        'source_ipv4': instance.ipv4 | default('', true),
+        'vmi_addrs': vmi_addrs | reject('equalto', '') | list
+      }}) -%}
+      {%- endfor -%}
+      {{- out -}}
+
+- name: validate_ip | Record the IP address check result
+  ansible.builtin.set_fact:
+    __postflight_result_ip:
+      ran: true
+      passed: "{{ (__postflight_source_type | length > 0 and __postflight_source_type != 'vmware')
+        or ((postflight_vcenter_hostname | length > 0)
+        and (__postflight_ip_state | length == postflight_vm_list | length)
+        and (__postflight_ip_state.values() | selectattr('source_ok', 'equalto', false) | list | length == 0)) }}"
+      detail: >-
+        {% if __postflight_source_type | length > 0 and __postflight_source_type != 'vmware' %}
+        Skipped — source type is {{ __postflight_source_type }}, not vmware;
+        the vCenter source checks do not apply
+        {% elif postflight_vcenter_hostname | length == 0 %}
+        Not configured — set host/username/password on the source host
+        (or run from AAP where the source credential injects VMWARE_*) to
+        enable the IP address check
+        {% else %}
+        {% set failed = __postflight_ip_state.items()
+        | selectattr('1.source_ok', 'equalto', false)
+        | map(attribute='0') | list %}
+        {% set mismatched_names = [] %}
+        {% set no_address = [] %}
+        {% for e in __postflight_ip_state.items() %}
+        {% if e[1].source_ok and e[1].source_ipv4 | length > 0 and e[1].source_ipv4 not in e[1].vmi_addrs %}
+        {% set _ = mismatched_names.append(e[0]) %}
+        {% elif e[1].source_ok and e[1].source_ipv4 | length == 0 %}
+        {% set _ = no_address.append(e[0]) %}
+        {% endif %}
+        {% endfor %}
+        {% if failed | length > 0 %}
+        vCenter lookup failed for {{ failed | length }} of
+        {{ postflight_vm_list | length }} VM(s): {{ failed | join(', ') }}
+        — re-run the IP check alone (--tags ip) as a one-off CLI run with
+        postflight_secure_logging=false to see the fault, then rotate the
+        exposed credential
+        {% else %}
+        All {{ postflight_vm_list | length }} VM(s) looked up in vCenter
+        {% if mismatched_names | length > 0 %};
+        warning: {{ mismatched_names | length }} VM(s) report a different
+        address in OpenShift than the vCenter inventory
+        ({{ mismatched_names | join(', ') }}) — DHCP may have reassigned
+        the lease; this does not fail the migration or block the
+        power-off
+        {% endif %}
+        {% if no_address | length > 0 %}; warning: {{ no_address | length }}
+        VM(s) report no source address from vCenter
+        ({{ no_address | join(', ') }}) — the source VM may be powered
+        off or unnetworked; this does not fail the migration or block
+        the power-off
+        {% elif mismatched_names | length == 0 %}; every VM reports its source address in OpenShift
+        {% endif %}
+        {% endif %}
+        {% endif %}
+
+...

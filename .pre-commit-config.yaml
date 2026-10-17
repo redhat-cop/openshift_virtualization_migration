@@ -53,6 +53,20 @@ repos:
   # Ensures generated documentation (README.md and role READMEs) are up-to-date
   - repo: local
     hooks:
+      - id: postflight-vmware-contract
+        name: Verify installed VMware power-state module contract
+        entry: python3 scripts/check-postflight-vmware.py
+        language: system
+        pass_filenames: false
+        files: ^(roles/postflight/|galaxy.yml|requirements-dev.yml|scripts/check-postflight-vmware.py)
+
+      - id: postflight-power-offline
+        name: Test postflight power-off with offline module doubles
+        entry: python3 -m unittest discover --start-directory tests/unit --pattern test_postflight_power.py
+        language: system
+        pass_filenames: false
+        files: ^(roles/postflight/|tests/unit/test_postflight_power.py)
+
       - id: update-documentation
         name: Generate documentation
         entry: bash scripts/update-documentation.sh

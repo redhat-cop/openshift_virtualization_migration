@@ -1,0 +1,6 @@
+---
+minor_changes:
+  - Add postflight role to validate migration outcomes after vmf_migrate completes — Migration status, migrated VM presence and running state, target list match, guest agent, IP addresses, disk topology.
+  - Add the per-VM fail-closed source power-off to postflight (see docs/adr/0001-postflight-fail-closed-power-off.md).
+  - Add vmf_postflight.yml playbook to run the postflight role from a controller or an AAP job template.
+...
