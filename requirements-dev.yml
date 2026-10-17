@@ -7,6 +7,8 @@ collections:
     version: ">=4.0.0"
   - name: vmware.vmware_rest
     version: ">=4.6.0"
+  - name: vmware.vmware
+    version: ">=1.11.0"
   - name: ansible.controller
     version: ">=4.5.12"
   - name: ansible.posix

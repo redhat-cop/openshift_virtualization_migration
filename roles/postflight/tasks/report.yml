@@ -1,0 +1,81 @@
+---
+# Collect every check result and fail the play if any ran check failed.
+# Check files register __postflight_result_* facts with ran: true; the
+# summary assert only covers checks that ran, so an isolated --tags debug
+# run ends green when the targeted check passed. A check that never ran
+# (unexpected failure in a full run) still shows FAIL with "check did
+# not run" in the summary, so the report never lies.
+#
+# The record tasks' passed values round-trip as real booleans on
+# ansible-core 2.16 (a full-string-expression set_fact preserves the
+# native type, verified), and the un-run defaults carry real false
+# booleans. Check outputs still produce mixed forms, so the | bool
+# filter accepts both. Note: the bare `falsy` test does NOT convert
+# the string "False" — pass convert_bool=true
+# (selectattr(..., 'falsy', true)) when filtering summary values by
+# key, as the fail_msg does.
+
+- name: report | Build the postflight summary
+  ansible.builtin.set_fact:
+    __postflight_summary:
+      Migration plan status: >-
+        {{ __postflight_result_plan | default({'ran': false, 'passed': false, 'detail': 'check did not run'}) }}
+      Migrated VMs present and running: >-
+        {{ __postflight_result_vms | default({'ran': false, 'passed': false, 'detail': 'check did not run'}) }}
+      Target list matches: >-
+        {{ __postflight_result_list | default({'ran': false, 'passed': false, 'detail': 'check did not run'}) }}
+      Guest agent responsive: >-
+        {{ __postflight_result_agent | default({'ran': false, 'passed': false, 'detail': 'check did not run'}) }}
+      IP addresses match: >-
+        {{ __postflight_result_ip | default({'ran': false, 'passed': false, 'detail': 'check did not run'}) }}
+      Disk topology matches: >-
+        {{ __postflight_result_disks | default({'ran': false, 'passed': false, 'detail': 'check did not run'}) }}
+      Source power-off: >-
+        {{ __postflight_result_power | default({'ran': false, 'passed': false, 'detail': 'check did not run'}) }}
+
+- name: report | Display the postflight summary
+  ansible.builtin.debug:
+    msg: >-
+      {{ __postflight_check.value.passed | bool | ternary('PASS', 'FAIL') }} |
+      {{ __postflight_check.key }}: {{ __postflight_check.value.detail }}
+  loop: "{{ __postflight_summary | dict2items }}"
+  loop_control:
+    loop_var: __postflight_check
+    label: "{{ __postflight_check.key }}"
+
+- name: report | Assert every ran postflight check passed
+  ansible.builtin.assert:
+    that:
+      - >-
+        __postflight_summary | dict2items
+        | selectattr('value.ran', 'equalto', true)
+        | map(attribute='value.passed')
+        | map('bool')
+        | select('equalto', false)
+        | list | length == 0
+    fail_msg: >-
+      Postflight validation FAILED:
+      {{ __postflight_summary | dict2items
+         | selectattr('value.ran', 'equalto', true)
+         | selectattr('value.passed', 'falsy', true)
+         | map(attribute='key') | join(', ') }}.
+      Fix each failed check before treating the migration as complete —
+      do not power off a source VM whose counterpart failed validation.
+    success_msg: >-
+      Postflight validation passed: all
+      {{ __postflight_summary | dict2items
+         | selectattr('value.ran', 'equalto', true) | list | length }}
+      checks green. The migration is complete.
+    quiet: true
+
+- name: report | Remind the operator to rotate credentials exposed in debug output
+  ansible.builtin.debug:
+    msg: >-
+      postflight_secure_logging is false — task parameters and API
+      responses were printed to job output. If this ran on a persistent
+      AAP job template, rotate the exposed credentials now: the OpenShift
+      API key (K8S_AUTH_API_KEY) and the vCenter password
+      (VMWARE_PASSWORD).
+  when: not (postflight_secure_logging | default(true) | bool)
+
+...

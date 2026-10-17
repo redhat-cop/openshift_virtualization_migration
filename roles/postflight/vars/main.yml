@@ -1,0 +1,6 @@
+---
+# Internal derived values — not user-facing. Users set the source host's
+# type in the inventory; this resolves it for the vCenter gate.
+__postflight_source_type: "{{ hostvars[postflight_source_name]['type'] | default('', true) }}"
+
+...

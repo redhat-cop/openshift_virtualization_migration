@@ -26,6 +26,7 @@ dependencies:
   "redhat.openshift_virtualization": ">=2.1.0"
   "redhat.openshift": ">=4.0.0"
   "vmware.vmware_rest": ">=4.6.0"
+  "vmware.vmware": ">=1.11.0"
   # AAP 2.5 can leverage the latest version of the collection. 2.4 must use <=4.5.12
   "ansible.controller": "*"
   "ansible.posix": ">=1.6.2"
