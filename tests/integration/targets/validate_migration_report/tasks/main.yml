@@ -1,0 +1,215 @@
+---
+# Regression test for the validate_migration report aggregation.
+# Runs the report tasks against pre-populated check facts — no real
+# endpoints — covering the three summary paths: an isolated tagged run,
+# an all-passed full run with mixed boolean forms, and a failed full run
+# whose assert names the failed checks. Also covers pre_validate's
+# required-identifier and plaintext-endpoint paths, and the fail-closed
+# power-off gate: pre-populated gate facts assert that unvalidated VMs
+# (failed plan, disk mismatch, absent facts) cannot power off.
+
+- name: Main | Isolated run — two checks ran, the assert covers those only
+  vars:
+    __validate_migration_result_plan: {ran: true, passed: true, detail: 'isolated pass'}
+    __validate_migration_result_power: {ran: true, passed: 'True', detail: 'isolated pass (string form)'}
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.validate_migration
+    tasks_from: report.yml
+
+- name: Main | Full run — all checks ran and passed in mixed boolean forms
+  vars:
+    __validate_migration_result_plan: {ran: true, passed: true, detail: 'bool true'}
+    __validate_migration_result_vms: {ran: true, passed: 'True', detail: 'string true'}
+    __validate_migration_result_list: {ran: true, passed: true, detail: 'bool true'}
+    __validate_migration_result_agent: {ran: true, passed: 'True', detail: 'string true'}
+    __validate_migration_result_ip: {ran: true, passed: true, detail: 'bool true'}
+    __validate_migration_result_disks: {ran: true, passed: 'True', detail: 'string true'}
+    __validate_migration_result_power: {ran: true, passed: true, detail: 'bool true'}
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.validate_migration
+    tasks_from: report.yml
+
+- name: Main | Full run — ran checks failed, the assert names them
+  block:
+    - name: Main | Run the report with failed checks
+      vars:
+        __validate_migration_result_plan: {ran: true, passed: true, detail: 'pass'}
+        __validate_migration_result_vms: {ran: true, passed: false, detail: 'failed'}
+        __validate_migration_result_list: {ran: true, passed: 'False', detail: 'string false form'}
+        __validate_migration_result_agent: {ran: true, passed: 'True', detail: 'pass'}
+        __validate_migration_result_ip: {ran: true, passed: true, detail: 'pass'}
+        __validate_migration_result_disks: {ran: true, passed: false, detail: 'disk count mismatch'}
+        __validate_migration_result_power: {ran: true, passed: 'True', detail: 'pass'}
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.validate_migration
+        tasks_from: report.yml
+  rescue:
+    - name: Main | Mark the expected failure observed
+      ansible.builtin.set_fact:
+        __validate_migration_report_failure_observed: true
+
+    - name: Main | Assert the summary marks the failed checks
+      ansible.builtin.assert:
+        that:
+          - not (__validate_migration_summary['Migrated VMs present and running'].passed | bool)
+          - not (__validate_migration_summary['Target list matches'].passed | bool)
+          - not (__validate_migration_summary['Disk topology matches'].passed | bool)
+        quiet: true
+
+- name: Main | Assert the expected failure was observed
+  ansible.builtin.assert:
+    that: __validate_migration_report_failure_observed | default(false) | bool
+    quiet: true
+
+- name: Main | pre_validate accepts clean inputs
+  vars:
+    validate_migration_openshift_host: https://api.cluster.example.com
+    validate_migration_openshift_api_key: test-token
+    validate_migration_plan_name: test-plan
+    validate_migration_plan_namespace: migration
+    validate_migration_target_namespace: migration
+    validate_migration_vm_list: [vm-a, vm-b]
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.validate_migration
+    tasks_from: pre_validate.yml
+
+- name: Main | pre_validate rejects an empty VM list
+  block:
+    - name: Main | Run pre_validate with an empty VM list
+      vars:
+        validate_migration_openshift_host: https://api.cluster.example.com
+        validate_migration_openshift_api_key: test-token
+        validate_migration_plan_name: test-plan
+        validate_migration_plan_namespace: migration
+        validate_migration_target_namespace: migration
+        validate_migration_vm_list: []
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.validate_migration
+        tasks_from: pre_validate.yml
+  rescue:
+    - name: Main | Mark the empty-list rejection observed
+      ansible.builtin.set_fact:
+        __validate_migration_empty_list_rejection_observed: true
+
+- name: Main | pre_validate rejects a user:pass@ endpoint
+  block:
+    - name: Main | Run pre_validate with embedded credentials
+      vars:
+        validate_migration_openshift_host: https://svc-user:svc-pass@cluster.example.com
+        validate_migration_openshift_api_key: test-token
+        validate_migration_plan_name: test-plan
+        validate_migration_plan_namespace: migration
+        validate_migration_target_namespace: migration
+        validate_migration_vm_list: [vm-a]
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.validate_migration
+        tasks_from: pre_validate.yml
+  rescue:
+    - name: Main | Mark the userinfo rejection observed
+      ansible.builtin.set_fact:
+        __validate_migration_userinfo_rejection_observed: true
+
+- name: Main | Assert both rejections fired
+  ansible.builtin.assert:
+    that:
+      - __validate_migration_empty_list_rejection_observed | default(false) | bool
+      - __validate_migration_userinfo_rejection_observed | default(false) | bool
+    quiet: true
+
+# Fail-closed gate coverage (the safety-critical logic in power_off.yml):
+# each case pre-populates the gate facts via set_fact and runs
+# power_off.yml with an empty vCenter hostname — the gather skips, so no
+# mutation can occur, and the computed gate is asserted directly.
+
+- name: Main | Set clean gate inputs — absent per-VM facts
+  ansible.builtin.set_fact:
+    __validate_migration_result_plan: {ran: true, passed: true, detail: 'pass'}
+    __validate_migration_result_list: {ran: true, passed: true, detail: 'ok'}
+
+- name: Main | Gate — absent per-VM facts leave the gate closed
+  vars:
+    validate_migration_vcenter_hostname: ''
+    validate_migration_vm_list: ['vm-a']
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.validate_migration
+    tasks_from: power_off.yml
+
+- name: Main | Assert the gate stays closed with absent per-VM facts
+  ansible.builtin.assert:
+    that:
+      - not (__validate_migration_power_gate['vm-a'] | default(false) | bool)
+    quiet: true
+
+- name: Main | Set gate inputs — plan failed, VM otherwise valid
+  ansible.builtin.set_fact:
+    __validate_migration_result_plan: {ran: true, passed: false, detail: 'plan failed'}
+    __validate_migration_vms_state: {'vm-a': {present: true, running: true}}
+    __validate_migration_disks_state:
+      vm-a:
+        source_ok: true
+        source_disks: 2
+        source_sizes: [171798691840]
+        target_volumes: 2
+
+- name: Main | Gate — a failed plan leaves the gate closed
+  vars:
+    validate_migration_vcenter_hostname: ''
+    validate_migration_vm_list: ['vm-a']
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.validate_migration
+    tasks_from: power_off.yml
+
+- name: Main | Assert the gate stays closed on a failed plan
+  ansible.builtin.assert:
+    that:
+      - not (__validate_migration_power_gate['vm-a'] | default(false) | bool)
+    quiet: true
+
+- name: Main | Set gate inputs — disk count mismatch
+  ansible.builtin.set_fact:
+    __validate_migration_result_plan: {ran: true, passed: true, detail: 'pass'}
+    __validate_migration_disks_state:
+      vm-a:
+        source_ok: true
+        source_disks: 2
+        source_sizes: [171798691840, 17179869184]
+        target_volumes: 1
+
+- name: Main | Gate — a disk mismatch leaves the gate closed
+  vars:
+    validate_migration_vcenter_hostname: ''
+    validate_migration_vm_list: ['vm-a']
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.validate_migration
+    tasks_from: power_off.yml
+
+- name: Main | Assert the gate stays closed on a disk mismatch
+  ansible.builtin.assert:
+    that:
+      - not (__validate_migration_power_gate['vm-a'] | default(false) | bool)
+    quiet: true
+
+- name: Main | Set gate inputs — every fatal check passed
+  ansible.builtin.set_fact:
+    __validate_migration_disks_state:
+      vm-a:
+        source_ok: true
+        source_disks: 2
+        source_sizes: [171798691840, 17179869184]
+        target_volumes: 2
+
+- name: Main | Gate — every fatal check passed opens the gate
+  vars:
+    validate_migration_vcenter_hostname: ''
+    validate_migration_vm_list: ['vm-a']
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.validate_migration
+    tasks_from: power_off.yml
+
+- name: Main | Assert the gate opens when every fatal check passed
+  ansible.builtin.assert:
+    that:
+      - __validate_migration_power_gate['vm-a'] | default(false) | bool
+    quiet: true
+
+...
