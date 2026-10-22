@@ -15,6 +15,15 @@
       ansible.builtin.include_tasks: build_hosts.yml
       when: aap_seed_hosts_create | bool
 
+    # -- Ensure organization exists before creating resources in it -----------
+    - name: Create organization in AAP
+      ansible.builtin.include_role:
+        name: infra.aap_configuration.gateway_organizations
+      vars:
+        aap_organizations: >-
+          {{ aap_seed_controller_organizations }}
+      when: aap_seed_organizations_create | bool
+
     # -- Sync phase ------------------------------------------------------------
     - name: Create project and sync from SCM
       when: aap_seed_projects_create | bool

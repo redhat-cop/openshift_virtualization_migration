@@ -35,7 +35,7 @@ aap_seed_secure_logging: "{{ secure_logging | default(true) }}"
 # title: Organization Name
 # required: False
 # description: AAP organization name used for all created objects.
-aap_seed_org_name: Default
+aap_seed_org_name: OpenShift Virtualization Migration
 
 # title: Project Name
 # required: False
@@ -296,7 +296,8 @@ aap_seed_templates_create: true
 # title: Controller Organizations
 # required: False
 # description: List of AAP organization definitions.
-aap_seed_controller_organizations: []
+aap_seed_controller_organizations:
+  - name: "{{ aap_seed_org_name }}"
 
 # title: Controller Credential Types
 # required: False
