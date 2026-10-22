@@ -74,10 +74,10 @@ argument_specs:
       aap_seed_org_name:
         type: str
         required: false
-        default: Default
+        default: OpenShift Virtualization Migration
         description: >-
           AAP organization that owns the project, inventory, and
-          credentials.
+          credentials. Created automatically before other resources.
 
       aap_seed_project_name:
         type: str
