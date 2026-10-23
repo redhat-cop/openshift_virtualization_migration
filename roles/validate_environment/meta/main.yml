@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  role_name: preflight
+  role_name: validate_environment
   author: Red Hat
   description: >-
     Validate the migration environment before seeding AAP — OpenShift API

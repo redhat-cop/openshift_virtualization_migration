@@ -1,0 +1,53 @@
+---
+# Query the ClusterServiceVersion list in the MTV namespace.
+# kubernetes.core.k8s_info is certified content and the collection's
+# established pattern for cluster queries.
+
+- name: validate_mtv | List ClusterServiceVersions in the MTV namespace
+  kubernetes.core.k8s_info:
+    host: "{{ validate_environment_openshift_host }}"
+    api_key: "{{ validate_environment_openshift_api_key }}"
+    validate_certs: "{{ validate_environment_openshift_verify_ssl }}"
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    namespace: "{{ validate_environment_mtv_namespace }}"
+  register: __validate_environment_mtv_csvs
+  failed_when: false
+  no_log: "{{ validate_environment_secure_logging }}"
+
+- name: validate_mtv | Find the MTV CSV
+  ansible.builtin.set_fact:
+    __validate_environment_mtv_found: >-
+      {{ __validate_environment_mtv_csvs.resources | default([])
+      | selectattr('metadata.name', 'search', 'mtv-operator')
+      | list | length > 0 }}
+    __validate_environment_mtv_csv: >-
+      {{ __validate_environment_mtv_csvs.resources | default([])
+      | selectattr('metadata.name', 'search', 'mtv-operator')
+      | list | first | default({}) }}
+
+- name: validate_mtv | Record the MTV operator check result
+  ansible.builtin.set_fact:
+    __validate_environment_result_mtv:
+      ran: true
+      passed: "{{ __validate_environment_mtv_found
+        and (__validate_environment_mtv_csv.status.phase | default('')) == 'Succeeded' }}"
+      detail: >-
+        {% if __validate_environment_mtv_csvs.resources is not defined %}
+        Cluster API query failed in {{ validate_environment_mtv_namespace }} —
+        check the OpenShift connection and credentials first; the
+        operator check is inconclusive when the API is unreachable
+        {% elif not __validate_environment_mtv_found %}
+        No mtv-operator CSV found in {{ validate_environment_mtv_namespace }} —
+        install the Migration Toolkit for Virtualization operator before
+        seeding
+        {% elif (__validate_environment_mtv_csv.status.phase | default('')) != 'Succeeded' %}
+        CSV {{ __validate_environment_mtv_csv.metadata.name }} in
+        {{ validate_environment_mtv_namespace }} is
+        {{ __validate_environment_mtv_csv.status.phase | default('unknown') }} —
+        expected Succeeded
+        {% else %}
+        CSV {{ __validate_environment_mtv_csv.metadata.name }} Succeeded in
+        {{ validate_environment_mtv_namespace }}
+        {% endif %}
+...

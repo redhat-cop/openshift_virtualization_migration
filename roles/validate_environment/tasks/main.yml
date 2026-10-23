@@ -1,5 +1,5 @@
 ---
-# Preflight validates the migration environment before seeding AAP.
+# The environment validation pass runs before seeding AAP.
 #
 # All checks run on every invocation; the summary report (always-tagged)
 # fails the play if any ran check failed, so one run reports everything
@@ -17,7 +17,7 @@
   tags:
     - always
 
-- name: Run preflight checks
+- name: Run environment validation checks
   block:
     - name: Include OpenShift API authentication check
       ansible.builtin.include_tasks:
@@ -86,7 +86,7 @@
         - validate
 
   always:
-    - name: Include the preflight summary report
+    - name: Include the validate_environment summary report
       ansible.builtin.include_tasks:
         file: report.yml
         apply:
