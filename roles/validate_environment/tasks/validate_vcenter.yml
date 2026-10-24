@@ -1,0 +1,99 @@
+---
+# Probe vCenter connectivity and authentication.
+# Two paths: the certified vmware.vmware_rest REST collection (vCenter 7.0+)
+# first, then a community.vmware SOAP (pyVmomi) fallback that also covers 6.x
+# — older vCenters do not serve the /api/ REST tree at all, and proxies in
+# front of them commonly map only /sdk and /rest. Listing datacenters is the
+# lightest operation that proves both connectivity and authentication against
+# the configured source. The check only applies to vmware sources — other
+# source types (ovirt) skip it.
+#
+# Module tier justification (community content): the certified
+# vmware.vmware_rest collection requires vCenter 7.0+ and cannot reach 6.x at
+# all (no /api/ tree), and the certified successor vmware.vmware collection
+# does not yet ship a datacenter_info module. community.vmware
+# .vmware_datacenter_info (pyVmomi, vCenter 6.5+) is the only content that
+# covers the 6.x path, so the SOAP fallback runs only when the REST probe
+# cannot return data.
+
+- name: validate_vcenter | List vCenter datacenters via the REST API (vCenter 7.0+)
+  when:
+    - validate_environment_vcenter_hostname | length > 0
+    - __validate_environment_source_type | length == 0 or __validate_environment_source_type == 'vmware'
+  vmware.vmware_rest.vcenter_datacenter_info:
+    vcenter_hostname: "{{ validate_environment_vcenter_hostname }}"
+    vcenter_username: "{{ validate_environment_vcenter_username }}"
+    vcenter_password: "{{ validate_environment_vcenter_password }}"
+    vcenter_validate_certs: "{{ validate_environment_vcenter_validate_certs }}"
+  register: __validate_environment_vcenter_rest
+  failed_when: false
+  # A module crash (e.g. aiohttp ContentTypeError when the endpoint answers
+  # with a non-JSON body) bypasses failed_when and would abort the run; the
+  # fallback and record tasks below turn the fault into a graceful check
+  # result.
+  ignore_errors: true
+  no_log: "{{ validate_environment_secure_logging }}"
+
+- name: validate_vcenter | Fall back to the SOAP SDK for vCenter 6.x (no REST API)
+  when:
+    - validate_environment_vcenter_hostname | length > 0
+    - __validate_environment_source_type | length == 0 or __validate_environment_source_type == 'vmware'
+    - __validate_environment_vcenter_rest.value is not defined
+      or __validate_environment_vcenter_rest.value | length == 0
+  community.vmware.vmware_datacenter_info:
+    hostname: "{{ validate_environment_vcenter_hostname }}"
+    username: "{{ validate_environment_vcenter_username }}"
+    password: "{{ validate_environment_vcenter_password }}"
+    validate_certs: "{{ validate_environment_vcenter_validate_certs }}"
+  register: __validate_environment_vcenter_soap
+  failed_when: false
+  ignore_errors: true
+  no_log: "{{ validate_environment_secure_logging }}"
+
+- name: validate_vcenter | Merge the REST and SOAP results into one datacenter list
+  # Prefers a result with datacenters (the SOAP fallback can find data the
+  # proxied REST path misses); falls back to an empty result from either
+  # path (connected but none visible), then the empty-string sentinel when
+  # neither path returned data — the record task distinguishes a real list
+  # from '' by type.
+  ansible.builtin.set_fact:
+    __validate_environment_vcenter_dcs: "{{ ([(__validate_environment_vcenter_rest.value | default(none)),
+                                   (__validate_environment_vcenter_soap.datacenter_info | default(none))]
+                                  | reject('none') | select('truthy') | first)
+      | default([(__validate_environment_vcenter_rest.value | default(none)),
+                 (__validate_environment_vcenter_soap.datacenter_info | default(none))]
+                | reject('none') | first | default(none), true) }}"
+
+- name: validate_vcenter | Record the vCenter connectivity check result
+  ansible.builtin.set_fact:
+    __validate_environment_result_vcenter:
+      ran: true
+      passed: "{{ (__validate_environment_source_type | length > 0 and __validate_environment_source_type != 'vmware')
+        or ((validate_environment_vcenter_hostname | length > 0)
+        and (__validate_environment_vcenter_dcs is not string)
+        and (__validate_environment_vcenter_dcs | length) > 0) }}"
+      detail: >-
+        {% if __validate_environment_source_type | length > 0 and __validate_environment_source_type != 'vmware' %}
+        Skipped — source type is {{ __validate_environment_source_type }}, not vmware;
+        the vCenter check does not apply
+        {% elif validate_environment_vcenter_hostname | length == 0 %}
+        Not configured — set host/username/password on the source host
+        (or run from AAP where the source credential injects VMWARE_*) to
+        enable the vCenter check
+        {% elif __validate_environment_vcenter_dcs is not string and __validate_environment_vcenter_dcs | length > 0 %}
+        HTTP session established at {{ validate_environment_vcenter_hostname }}
+        ({{ __validate_environment_vcenter_dcs | length }} datacenters visible via
+        {{ 'REST' if __validate_environment_vcenter_rest.value is defined
+           and __validate_environment_vcenter_rest.value | length > 0
+           else 'the SOAP SDK' }})
+        {% elif __validate_environment_vcenter_dcs is not string %}
+        Connected to {{ validate_environment_vcenter_hostname }} but no datacenters
+        are visible — a migration source needs at least one
+        {% else %}
+        vCenter authentication or connectivity failed at
+        {{ validate_environment_vcenter_hostname }} — re-run the vCenter check alone
+        (--tags vcenter) as a one-off CLI run with
+        validate_environment_secure_logging=false to see the fault, then rotate the
+        exposed credential
+        {% endif %}
+...

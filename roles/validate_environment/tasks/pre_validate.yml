@@ -7,24 +7,24 @@
 - name: pre_validate | Validate required OpenShift connection variables
   ansible.builtin.assert:
     that:
-      - preflight_openshift_host | length > 0
-      - preflight_openshift_api_key | length > 0
+      - validate_environment_openshift_host | length > 0
+      - validate_environment_openshift_api_key | length > 0
     fail_msg: >-
       OpenShift connection is required. Set openshift_host and
       openshift_api_key on the target cluster host in the inventory (or
       run from AAP where the target credential injects K8S_AUTH_HOST and
       K8S_AUTH_API_KEY).
     success_msg: >-
-      OpenShift connection configured: {{ preflight_openshift_host }}
+      OpenShift connection configured: {{ validate_environment_openshift_host }}
     quiet: true
 
 - name: pre_validate | Reject plaintext credential-bearing endpoints
   ansible.builtin.assert:
     that:
-      - (preflight_aap_hostname | trim | lower) is not match('^http://')
-      - (preflight_openshift_host | trim | lower) is not match('^http://')
-      - preflight_aap_hostname is not search('://[^/@]+:[^/@]+@')
-      - preflight_openshift_host is not search('://[^/@]+:[^/@]+@')
+      - (validate_environment_aap_hostname | trim | lower) is not match('^http://')
+      - (validate_environment_openshift_host | trim | lower) is not match('^http://')
+      - validate_environment_aap_hostname is not search('://[^/@]+:[^/@]+@')
+      - validate_environment_openshift_host is not search('://[^/@]+:[^/@]+@')
     fail_msg: >-
       Credential-bearing endpoints must use https and must not embed
       user:pass@ in the URL — bearer tokens sent to a plaintext endpoint

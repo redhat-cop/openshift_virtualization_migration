@@ -1,0 +1,38 @@
+---
+# Probe the OpenShift API with the configured credential.
+# ansible.builtin.uri is used instead of the k8s modules because the HTTP
+# status code cleanly distinguishes 401/403 (credential rejected) from
+# 200/201 (authenticated).
+
+- name: validate_openshift | Probe OpenShift API SelfSubjectReview with the configured credential
+  ansible.builtin.uri:
+    url: "{{ validate_environment_openshift_host }}/apis/authentication.k8s.io/v1/selfsubjectreviews"
+    method: POST
+    body: '{"apiVersion":"authentication.k8s.io/v1","kind":"SelfSubjectReview"}'
+    body_format: json
+    validate_certs: "{{ validate_environment_openshift_verify_ssl }}"
+    headers:
+      Authorization: "{{ 'Bearer ' ~ (validate_environment_openshift_api_key | trim) }}"
+    status_code: [200, 201, 401, 403]
+  register: __validate_environment_ocp
+  # No module state is created — the review object is informational only,
+  # so this probe must never report changed.
+  changed_when: false
+  failed_when: false
+  no_log: "{{ validate_environment_secure_logging }}"
+
+- name: validate_openshift | Record the OpenShift authentication check result
+  ansible.builtin.set_fact:
+    __validate_environment_result_openshift:
+      ran: true
+      passed: "{{ (__validate_environment_ocp.status | default(0)) in [200, 201] }}"
+      detail: >-
+        {% if (__validate_environment_ocp.status | default(0)) in [200, 201] %}
+        HTTP {{ __validate_environment_ocp.status }} at {{ validate_environment_openshift_host }}
+        (identity: {{ __validate_environment_ocp.json.status.userInfo.username | default('unknown', true) }})
+        {% else %}
+        HTTP {{ __validate_environment_ocp.status | default('connection error') }} at
+        {{ validate_environment_openshift_host }} — 401/403 means the token or
+        credential is missing, expired, or rejected
+        {% endif %}
+...

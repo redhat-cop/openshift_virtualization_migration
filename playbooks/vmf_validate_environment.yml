@@ -5,7 +5,7 @@
   gather_facts: false
 
   tasks:
-    - name: Run preflight validation checks
+    - name: Run environment validation checks
       ansible.builtin.import_role:
-        name: infra.openshift_virtualization_migration.preflight
+        name: infra.openshift_virtualization_migration.validate_environment
 ...

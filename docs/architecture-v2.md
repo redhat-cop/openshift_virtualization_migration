@@ -61,7 +61,7 @@ flowchart TD
     end
 
     subgraph Migration["Phase C: Migration Execution"]
-        PreFlight["Pre-flight validation\nstorage, network, provider checks"]
+        EnvValidation["Environment validation\nstorage, network, provider checks"]
         Migrate["mtv_migrate role\nPlan creation + execution"]
         Monitor["Migration monitoring\nfailure_strategy handling"]
         PostVal["Post-migration validation"]
@@ -77,8 +77,8 @@ flowchart TD
     EnvMgr --> Ops
     Ops --> Net
     Net --> MTV
-    MigReq --> PreFlight
-    PreFlight --> Migrate
+    MigReq --> EnvValidation
+    EnvValidation --> Migrate
     Migrate --> Monitor
     Monitor --> PostVal
     Seed -.-> EnvConfig
