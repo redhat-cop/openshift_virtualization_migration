@@ -1,0 +1,129 @@
+---
+# Check the source VM's disk topology survived the migration: the disk
+# count on the source (vCenter virtual hardware) must match the target
+# volume count (the migrated VirtualMachine's data volumes). Fatal: a
+# missing disk means the migration did not copy what it should, which
+# also blocks that VM's source power-off. The individual disk sizes are
+# reported in the detail for human review — unit parsing across vCenter
+# KB and Kubernetes quantity strings is intentionally not automated, so
+# a rounding difference cannot false-fail the cutover.
+#
+# Module tier justification (community content): community.vmware
+# .vmware_guest_info returns config.hardware.device through SOAP alone.
+# Certified vmware.vmware.vm_info initializes REST even for vsphere
+# schema. Retain SOAP-only gathering for unknown legacy vCenters and the
+# demo emulator; this does not assert support for every old version.
+
+- name: validate_disks | Gather source disk topology from vCenter
+  when:
+    - validate_migration_vcenter_hostname | length > 0
+    - __validate_migration_source_type | length == 0 or __validate_migration_source_type == 'vmware'
+  community.vmware.vmware_guest_info:
+    hostname: "{{ validate_migration_vcenter_hostname }}"
+    username: "{{ validate_migration_vcenter_username }}"
+    password: "{{ validate_migration_vcenter_password }}"
+    validate_certs: "{{ validate_migration_vcenter_validate_certs }}"
+    name: "{{ __validate_migration_source_vm }}"
+    datacenter: "{{ validate_migration_vcenter_datacenter
+      if validate_migration_vcenter_datacenter | length > 0 else omit }}"
+    schema: vsphere
+    properties:
+      - config.hardware.device
+  loop: "{{ validate_migration_vm_list }}"
+  loop_control:
+    loop_var: __validate_migration_source_vm
+  register: __validate_migration_source_disks
+  # Keep failed=true so lookup faults remain visible to result accounting.
+  ignore_errors: true
+  no_log: "{{ validate_migration_secure_logging }}"
+
+- name: validate_disks | Query the migrated VirtualMachines' volume counts
+  kubernetes.core.k8s_info:
+    host: "{{ validate_migration_openshift_host }}"
+    api_key: "{{ validate_migration_openshift_api_key }}"
+    validate_certs: "{{ validate_migration_openshift_verify_ssl }}"
+    api_version: kubevirt.io/v1
+    kind: VirtualMachine
+    namespace: "{{ validate_migration_target_namespace }}"
+  register: __validate_migration_disks_vm_query
+  failed_when: false
+  no_log: "{{ validate_migration_secure_logging }}"
+
+- name: validate_disks | Build the per-VM disk comparison map
+  ansible.builtin.set_fact:
+    __validate_migration_disks_state: >-
+      {%- set vms = __validate_migration_disks_vm_query.resources | default([]) -%}
+      {%- set out = {} -%}
+      {%- for r in __validate_migration_source_disks.results | default([]) -%}
+      {%- set name = r.__validate_migration_source_vm | default('') -%}
+      {%- set devices = (r.instance.config.hardware.device | default([])) if r.instance is defined else [] -%}
+      {%- set source_disks = devices | selectattr('capacityInKB', 'defined') | list -%}
+      {%- set vm = vms | selectattr('metadata.name', 'equalto', name) | list | first | default({}) -%}
+      {%- set vols = vm.spec.template.spec.volumes | default([]) -%}
+      {%- set target_volumes = (vols | selectattr('dataVolume', 'defined') | list)
+        + (vols | selectattr('persistentVolumeClaim', 'defined') | list) -%}
+      {%- set _ = out.update({name: {
+        'source_ok': r.instance.config.hardware.device is defined
+          and r.instance.config.hardware.device is sequence
+          and r.instance.config.hardware.device is not string
+          and not (r.failed | default(false) | bool)
+          and not (r.skipped | default(false) | bool),
+        'source_disks': source_disks | length,
+        'source_sizes': source_disks | map(attribute='capacityInKB') | list,
+        'target_volumes': target_volumes | length
+      }}) -%}
+      {%- endfor -%}
+      {{- out -}}
+
+- name: validate_disks | Count the disk topology mismatches
+  ansible.builtin.set_fact:
+    __validate_migration_disks_mismatched: >-
+      {%- set out = [] -%}
+      {%- for e in __validate_migration_disks_state.items() -%}
+      {%- if e[1].source_ok and e[1].source_disks != e[1].target_volumes -%}
+      {%- set _ = out.append(e[0]) -%}
+      {%- endif -%}
+      {%- endfor -%}
+      {{- out -}}
+
+- name: validate_disks | Record the disk topology check result
+  ansible.builtin.set_fact:
+    __validate_migration_result_disks:
+      ran: true
+      passed: "{{ (__validate_migration_source_type | length > 0 and __validate_migration_source_type != 'vmware')
+        or ((validate_migration_vcenter_hostname | length > 0)
+        and (__validate_migration_disks_state | length == validate_migration_vm_list | length)
+        and (__validate_migration_disks_state.values() | selectattr('source_ok', 'equalto', false) | list | length == 0)
+        and __validate_migration_disks_mismatched | length == 0) }}"
+      detail: >-
+        {% if __validate_migration_source_type | length > 0 and __validate_migration_source_type != 'vmware' %}
+        Skipped — source type is {{ __validate_migration_source_type }}, not vmware;
+        the vCenter source checks do not apply
+        {% elif validate_migration_vcenter_hostname | length == 0 %}
+        Not configured — set host/username/password on the source host
+        (or run from AAP where the source credential injects VMWARE_*) to
+        enable the disk topology check
+        {% else %}
+        {% set failed = __validate_migration_disks_state.items()
+        | selectattr('1.source_ok', 'equalto', false)
+        | map(attribute='0') | list %}
+        {% if failed | length > 0 %}
+        vCenter lookup failed for {{ failed | length }} of
+        {{ validate_migration_vm_list | length }} VM(s): {{ failed | join(', ') }}
+        — re-run the disk check alone (--tags disks) as a one-off CLI run
+        with validate_migration_secure_logging=false to see the fault, then
+        rotate the exposed credential
+        {% elif __validate_migration_disks_mismatched | length > 0 %}
+        Disk count mismatch for {{ __validate_migration_disks_mismatched | length }}
+        VM(s): {{ __validate_migration_disks_mismatched | join(', ') }} — the
+        migration did not copy every source disk; do not cut over until
+        the topology matches
+        {% else %}
+        Disk topology matches for all {{ validate_migration_vm_list | length }}
+        VM(s): {% for e in __validate_migration_disks_state.items() %}{{ e[0] }}
+        ({{ e[1].source_disks }} disks, {{ e[1].source_sizes | join('/')
+        }} KB source){% if not loop.last %}, {% endif %}{% endfor %}
+        {% endif %}
+        {% endif %}
+
+...

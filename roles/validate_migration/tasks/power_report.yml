@@ -1,0 +1,63 @@
+---
+# An empty vm_list here marks the check failed (fail-closed); pre_validate
+# normally rejects an empty list first, so this is defensive only.
+# Report only sanitized identities and outcomes, never raw module errors.
+# A timeout can follow dispatch: failed action does not mean unchanged state.
+- name: power_report | Classify each expected source VM
+  ansible.builtin.set_fact:
+    __validate_migration_power_outcomes: >-
+      {%- set out = {} -%}
+      {%- for name in validate_migration_vm_list -%}
+      {%- set source = __validate_migration_power_sources.get(name, {}) -%}
+      {%- set vm = source.instance | default({}) -%}
+      {%- set identity = name ~ ' (' ~ (vm.moid | default('unknown MoID')) ~ ')' -%}
+      {%- set action = __validate_migration_power_results.results | default([])
+        | selectattr('__validate_migration_power_name', 'defined')
+        | selectattr('__validate_migration_power_name', 'equalto', name) | first | default({}) -%}
+      {%- set ok = true -%}
+      {%- if not (source.valid | default(false) | bool) -%}
+      {%- set ok = false -%}
+      {%- set detail = 'lookup failed or missing/unsupported source facts; no power-off attempted' -%}
+      {%- elif not (validate_migration_power_off_source | bool) -%}
+      {%- set detail = 'read-only: ' ~ vm.hw_power_status -%}
+      {%- elif validate_migration_vcenter_datacenter | trim | length == 0 -%}
+      {%- set ok = false -%}
+      {%- set detail = 'datacenter required for enabled power-off; no power-off attempted' -%}
+      {%- elif vm.hw_power_status == 'poweredOff' -%}
+      {%- set detail = 'already off' -%}
+      {%- elif not (__validate_migration_power_gate.get(name, false) | bool) -%}
+      {%- set detail = 'source stays on: fatal checks failed or did not run' -%}
+      {%- elif ansible_check_mode -%}
+      {%- set detail = 'check mode: would power off; no power-off attempted' -%}
+      {%- elif action.failed | default(false) | bool
+        or action.skipped | default(false) | bool
+        or action.vm is not defined or action.vm is not mapping
+        or action.vm.moid | default('') != vm.moid -%}
+      {%- set ok = false -%}
+      {%- set detail = 'power-off failed or unconfirmed; current power state unknown — inspect vCenter' -%}
+      {%- else -%}
+      {%- set detail = 'power-off completed (module result; no independent read-back)' -%}
+      {%- endif -%}
+      {%- set _ = out.update({name: {'passed': ok, 'detail': identity ~ ': ' ~ detail}}) -%}
+      {%- endfor -%}
+      {{- out -}}
+
+- name: power_report | Record the source power-off check
+  ansible.builtin.set_fact:
+    __validate_migration_result_power:
+      ran: true
+      passed: "{{ (__validate_migration_source_type | length > 0 and __validate_migration_source_type != 'vmware')
+        or ((validate_migration_vcenter_hostname | length > 0)
+        and validate_migration_vm_list | length > 0
+        and (__validate_migration_power_outcomes.values()
+        | selectattr('passed', 'equalto', false) | list | length == 0)) }}"
+      detail: >-
+        {% if __validate_migration_source_type | length > 0 and __validate_migration_source_type != 'vmware' %}
+        Skipped — source type is {{ __validate_migration_source_type }}, not vmware
+        {% elif validate_migration_vcenter_hostname | length == 0 %}
+        Not configured — set source host/username/password (or VMWARE_*);
+        no source power-off attempted
+        {% else %}
+        {{ __validate_migration_power_outcomes.values() | map(attribute='detail') | join('; ') }}
+        {% endif %}
+...

@@ -1,0 +1,52 @@
+---
+# Check the expected VM list matches the migrated set: every expected VM
+# must exist (expected subset). Extra VirtualMachines in the namespace
+# are reported in the detail as warnings — they do not fail the check,
+# so a namespace shared with other workloads does not false-positive.
+
+- name: validate_list | Query migrated VirtualMachines in the target namespace
+  kubernetes.core.k8s_info:
+    host: "{{ validate_migration_openshift_host }}"
+    api_key: "{{ validate_migration_openshift_api_key }}"
+    validate_certs: "{{ validate_migration_openshift_verify_ssl }}"
+    api_version: kubevirt.io/v1
+    kind: VirtualMachine
+    namespace: "{{ validate_migration_target_namespace }}"
+  register: __validate_migration_list_query
+  failed_when: false
+  no_log: "{{ validate_migration_secure_logging }}"
+
+- name: validate_list | Resolve the found VM names
+  ansible.builtin.set_fact:
+    __validate_migration_list_found: "{{ __validate_migration_list_query.resources
+      | default([]) | map(attribute='metadata.name') | list }}"
+
+- name: validate_list | Split the found VMs into missing and extra
+  ansible.builtin.set_fact:
+    __validate_migration_list_missing: "{{ validate_migration_vm_list | difference(__validate_migration_list_found) }}"
+    __validate_migration_list_extra: "{{ __validate_migration_list_found | difference(validate_migration_vm_list) }}"
+
+- name: validate_list | Record the target list check result
+  ansible.builtin.set_fact:
+    __validate_migration_result_list:
+      ran: true
+      passed: "{{ __validate_migration_list_missing | length == 0 }}"
+      detail: >-
+        {% if __validate_migration_list_query.resources is not defined %}
+        Cluster API query failed in {{ validate_migration_target_namespace }} —
+        check the OpenShift connection and credentials first; the list
+        check is inconclusive when the API is unreachable
+        {% elif __validate_migration_list_missing | length > 0 %}
+        {{ __validate_migration_list_missing | length }} expected VM(s) missing
+        from the migrated set in {{ validate_migration_target_namespace }}:
+        {{ __validate_migration_list_missing | join(', ') }}
+        {% else %}
+        All {{ validate_migration_vm_list | length }} expected VM(s) present in
+        {{ validate_migration_target_namespace }}{% if __validate_migration_list_extra | length > 0 %};
+        warning: {{ __validate_migration_list_extra | length }} additional
+        VirtualMachine(s) in the namespace beyond the expected list
+        ({{ __validate_migration_list_extra | join(', ') }}){% else %}; no
+        additional VirtualMachines in the namespace{% endif %}
+        {% endif %}
+
+...

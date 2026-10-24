@@ -1,0 +1,6 @@
+---
+# Internal derived values — not user-facing. Users set the source host's
+# type in the inventory; this resolves it for the vCenter gate.
+__validate_migration_source_type: "{{ hostvars[validate_migration_source_name]['type'] | default('', true) }}"
+
+...

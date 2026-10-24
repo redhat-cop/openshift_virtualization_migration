@@ -1,0 +1,51 @@
+---
+# Required variables — without these nothing can run. Per-check inputs
+# (vCenter) are validated inside their own check files so a missing input
+# fails that check with instructions instead of aborting the play.
+
+- name: pre_validate | Validate required OpenShift connection variables
+  ansible.builtin.assert:
+    that:
+      - validate_migration_openshift_host | length > 0
+      - validate_migration_openshift_api_key | length > 0
+    fail_msg: >-
+      OpenShift connection is required. Set openshift_host and
+      openshift_api_key on the target cluster host in the inventory (or
+      run from AAP where the target credential injects K8S_AUTH_HOST and
+      K8S_AUTH_API_KEY).
+    success_msg: >-
+      OpenShift connection configured: {{ validate_migration_openshift_host }}
+    quiet: true
+
+- name: pre_validate | Validate required migration identifiers
+  ansible.builtin.assert:
+    that:
+      - validate_migration_plan_name | length > 0
+      - validate_migration_plan_namespace | length > 0
+      - validate_migration_target_namespace | length > 0
+      - validate_migration_vm_list | length > 0
+    fail_msg: >-
+      Plan name, Plan namespace, target namespace, and a non-empty VM
+      list are required. Set mtv_migrate_plan_name and
+      mtv_migrate_plan_namespace (or validate_migration_plan_name and
+      validate_migration_plan_namespace), validate_migration_target_namespace, and
+      validate_migration_vm_list.
+    success_msg: >-
+      Validating Plan {{ validate_migration_plan_name }} in
+      {{ validate_migration_plan_namespace }} — {{ validate_migration_vm_list | length }}
+      VM(s) in {{ validate_migration_target_namespace }}
+    quiet: true
+
+- name: pre_validate | Reject plaintext credential-bearing endpoints
+  ansible.builtin.assert:
+    that:
+      - (validate_migration_openshift_host | trim | lower) is not match('^http://')
+      - validate_migration_openshift_host is not search('://[^/@]+:[^/@]+@')
+    fail_msg: >-
+      The OpenShift endpoint must use https and must not embed user:pass@
+      in the URL — bearer tokens sent to a plaintext endpoint transit
+      unencrypted. Set an https URL on the migration_clusters host in the
+      inventory.
+    quiet: true
+
+...

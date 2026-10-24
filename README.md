@@ -55,6 +55,7 @@ This collection includes the following roles for managing OpenShift Virtualizati
 * [utility_aap_deploy](roles/utility_aap_deploy/README.md) - Deploys an instance of Ansible Automation Platform.
 * [utility_openshift_target_credential](roles/utility_openshift_target_credential/README.md) - A utility role to manage OpenShift target cluster credentials for migration
 * [utility_registry_credentials](roles/utility_registry_credentials/README.md) - Manages registry credentials in an OpenShift namespace.
+* [validate_migration](roles/validate_migration/README.md) - Validate migration outcomes after vmf_migrate completes — Migration status, migrated VM presence and state, target list match, guest agent, IP addresses, disk topology, and the fail-closed source power-off.
 <!--ROLES_LIST_END-->
 
 ## Requirements

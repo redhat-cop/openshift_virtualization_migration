@@ -1,0 +1,68 @@
+---
+# Check every expected VM exists as a migrated VirtualMachine in the
+# target namespace and is Running. MTV preserves VM names, so the input
+# name is the migrated VirtualMachine's name.
+
+- name: validate_vms | Query migrated VirtualMachines in the target namespace
+  kubernetes.core.k8s_info:
+    host: "{{ validate_migration_openshift_host }}"
+    api_key: "{{ validate_migration_openshift_api_key }}"
+    validate_certs: "{{ validate_migration_openshift_verify_ssl }}"
+    api_version: kubevirt.io/v1
+    kind: VirtualMachine
+    namespace: "{{ validate_migration_target_namespace }}"
+  register: __validate_migration_vm_query
+  failed_when: false
+  no_log: "{{ validate_migration_secure_logging }}"
+
+- name: validate_vms | Build the per-VM presence and state map
+  ansible.builtin.set_fact:
+    __validate_migration_vms_state: >-
+      {%- set vms = __validate_migration_vm_query.resources | default([]) -%}
+      {%- set out = {} -%}
+      {%- for name in validate_migration_vm_list -%}
+      {%- set vm = vms | selectattr('metadata.name', 'equalto', name) | list | first | default({}) -%}
+      {%- set _ = out.update({name: {
+        'present': vm | length > 0,
+        'running': (vm.status.printableStatus | default('')) == 'Running'
+      }}) -%}
+      {%- endfor -%}
+      {{- out -}}
+
+- name: validate_vms | Record the migrated VM check result
+  ansible.builtin.set_fact:
+    __validate_migration_result_vms:
+      ran: true
+      passed: "{{ (__validate_migration_vms_state.values()
+        | selectattr('running', 'equalto', true) | list | length)
+        == (validate_migration_vm_list | length) }}"
+      detail: >-
+        {% if __validate_migration_vm_query.resources is not defined %}
+        Cluster API query failed in {{ validate_migration_target_namespace }} —
+        check the OpenShift connection and credentials first; the VM
+        check is inconclusive when the API is unreachable
+        {% else %}
+        {% set missing = __validate_migration_vms_state.items()
+        | selectattr('1.present', 'equalto', false)
+        | map(attribute='0') | list %}
+        {% set not_running = __validate_migration_vms_state.items()
+        | selectattr('1.present', 'equalto', true)
+        | selectattr('1.running', 'equalto', false)
+        | map(attribute='0') | list %}
+        {% if missing | length > 0 %}
+        {{ missing | length }} of {{ validate_migration_vm_list | length }} VM(s)
+        not found in {{ validate_migration_target_namespace }}:
+        {{ missing | join(', ') }} — check the migration plan and the
+        VM list
+        {% elif not_running | length > 0 %}
+        {{ not_running | length }} of {{ validate_migration_vm_list | length }}
+        VM(s) present but not Running:
+        {{ not_running | join(', ') }} — expected printableStatus
+        Running
+        {% else %}
+        All {{ validate_migration_vm_list | length }} VM(s) present and Running
+        in {{ validate_migration_target_namespace }}
+        {% endif %}
+        {% endif %}
+
+...
