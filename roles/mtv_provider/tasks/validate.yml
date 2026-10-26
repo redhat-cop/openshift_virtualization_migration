@@ -148,6 +148,9 @@
               {{ mtv_provider_source_host | regex_replace(':[0-9]+$', '') }}
           register: _mtv_provider_vmca_fetch
 
+        # Justified command use: the community.crypto.x509_certificate_convert
+        # module writes to a dest_path file — this task captures PEM on
+        # stdout via register so the fact below stores the content directly.
         - name: validate | Convert VMCA CA certificate from DER to PEM
           ansible.builtin.command:
             cmd: >-
