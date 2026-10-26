@@ -148,6 +148,8 @@
               {{ mtv_provider_source_host | regex_replace(':[0-9]+$', '') }}
           register: _mtv_provider_vmca_fetch
 
+        # Justified command use: no Ansible module performs DER-to-PEM
+        # certificate conversion — openssl x509 is the only path.
         - name: validate | Convert VMCA CA certificate from DER to PEM
           ansible.builtin.command:
             cmd: >-
