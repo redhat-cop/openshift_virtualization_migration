@@ -15,6 +15,11 @@
 # .vmware_datacenter_info (pyVmomi, vCenter 6.5+) is the only content that
 # covers the 6.x path, so the SOAP fallback runs only when the REST probe
 # cannot return data.
+#
+# Pin-range safety: community.vmware is pinned >=5.5.0 (galaxy.yml); the
+# task uses only the core connection options (hostname, username, password,
+# validate_certs), unchanged across 5.x. Requires pyVmomi, which the
+# execution environments ship.
 
 - name: validate_vcenter | List vCenter datacenters via the REST API (vCenter 7.0+)
   when:
