@@ -14,6 +14,11 @@
 # customer vCenters; see docs/research/validate-migration-vmware-powerstate.md.
 # MoID targets the object just gathered, but does not prove that a VM
 # recreated under the same name is the original migration source.
+#
+# Pin-range safety: community.vmware is pinned >=5.5.0 (galaxy.yml); every
+# option in use (connection, name, datacenter, schema, properties) predates
+# the pin floor and is unchanged across 5.x. Requires pyVmomi, which the
+# execution environments ship.
 
 - name: gather_source_vm | Gather source VM facts from vCenter (SOAP)
   when:
