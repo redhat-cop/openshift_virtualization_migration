@@ -8,53 +8,26 @@
 # KB and Kubernetes quantity strings is intentionally not automated, so
 # a rounding difference cannot false-fail the cutover.
 #
-# Module tier justification (community content): community.vmware
-# .vmware_guest_info returns config.hardware.device through SOAP alone.
-# Certified vmware.vmware.vm_info initializes REST even for vsphere
-# schema. Retain SOAP-only gathering for unknown legacy vCenters and the
-# demo emulator; this does not assert support for every old version.
+# Module tier justification (community content) lives in
+# gather_source_vm.yml (the shared include).
 
 - name: validate_disks | Gather source disk topology from vCenter
-  when:
-    - validate_migration_vcenter_hostname | length > 0
-    - __validate_migration_source_type | length == 0 or __validate_migration_source_type == 'vmware'
-  community.vmware.vmware_guest_info:
-    hostname: "{{ validate_migration_vcenter_hostname }}"
-    username: "{{ validate_migration_vcenter_username }}"
-    password: "{{ validate_migration_vcenter_password }}"
-    validate_certs: "{{ validate_migration_vcenter_validate_certs }}"
-    name: "{{ __validate_migration_source_vm }}"
-    datacenter: "{{ validate_migration_vcenter_datacenter
-      if validate_migration_vcenter_datacenter | length > 0 else omit }}"
-    schema: vsphere
-    properties:
-      - config.hardware.device
-  loop: "{{ validate_migration_vm_list }}"
-  loop_control:
-    loop_var: __validate_migration_source_vm
-  register: __validate_migration_source_disks
-  # Keep failed=true so lookup faults remain visible to result accounting.
-  ignore_errors: true
-  no_log: "{{ validate_migration_secure_logging }}"
+  ansible.builtin.include_tasks: gather_source_vm.yml
+  vars:
+    __gather_vm_schema: vsphere
+    __gather_vm_properties: [config.hardware.device]
 
 - name: validate_disks | Query the migrated VirtualMachines' volume counts
-  kubernetes.core.k8s_info:
-    host: "{{ validate_migration_openshift_host }}"
-    api_key: "{{ validate_migration_openshift_api_key }}"
-    validate_certs: "{{ validate_migration_openshift_verify_ssl }}"
-    api_version: kubevirt.io/v1
-    kind: VirtualMachine
-    namespace: "{{ validate_migration_target_namespace }}"
-  register: __validate_migration_disks_vm_query
-  failed_when: false
-  no_log: "{{ validate_migration_secure_logging }}"
+  ansible.builtin.include_tasks: gather_target_k8s.yml
+  vars:
+    __gather_kind: VirtualMachine
 
 - name: validate_disks | Build the per-VM disk comparison map
   ansible.builtin.set_fact:
     __validate_migration_disks_state: >-
-      {%- set vms = __validate_migration_disks_vm_query.resources | default([]) -%}
+      {%- set vms = __validate_migration_target_query.resources | default([]) -%}
       {%- set out = {} -%}
-      {%- for r in __validate_migration_source_disks.results | default([]) -%}
+      {%- for r in __validate_migration_source_vm_results.results | default([]) -%}
       {%- set name = r.__validate_migration_source_vm | default('') -%}
       {%- set devices = (r.instance.config.hardware.device | default([])) if r.instance is defined else [] -%}
       {%- set source_disks = devices | selectattr('capacityInKB', 'defined') | list -%}

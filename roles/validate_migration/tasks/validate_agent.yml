@@ -6,21 +6,14 @@
 # blocks the source power-off.
 
 - name: validate_agent | Query VirtualMachineInstances in the target namespace
-  kubernetes.core.k8s_info:
-    host: "{{ validate_migration_openshift_host }}"
-    api_key: "{{ validate_migration_openshift_api_key }}"
-    validate_certs: "{{ validate_migration_openshift_verify_ssl }}"
-    api_version: kubevirt.io/v1
-    kind: VirtualMachineInstance
-    namespace: "{{ validate_migration_target_namespace }}"
-  register: __validate_migration_vmi_query
-  failed_when: false
-  no_log: "{{ validate_migration_secure_logging }}"
+  ansible.builtin.include_tasks: gather_target_k8s.yml
+  vars:
+    __gather_kind: VirtualMachineInstance
 
 - name: validate_agent | Build the per-VM agent status map
   ansible.builtin.set_fact:
     __validate_migration_agents: >-
-      {%- set vmis = __validate_migration_vmi_query.resources | default([]) -%}
+      {%- set vmis = __validate_migration_target_query.resources | default([]) -%}
       {%- set out = {} -%}
       {%- for name in validate_migration_vm_list -%}
       {%- set vmi = vmis | selectattr('metadata.name', 'equalto', name) | list | first | default({}) -%}
@@ -35,9 +28,9 @@
   ansible.builtin.set_fact:
     __validate_migration_result_agent:
       ran: true
-      passed: "{{ __validate_migration_vmi_query.resources is defined }}"
+      passed: "{{ __validate_migration_target_query.resources is defined }}"
       detail: >-
-        {% if __validate_migration_vmi_query.resources is not defined %}
+        {% if __validate_migration_target_query.resources is not defined %}
         Cluster API query failed in {{ validate_migration_target_namespace }} —
         check the OpenShift connection and credentials first; the agent
         check is inconclusive when the API is unreachable

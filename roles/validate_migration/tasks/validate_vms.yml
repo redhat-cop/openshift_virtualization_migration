@@ -4,21 +4,14 @@
 # name is the migrated VirtualMachine's name.
 
 - name: validate_vms | Query migrated VirtualMachines in the target namespace
-  kubernetes.core.k8s_info:
-    host: "{{ validate_migration_openshift_host }}"
-    api_key: "{{ validate_migration_openshift_api_key }}"
-    validate_certs: "{{ validate_migration_openshift_verify_ssl }}"
-    api_version: kubevirt.io/v1
-    kind: VirtualMachine
-    namespace: "{{ validate_migration_target_namespace }}"
-  register: __validate_migration_vm_query
-  failed_when: false
-  no_log: "{{ validate_migration_secure_logging }}"
+  ansible.builtin.include_tasks: gather_target_k8s.yml
+  vars:
+    __gather_kind: VirtualMachine
 
 - name: validate_vms | Build the per-VM presence and state map
   ansible.builtin.set_fact:
     __validate_migration_vms_state: >-
-      {%- set vms = __validate_migration_vm_query.resources | default([]) -%}
+      {%- set vms = __validate_migration_target_query.resources | default([]) -%}
       {%- set out = {} -%}
       {%- for name in validate_migration_vm_list -%}
       {%- set vm = vms | selectattr('metadata.name', 'equalto', name) | list | first | default({}) -%}
@@ -37,7 +30,7 @@
         | selectattr('running', 'equalto', true) | list | length)
         == (validate_migration_vm_list | length) }}"
       detail: >-
-        {% if __validate_migration_vm_query.resources is not defined %}
+        {% if __validate_migration_target_query.resources is not defined %}
         Cluster API query failed in {{ validate_migration_target_namespace }} —
         check the OpenShift connection and credentials first; the VM
         check is inconclusive when the API is unreachable

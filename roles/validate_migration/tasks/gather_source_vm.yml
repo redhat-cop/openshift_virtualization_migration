@@ -1,0 +1,40 @@
+---
+# Shared SOAP gather for source VM facts — moid, power state, and disk
+# topology. Previously copied into power_off, validate_disks, and
+# validate_ip; kept as one include so the lookup contract lives in one
+# place. Consumers needing specific properties pass __gather_vm_schema
+# and __gather_vm_properties (e.g. validate_disks); the results land in
+# __validate_migration_source_vm_results.
+#
+# Module tier justification: retain community.vmware.vmware_guest_info
+# for SOAP-only gathering. The certified vmware.vmware.vm_info initializes
+# REST even with schema=vsphere, which is unsuitable for an unknown legacy
+# vCenter/emulator baseline. This is not a blanket support claim for 6.x.
+# Neither path has yet been verified against the demo emulator or old
+# customer vCenters; see docs/research/validate-migration-vmware-powerstate.md.
+# MoID targets the object just gathered, but does not prove that a VM
+# recreated under the same name is the original migration source.
+
+- name: gather_source_vm | Gather source VM facts from vCenter (SOAP)
+  when:
+    - validate_migration_vcenter_hostname | length > 0
+    - __validate_migration_source_type | length == 0 or __validate_migration_source_type == 'vmware'
+  community.vmware.vmware_guest_info:
+    hostname: "{{ validate_migration_vcenter_hostname }}"
+    username: "{{ validate_migration_vcenter_username }}"
+    password: "{{ validate_migration_vcenter_password }}"
+    validate_certs: "{{ validate_migration_vcenter_validate_certs }}"
+    name: "{{ __validate_migration_source_vm }}"
+    datacenter: "{{ validate_migration_vcenter_datacenter
+      if validate_migration_vcenter_datacenter | length > 0 else omit }}"
+    schema: "{{ __gather_vm_schema | default(omit) }}"
+    properties: "{{ __gather_vm_properties | default(omit) }}"
+  loop: "{{ validate_migration_vm_list }}"
+  loop_control:
+    loop_var: __validate_migration_source_vm
+  register: __validate_migration_source_vm_results
+  # Keep failed=true so lookup faults remain visible to result
+  # accounting; do not mask it with failed_when.
+  ignore_errors: true
+  no_log: "{{ validate_migration_secure_logging }}"
+...

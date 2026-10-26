@@ -8,37 +8,18 @@
 # gated checks did not run stays on: the gate defaults to false when
 # the checks' facts are absent. With
 # validate_migration_power_off_source=false the role gathers the same facts and
-# reports source power state without mutating.
+# reports source power state without mutating. A suspended source is a
+# valid lookup result: read-only mode reports it, and an enabled
+# power-off applies the same hard stop.
+# Module tier justification for the SOAP gather lives in
+# gather_source_vm.yml (the shared include).
 #
-# Module tier justification: retain community.vmware.vmware_guest_info
-# for SOAP-only gathering. The certified vmware.vmware.vm_info initializes
-# REST even with schema=vsphere, which is unsuitable for an unknown legacy
-# vCenter/emulator baseline. This is not a blanket support claim for 6.x.
-# Use certified vmware.vmware.vm_powerstate for the SOAP hard stop.
-# Neither path has yet been verified against the demo emulator or old
-# customer vCenters; see docs/research/validate-migration-vmware-powerstate.md.
-# MoID targets the object just gathered, but does not prove that a VM
-# recreated under the same name is the original migration source.
+# Use certified vmware.vmware.vm_powerstate for the SOAP hard stop; it
+# has not yet been verified against the demo emulator or old customer
+# vCenters; see docs/research/validate-migration-vmware-powerstate.md.
 
 - name: power_off | Gather source VM facts (moid and power state)
-  when:
-    - validate_migration_vcenter_hostname | length > 0
-    - __validate_migration_source_type | length == 0 or __validate_migration_source_type == 'vmware'
-  community.vmware.vmware_guest_info:
-    hostname: "{{ validate_migration_vcenter_hostname }}"
-    username: "{{ validate_migration_vcenter_username }}"
-    password: "{{ validate_migration_vcenter_password }}"
-    validate_certs: "{{ validate_migration_vcenter_validate_certs }}"
-    name: "{{ __validate_migration_source_vm }}"
-    datacenter: "{{ validate_migration_vcenter_datacenter
-      if validate_migration_vcenter_datacenter | length > 0 else omit }}"
-  loop: "{{ validate_migration_vm_list }}"
-  loop_control:
-    loop_var: __validate_migration_source_vm
-  register: __validate_migration_power_facts
-  # Preserve failed=true for the report; do not mask it with failed_when.
-  ignore_errors: true
-  no_log: "{{ validate_migration_secure_logging }}"
+  ansible.builtin.include_tasks: gather_source_vm.yml
 
 - name: power_off | Compute the per-VM fail-closed gate
   # Global gates (plan status, target list) plus the per-VM fatal bits
@@ -67,14 +48,14 @@
     __validate_migration_power_sources: >-
       {%- set out = {} -%}
       {%- for name in validate_migration_vm_list -%}
-      {%- set r = __validate_migration_power_facts.results | default([])
+      {%- set r = __validate_migration_source_vm_results.results | default([])
         | selectattr('__validate_migration_source_vm', 'defined')
         | selectattr('__validate_migration_source_vm', 'equalto', name) | first | default({}) -%}
       {%- set vm = r.instance | default({}) -%}
       {%- set valid = vm is mapping and not (r.failed | default(false) | bool)
         and not (r.skipped | default(false) | bool)
         and vm.moid is defined and vm.moid is string and vm.moid | length > 0
-        and vm.hw_power_status | default('') in ['poweredOn', 'poweredOff'] -%}
+        and vm.hw_power_status | default('') in ['poweredOn', 'poweredOff', 'suspended'] -%}
       {%- set _ = out.update({name: {'valid': valid, 'instance': vm}}) -%}
       {%- endfor -%}
       {{- out -}}
@@ -86,7 +67,8 @@
     - validate_migration_vcenter_datacenter | trim | length > 0
     - __validate_migration_power_gate.get(__validate_migration_power_name, false) | bool
     - __validate_migration_power_sources[__validate_migration_power_name].valid | bool
-    - __validate_migration_power_sources[__validate_migration_power_name].instance.hw_power_status == 'poweredOn'
+    - __validate_migration_power_sources[__validate_migration_power_name]
+      .instance.hw_power_status in ['poweredOn', 'suspended']
   vmware.vmware.vm_powerstate:
     hostname: "{{ validate_migration_vcenter_hostname }}"
     username: "{{ validate_migration_vcenter_username }}"

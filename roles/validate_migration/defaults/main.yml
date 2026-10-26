@@ -153,11 +153,11 @@ validate_migration_vm_list: []
 # required: False
 # description: >-
 #   Power off source VMs whose migrated counterpart passed every fatal
-#   check (per-VM, fail-closed — see docs/adr/0001-validate_migration-fail-closed
-#   -power-off.md). The power-off is a hard stop via the vCenter API and
-#   the only sanctioned mutation in this role. Set false to run
-#   read-only: the role then reports source power state without
-#   mutating.
+#   check (per-VM, fail-closed — see
+#   docs/adr/0001-validate-migration-fail-closed-power-off.md). The
+#   power-off is a hard stop via the vCenter API and the only sanctioned
+#   mutation in this role. Set false to run read-only: the role then
+#   reports source power state without mutating.
 validate_migration_power_off_source: true
 
 ...

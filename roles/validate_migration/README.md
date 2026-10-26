@@ -245,11 +245,23 @@ Description: Validate migration outcomes after vmf_migrate completes — Migrati
 | Include disk topology check | `ansible.builtin.include_tasks` | False |
 | Include the source power-off action | `ansible.builtin.include_tasks` | False |
 
+#### File: tasks/gather_source_vm.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| gather_source_vm ¦ Gather source VM facts from vCenter (SOAP) | `community.vmware.vmware_guest_info` | True |
+
+#### File: tasks/gather_target_k8s.yml
+
+| Name | Module | Has Conditions |
+| ---- | ------ | --------- |
+| gather_target_k8s ¦ Query OpenShift Virtualization objects | `kubernetes.core.k8s_info` | False |
+
 #### File: tasks/power_off.yml
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| power_off ¦ Gather source VM facts (moid and power state) | `community.vmware.vmware_guest_info` | True |
+| power_off ¦ Gather source VM facts (moid and power state) | `ansible.builtin.include_tasks` | False |
 | power_off ¦ Compute the per-VM fail-closed gate | `ansible.builtin.set_fact` | False |
 | power_off ¦ Normalize the source lookup results | `ansible.builtin.set_fact` | False |
 | power_off ¦ Power off validated source VMs (hard stop) | `vmware.vmware.vm_powerstate` | True |
@@ -283,7 +295,7 @@ Description: Validate migration outcomes after vmf_migrate completes — Migrati
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| validate_agent ¦ Query VirtualMachineInstances in the target namespace | `kubernetes.core.k8s_info` | False |
+| validate_agent ¦ Query VirtualMachineInstances in the target namespace | `ansible.builtin.include_tasks` | False |
 | validate_agent ¦ Build the per-VM agent status map | `ansible.builtin.set_fact` | False |
 | validate_agent ¦ Record the guest agent check result | `ansible.builtin.set_fact` | False |
 
@@ -291,8 +303,8 @@ Description: Validate migration outcomes after vmf_migrate completes — Migrati
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| validate_disks ¦ Gather source disk topology from vCenter | `community.vmware.vmware_guest_info` | True |
-| validate_disks ¦ Query the migrated VirtualMachines' volume counts | `kubernetes.core.k8s_info` | False |
+| validate_disks ¦ Gather source disk topology from vCenter | `ansible.builtin.include_tasks` | False |
+| validate_disks ¦ Query the migrated VirtualMachines' volume counts | `ansible.builtin.include_tasks` | False |
 | validate_disks ¦ Build the per-VM disk comparison map | `ansible.builtin.set_fact` | False |
 | validate_disks ¦ Count the disk topology mismatches | `ansible.builtin.set_fact` | False |
 | validate_disks ¦ Record the disk topology check result | `ansible.builtin.set_fact` | False |
@@ -301,8 +313,8 @@ Description: Validate migration outcomes after vmf_migrate completes — Migrati
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| validate_ip ¦ Gather source VM facts from vCenter | `community.vmware.vmware_guest_info` | True |
-| validate_ip ¦ Query VirtualMachineInstances for the target addresses | `kubernetes.core.k8s_info` | False |
+| validate_ip ¦ Gather source VM facts from vCenter | `ansible.builtin.include_tasks` | False |
+| validate_ip ¦ Query VirtualMachineInstances for the target addresses | `ansible.builtin.include_tasks` | False |
 | validate_ip ¦ Build the per-VM address comparison map | `ansible.builtin.set_fact` | False |
 | validate_ip ¦ Record the IP address check result | `ansible.builtin.set_fact` | False |
 
@@ -310,7 +322,7 @@ Description: Validate migration outcomes after vmf_migrate completes — Migrati
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| validate_list ¦ Query migrated VirtualMachines in the target namespace | `kubernetes.core.k8s_info` | False |
+| validate_list ¦ Query migrated VirtualMachines in the target namespace | `ansible.builtin.include_tasks` | False |
 | validate_list ¦ Resolve the found VM names | `ansible.builtin.set_fact` | False |
 | validate_list ¦ Split the found VMs into missing and extra | `ansible.builtin.set_fact` | False |
 | validate_list ¦ Record the target list check result | `ansible.builtin.set_fact` | False |
@@ -330,11 +342,47 @@ Description: Validate migration outcomes after vmf_migrate completes — Migrati
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
-| validate_vms ¦ Query migrated VirtualMachines in the target namespace | `kubernetes.core.k8s_info` | False |
+| validate_vms ¦ Query migrated VirtualMachines in the target namespace | `ansible.builtin.include_tasks` | False |
 | validate_vms ¦ Build the per-VM presence and state map | `ansible.builtin.set_fact` | False |
 | validate_vms ¦ Record the migrated VM check result | `ansible.builtin.set_fact` | False |
 
 ## Task Flow Graphs
+
+### Graph for gather_source_vm.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| gather_source_vm___Gather_source_VM_facts_from_vCenter__SOAP_0[gather source vm   gather source vm facts from<br>vcenter  soap <br>When: **validate migration vcenter hostname   length   0<br>and   validate migration source type   length    0<br>or   validate migration source type     vmware**]:::task
+  gather_source_vm___Gather_source_VM_facts_from_vCenter__SOAP_0-->End
+```
+
+### Graph for gather_target_k8s.yml
+
+```mermaid
+flowchart TD
+Start
+classDef block stroke:#3498db,stroke-width:2px;
+classDef task stroke:#4b76bb,stroke-width:2px;
+classDef includeTasks stroke:#16a085,stroke-width:2px;
+classDef importTasks stroke:#34495e,stroke-width:2px;
+classDef includeRole stroke:#2980b9,stroke-width:2px;
+classDef importRole stroke:#699ba7,stroke-width:2px;
+classDef includeVars stroke:#8e44ad,stroke-width:2px;
+classDef rescue stroke:#665352,stroke-width:2px;
+
+  Start-->|Task| gather_target_k8s___Query_OpenShift_Virtualization_objects0[gather target k8s   query openshift virtualization<br>objects]:::task
+  gather_target_k8s___Query_OpenShift_Virtualization_objects0-->End
+```
 
 ### Graph for main.yml
 
@@ -377,10 +425,10 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| power_off___Gather_source_VM_facts__moid_and_power_state_0[power off   gather source vm facts  moid and power<br>state <br>When: **validate migration vcenter hostname   length   0<br>and   validate migration source type   length    0<br>or   validate migration source type     vmware**]:::task
-  power_off___Gather_source_VM_facts__moid_and_power_state_0-->|Task| power_off___Compute_the_per_VM_fail_closed_gate1[power off   compute the per vm fail closed gate]:::task
+  Start-->|Include task| power_off___Gather_source_VM_facts__moid_and_power_state__gather_source_vm_yml_0[power off   gather source vm facts  moid and power<br>state <br>include_task: gather source vm yml]:::includeTasks
+  power_off___Gather_source_VM_facts__moid_and_power_state__gather_source_vm_yml_0-->|Task| power_off___Compute_the_per_VM_fail_closed_gate1[power off   compute the per vm fail closed gate]:::task
   power_off___Compute_the_per_VM_fail_closed_gate1-->|Task| power_off___Normalize_the_source_lookup_results2[power off   normalize the source lookup results]:::task
-  power_off___Normalize_the_source_lookup_results2-->|Task| power_off___Power_off_validated_source_VMs__hard_stop_3[power off   power off validated source vms  hard<br>stop <br>When: **validate migration power off source   bool and not<br>ansible check mode and validate migration vcenter<br>datacenter   trim   length   0 and   validate<br>migration power gate get   validate migration<br>power name  false    bool and   validate migration<br>power sources   validate migration power name <br>valid   bool and   validate migration power<br>sources   validate migration power name  instance<br>hw power status     poweredon**]:::task
+  power_off___Normalize_the_source_lookup_results2-->|Task| power_off___Power_off_validated_source_VMs__hard_stop_3[power off   power off validated source vms  hard<br>stop <br>When: **validate migration power off source   bool and not<br>ansible check mode and validate migration vcenter<br>datacenter   trim   length   0 and   validate<br>migration power gate get   validate migration<br>power name  false    bool and   validate migration<br>power sources   validate migration power name <br>valid   bool and   validate migration power<br>sources   validate migration power name  instance<br>hw power status in   poweredon    suspended**]:::task
   power_off___Power_off_validated_source_VMs__hard_stop_3-->|Include task| power_off___Classify_and_record_the_source_power_off_results_power_report_yml_4[power off   classify and record the source power<br>off results<br>include_task: power report yml]:::includeTasks
   power_off___Classify_and_record_the_source_power_off_results_power_report_yml_4-->End
 ```
@@ -459,8 +507,8 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| validate_agent___Query_VirtualMachineInstances_in_the_target_namespace0[validate agent   query virtualmachineinstances in<br>the target namespace]:::task
-  validate_agent___Query_VirtualMachineInstances_in_the_target_namespace0-->|Task| validate_agent___Build_the_per_VM_agent_status_map1[validate agent   build the per vm agent status map]:::task
+  Start-->|Include task| validate_agent___Query_VirtualMachineInstances_in_the_target_namespace_gather_target_k8s_yml_0[validate agent   query virtualmachineinstances in<br>the target namespace<br>include_task: gather target k8s yml]:::includeTasks
+  validate_agent___Query_VirtualMachineInstances_in_the_target_namespace_gather_target_k8s_yml_0-->|Task| validate_agent___Build_the_per_VM_agent_status_map1[validate agent   build the per vm agent status map]:::task
   validate_agent___Build_the_per_VM_agent_status_map1-->|Task| validate_agent___Record_the_guest_agent_check_result2[validate agent   record the guest agent check<br>result]:::task
   validate_agent___Record_the_guest_agent_check_result2-->End
 ```
@@ -479,9 +527,9 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| validate_disks___Gather_source_disk_topology_from_vCenter0[validate disks   gather source disk topology from<br>vcenter<br>When: **validate migration vcenter hostname   length   0<br>and   validate migration source type   length    0<br>or   validate migration source type     vmware**]:::task
-  validate_disks___Gather_source_disk_topology_from_vCenter0-->|Task| validate_disks___Query_the_migrated_VirtualMachines__volume_counts1[validate disks   query the migrated<br>virtualmachines  volume counts]:::task
-  validate_disks___Query_the_migrated_VirtualMachines__volume_counts1-->|Task| validate_disks___Build_the_per_VM_disk_comparison_map2[validate disks   build the per vm disk comparison<br>map]:::task
+  Start-->|Include task| validate_disks___Gather_source_disk_topology_from_vCenter_gather_source_vm_yml_0[validate disks   gather source disk topology from<br>vcenter<br>include_task: gather source vm yml]:::includeTasks
+  validate_disks___Gather_source_disk_topology_from_vCenter_gather_source_vm_yml_0-->|Include task| validate_disks___Query_the_migrated_VirtualMachines__volume_counts_gather_target_k8s_yml_1[validate disks   query the migrated<br>virtualmachines  volume counts<br>include_task: gather target k8s yml]:::includeTasks
+  validate_disks___Query_the_migrated_VirtualMachines__volume_counts_gather_target_k8s_yml_1-->|Task| validate_disks___Build_the_per_VM_disk_comparison_map2[validate disks   build the per vm disk comparison<br>map]:::task
   validate_disks___Build_the_per_VM_disk_comparison_map2-->|Task| validate_disks___Count_the_disk_topology_mismatches3[validate disks   count the disk topology<br>mismatches]:::task
   validate_disks___Count_the_disk_topology_mismatches3-->|Task| validate_disks___Record_the_disk_topology_check_result4[validate disks   record the disk topology check<br>result]:::task
   validate_disks___Record_the_disk_topology_check_result4-->End
@@ -501,9 +549,9 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| validate_ip___Gather_source_VM_facts_from_vCenter0[validate ip   gather source vm facts from vcenter<br>When: **validate migration vcenter hostname   length   0<br>and   validate migration source type   length    0<br>or   validate migration source type     vmware**]:::task
-  validate_ip___Gather_source_VM_facts_from_vCenter0-->|Task| validate_ip___Query_VirtualMachineInstances_for_the_target_addresses1[validate ip   query virtualmachineinstances for<br>the target addresses]:::task
-  validate_ip___Query_VirtualMachineInstances_for_the_target_addresses1-->|Task| validate_ip___Build_the_per_VM_address_comparison_map2[validate ip   build the per vm address comparison<br>map]:::task
+  Start-->|Include task| validate_ip___Gather_source_VM_facts_from_vCenter_gather_source_vm_yml_0[validate ip   gather source vm facts from vcenter<br>include_task: gather source vm yml]:::includeTasks
+  validate_ip___Gather_source_VM_facts_from_vCenter_gather_source_vm_yml_0-->|Include task| validate_ip___Query_VirtualMachineInstances_for_the_target_addresses_gather_target_k8s_yml_1[validate ip   query virtualmachineinstances for<br>the target addresses<br>include_task: gather target k8s yml]:::includeTasks
+  validate_ip___Query_VirtualMachineInstances_for_the_target_addresses_gather_target_k8s_yml_1-->|Task| validate_ip___Build_the_per_VM_address_comparison_map2[validate ip   build the per vm address comparison<br>map]:::task
   validate_ip___Build_the_per_VM_address_comparison_map2-->|Task| validate_ip___Record_the_IP_address_check_result3[validate ip   record the ip address check result]:::task
   validate_ip___Record_the_IP_address_check_result3-->End
 ```
@@ -522,8 +570,8 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| validate_list___Query_migrated_VirtualMachines_in_the_target_namespace0[validate list   query migrated virtualmachines in<br>the target namespace]:::task
-  validate_list___Query_migrated_VirtualMachines_in_the_target_namespace0-->|Task| validate_list___Resolve_the_found_VM_names1[validate list   resolve the found vm names]:::task
+  Start-->|Include task| validate_list___Query_migrated_VirtualMachines_in_the_target_namespace_gather_target_k8s_yml_0[validate list   query migrated virtualmachines in<br>the target namespace<br>include_task: gather target k8s yml]:::includeTasks
+  validate_list___Query_migrated_VirtualMachines_in_the_target_namespace_gather_target_k8s_yml_0-->|Task| validate_list___Resolve_the_found_VM_names1[validate list   resolve the found vm names]:::task
   validate_list___Resolve_the_found_VM_names1-->|Task| validate_list___Split_the_found_VMs_into_missing_and_extra2[validate list   split the found vms into missing<br>and extra]:::task
   validate_list___Split_the_found_VMs_into_missing_and_extra2-->|Task| validate_list___Record_the_target_list_check_result3[validate list   record the target list check<br>result]:::task
   validate_list___Record_the_target_list_check_result3-->End
@@ -566,8 +614,8 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| validate_vms___Query_migrated_VirtualMachines_in_the_target_namespace0[validate vms   query migrated virtualmachines in<br>the target namespace]:::task
-  validate_vms___Query_migrated_VirtualMachines_in_the_target_namespace0-->|Task| validate_vms___Build_the_per_VM_presence_and_state_map1[validate vms   build the per vm presence and state<br>map]:::task
+  Start-->|Include task| validate_vms___Query_migrated_VirtualMachines_in_the_target_namespace_gather_target_k8s_yml_0[validate vms   query migrated virtualmachines in<br>the target namespace<br>include_task: gather target k8s yml]:::includeTasks
+  validate_vms___Query_migrated_VirtualMachines_in_the_target_namespace_gather_target_k8s_yml_0-->|Task| validate_vms___Build_the_per_VM_presence_and_state_map1[validate vms   build the per vm presence and state<br>map]:::task
   validate_vms___Build_the_per_VM_presence_and_state_map1-->|Task| validate_vms___Record_the_migrated_VM_check_result2[validate vms   record the migrated vm check result]:::task
   validate_vms___Record_the_migrated_VM_check_result2-->End
 ```

@@ -34,6 +34,9 @@ if kind == 'malformed':
     m.exit_json(changed=False, instance={})
 if kind == 'unknown':
     m.exit_json(changed=False, instance={'moid': 'id-' + name, 'hw_power_status': 'unknown'})
+if kind == 'suspended':
+    m.exit_json(changed=False, instance={
+        'moid': 'id-' + name, 'hw_power_status': 'suspended', 'ipv4': '192.0.2.10'})
 if m.params['schema'] == 'vsphere':
     m.exit_json(changed=False, instance={'config': {'hardware': {
         'device': [{'capacityInKB': 1024}, {'label': 'network adapter'}]}}})
@@ -114,6 +117,10 @@ class ValidateMigrationPowerTests(unittest.TestCase):
             ("already off", {"lookup": {"a": "off"}}, {}, True, 0, "already off"),
             ("read only", {}, {"validate_migration_power_off_source": False,
                                "validate_migration_vcenter_datacenter": ""}, True, 0, "read-only"),
+            ("suspended read only", {"lookup": {"a": "suspended"}},
+             {"validate_migration_power_off_source": False,
+              "validate_migration_vcenter_datacenter": ""}, True, 0, "read-only: suspended"),
+            ("suspended power off", {"lookup": {"a": "suspended"}}, {}, True, 1, "power-off completed"),
             ("missing datacenter", {}, {"validate_migration_vcenter_datacenter": ""}, False, 0, "datacenter required"),
             ("plan failed", {}, {"__validate_migration_result_plan": {"ran": True, "passed": False}},
              True, 0, "source stays on"),
@@ -130,13 +137,16 @@ class ValidateMigrationPowerTests(unittest.TestCase):
             ("disk lookup failed", {}, {"__validate_migration_disks_state": {
                 "a": {"source_ok": False, "source_disks": 1, "target_volumes": 1}}},
              True, 0, "source stays on"),
+            ("disk lookup 0/0", {}, {"__validate_migration_disks_state": {
+                "a": {"source_ok": False, "source_disks": 0, "target_volumes": 0}}},
+             True, 0, "source stays on"),
             ("absent facts", {}, {"__validate_migration_vms_state": {}, "__validate_migration_disks_state": {}},
              True, 0, "source stays on"),
             ("mixed gates", {}, {"validate_migration_vm_list": ["a", "b"]}, True, 1, "b (id-b): source stays on"),
             ("partial failure", {"lookup": {"b": "failure"}}, {"validate_migration_vm_list": ["a", "b"]},
              False, 1, "power-off completed"),
             ("check mode", {"check": True}, {}, True, 0, "would power off"),
-            ("plan failed", {"tasks_from": "validate_plan.yml"},
+            ("plan failed check", {"tasks_from": "validate_plan.yml"},
              {"validate_migration_plan_name": "a-plan", "validate_migration_plan_namespace": "fixture"},
              False, 0, "is Failed"),
             ("plan none", {"tasks_from": "validate_plan.yml", "no_migrations": True},
