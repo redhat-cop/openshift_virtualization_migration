@@ -29,9 +29,9 @@ argument_specs:
         description: >-
           Whether to enable secure logging for tasks that handle
           credentials. Set to false to debug failed probes. Prefer a
-          one-off CLI run (--tags <check>) over flipping the toggle on a
-          job template; if you must, rotate the exposed credential
-          afterwards.
+          one-off CLI run (-e validate_migration_secure_logging=false)
+          over flipping the toggle on a job template; if you must,
+          rotate the exposed credential afterwards.
 
       validate_migration_target_name:
         type: str

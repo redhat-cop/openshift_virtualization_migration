@@ -110,7 +110,7 @@
         {% if failed | length > 0 %}
         vCenter lookup failed for {{ failed | length }} of
         {{ validate_migration_vm_list | length }} VM(s): {{ failed | join(', ') }}
-        — re-run the disk check alone (--tags disks) as a one-off CLI run
+        — re-run the disk check alone as a one-off CLI run
         with validate_migration_secure_logging=false to see the fault, then
         rotate the exposed credential
         {% elif __validate_migration_disks_mismatched | length > 0 %}

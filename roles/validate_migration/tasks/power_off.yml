@@ -5,8 +5,8 @@
 # counterpart passed every fatal check — plan succeeded, present,
 # running, target list match, and disk topology. Warn-only checks
 # (guest agent, IP addresses) never block the power-off. A VM whose
-# gated checks did not run (--tags isolation) stays on: the gate
-# defaults to false when the checks' facts are absent. With
+# gated checks did not run stays on: the gate defaults to false when
+# the checks' facts are absent. With
 # validate_migration_power_off_source=false the role gathers the same facts and
 # reports source power state without mutating.
 #
@@ -43,7 +43,7 @@
 - name: power_off | Compute the per-VM fail-closed gate
   # Global gates (plan status, target list) plus the per-VM fatal bits
   # from validate_vms and validate_disks. Absent facts default to false,
-  # so an isolated --tags poweroff run powers nothing off.
+  # so a run without the checks' facts powers nothing off.
   ansible.builtin.set_fact:
     __validate_migration_power_gate: >-
       {%- set plan_ok = (__validate_migration_result_plan.ran | default(false) | bool)

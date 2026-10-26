@@ -25,7 +25,7 @@ From an AAP job template the target credential injects `K8S_AUTH_*` and the sour
 
 With the sample inventory the connection variables resolve from the target cluster host (`openshift_host`, `openshift_api_key`) and the source host (`host`, `username`, `password`) — selected by `validate_migration_target_name` and `validate_migration_source_name`, which default to the `target_name`/`source_name` extra vars (injected by the seeded credentials) or the first host of each group.
 
-All checks run on every invocation, and the summary assert requires every ran check green — the per-check tags (`plan`, `vms`, `list`, `agent`, `ip`, `disks`, `poweroff`) exist for isolated debugging; the summary asserts only over the checks that ran, so a tagged debug run ends green when the targeted check passed. A source whose `type` is not `vmware` (for example `ovirt`) skips the vCenter source checks.
+All checks run on every invocation, and the summary assert requires every ran check green. A source whose `type` is not `vmware` (for example `ovirt`) skips the vCenter source checks.
 
 The source power-off is the only sanctioned mutation: per-VM and fail-closed, a source VM powers off only after its migrated counterpart passed every fatal check. Set `validate_migration_power_off_source: false` to run read-only.
 
@@ -109,7 +109,7 @@ Description: Validate migration outcomes after vmf_migrate completes — Migrati
     * **Required**: False
     * **Type**: bool
     * **Default**: True
-    * **Description**: Whether to enable secure logging for tasks that handle credentials. Set to false to debug failed probes. Prefer a one-off CLI run (--tags <check>) over flipping the toggle on a job template; if you must, rotate the exposed credential afterwards.
+    * **Description**: Whether to enable secure logging for tasks that handle credentials. Set to false to debug failed probes. Prefer a one-off CLI run (-e validate_migration_secure_logging=false) over flipping the toggle on a job template; if you must, rotate the exposed credential afterwards.
   * **validate_migration_source_name**:
     * **Required**: False
     * **Type**: str

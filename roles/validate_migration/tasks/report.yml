@@ -1,8 +1,7 @@
 ---
 # Collect every check result and fail the play if any ran check failed.
 # Check files register __validate_migration_result_* facts with ran: true; the
-# summary assert only covers checks that ran, so an isolated --tags debug
-# run ends green when the targeted check passed. A check that never ran
+# summary assert only covers checks that ran. A check that never ran
 # (unexpected failure in a full run) still shows FAIL with "check did
 # not run" in the summary, so the report never lies.
 #

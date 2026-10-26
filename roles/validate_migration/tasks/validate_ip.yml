@@ -102,7 +102,7 @@
         {% if failed | length > 0 %}
         vCenter lookup failed for {{ failed | length }} of
         {{ validate_migration_vm_list | length }} VM(s): {{ failed | join(', ') }}
-        — re-run the IP check alone (--tags ip) as a one-off CLI run with
+        — re-run the IP check alone as a one-off CLI run with
         validate_migration_secure_logging=false to see the fault, then rotate the
         exposed credential
         {% else %}
