@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - Add validate_migration role to validate migration outcomes after vmf_migrate completes — migration status, migrated VM presence and running state, target list match, guest agent, IP addresses, disk topology, and the per-VM fail-closed source power-off (see docs/adr/0001-validate-migration-fail-closed-power-off.md; playbook vmf_validate_migration.yml).
+...

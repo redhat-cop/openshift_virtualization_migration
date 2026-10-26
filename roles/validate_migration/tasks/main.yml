@@ -1,0 +1,54 @@
+---
+# The migration validation pass runs after vmf_migrate completes.
+#
+# All checks run on every invocation; the summary report fails the play
+# if any ran check failed, so one run reports everything that needs
+# attention.
+#
+# The source power-off is the only mutating step: per-VM and fail-closed
+# (docs/adr/0001-validate-migration-fail-closed-power-off.md). A source VM powers
+# off only after its migrated counterpart passed every fatal check —
+# plan succeeded, present, running, target list match, and disk
+# topology. Warn-only checks (guest agent, IP addresses) never block the
+# power-off. Set validate_migration_power_off_source=false to run read-only; the
+# role then reports source power state without mutating.
+
+- name: Include pre-validation of required variables
+  ansible.builtin.include_tasks:
+    file: pre_validate.yml
+
+- name: Run migration validation checks
+  block:
+    - name: Include migration plan status check
+      ansible.builtin.include_tasks:
+        file: validate_plan.yml
+
+    - name: Include migrated VM presence and state check
+      ansible.builtin.include_tasks:
+        file: validate_vms.yml
+
+    - name: Include target list match check
+      ansible.builtin.include_tasks:
+        file: validate_list.yml
+
+    - name: Include guest agent check
+      ansible.builtin.include_tasks:
+        file: validate_agent.yml
+
+    - name: Include IP address check
+      ansible.builtin.include_tasks:
+        file: validate_ip.yml
+
+    - name: Include disk topology check
+      ansible.builtin.include_tasks:
+        file: validate_disks.yml
+
+    - name: Include the source power-off action
+      ansible.builtin.include_tasks:
+        file: power_off.yml
+
+  always:
+    - name: Include the validate_migration summary report
+      ansible.builtin.include_tasks:
+        file: report.yml
+...

@@ -1,0 +1,19 @@
+---
+# Shared OpenShift Virtualization query — previously copied across
+# validate_vms, validate_list, validate_disks, validate_agent, and
+# validate_ip. The including file passes __gather_kind (VirtualMachine
+# or VirtualMachineInstance) and consumes
+# __validate_migration_target_query.
+
+- name: gather_target_k8s | Query OpenShift Virtualization objects
+  kubernetes.core.k8s_info:
+    host: "{{ validate_migration_openshift_host }}"
+    api_key: "{{ validate_migration_openshift_api_key }}"
+    validate_certs: "{{ validate_migration_openshift_verify_ssl }}"
+    api_version: kubevirt.io/v1
+    kind: "{{ __gather_kind }}"
+    namespace: "{{ validate_migration_target_namespace }}"
+  register: __validate_migration_target_query
+  failed_when: false
+  no_log: "{{ validate_migration_secure_logging }}"
+...

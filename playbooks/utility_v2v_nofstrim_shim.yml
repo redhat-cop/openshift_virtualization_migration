@@ -1,0 +1,339 @@
+---
+# =============================================================================
+# Workaround: MTV 2.11/2.12 migrations fail on pre-x86-64-v3 CPUs
+# =============================================================================
+#
+# PROBLEM
+#   On clusters whose nodes lack AVX2 (x86-64-v3; e.g. Xeon E5 v1/v2 practice
+#   hardware), MTV 2.11+ migrations fail during guest conversion with either:
+#     - virt-v2v-inspector: unrecognized option '--no-fstrim'
+#       (the controller passes a flag the rhel9 v2v image predates), or
+#     - conversion pod exit code 132 (SIGILL)
+#       (the default rhel10 v2v image requires x86-64-v3).
+#   Both shipped images are unusable on that hardware: rhel9 is too old for
+#   the controller's command line, rhel10 is too new for the CPU.
+#
+# FIX
+#   Build a shim image FROM the installed MTV's own rhel9 v2v image that
+#   wraps virt-v2v-inspector and virt-v2v, stripping only '--no-fstrim'
+#   (the flag disables an fstrim pass the rhel9 build never performs, so
+#   removing it restores the pre-flag behavior exactly). Push it to the
+#   cluster's integrated registry and pin ForkliftController.virt_v2v_image_fqin.
+#
+# REQUIREMENTS (controller running this playbook)
+#   - oc logged in with cluster-admin
+#   - podman (builds with --platform linux/amd64; works from Apple Silicon)
+#
+# USAGE
+#   ansible-playbook playbooks/utility_v2v_nofstrim_shim.yml \
+#     -e v2v_shim_namespace=e2e-testing
+#
+# AFTER RUNNING
+#   Delete any terminal (failed) Migration CRs for the plan, then re-run the
+#   migration (vmf_migrate or the AAP job template). A Migration in a terminal
+#   state never re-executes.
+#
+# NOTES
+#   - The integrated registry is switched to Managed with emptyDir storage if
+#     it is Removed (set v2v_shim_ensure_registry=false to skip). emptyDir is
+#     ephemeral: re-run this playbook after a registry pod restart.
+#   - Idempotent: re-running rebuilds and re-pushes the same image and
+#     re-applies the same pin.
+#   - Verify the fix with a report-only validate_migration run before cutting over.
+# =============================================================================
+
+- name: Apply the virt-v2v no-fstrim shim for MTV on pre-x86-64-v3 CPUs
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    # Namespace where migration (conversion) pods run and where the shim
+    # image is pushed. Conversion pods use the namespace's default
+    # service account, which can pull images from its own namespace.
+    v2v_shim_namespace: e2e-testing
+
+    # Flip the integrated registry Removed -> Managed when needed.
+    v2v_shim_ensure_registry: true
+
+    # Best-effort informational CPU check (needs cluster-admin oc debug).
+    v2v_shim_check_cpus: true
+
+    __v2v_shim_csv_namespace: openshift-mtv
+
+    # Resolved during the run (lazily evaluated at use time).
+    __v2v_shim_build_dir: >-
+      {{ lookup('ansible.builtin.env', 'TMPDIR', default='/tmp')
+         ~ '/v2v-nofstrim-shim-' ~ (__v2v_shim_version | default('unknown')) }}
+
+  tasks:
+    - name: Shim | Resolve the installed MTV operator CSV
+      kubernetes.core.k8s_info:
+        api_version: operators.coreos.com/v1alpha1
+        kind: ClusterServiceVersion
+        namespace: "{{ __v2v_shim_csv_namespace }}"
+      register: __v2v_shim_csvs
+
+    - name: Shim | Select the MTV operator CSV
+      ansible.builtin.set_fact:
+        __v2v_shim_csv: "{{ __v2v_shim_csvs.resources
+          | selectattr('metadata.name', 'match', '^mtv-operator\\.')
+          | sort(attribute='metadata.name') | last | default({}) }}"
+
+    - name: Shim | Require an installed MTV operator
+      ansible.builtin.assert:
+        that: __v2v_shim_csv | length > 0
+        fail_msg: >-
+          No mtv-operator CSV found in {{ __v2v_shim_csv_namespace }}.
+          Install MTV first.
+        quiet: true
+
+    - name: Shim | Resolve the CSV's rhel9 v2v image
+      ansible.builtin.set_fact:
+        __v2v_shim_base_image: "{{ __v2v_shim_csv.spec.relatedImages
+          | selectattr('name', 'equalto', 'virt_v2v_rhel9')
+          | map(attribute='image') | first | default('') }}"
+        __v2v_shim_version: "{{ __v2v_shim_csv.metadata.name
+          | regex_replace('^mtv-operator\\.v', '') }}"
+
+    - name: Shim | Require the rhel9 v2v image in the CSV
+      ansible.builtin.assert:
+        that: __v2v_shim_base_image | length > 0
+        fail_msg: >-
+          {{ __v2v_shim_csv.metadata.name }} ships no virt_v2v_rhel9 image;
+          this workaround does not apply. Review its relatedImages.
+        quiet: true
+
+    - name: Shim | Report the resolved base image
+      ansible.builtin.debug:
+        msg: >-
+          MTV {{ __v2v_shim_version }} rhel9 v2v base:
+          {{ __v2v_shim_base_image }}
+
+    - name: Shim | Check node CPUs for the x86-64-v3 baseline
+      when: v2v_shim_check_cpus | bool
+      block:
+        - name: Shim | List worker nodes
+          # Command justification: oc node debugging has no module
+          # equivalent; reading /proc/cpuinfo requires the node context.
+          ansible.builtin.command:
+            cmd: oc get nodes -o name
+          register: __v2v_shim_nodes
+          changed_when: false
+
+        - name: Shim | Read CPU flags from each node
+          ansible.builtin.command:
+            cmd: >-
+              oc debug {{ __v2v_shim_node }} -- chroot /host
+              sh -c 'grep -m1 -o avx2 /proc/cpuinfo || echo NO_AVX2'
+          loop: "{{ __v2v_shim_nodes.stdout_lines }}"
+          loop_control:
+            loop_var: __v2v_shim_node
+          register: __v2v_shim_cpu_checks
+          changed_when: false
+          failed_when: false
+
+        - name: Shim | Warn when some node supports x86-64-v3
+          ansible.builtin.debug:
+            msg: >-
+              NOTE: some nodes report AVX2 — the rhel10 default v2v image
+              may work there; this shim is only needed on nodes without it.
+          when: >-
+            __v2v_shim_cpu_checks.results
+            | selectattr('stdout', 'defined')
+            | selectattr('stdout', 'search', 'avx2') | list | length > 0
+
+    - name: Shim | Ensure the integrated registry is available
+      when: v2v_shim_ensure_registry | bool
+      block:
+        - name: Shim | Read the registry config
+          kubernetes.core.k8s_info:
+            api_version: imageregistry.operator.openshift.io/v1
+            kind: Config
+            name: cluster
+          register: __v2v_shim_regconfig
+
+        - name: Shim | Report a registry that was Removed
+          when: >-
+            (__v2v_shim_regconfig.resources | first).spec.managementState
+            | default('') == 'Removed'
+          ansible.builtin.debug:
+            msg: >-
+              Integrated registry was Removed — switching it to Managed with
+              emptyDir storage (ephemeral; re-run this playbook after a
+              registry pod restart).
+
+        - name: Shim | Manage the registry (emptyDir storage)
+          kubernetes.core.k8s:
+            api_version: imageregistry.operator.openshift.io/v1
+            kind: Config
+            name: cluster
+            state: patched
+            merge_type: merge
+            definition:
+              spec:
+                managementState: Managed
+                defaultRoute: true
+                storage:
+                  emptyDir: {}
+
+        - name: Shim | Wait for the registry deployment
+          kubernetes.core.k8s_info:
+            api_version: apps/v1
+            kind: Deployment
+            namespace: openshift-image-registry
+            name: image-registry
+          register: __v2v_shim_regdeploy
+          until: >-
+            (__v2v_shim_regdeploy.resources | first).status.readyReplicas
+            | default(0) > 0
+          retries: 20
+          delay: 15
+
+    - name: Shim | Resolve the registry public route
+      # Command justification: 'oc registry info' resolves the default
+      # route including its TLS setup; no module equivalent.
+      ansible.builtin.command:
+        cmd: oc registry info
+      register: __v2v_shim_registry
+      until: __v2v_shim_registry.stdout | length > 0
+      retries: 10
+      delay: 10
+      changed_when: false
+
+    - name: Shim | Trust the registry route certificate locally
+      # Command justification: extracting the serving chain into podman's
+      # certs.d is a local TLS operation with no module equivalent.
+      ansible.builtin.shell: |
+        set -o pipefail
+        mkdir -p ~/.config/containers/certs.d/{{ __v2v_shim_registry.stdout }}
+        echo | openssl s_client -connect {{ __v2v_shim_registry.stdout }}:443 \
+          -servername {{ __v2v_shim_registry.stdout }} -showcerts 2>/dev/null \
+          | awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/{print}' \
+          > ~/.config/containers/certs.d/{{ __v2v_shim_registry.stdout }}/ca.crt
+        grep -q BEGIN ~/.config/containers/certs.d/{{ __v2v_shim_registry.stdout }}/ca.crt
+      args:
+        executable: /bin/bash
+      changed_when: true
+
+    - name: Shim | Log the local container client into the registry
+      ansible.builtin.command:
+        cmd: oc registry login
+      changed_when: false
+
+    - name: Shim | Stage the build directory
+      ansible.builtin.file:
+        path: "{{ __v2v_shim_build_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Shim | Stage the shim script
+      ansible.builtin.copy:
+        dest: "{{ __v2v_shim_build_dir }}/shim.py"
+        content: |
+          #!/usr/bin/python3
+          """Strip --no-fstrim (this build predates it); exec the real binary."""
+          import os
+          import sys
+
+          real = os.path.abspath(__file__) + ".real"
+          args = [a for a in sys.argv[1:] if a != "--no-fstrim"]
+          os.execv(real, [sys.argv[0]] + args)
+        mode: "0644"
+
+    - name: Shim | Stage the Containerfile
+      ansible.builtin.copy:
+        dest: "{{ __v2v_shim_build_dir }}/Containerfile"
+        content: |
+          FROM {{ __v2v_shim_base_image }}
+
+          # Workaround image for MTV on pre-x86-64-v3 CPUs: the forklift
+          # controller passes --no-fstrim to virt-v2v-inspector, but this
+          # rhel9 build predates the flag; the rhel10 build that supports
+          # it requires the x86-64-v3 baseline. The flag only disables an
+          # fstrim pass this build never performs, so stripping it
+          # restores the pre-flag behavior exactly.
+          COPY shim.py /usr/bin/v2v-nofstrim-shim.py
+          RUN for b in virt-v2v-inspector virt-v2v; do \
+                mv /usr/bin/$b /usr/bin/$b.real && \
+                cp /usr/bin/v2v-nofstrim-shim.py /usr/bin/$b && \
+                chmod 0755 /usr/bin/$b; \
+              done
+        mode: "0644"
+      register: __v2v_shim_containerfile
+
+    - name: Shim | Build the shim image (linux/amd64)
+      # Command justification: container builds are podman's domain.
+      ansible.builtin.command:
+        cmd: >-
+          podman build --platform linux/amd64
+          --file {{ __v2v_shim_containerfile.dest }}
+          --tag v2v-nofstrim-shim:{{ __v2v_shim_version }}
+          {{ __v2v_shim_containerfile.dest | dirname }}
+      changed_when: true
+
+    - name: Shim | Verify the shim strips only the target flag
+      # The shim must accept --no-fstrim (the workaround) and still reject
+      # unknown flags (no blanket argument swallowing).
+      ansible.builtin.command:
+        cmd: >-
+          podman run --rm --platform linux/amd64 --entrypoint sh
+          v2v-nofstrim-shim:{{ __v2v_shim_version }} -c
+          'virt-v2v-inspector --no-fstrim --help >/dev/null 2>&1
+          || exit 10;
+          virt-v2v-inspector --definitely-bogus-flag >/dev/null 2>&1
+          && exit 20;
+          exit 0'
+      register: __v2v_shim_verify
+      changed_when: false
+      failed_when: __v2v_shim_verify.rc != 0
+
+    - name: Shim | Push the shim image to the integrated registry
+      ansible.builtin.command:
+        cmd: >-
+          podman push
+          v2v-nofstrim-shim:{{ __v2v_shim_version }}
+          {{ __v2v_shim_registry.stdout }}/{{ v2v_shim_namespace }}/v2v-nofstrim-shim:{{ __v2v_shim_version }}
+      changed_when: true
+    - name: Shim | Pin the ForkliftController to the shim image
+      kubernetes.core.k8s:
+        api_version: forklift.konveyor.io/v1beta1
+        kind: ForkliftController
+        name: forklift
+        namespace: "{{ __v2v_shim_csv_namespace }}"
+        state: patched
+        merge_type: merge
+        definition:
+          spec:
+            virt_v2v_image_fqin: >-
+              {{ 'image-registry.openshift-image-registry.svc:5000/' ~ v2v_shim_namespace
+                 ~ '/v2v-nofstrim-shim:' ~ __v2v_shim_version }}
+
+    - name: Shim | Wait for the controller to render the pin
+      kubernetes.core.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        namespace: "{{ __v2v_shim_csv_namespace }}"
+        name: forklift-controller
+      register: __v2v_shim_controller
+      until: >-
+        (__v2v_shim_controller.resources | first).spec.template.spec.containers[0].env
+        | selectattr('name', 'equalto', 'VIRT_V2V_IMAGE')
+        | map(attribute='value') | join('')
+        is search('v2v-nofstrim-shim:' + __v2v_shim_version)
+      retries: 20
+      delay: 15
+
+    - name: Shim | Report completion and next steps
+      ansible.builtin.debug:
+        msg:
+          - "Shim applied: MTV {{ __v2v_shim_version }} rhel9 v2v + --no-fstrim strip."
+          - "Pinned ForkliftController.virt_v2v_image_fqin to the integrated registry image."
+          - "Next: delete terminal (failed) Migration CRs for your plans —"
+          - "  oc -n {{ v2v_shim_namespace }} delete migration <name>"
+          - "  (a Migration in a terminal state never re-executes) —"
+          - "then re-run the migration."
+          - "Note: registry storage is emptyDir; re-run this playbook after"
+          - "a registry pod restart."
+
+...

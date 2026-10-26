@@ -1,0 +1,91 @@
+---
+# The source power-off: the only sanctioned mutation in this role
+# (docs/adr/0001-validate-migration-fail-closed-power-off.md). Per-VM and
+# fail-closed: a source VM powers off only after its migrated
+# counterpart passed every fatal check — plan succeeded, present,
+# running, target list match, and disk topology. Warn-only checks
+# (guest agent, IP addresses) never block the power-off. A VM whose
+# gated checks did not run stays on: the gate defaults to false when
+# the checks' facts are absent. With
+# validate_migration_power_off_source=false the role gathers the same facts and
+# reports source power state without mutating. A suspended source is a
+# valid lookup result: read-only mode reports it, and an enabled
+# power-off applies the same hard stop.
+# Module tier justification for the SOAP gather lives in
+# gather_source_vm.yml (the shared include).
+#
+# Use certified vmware.vmware.vm_powerstate for the SOAP hard stop; it
+# has not yet been verified against the demo emulator or old customer
+# vCenters; see docs/research/validate-migration-vmware-powerstate.md.
+
+- name: power_off | Gather source VM facts (moid and power state)
+  ansible.builtin.include_tasks: gather_source_vm.yml
+
+- name: power_off | Compute the per-VM fail-closed gate
+  # Global gates (plan status, target list) plus the per-VM fatal bits
+  # from validate_vms and validate_disks. Absent facts default to false,
+  # so a run without the checks' facts powers nothing off.
+  ansible.builtin.set_fact:
+    __validate_migration_power_gate: >-
+      {%- set plan_ok = (__validate_migration_result_plan.ran | default(false) | bool)
+        and (__validate_migration_result_plan.passed | default(false) | bool) -%}
+      {%- set list_ok = (__validate_migration_result_list.ran | default(false) | bool)
+        and (__validate_migration_result_list.passed | default(false) | bool) -%}
+      {%- set out = {} -%}
+      {%- for name in validate_migration_vm_list -%}
+      {%- set v = __validate_migration_vms_state.get(name, {}) if __validate_migration_vms_state is defined else {} -%}
+      {%- set d = __validate_migration_disks_state.get(name, {})
+        if __validate_migration_disks_state is defined else {} -%}
+      {%- set vms_ok = (v.get('present', false) | bool) and (v.get('running', false) | bool) -%}
+      {%- set disks_ok = (d.get('source_ok', false) | bool)
+        and (d.get('source_disks', -1) == d.get('target_volumes', -2)) -%}
+      {%- set _ = out.update({name: plan_ok and vms_ok and list_ok and disks_ok}) -%}
+      {%- endfor -%}
+      {{- out -}}
+
+- name: power_off | Normalize the source lookup results
+  ansible.builtin.set_fact:
+    __validate_migration_power_sources: >-
+      {%- set out = {} -%}
+      {%- for name in validate_migration_vm_list -%}
+      {%- set r = __validate_migration_source_vm_results.results | default([])
+        | selectattr('__validate_migration_source_vm', 'defined')
+        | selectattr('__validate_migration_source_vm', 'equalto', name) | first | default({}) -%}
+      {%- set vm = r.instance | default({}) -%}
+      {%- set valid = vm is mapping and not (r.failed | default(false) | bool)
+        and not (r.skipped | default(false) | bool)
+        and vm.moid is defined and vm.moid is string and vm.moid | length > 0
+        and vm.hw_power_status | default('') in ['poweredOn', 'poweredOff', 'suspended'] -%}
+      {%- set _ = out.update({name: {'valid': valid, 'instance': vm}}) -%}
+      {%- endfor -%}
+      {{- out -}}
+
+- name: power_off | Power off validated source VMs (hard stop)
+  when:
+    - validate_migration_power_off_source | bool
+    - not ansible_check_mode
+    - validate_migration_vcenter_datacenter | trim | length > 0
+    - __validate_migration_power_gate.get(__validate_migration_power_name, false) | bool
+    - __validate_migration_power_sources[__validate_migration_power_name].valid | bool
+    - __validate_migration_power_sources[__validate_migration_power_name]
+      .instance.hw_power_status in ['poweredOn', 'suspended']
+  vmware.vmware.vm_powerstate:
+    hostname: "{{ validate_migration_vcenter_hostname }}"
+    username: "{{ validate_migration_vcenter_username }}"
+    password: "{{ validate_migration_vcenter_password }}"
+    validate_certs: "{{ validate_migration_vcenter_validate_certs }}"
+    datacenter: "{{ validate_migration_vcenter_datacenter }}"
+    moid: "{{ __validate_migration_power_sources[__validate_migration_power_name].instance.moid }}"
+    state: powered-off
+  loop: "{{ validate_migration_vm_list }}"
+  loop_control:
+    loop_var: __validate_migration_power_name
+    label: "{{ __validate_migration_power_name }}"
+  register: __validate_migration_power_results
+  ignore_errors: true
+  no_log: "{{ validate_migration_secure_logging }}"
+
+- name: power_off | Classify and record the source power-off results
+  ansible.builtin.include_tasks: power_report.yml
+
+...

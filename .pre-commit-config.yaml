@@ -53,6 +53,20 @@ repos:
   # Ensures generated documentation (README.md and role READMEs) are up-to-date
   - repo: local
     hooks:
+      - id: validate_migration-vmware-contract
+        name: Verify installed VMware power-state module contract
+        entry: python3 scripts/check-validate-migration-vmware.py
+        language: system
+        pass_filenames: false
+        files: ^(roles/validate_migration/|galaxy.yml|requirements-dev.yml|scripts/check-validate-migration-vmware.py)
+
+      - id: validate_migration-power-offline
+        name: Test validate_migration power-off with offline module doubles
+        entry: python3 -m unittest discover --start-directory tests/unit --pattern test_validate_migration_power.py
+        language: system
+        pass_filenames: false
+        files: ^(roles/validate_migration/|tests/unit/test_validate_migration_power.py)
+
       - id: update-documentation
         name: Generate documentation
         entry: bash scripts/update-documentation.sh

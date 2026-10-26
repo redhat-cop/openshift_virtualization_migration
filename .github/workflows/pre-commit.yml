@@ -78,6 +78,14 @@ jobs:
         run: |
           pip install -r requirements-ci.txt
 
+      - name: Install collections for the VMware module-contract guard
+        # The validate_migration-vmware-contract hook verifies the REAL installed
+        # module contracts (vmware.vmware.vm_powerstate and
+        # community.vmware.vmware_guest_info); .ansible/ is gitignored, so
+        # CI must install them or the guard fails closed on every PR.
+        run: |
+          ansible-galaxy collection install vmware.vmware community.vmware
+
       - name: Cache pre-commit environments
         uses: actions/cache@v4
         with:

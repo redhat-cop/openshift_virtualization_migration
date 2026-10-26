@@ -1,0 +1,175 @@
+---
+argument_specs:
+  main:
+    short_description: >-
+      Validate migration outcomes after vmf_migrate completes
+    description:
+      - >-
+        Runs every validate_migration check and reports a summary, then fails the
+        play if any check failed. Checks: migration plan status, migrated
+        VM presence and running state, target list match, guest agent,
+        IP addresses, disk topology, and the source power-off. An
+        unconfigured target fails with guidance rather than crashing the
+        play.
+      - >-
+        Designed to run from an AAP job template (credentials inject
+        K8S_AUTH_* and VMWARE_*) or a controller with the sample
+        inventory. Connection variables cascade from environment
+        variables to inventory host variables.
+      - >-
+        The source power-off is the only sanctioned mutation: per-VM and
+        fail-closed — a source VM powers off only after its counterpart
+        passed every fatal check. Set validate_migration_power_off_source=false
+        to run read-only.
+    options:
+      validate_migration_secure_logging:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to enable secure logging for tasks that handle
+          credentials. Set to false to debug failed probes. Prefer a
+          one-off CLI run (-e validate_migration_secure_logging=false)
+          over flipping the toggle on a job template; if you must,
+          rotate the exposed credential afterwards.
+
+      validate_migration_target_name:
+        type: str
+        required: false
+        description: >-
+          Inventory host whose variables feed the OpenShift checks.
+          Defaults to the target_name extra var (injected by the seeded
+          credentials) or the first migration_clusters host.
+
+      validate_migration_source_name:
+        type: str
+        required: false
+        description: >-
+          Inventory host whose variables feed the vCenter checks.
+          Defaults to the source_name extra var (injected by the seeded
+          credentials) or the first vm_sources host.
+
+      validate_migration_openshift_host:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          OpenShift API endpoint. Resolves from K8S_AUTH_HOST env var or
+          the openshift_host variable on the target cluster host
+          (validate_migration_target_name). Required — the validate_migration aborts
+          without it.
+
+      validate_migration_openshift_api_key:
+        type: str
+        required: false
+        default: ""
+        no_log: true
+        description: >-
+          OpenShift API token. Resolves from K8S_AUTH_API_KEY env var or
+          the openshift_api_key variable on the target cluster host
+          (validate_migration_target_name). Required — the validate_migration aborts
+          without it.
+
+      validate_migration_openshift_verify_ssl:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Validate the OpenShift API TLS certificate.
+
+      validate_migration_vcenter_hostname:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          vCenter endpoint for the source VM checks. Resolves from
+          VMWARE_HOST env var or the host variable on the source host
+          (validate_migration_source_name). When unset, the source checks fail
+          with instructions.
+
+      validate_migration_vcenter_username:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          vCenter username. Resolves from VMWARE_USER env var or the
+          username variable on the source host (validate_migration_source_name).
+
+      validate_migration_vcenter_password:
+        type: str
+        required: false
+        default: ""
+        no_log: true
+        description: >-
+          vCenter password. Resolves from VMWARE_PASSWORD env var or the
+          password variable on the source host (validate_migration_source_name).
+          When validate_migration_power_off_source is true, the credential needs
+          the power off permission.
+
+      validate_migration_vcenter_validate_certs:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Validate the vCenter TLS certificate.
+
+      validate_migration_vcenter_datacenter:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Datacenter for source VM lookup and power-off. Required for
+          enabled power-off; optional for read-only gathering. A missing
+          value fails the power check without mutating any source VM.
+
+      validate_migration_plan_name:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Name of the MTV (Forklift) Plan whose migration validate_migration
+          validates. Defaults to the mtv_migrate_plan_name variable so
+          validate_migration runs seamlessly after vmf_migrate. Required — the
+          validate_migration aborts without it.
+
+      validate_migration_plan_namespace:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Namespace holding the migration Plan and its Migration
+          objects. Defaults to the mtv_migrate_plan_namespace variable.
+          Required — the validate_migration aborts without it.
+
+      validate_migration_target_namespace:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Namespace holding the migrated VirtualMachines — the Plan's
+          target namespace. Defaults to the Plan namespace.
+
+      validate_migration_vm_list:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: >-
+          Explicit list of source VM names to validate. MTV preserves VM
+          names, so each name is also the migrated VirtualMachine's name
+          in the target namespace. Required — the validate_migration aborts with
+          an empty list.
+
+      validate_migration_power_off_source:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Power off source VMs whose migrated counterpart passed every
+          fatal check (per-VM, fail-closed — a failed check leaves that
+          source running). The power-off is a hard stop via the vCenter
+          API and the only sanctioned mutation in this role. Set false to
+          run read-only: the role reports source power state without
+          mutating.
+
+...
