@@ -91,9 +91,9 @@
         are visible — a migration source needs at least one
         {% else %}
         vCenter authentication or connectivity failed at
-        {{ validate_environment_vcenter_hostname }} — re-run the environment
-        validation as a one-off CLI run with
-        validate_environment_secure_logging=false to see the fault, then rotate the
-        exposed credential
+        {{ validate_environment_vcenter_hostname }} — re-run the vCenter
+        check as a one-off CLI run with validate_environment_checks=[vcenter]
+        and validate_environment_secure_logging=false to see the fault,
+        then rotate the exposed credential
         {% endif %}
 ...

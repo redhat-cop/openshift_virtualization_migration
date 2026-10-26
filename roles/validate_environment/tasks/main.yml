@@ -1,10 +1,11 @@
 ---
 # The environment validation pass runs before seeding AAP.
 #
-# All checks run on every invocation; the summary report fails the play
-# if any ran check failed, so one run reports everything that needs
-# attention. Checks whose target is not configured fail that check with
-# a message describing what to set — they do not crash the play.
+# The checks default to all six; validate_environment_checks limits the
+# pass to the named checks for a one-off run. The summary report fails
+# the play if any ran check failed, so one run reports everything that
+# needs attention. Checks whose target is not configured fail that check
+# with a message describing what to set — they do not crash the play.
 
 - name: Include pre-validation of required connection variables
   ansible.builtin.include_tasks:
@@ -12,29 +13,12 @@
 
 - name: Run environment validation checks
   block:
-    - name: Include OpenShift API authentication check
+    - name: Include each selected environment validation check
       ansible.builtin.include_tasks:
-        file: validate_openshift.yml
-
-    - name: Include OpenShift Virtualization operator check
-      ansible.builtin.include_tasks:
-        file: validate_cnv.yml
-
-    - name: Include MTV operator check
-      ansible.builtin.include_tasks:
-        file: validate_mtv.yml
-
-    - name: Include AAP access check
-      ansible.builtin.include_tasks:
-        file: validate_aap.yml
-
-    - name: Include vCenter connectivity check
-      ansible.builtin.include_tasks:
-        file: validate_vcenter.yml
-
-    - name: Include VDDK init image check
-      ansible.builtin.include_tasks:
-        file: validate_vddk.yml
+        file: "validate_{{ __validate_environment_check }}.yml"
+      loop: "{{ validate_environment_checks }}"
+      loop_control:
+        loop_var: __validate_environment_check
 
   always:
     - name: Include the validate_environment summary report

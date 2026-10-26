@@ -56,7 +56,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 
 #### Key: main
 
-* **Description**: ['Runs every validate_environment check and reports a summary, then fails the play if any check failed. Checks: OpenShift API auth, CNV and MTV operator health, AAP access, vCenter connectivity, and VDDK init image configuration.', 'Designed to run from an AAP job template (credentials inject K8S_AUTH_*, VMWARE_*, CONTROLLER_HOST, CONTROLLER_API_TOKEN) or a controller with the sample inventory. Connection variables cascade from environment variables to inventory host variables.', 'All checks run on every invocation. An unconfigured target fails that check with guidance rather than crashing the play, so one run reports everything that needs attention.']
+* **Description**: ['Runs the selected validate_environment checks and reports a summary, then fails the play if any ran check failed. Checks: OpenShift API auth, CNV and MTV operator health, AAP access, vCenter connectivity, and VDDK init image configuration.', 'Designed to run from an AAP job template (credentials inject K8S_AUTH_*, VMWARE_*, CONTROLLER_HOST, CONTROLLER_API_TOKEN) or a controller with the sample inventory. Connection variables cascade from environment variables to inventory host variables.', 'All checks run by default; validate_environment_checks limits the pass to the named checks. An unconfigured target fails that check with guidance rather than crashing the play, so one run reports everything that needs attention.']
 * **Options**:
   * **validate_environment_aap_api_path**:
     * **Required**: False
@@ -93,6 +93,11 @@ Description: Validate the migration environment before seeding AAP — OpenShift
     * **Type**: bool
     * **Default**: True
     * **Description**: Validate the AAP TLS certificate.
+  * **validate_environment_checks**:
+    * **Required**: False
+    * **Type**: list
+    * **Default**: ['openshift', 'cnv', 'mtv', 'aap', 'vcenter', 'vddk']
+    * **Description**: Which environment validation checks to run, as check-name strings (openshift, cnv, mtv, aap, vcenter, vddk). Defaults to all six. A one-off CLI run can limit the pass, e.g. -e validate_environment_checks=[vcenter] to debug a single check. An unknown name fails the include with a loud file-not-found error — the summary report still runs.
   * **validate_environment_cnv_namespace**:
     * **Required**: False
     * **Type**: str
@@ -169,26 +174,33 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`validate_environment_aap_api_path`](defaults/main.yml#L130)   | str   | `/api/controller/v2/` |  None  |   False  |  AAP API Path |
-| [`validate_environment_aap_hostname`](defaults/main.yml#L116)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Hostname |
+| [`validate_environment_aap_api_path`](defaults/main.yml#L144)   | str   | `/api/controller/v2/` |  None  |   False  |  AAP API Path |
+| [`validate_environment_aap_hostname`](defaults/main.yml#L130)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Hostname |
 | [`validate_environment_aap_name`](defaults/main.yml#L20)   | str   | `{{ groups['migration_aap'] ¦ default([], true) ¦ first ¦ default('', true) }}` |  None  |   None  |  None |
-| [`validate_environment_aap_password`](defaults/main.yml#L148)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Password |
-| [`validate_environment_aap_token`](defaults/main.yml#L161)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Token |
-| [`validate_environment_aap_username`](defaults/main.yml#L137)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Username |
-| [`validate_environment_aap_validate_certs`](defaults/main.yml#L174)   | str   | `{{ (lookup('env', 'AAP_VALIDATE_CERTS') ¦ default(hostvars[validate_environment_aap_name]['aap_validate_certs'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  AAP Verify SSL |
-| [`validate_environment_cnv_namespace`](defaults/main.yml#L183)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  CNV Namespace |
-| [`validate_environment_mtv_namespace`](defaults/main.yml#L200)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  MTV Namespace |
-| [`validate_environment_openshift_api_key`](defaults/main.yml#L46)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
-| [`validate_environment_openshift_host`](defaults/main.yml#L33)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift Host |
-| [`validate_environment_openshift_verify_ssl`](defaults/main.yml#L63)   | str   | `{{ (lookup('env', 'K8S_AUTH_VERIFY_SSL') ¦ default(hostvars[validate_environment_target_name]['openshift_verify_ssl'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  OpenShift Verify SSL |
+| [`validate_environment_aap_password`](defaults/main.yml#L162)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Password |
+| [`validate_environment_aap_token`](defaults/main.yml#L175)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Token |
+| [`validate_environment_aap_username`](defaults/main.yml#L151)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Username |
+| [`validate_environment_aap_validate_certs`](defaults/main.yml#L188)   | str   | `{{ (lookup('env', 'AAP_VALIDATE_CERTS') ¦ default(hostvars[validate_environment_aap_name]['aap_validate_certs'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  AAP Verify SSL |
+| [`validate_environment_checks`](defaults/main.yml#L33)   | list   | `[]` |  None  |   False  |  Checks |
+| [`validate_environment_checks.0`](defaults/main.yml#L34)   | str   | `openshift` |  None  |   None  |  None |
+| [`validate_environment_checks.1`](defaults/main.yml#L35)   | str   | `cnv` |  None  |   None  |  None |
+| [`validate_environment_checks.2`](defaults/main.yml#L36)   | str   | `mtv` |  None  |   None  |  None |
+| [`validate_environment_checks.3`](defaults/main.yml#L37)   | str   | `aap` |  None  |   None  |  None |
+| [`validate_environment_checks.4`](defaults/main.yml#L38)   | str   | `vcenter` |  None  |   None  |  None |
+| [`validate_environment_checks.5`](defaults/main.yml#L39)   | str   | `vddk` |  None  |   None  |  None |
+| [`validate_environment_cnv_namespace`](defaults/main.yml#L197)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  CNV Namespace |
+| [`validate_environment_mtv_namespace`](defaults/main.yml#L214)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  MTV Namespace |
+| [`validate_environment_openshift_api_key`](defaults/main.yml#L60)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
+| [`validate_environment_openshift_host`](defaults/main.yml#L47)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift Host |
+| [`validate_environment_openshift_verify_ssl`](defaults/main.yml#L77)   | str   | `{{ (lookup('env', 'K8S_AUTH_VERIFY_SSL') ¦ default(hostvars[validate_environment_target_name]['openshift_verify_ssl'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  OpenShift Verify SSL |
 | [`validate_environment_secure_logging`](defaults/main.yml#L25)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
 | [`validate_environment_source_name`](defaults/main.yml#L17)   | str   | `{{ source_name ¦ default(groups['vm_sources'] ¦ default([], true) ¦ first ¦ default('', true), true) }}` |  None  |   None  |  None |
 | [`validate_environment_target_name`](defaults/main.yml#L14)   | str   | `{{ target_name ¦ default(groups['migration_clusters'] ¦ default([], true) ¦ first ¦ default('', true), true) }}` |  None  |   None  |  None |
-| [`validate_environment_vcenter_hostname`](defaults/main.yml#L72)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Hostname |
-| [`validate_environment_vcenter_password`](defaults/main.yml#L94)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Password |
-| [`validate_environment_vcenter_username`](defaults/main.yml#L83)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Username |
-| [`validate_environment_vcenter_validate_certs`](defaults/main.yml#L106)   | str   | `{{ (lookup('env', 'VMWARE_VALIDATE_CERTS') ¦ default(hostvars[validate_environment_source_name]['validate_certs'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  vCenter Verify SSL |
-| [`validate_environment_vddk_image`](defaults/main.yml#L217)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  VDDK Init Image |
+| [`validate_environment_vcenter_hostname`](defaults/main.yml#L86)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Hostname |
+| [`validate_environment_vcenter_password`](defaults/main.yml#L108)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Password |
+| [`validate_environment_vcenter_username`](defaults/main.yml#L97)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Username |
+| [`validate_environment_vcenter_validate_certs`](defaults/main.yml#L120)   | str   | `{{ (lookup('env', 'VMWARE_VALIDATE_CERTS') ¦ default(hostvars[validate_environment_source_name]['validate_certs'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  vCenter Verify SSL |
+| [`validate_environment_vddk_image`](defaults/main.yml#L231)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  VDDK Init Image |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
@@ -205,6 +217,20 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 <b>`validate_environment_aap_username`:</b> >-
 <br>
 <b>`validate_environment_aap_validate_certs`:</b> >-
+<br>
+<b>`validate_environment_checks`:</b> >-
+<br>
+<b>`validate_environment_checks.0`:</b> None
+<br>
+<b>`validate_environment_checks.1`:</b> None
+<br>
+<b>`validate_environment_checks.2`:</b> None
+<br>
+<b>`validate_environment_checks.3`:</b> None
+<br>
+<b>`validate_environment_checks.4`:</b> None
+<br>
+<b>`validate_environment_checks.5`:</b> None
 <br>
 <b>`validate_environment_cnv_namespace`:</b> >-
 <br>
@@ -253,12 +279,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 | ---- | ------ | --------- |
 | Include pre-validation of required connection variables | `ansible.builtin.include_tasks` | False |
 | Run environment validation checks | `block` | False |
-| Include OpenShift API authentication check | `ansible.builtin.include_tasks` | False |
-| Include OpenShift Virtualization operator check | `ansible.builtin.include_tasks` | False |
-| Include MTV operator check | `ansible.builtin.include_tasks` | False |
-| Include AAP access check | `ansible.builtin.include_tasks` | False |
-| Include vCenter connectivity check | `ansible.builtin.include_tasks` | False |
-| Include VDDK init image check | `ansible.builtin.include_tasks` | False |
+| Include each selected environment validation check | `ansible.builtin.include_tasks` | False |
 
 #### File: tasks/pre_validate.yml
 
@@ -339,14 +360,9 @@ classDef rescue stroke:#665352,stroke-width:2px;
 
   Start-->|Include task| Include_pre_validation_of_required_connection_variables_pre_validate_yml_0[include pre validation of required connection<br>variables<br>include_task: pre validate yml]:::includeTasks
   Include_pre_validation_of_required_connection_variables_pre_validate_yml_0-->|Block Start| Run_environment_validation_checks1_block_start_0[[run environment validation checks]]:::block
-  Run_environment_validation_checks1_block_start_0-->|Include task| Include_OpenShift_API_authentication_check_validate_openshift_yml_0[include openshift api authentication check<br>include_task: validate openshift yml]:::includeTasks
-  Include_OpenShift_API_authentication_check_validate_openshift_yml_0-->|Include task| Include_OpenShift_Virtualization_operator_check_validate_cnv_yml_1[include openshift virtualization operator check<br>include_task: validate cnv yml]:::includeTasks
-  Include_OpenShift_Virtualization_operator_check_validate_cnv_yml_1-->|Include task| Include_MTV_operator_check_validate_mtv_yml_2[include mtv operator check<br>include_task: validate mtv yml]:::includeTasks
-  Include_MTV_operator_check_validate_mtv_yml_2-->|Include task| Include_AAP_access_check_validate_aap_yml_3[include aap access check<br>include_task: validate aap yml]:::includeTasks
-  Include_AAP_access_check_validate_aap_yml_3-->|Include task| Include_vCenter_connectivity_check_validate_vcenter_yml_4[include vcenter connectivity check<br>include_task: validate vcenter yml]:::includeTasks
-  Include_vCenter_connectivity_check_validate_vcenter_yml_4-->|Include task| Include_VDDK_init_image_check_validate_vddk_yml_5[include vddk init image check<br>include_task: validate vddk yml]:::includeTasks
-  Include_VDDK_init_image_check_validate_vddk_yml_5-.->|End of Block| Run_environment_validation_checks1_block_start_0
-  Include_VDDK_init_image_check_validate_vddk_yml_5-->End
+  Run_environment_validation_checks1_block_start_0-->|Include task| Include_each_selected_environment_validation_check_validate______validate_environment_check____yml_0[include each selected environment validation check<br>include_task: validate      validate environment check    yml]:::includeTasks
+  Include_each_selected_environment_validation_check_validate______validate_environment_check____yml_0-.->|End of Block| Run_environment_validation_checks1_block_start_0
+  Include_each_selected_environment_validation_check_validate______validate_environment_check____yml_0-->End
 ```
 
 ### Graph for pre_validate.yml

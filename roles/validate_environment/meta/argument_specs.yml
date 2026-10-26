@@ -5,20 +5,40 @@ argument_specs:
       Validate the migration environment before seeding AAP
     description:
       - >-
-        Runs every validate_environment check and reports a summary, then fails the
-        play if any check failed. Checks: OpenShift API auth, CNV and
-        MTV operator health, AAP access, vCenter connectivity, and VDDK
-        init image configuration.
+        Runs the selected validate_environment checks and reports a summary,
+        then fails the play if any ran check failed. Checks: OpenShift
+        API auth, CNV and MTV operator health, AAP access, vCenter
+        connectivity, and VDDK init image configuration.
       - >-
         Designed to run from an AAP job template (credentials inject
         K8S_AUTH_*, VMWARE_*, CONTROLLER_HOST, CONTROLLER_API_TOKEN) or
         a controller with the sample inventory. Connection variables
         cascade from environment variables to inventory host variables.
       - >-
-        All checks run on every invocation. An unconfigured target fails
+        All checks run by default; validate_environment_checks limits the
+        pass to the named checks. An unconfigured target fails
         that check with guidance rather than crashing the play, so one
         run reports everything that needs attention.
     options:
+      validate_environment_checks:
+        type: list
+        elements: str
+        required: false
+        default:
+          - openshift
+          - cnv
+          - mtv
+          - aap
+          - vcenter
+          - vddk
+        description: >-
+          Which environment validation checks to run, as check-name
+          strings (openshift, cnv, mtv, aap, vcenter, vddk). Defaults to
+          all six. A one-off CLI run can limit the pass, e.g.
+          -e validate_environment_checks=[vcenter] to debug a single
+          check. An unknown name fails the include with a loud
+          file-not-found error — the summary report still runs.
+
       validate_environment_secure_logging:
         type: bool
         required: false
