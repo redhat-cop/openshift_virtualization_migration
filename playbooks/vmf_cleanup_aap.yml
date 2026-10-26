@@ -1,0 +1,11 @@
+---
+- name: Remove AAP Migration Factory artifacts
+  hosts: migration_aap
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Remove AAP artifacts created by aap_seed
+      ansible.builtin.import_role:
+        name: infra.openshift_virtualization_migration.aap_cleanup
+...
