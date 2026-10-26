@@ -13,6 +13,10 @@
     namespace: "{{ validate_environment_cnv_namespace }}"
   register: __validate_environment_cnv_csvs
   failed_when: false
+  # A module crash (e.g. an unresolvable host or a malformed kubeconfig)
+  # bypasses failed_when and would abort the run; the record task below
+  # turns the fault into a graceful check result.
+  ignore_errors: true
   no_log: "{{ validate_environment_secure_logging }}"
 
 - name: validate_cnv | Find the OpenShift Virtualization CSV

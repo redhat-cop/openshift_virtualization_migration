@@ -124,9 +124,9 @@ validate_environment_aap_hostname: >-
 # required: False
 # description: >-
 #   API base path appended to the AAP hostname for the access check.
-#   Defaults to /api/controller/v2/ (AAP 2.5 platform and AWX). AAP 2.4
-#   and earlier serve the API at /api/v2/ — set that value for those
-#   environments.
+#   Defaults to /api/controller/v2/ (AAP 2.5 platform deployments). AWX
+#   and AAP 2.4 and earlier serve the API at /api/v2/ — set that value
+#   for those environments.
 validate_environment_aap_api_path: /api/controller/v2/
 
 # title: AAP Username

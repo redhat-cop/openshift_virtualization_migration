@@ -21,6 +21,10 @@
     status_code: [200, 401, 403]
   register: __validate_environment_aap
   failed_when: false
+  # A module crash (e.g. aiohttp ContentTypeError when the endpoint answers
+  # with a non-JSON body) bypasses failed_when and would abort the run; the
+  # record task below turns the fault into a graceful check result.
+  ignore_errors: true
   no_log: "{{ validate_environment_secure_logging }}"
 
 - name: validate_aap | Record the AAP access check result

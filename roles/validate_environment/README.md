@@ -61,8 +61,8 @@ Description: Validate the migration environment before seeding AAP — OpenShift
   * **validate_environment_aap_api_path**:
     * **Required**: False
     * **Type**: str
-    * **Default**: /api/v2/
-    * **Description**: API base path for the access check. Defaults to /api/v2/ (AWX and AAP 2.4 and earlier); AAP 2.5 platform deployments serve the controller API at /api/controller/v2/.
+    * **Default**: /api/controller/v2/
+    * **Description**: API base path for the access check. Defaults to /api/controller/v2/ (AAP 2.5 platform deployments); AWX and AAP 2.4 and earlier serve the controller API at /api/v2/ — set that value for those environments.
   * **validate_environment_aap_hostname**:
     * **Required**: False
     * **Type**: str
