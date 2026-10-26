@@ -1,0 +1,200 @@
+---
+argument_specs:
+  main:
+    short_description: >-
+      Remove AAP artifacts created by the aap_seed role.
+    description:
+      - >-
+        Tears down the AAP Configuration-as-Code objects that were
+        seeded by the C(aap_seed) role — job templates, credentials,
+        credential types, projects, execution environments, hosts,
+        inventories, and the organization.
+      - >-
+        Each object category has a boolean toggle
+        (C(aap_cleanup_templates), C(aap_cleanup_credentials), etc.)
+        so operators can selectively keep items.
+      - >-
+        Removal order respects dependencies: templates first,
+        organization last.
+    options:
+      aap_cleanup_hostname:
+        type: str
+        required: true
+        description: >-
+          Hostname of the AAP instance.
+
+      aap_cleanup_username:
+        type: str
+        required: false
+        description: >-
+          Username for AAP authentication.
+
+      aap_cleanup_password:
+        type: str
+        required: false
+        description: >-
+          Password for AAP authentication.
+
+      aap_cleanup_token:
+        type: str
+        required: false
+        description: >-
+          OAuth token for AAP authentication.
+
+      aap_cleanup_validate_certs:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to validate TLS certificates for AAP connections.
+
+      aap_cleanup_org_name:
+        type: str
+        required: false
+        default: OpenShift Virtualization Migration
+        description: >-
+          The AAP organization to clean up. All objects are scoped
+          to this organization.
+
+      aap_cleanup_all:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Master switch — when true, every object category is removed.
+          Set to false to use the individual toggles for selective
+          removal.
+
+      aap_cleanup_templates:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Remove job templates. Only effective when
+          C(aap_cleanup_all) is false.
+
+      aap_cleanup_credentials:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Remove credentials (source, target, Git, registry). Only
+          effective when C(aap_cleanup_all) is false.
+
+      aap_cleanup_credential_types:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Remove custom credential types. Only effective when
+          C(aap_cleanup_all) is false.
+
+      aap_cleanup_projects:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Remove the SCM project. Only effective when
+          C(aap_cleanup_all) is false.
+
+      aap_cleanup_execution_environments:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Remove execution environment definitions. Only effective
+          when C(aap_cleanup_all) is false.
+
+      aap_cleanup_hosts:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Remove hosts and groups from the inventory. Only effective
+          when C(aap_cleanup_all) is false.
+
+      aap_cleanup_inventories:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Remove the inventory. Only effective when
+          C(aap_cleanup_all) is false.
+
+      aap_cleanup_organization:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Remove the organization itself. Only removed after all
+          other objects are deleted. Only effective when
+          C(aap_cleanup_all) is false.
+
+      aap_cleanup_template_names:
+        type: list
+        elements: str
+        required: false
+        default:
+          - OpenShift Virtualization Migration - MTV Provider
+          - OpenShift Virtualization Migration - MTV Maps
+          - OpenShift Virtualization Migration - MTV Plans
+          - OpenShift Virtualization Migration - MTV Migrate
+          - OpenShift Virtualization Migration - Pre-Migration VM Operations
+          - OpenShift Virtualization Migration - Registry Credentials
+        description: >-
+          List of job template names to remove.
+
+      aap_cleanup_credential_names:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: >-
+          Explicit list of credential names to remove. When empty
+          (the default), credentials are discovered from inventory
+          host variables using the same logic as C(aap_seed).
+
+      aap_cleanup_credential_type_names:
+        type: list
+        elements: str
+        required: false
+        default:
+          - Migration Factory - Source Environment
+          - Migration Factory - Target Environment
+        description: >-
+          List of custom credential type names to remove.
+
+      aap_cleanup_project_name:
+        type: str
+        required: false
+        default: OpenShift Virtualization Migration
+        description: >-
+          Name of the AAP project to remove.
+
+      aap_cleanup_execution_environment_name:
+        type: str
+        required: false
+        description: >-
+          Name of the execution environment to remove.
+
+      aap_cleanup_inventory_name:
+        type: str
+        required: false
+        default: OpenShift Virtualization Migration
+        description: >-
+          Name of the AAP inventory to remove.
+
+      aap_cleanup_ee_credential_name:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Name of the registry credential to remove.
+
+      aap_cleanup_git_credential_name:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Name of the Git credential to remove.
+...
