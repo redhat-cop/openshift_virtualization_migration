@@ -92,7 +92,7 @@
         {% else %}
         vCenter authentication or connectivity failed at
         {{ validate_environment_vcenter_hostname }} — re-run the vCenter check alone
-        (--tags vcenter) as a one-off CLI run with
+        as a one-off CLI run with
         validate_environment_secure_logging=false to see the fault, then rotate the
         exposed credential
         {% endif %}

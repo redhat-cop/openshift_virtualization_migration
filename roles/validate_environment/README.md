@@ -29,7 +29,7 @@ The AAP access check defaults to the AAP 2.5 platform controller API path (`/api
 
 With the sample inventory the connection variables resolve from the target cluster host (`openshift_host`, `openshift_api_key`), the source host (`host`, `username`, `password`, `vddk.image`), and the AAP host (`aap_hostname`, `aap_token`) — selected by `validate_environment_target_name`, `validate_environment_source_name`, and `validate_environment_aap_name`, which default to the `target_name`/`source_name` extra vars (injected by the seeded credentials) or the first host of each group.
 
-All checks run on every invocation, and the summary assert requires every check green — the per-check tags (`openshift`, `cnv`, `mtv`, `aap`, `vcenter`, `vddk`) exist for isolated debugging; the summary asserts only over the checks that ran, so a tagged debug run ends green when the targeted check passed. A source whose `type` is not `vmware` (for example `ovirt`) skips the vCenter and VDDK checks.
+All checks run on every invocation, and the summary assert requires every check green. A source whose `type` is not `vmware` (for example `ovirt`) skips the vCenter and VDDK checks.
 
 ## Check Mode
 
@@ -122,7 +122,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
     * **Required**: False
     * **Type**: bool
     * **Default**: True
-    * **Description**: Whether to enable secure logging for tasks that handle credentials. Set to false to debug failed probes. Prefer a one-off CLI run (--tags <check>) over flipping the toggle on a job template; if you must, rotate the exposed credential (token or password) afterwards.
+    * **Description**: Whether to enable secure logging for tasks that handle credentials. Set to false to debug failed probes. Prefer a one-off CLI run (-e validate_environment_secure_logging=false) over flipping the toggle on a job template; if you must, rotate the exposed credential (token or password) afterwards.
   * **validate_environment_source_name**:
     * **Required**: False
     * **Type**: str

@@ -22,9 +22,9 @@
 | `aap_cleanup` | **REWRITTEN** | AAP 2.5+ only, simplified dispatch |
 | `aap_machine_credentials` | **DEFERRED** to Phase 3 | Day 2 scope |
 | `mtv_management` | **REWRITTEN** | Error handling, provider lifecycle, `provider` var fix |
-| `mtv_migrate` | **REWRITTEN** | `failure_strategy`, pre-flight, scheduling, cold migration |
+| `mtv_migrate` | **REWRITTEN** | `failure_strategy`, environment validation, scheduling, cold migration |
 | `network_mgmt` | **REWRITTEN** | Bug fixes (typo), error handling, OVN/UDN prep |
-| `validate_migration` | **ENHANCED** | Structured output, pre-flight integration |
+| `validate_migration` | **ENHANCED** | Structured output, environment validation integration |
 | `cluster_healthcheck` | **ENHANCED** | Additional checks for v2 readiness |
 | `operator_management` | **SIMPLIFIED** | Fewer defaults, cleaner config |
 | `ocp_cleanup` | **KEPT** | Enhanced scoping |
@@ -183,7 +183,7 @@ One primary orchestration workflow:
 ```
 MF - Full Migration Workflow
 ├── MF - Configure Environment (source + target)
-├── MF - Validate (pre-flight)
+├── MF - Validate (environment)
 ├── MF - Migrate
 └── MF - Validate (post-migration)
 ```
@@ -407,7 +407,7 @@ environment_manager_environments: {}     # same structure as environments.yml
 **New capabilities:**
 
 - `failure_strategy` parameter (MIG-05)
-- Pre-flight validation (MIG-08)
+- Environment validation (MIG-08)
 - Cold migration with shutdown/timeout (MIG-07)
 - Maintenance window scheduling (MIG-09)
 - Structured migration report output
@@ -417,7 +417,7 @@ environment_manager_environments: {}     # same structure as environments.yml
 mtv_migrate_failure_strategy: continue_and_report
     # continue_and_report | continue_and_retry | halt_on_failure
 mtv_migrate_max_retries: 3
-mtv_migrate_pre_flight: true
+mtv_migrate_environment_validation: true
 mtv_migrate_shutdown_timeout: 300
 mtv_migrate_force_shutdown: false
 mtv_migrate_cleanup_source: false
@@ -430,9 +430,9 @@ mtv_migrate_maintenance_window_end: ""    # ISO 8601
 ```yaml
 # tasks/main.yml (conceptual structure)
 - block:
-    - name: Pre-flight validation
-      include_tasks: _pre_flight.yml
-      when: mtv_migrate_pre_flight
+    - name: Environment validation
+      include_tasks: _environment_validation.yml
+      when: mtv_migrate_environment_validation
 
     - name: Wait for maintenance window
       include_tasks: _schedule.yml
@@ -652,7 +652,7 @@ infra.openshift_virtualization_migration/
 │   ├── mtv_migrate/
 │   │   ├── tasks/
 │   │   │   ├── main.yml
-│   │   │   ├── _pre_flight.yml
+│   │   │   ├── _environment_validation.yml
 │   │   │   ├── _schedule.yml
 │   │   │   ├── _plans.yml
 │   │   │   ├── _execute.yml
