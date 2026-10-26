@@ -1,7 +1,7 @@
 ---
 # Regression test for the validate_environment report aggregation.
 # Runs the report tasks against pre-populated check facts — no real
-# endpoints — covering the three summary paths: an isolated tagged run,
+# endpoints — covering the three summary paths: an isolated partial run,
 # an all-passed full run with mixed boolean forms, and a failed full run
 # whose assert names the failed checks.
 
