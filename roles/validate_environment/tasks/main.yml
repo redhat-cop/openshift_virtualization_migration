@@ -16,7 +16,12 @@
     - name: Include each selected environment validation check
       ansible.builtin.include_tasks:
         file: "validate_{{ __validate_environment_check }}.yml"
-      loop: "{{ validate_environment_checks }}"
+      # CLI -e passes a string (e.g. -e validate_environment_checks=[vddk])
+      # where an inventory var is a real list — normalize both forms here.
+      loop: "{{ validate_environment_checks
+                if validate_environment_checks is not string
+                else (validate_environment_checks | replace('[', '') | replace(']', '')
+                | split(',') | map('trim') | reject('equalto', '') | list) }}"
       loop_control:
         loop_var: __validate_environment_check
 

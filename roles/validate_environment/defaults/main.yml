@@ -28,7 +28,8 @@ validate_environment_secure_logging: "{{ secure_logging | default(true) }}"
 # required: False
 # description: >-
 #   Which environment validation checks to run, as check-name strings.
-#   Defaults to all six. A one-off run can limit the pass, e.g.
+#   Defaults to all six. Accepts a list, a bare check name, or a
+#   bracketed comma-separated string — the CLI -e form, e.g.
 #   validate_environment_checks=[vcenter] to debug the vCenter check.
 validate_environment_checks:
   - openshift

@@ -34,7 +34,8 @@ argument_specs:
         description: >-
           Which environment validation checks to run, as check-name
           strings (openshift, cnv, mtv, aap, vcenter, vddk). Defaults to
-          all six. A one-off CLI run can limit the pass, e.g.
+          all six. Accepts a list, a bare check name, or a bracketed
+          comma-separated string — the CLI -e form, e.g.
           -e validate_environment_checks=[vcenter] to debug a single
           check. An unknown name fails the include with a loud
           file-not-found error — the summary report still runs.

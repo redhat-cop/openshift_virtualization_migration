@@ -97,7 +97,7 @@ Description: Validate the migration environment before seeding AAP — OpenShift
     * **Required**: False
     * **Type**: list
     * **Default**: ['openshift', 'cnv', 'mtv', 'aap', 'vcenter', 'vddk']
-    * **Description**: Which environment validation checks to run, as check-name strings (openshift, cnv, mtv, aap, vcenter, vddk). Defaults to all six. A one-off CLI run can limit the pass, e.g. -e validate_environment_checks=[vcenter] to debug a single check. An unknown name fails the include with a loud file-not-found error — the summary report still runs.
+    * **Description**: Which environment validation checks to run, as check-name strings (openshift, cnv, mtv, aap, vcenter, vddk). Defaults to all six. Accepts a list, a bare check name, or a bracketed comma-separated string — the CLI -e form, e.g. -e validate_environment_checks=[vcenter] to debug a single check. An unknown name fails the include with a loud file-not-found error — the summary report still runs.
   * **validate_environment_cnv_namespace**:
     * **Required**: False
     * **Type**: str
@@ -174,33 +174,33 @@ Description: Validate the migration environment before seeding AAP — OpenShift
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`validate_environment_aap_api_path`](defaults/main.yml#L144)   | str   | `/api/controller/v2/` |  None  |   False  |  AAP API Path |
-| [`validate_environment_aap_hostname`](defaults/main.yml#L130)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Hostname |
+| [`validate_environment_aap_api_path`](defaults/main.yml#L145)   | str   | `/api/controller/v2/` |  None  |   False  |  AAP API Path |
+| [`validate_environment_aap_hostname`](defaults/main.yml#L131)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Hostname |
 | [`validate_environment_aap_name`](defaults/main.yml#L20)   | str   | `{{ groups['migration_aap'] ¦ default([], true) ¦ first ¦ default('', true) }}` |  None  |   None  |  None |
-| [`validate_environment_aap_password`](defaults/main.yml#L162)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Password |
-| [`validate_environment_aap_token`](defaults/main.yml#L175)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Token |
-| [`validate_environment_aap_username`](defaults/main.yml#L151)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Username |
-| [`validate_environment_aap_validate_certs`](defaults/main.yml#L188)   | str   | `{{ (lookup('env', 'AAP_VALIDATE_CERTS') ¦ default(hostvars[validate_environment_aap_name]['aap_validate_certs'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  AAP Verify SSL |
-| [`validate_environment_checks`](defaults/main.yml#L33)   | list   | `[]` |  None  |   False  |  Checks |
-| [`validate_environment_checks.0`](defaults/main.yml#L34)   | str   | `openshift` |  None  |   None  |  None |
-| [`validate_environment_checks.1`](defaults/main.yml#L35)   | str   | `cnv` |  None  |   None  |  None |
-| [`validate_environment_checks.2`](defaults/main.yml#L36)   | str   | `mtv` |  None  |   None  |  None |
-| [`validate_environment_checks.3`](defaults/main.yml#L37)   | str   | `aap` |  None  |   None  |  None |
-| [`validate_environment_checks.4`](defaults/main.yml#L38)   | str   | `vcenter` |  None  |   None  |  None |
-| [`validate_environment_checks.5`](defaults/main.yml#L39)   | str   | `vddk` |  None  |   None  |  None |
-| [`validate_environment_cnv_namespace`](defaults/main.yml#L197)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  CNV Namespace |
-| [`validate_environment_mtv_namespace`](defaults/main.yml#L214)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  MTV Namespace |
-| [`validate_environment_openshift_api_key`](defaults/main.yml#L60)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
-| [`validate_environment_openshift_host`](defaults/main.yml#L47)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift Host |
-| [`validate_environment_openshift_verify_ssl`](defaults/main.yml#L77)   | str   | `{{ (lookup('env', 'K8S_AUTH_VERIFY_SSL') ¦ default(hostvars[validate_environment_target_name]['openshift_verify_ssl'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  OpenShift Verify SSL |
+| [`validate_environment_aap_password`](defaults/main.yml#L163)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Password |
+| [`validate_environment_aap_token`](defaults/main.yml#L176)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Token |
+| [`validate_environment_aap_username`](defaults/main.yml#L152)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  AAP Username |
+| [`validate_environment_aap_validate_certs`](defaults/main.yml#L189)   | str   | `{{ (lookup('env', 'AAP_VALIDATE_CERTS') ¦ default(hostvars[validate_environment_aap_name]['aap_validate_certs'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  AAP Verify SSL |
+| [`validate_environment_checks`](defaults/main.yml#L34)   | list   | `[]` |  None  |   False  |  Checks |
+| [`validate_environment_checks.0`](defaults/main.yml#L35)   | str   | `openshift` |  None  |   None  |  None |
+| [`validate_environment_checks.1`](defaults/main.yml#L36)   | str   | `cnv` |  None  |   None  |  None |
+| [`validate_environment_checks.2`](defaults/main.yml#L37)   | str   | `mtv` |  None  |   None  |  None |
+| [`validate_environment_checks.3`](defaults/main.yml#L38)   | str   | `aap` |  None  |   None  |  None |
+| [`validate_environment_checks.4`](defaults/main.yml#L39)   | str   | `vcenter` |  None  |   None  |  None |
+| [`validate_environment_checks.5`](defaults/main.yml#L40)   | str   | `vddk` |  None  |   None  |  None |
+| [`validate_environment_cnv_namespace`](defaults/main.yml#L198)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  CNV Namespace |
+| [`validate_environment_mtv_namespace`](defaults/main.yml#L215)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  MTV Namespace |
+| [`validate_environment_openshift_api_key`](defaults/main.yml#L61)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
+| [`validate_environment_openshift_host`](defaults/main.yml#L48)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift Host |
+| [`validate_environment_openshift_verify_ssl`](defaults/main.yml#L78)   | str   | `{{ (lookup('env', 'K8S_AUTH_VERIFY_SSL') ¦ default(hostvars[validate_environment_target_name]['openshift_verify_ssl'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  OpenShift Verify SSL |
 | [`validate_environment_secure_logging`](defaults/main.yml#L25)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   None  |  None |
 | [`validate_environment_source_name`](defaults/main.yml#L17)   | str   | `{{ source_name ¦ default(groups['vm_sources'] ¦ default([], true) ¦ first ¦ default('', true), true) }}` |  None  |   None  |  None |
 | [`validate_environment_target_name`](defaults/main.yml#L14)   | str   | `{{ target_name ¦ default(groups['migration_clusters'] ¦ default([], true) ¦ first ¦ default('', true), true) }}` |  None  |   None  |  None |
-| [`validate_environment_vcenter_hostname`](defaults/main.yml#L86)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Hostname |
-| [`validate_environment_vcenter_password`](defaults/main.yml#L108)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Password |
-| [`validate_environment_vcenter_username`](defaults/main.yml#L97)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Username |
-| [`validate_environment_vcenter_validate_certs`](defaults/main.yml#L120)   | str   | `{{ (lookup('env', 'VMWARE_VALIDATE_CERTS') ¦ default(hostvars[validate_environment_source_name]['validate_certs'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  vCenter Verify SSL |
-| [`validate_environment_vddk_image`](defaults/main.yml#L231)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  VDDK Init Image |
+| [`validate_environment_vcenter_hostname`](defaults/main.yml#L87)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Hostname |
+| [`validate_environment_vcenter_password`](defaults/main.yml#L109)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Password |
+| [`validate_environment_vcenter_username`](defaults/main.yml#L98)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  vCenter Username |
+| [`validate_environment_vcenter_validate_certs`](defaults/main.yml#L121)   | str   | `{{ (lookup('env', 'VMWARE_VALIDATE_CERTS') ¦ default(hostvars[validate_environment_source_name]['validate_certs'] ¦ default(true), true)) ¦ bool }}` |  None  |   False  |  vCenter Verify SSL |
+| [`validate_environment_vddk_image`](defaults/main.yml#L232)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  VDDK Init Image |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
