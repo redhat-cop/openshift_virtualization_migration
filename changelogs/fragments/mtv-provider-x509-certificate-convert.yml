@@ -1,0 +1,5 @@
+---
+minor_changes:
+  - Replace the ``openssl x509`` command invocation with the ``community.crypto.x509_certificate_convert`` module when converting the VMCA CA certificate from DER to PEM in the ``mtv_provider`` role, and read the converted certificate from the resulting file instead of parsing command output.
+bugfixes:
+  - Remove temporary VMCA certificate files (DER and PEM) after validation in the ``mtv_provider`` role so they no longer linger on disk when validation fails.
