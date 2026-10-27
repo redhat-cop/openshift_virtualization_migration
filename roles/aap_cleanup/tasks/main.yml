@@ -1,154 +1,141 @@
 ---
-- name: Remove AAP artifacts created by aap_seed
-  module_defaults:
-    group/ansible.controller.controller:
-      controller_host: "{{ aap_cleanup_hostname }}"
-      controller_username: "{{ aap_cleanup_username | default(omit, true) }}"
-      controller_password: "{{ aap_cleanup_password | default(omit, true) }}"
-      controller_oauthtoken: "{{ aap_cleanup_token | default(omit, true) }}"
-      validate_certs: "{{ aap_cleanup_validate_certs }}"
+# =============================================================================
+# aap_cleanup — Remove AAP artifacts created by aap_seed
+#
+# Uses the same infra.aap_configuration CaC collection that aap_seed uses,
+# but in reverse.  Resources are discovered via the AAP API, filtered to the
+# target organisation, then dispatched with state: absent.
+# =============================================================================
+
+- name: Build authentication headers
+  ansible.builtin.set_fact:
+    _aap_cleanup_auth_headers: >-
+      {{ {'Authorization': 'Bearer ' ~ aap_cleanup_token}
+         if aap_cleanup_token | default('', true) | trim | length > 0
+         else {} }}
+    _aap_cleanup_force_basic_auth: >-
+      {{ aap_cleanup_token | default('', true)
+         | trim | length == 0 }}
+  no_log: "{{ aap_cleanup_secure_logging }}"
+
+- name: Resolve organization ID
+  ansible.builtin.uri:
+    url: >-
+      {{ aap_cleanup_hostname }}{{ aap_cleanup_api_base
+      }}/organizations/?name={{ aap_cleanup_org_name | urlencode }}
+    method: GET
+    headers: "{{ _aap_cleanup_auth_headers }}"
+    user: >-
+      {{ aap_cleanup_username
+         if (_aap_cleanup_force_basic_auth | bool) else omit }}
+    password: >-
+      {{ aap_cleanup_password
+         if (_aap_cleanup_force_basic_auth | bool) else omit }}
+    force_basic_auth: "{{ _aap_cleanup_force_basic_auth }}"
+    validate_certs: "{{ aap_cleanup_validate_certs }}"
+    body_format: json
+    status_code: [200]
+  register: _aap_cleanup_org_result
+  no_log: "{{ aap_cleanup_secure_logging }}"
+
+- name: Set organization ID
+  ansible.builtin.set_fact:
+    _aap_cleanup_org_id: >-
+      {{ _aap_cleanup_org_result.json.results[0].id }}
+  when: _aap_cleanup_org_result.json.count > 0
+
+- name: Discover and remove AAP resources
+  when: _aap_cleanup_org_id is defined
   block:
-    # 1. Job templates (depend on project, inventory, EE, credentials)
+    # 1. Job templates
     - name: Remove job templates
-      ansible.controller.job_template:
-        name: "{{ __aap_cleanup_template }}"
-        organization: "{{ aap_cleanup_org_name }}"
-        state: absent
-      loop: "{{ aap_cleanup_template_names }}"
-      loop_control:
-        loop_var: __aap_cleanup_template
-        label: "{{ __aap_cleanup_template }}"
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: job_templates
+        _aap_cleanup_dispatch_var: controller_templates
       when: aap_cleanup_all | bool or aap_cleanup_templates | bool
 
-    # 2. Credentials (depend on credential types)
+    # 2. Credentials
     - name: Remove credentials
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: credentials
+        _aap_cleanup_dispatch_var: controller_credentials
+        _aap_cleanup_extra_fields:
+          - credential_type
       when: aap_cleanup_all | bool or aap_cleanup_credentials | bool
-      block:
-        - name: Build credential list from inventory
-          when: aap_cleanup_credential_names | length == 0
-          ansible.builtin.set_fact:
-            __aap_cleanup_credential_list: >-
-              {{
-                (groups['vm_sources'] | default([])
-                  | map('regex_replace', '^(.*)$', '{"name": "\1", "credential_type": "' ~ aap_cleanup_credential_type_names[0] | default("Migration Factory - Source Environment") ~ '"}')
-                  | map('from_json')
-                  | list)
-                +
-                (groups['migration_clusters'] | default([])
-                  | map('regex_replace', '^(.*)$', '{"name": "\1", "credential_type": "' ~ aap_cleanup_credential_type_names[1] | default("Migration Factory - Target Environment") ~ '"}')
-                  | map('from_json')
-                  | list)
-                +
-                ([{"name": aap_cleanup_ee_credential_name, "credential_type": "Container Registry"}] if aap_cleanup_ee_credential_name | length > 0 else [])
-                +
-                ([{"name": aap_cleanup_git_credential_name, "credential_type": "Source Control"}] if aap_cleanup_git_credential_name | length > 0 else [])
-              }}
 
-        - name: Use explicit credential names
-          when: aap_cleanup_credential_names | length > 0
-          ansible.builtin.set_fact:
-            __aap_cleanup_credential_list: >-
-              {{ aap_cleanup_credential_names
-                 | map('regex_replace', '^(.*)$', '{"name": "\1", "credential_type": "' ~ aap_cleanup_credential_type_names[0] | default("Migration Factory - Source Environment") ~ '"}')
-                 | map('from_json')
-                 | list }}
-
-        - name: Remove credentials
-          ansible.controller.credential:
-            name: "{{ __aap_cleanup_credential.name }}"
-            organization: "{{ aap_cleanup_org_name }}"
-            credential_type: "{{ __aap_cleanup_credential.credential_type }}"
-            state: absent
-          loop: "{{ __aap_cleanup_credential_list | default([]) }}"
-          loop_control:
-            loop_var: __aap_cleanup_credential
-            label: "{{ __aap_cleanup_credential.name }}"
-          register: __aap_cleanup_cred_result
-          failed_when:
-            - __aap_cleanup_cred_result is failed
-            - "'not found' not in (__aap_cleanup_cred_result.msg | default('') | lower)"
-            - "'does not exist' not in (__aap_cleanup_cred_result.msg | default('') | lower)"
-
-    # 3. Credential types
+    # 3. Credential types (filter out managed/built-in types)
     - name: Remove credential types
-      ansible.controller.credential_type:
-        name: "{{ __aap_cleanup_cred_type }}"
-        state: absent
-      loop: "{{ aap_cleanup_credential_type_names }}"
-      loop_control:
-        loop_var: __aap_cleanup_cred_type
-        label: "{{ __aap_cleanup_cred_type }}"
-      when: aap_cleanup_all | bool or aap_cleanup_credential_types | bool
-      register: __aap_cleanup_cred_type_result
-      failed_when:
-        - __aap_cleanup_cred_type_result is failed
-        - "'not found' not in (__aap_cleanup_cred_type_result.msg | default('') | lower)"
-        - "'does not exist' not in (__aap_cleanup_cred_type_result.msg | default('') | lower)"
-        - "'permission' not in (__aap_cleanup_cred_type_result.msg | default('') | lower)"
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: credential_types
+        _aap_cleanup_dispatch_var: controller_credential_types
+        _aap_cleanup_filter_managed: true
+        _aap_cleanup_use_org_filter: false
+      when: >-
+        aap_cleanup_all | bool
+        or aap_cleanup_credential_types | bool
 
-    # 4. Project (depends on org)
-    - name: Remove project
-      ansible.controller.project:
-        name: "{{ aap_cleanup_project_name }}"
-        organization: "{{ aap_cleanup_org_name }}"
-        state: absent
+    # 4. Projects
+    - name: Remove projects
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: projects
+        _aap_cleanup_dispatch_var: controller_projects
       when: aap_cleanup_all | bool or aap_cleanup_projects | bool
 
     # 5. Execution environments
-    - name: Remove execution environment
-      ansible.controller.execution_environment:
-        name: "{{ aap_cleanup_execution_environment_name }}"
-        organization: "{{ aap_cleanup_org_name }}"
-        state: absent
-      when:
-        - aap_cleanup_all | bool or aap_cleanup_execution_environments | bool
-        - aap_cleanup_execution_environment_name | length > 0
+    - name: Remove execution environments
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: execution_environments
+        _aap_cleanup_dispatch_var: controller_execution_environments
+      when: >-
+        aap_cleanup_all | bool
+        or aap_cleanup_execution_environments | bool
 
-    # 6. Hosts (must be removed before inventory)
-    - name: Remove hosts from inventory
+    # 6. Hosts (scoped to inventories within the org)
+    - name: Remove hosts
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: hosts
+        _aap_cleanup_dispatch_var: controller_hosts
+        _aap_cleanup_extra_fields:
+          - inventory
+        _aap_cleanup_use_org_filter: false
+        _aap_cleanup_extra_query: >-
+          inventory__organization={{ _aap_cleanup_org_id }}&
       when: aap_cleanup_all | bool or aap_cleanup_hosts | bool
-      block:
-        - name: Build host list from inventory groups
-          ansible.builtin.set_fact:
-            __aap_cleanup_host_names: >-
-              {{
-                (groups['vm_sources'] | default([]))
-                +
-                (groups['migration_clusters'] | default([]))
-              }}
 
-        - name: Remove hosts
-          ansible.controller.host:
-            name: "{{ __aap_cleanup_host }}"
-            inventory: "{{ aap_cleanup_inventory_name }}"
-            state: absent
-          loop: "{{ __aap_cleanup_host_names }}"
-          loop_control:
-            loop_var: __aap_cleanup_host
-            label: "{{ __aap_cleanup_host }}"
-          register: __aap_cleanup_host_result
-          failed_when:
-            - __aap_cleanup_host_result is failed
-            - "'not found' not in (__aap_cleanup_host_result.msg | default('') | lower)"
-            - "'does not exist' not in (__aap_cleanup_host_result.msg | default('') | lower)"
-
-    # 7. Inventory
-    - name: Remove inventory
-      ansible.controller.inventory:
-        name: "{{ aap_cleanup_inventory_name }}"
-        organization: "{{ aap_cleanup_org_name }}"
-        state: absent
-      when: aap_cleanup_all | bool or aap_cleanup_inventories | bool
+    # 7. Inventories
+    - name: Remove inventories
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: inventories
+        _aap_cleanup_dispatch_var: controller_inventories
+      when: >-
+        aap_cleanup_all | bool
+        or aap_cleanup_inventories | bool
 
     # 8. Organization (last — everything else must be gone first)
     - name: Remove organization
-      ansible.platform.organization:
-        name: "{{ aap_cleanup_org_name }}"
-        state: absent
-        gateway_hostname: "{{ aap_cleanup_hostname }}"
-        gateway_username: "{{ aap_cleanup_username | default(omit, true) }}"
-        gateway_password: "{{ aap_cleanup_password | default(omit, true) }}"
-        gateway_token: "{{ aap_cleanup_token | default(omit, true) }}"
-        gateway_validate_certs: "{{ aap_cleanup_validate_certs }}"
-      when: aap_cleanup_all | bool or aap_cleanup_organization | bool
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: organizations
+        _aap_cleanup_dispatch_var: aap_organizations
+        _aap_cleanup_use_org_filter: false
+        _aap_cleanup_extra_query: >-
+          name={{ aap_cleanup_org_name | urlencode }}&
+      when: >-
+        aap_cleanup_all | bool
+        or aap_cleanup_organization | bool
 ...

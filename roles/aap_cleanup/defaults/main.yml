@@ -2,7 +2,11 @@
 # =============================================================================
 # aap_cleanup — Remove AAP artifacts created by aap_seed
 # =============================================================================
-# This role removes the AAP objects that the aap_seed role creates.
+# This role removes AAP objects created by the aap_seed role.  It discovers
+# resources via the AAP API (scoped to the target organisation), builds
+# state:absent lists, and dispatches through infra.aap_configuration — the
+# same CaC collection that aap_seed uses to create objects.
+#
 # Every object category has a toggle so you can selectively keep items.
 # Removal order respects dependencies: templates → credentials →
 # credential types → projects → execution environments → hosts →
@@ -14,38 +18,64 @@
 
 # title: AAP Hostname
 # required: True
-# description: Hostname of the AAP instance.
+# description: >-
+#   Hostname of the AAP instance (including https:// scheme).
+#   Cascades from aap_hostname inventory variable.
 aap_cleanup_hostname: "{{ aap_hostname }}"
 
 # title: AAP Username
 # required: False
-# description: Username for AAP authentication.
-aap_cleanup_username: "{{ aap_username | default(omit) }}"
+# description: >-
+#   Username for AAP authentication.
+#   Cascades from aap_username inventory variable.
+aap_cleanup_username: "{{ aap_username | default('') }}"
 
 # title: AAP Password
 # required: False
-# description: Password for AAP authentication.
-aap_cleanup_password: "{{ aap_password | default(omit) }}"
+# description: >-
+#   Password for AAP authentication.
+#   Cascades from aap_password inventory variable.
+aap_cleanup_password: "{{ aap_password | default('') }}"
 
 # title: AAP Token
 # required: False
-# description: OAuth token for AAP authentication.
-aap_cleanup_token: "{{ aap_token | default(omit) }}"
+# description: >-
+#   OAuth token for AAP authentication.
+#   Cascades from aap_token inventory variable.
+aap_cleanup_token: "{{ aap_token | default('') }}"
 
 # title: Validate Certificates
 # required: False
-# description: Whether to validate TLS certificates for AAP connections.
-aap_cleanup_validate_certs: "{{ aap_validate_certs | default(true) }}"
+# description: >-
+#   Whether to validate TLS certificates for AAP connections.
+aap_cleanup_validate_certs: >-
+  {{ aap_validate_certs | default(true) }}
+
+# title: Secure Logging
+# required: False
+# description: >-
+#   Whether to enable secure logging for sensitive tasks.
+aap_cleanup_secure_logging: "{{ secure_logging | default(true) }}"
 
 # ---------------------------------------------------------------------------
-# Organization (must match what aap_seed created)
+# API base path
+# ---------------------------------------------------------------------------
+
+# title: API Base Path
+# required: False
+# description: >-
+#   Controller API base path. AAP 2.5+ uses /api/controller/v2.
+aap_cleanup_api_base: /api/controller/v2
+
+# ---------------------------------------------------------------------------
+# Organization
 # ---------------------------------------------------------------------------
 
 # title: Organization Name
 # required: False
 # description: >-
-#   The AAP organization to remove. Must match the org created by
-#   aap_seed. All objects below are scoped to this organization.
+#   The AAP organization to clean up. All discovered resources are
+#   scoped to this organization. Must match the org created by aap_seed.
 aap_cleanup_org_name: OpenShift Virtualization Migration
 
 # ---------------------------------------------------------------------------
@@ -71,12 +101,14 @@ aap_cleanup_templates: false
 
 # title: Remove Credentials
 # required: False
-# description: Whether to remove credentials (source, target, Git, registry).
+# description: >-
+#   Whether to remove credentials (source, target, Git, registry).
 aap_cleanup_credentials: false
 
 # title: Remove Credential Types
 # required: False
-# description: Whether to remove custom credential types.
+# description: >-
+#   Whether to remove custom credential types.
 aap_cleanup_credential_types: false
 
 # title: Remove Projects
@@ -86,12 +118,14 @@ aap_cleanup_projects: false
 
 # title: Remove Execution Environments
 # required: False
-# description: Whether to remove execution environment definitions.
+# description: >-
+#   Whether to remove execution environment definitions.
 aap_cleanup_execution_environments: false
 
 # title: Remove Hosts
 # required: False
-# description: Whether to remove hosts and groups from the inventory.
+# description: >-
+#   Whether to remove hosts from the inventory.
 aap_cleanup_hosts: false
 
 # title: Remove Inventories
@@ -107,71 +141,13 @@ aap_cleanup_inventories: false
 aap_cleanup_organization: false
 
 # ---------------------------------------------------------------------------
-# Object names — default to the same names aap_seed uses
+# Dry-run mode
 # ---------------------------------------------------------------------------
 
-# title: Job Template Names
+# title: Dry Run
 # required: False
 # description: >-
-#   List of job template names to remove. Defaults to all templates
-#   created by aap_seed.
-aap_cleanup_template_names:
-  - OpenShift Virtualization Migration - MTV Provider
-  - OpenShift Virtualization Migration - MTV Maps
-  - OpenShift Virtualization Migration - MTV Plans
-  - OpenShift Virtualization Migration - MTV Migrate
-  - OpenShift Virtualization Migration - Pre-Migration VM Operations
-  - OpenShift Virtualization Migration - Registry Credentials
-
-# title: Credential Names
-# required: False
-# description: >-
-#   List of credential names to remove. Built dynamically from inventory
-#   hosts by default (same logic as aap_seed build_credentials). Set
-#   this explicitly to override.
-aap_cleanup_credential_names: []
-
-# title: Credential Type Names
-# required: False
-# description: >-
-#   List of custom credential type names to remove. Defaults to the
-#   source and target types created by aap_seed.
-aap_cleanup_credential_type_names:
-  - Migration Factory - Source Environment
-  - Migration Factory - Target Environment
-
-# title: Project Name
-# required: False
-# description: Name of the AAP project to remove.
-aap_cleanup_project_name: OpenShift Virtualization Migration
-
-# title: Execution Environment Name
-# required: False
-# description: >-
-#   Name of the execution environment to remove. Cascades from
-#   aap_execution_environment.
-aap_cleanup_execution_environment_name: >-
-  {{ aap_execution_environment |
-     default('Default execution environment') }}
-
-# title: Inventory Name
-# required: False
-# description: Name of the AAP inventory to remove.
-aap_cleanup_inventory_name: OpenShift Virtualization Migration
-
-# title: EE Registry Credential Name
-# required: False
-# description: >-
-#   Name of the registry credential to remove (created for EE image
-#   pulling). Cascades from aap_execution_environment_credential.
-aap_cleanup_ee_credential_name: >-
-  {{ aap_execution_environment_credential | default('') }}
-
-# title: Git Credential Name
-# required: False
-# description: >-
-#   Name of the Git credential to remove (created for project SCM).
-#   Cascades from aap_project_credential.
-aap_cleanup_git_credential_name: >-
-  {{ aap_project_credential | default('') }}
+#   When true, discover and report resources that would be removed
+#   but do not actually delete anything.
+aap_cleanup_dry_run: false
 ...
