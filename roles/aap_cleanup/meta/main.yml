@@ -1,19 +1,12 @@
 ---
 galaxy_info:
-  author: Red Hat CoP
+  author: Red Hat
   description: >-
     Remove AAP artifacts created by the aap_seed role — job templates,
     credentials, credential types, projects, execution environments,
     inventories, hosts, and the organization.
-  license: GPL-3.0-or-later
+  license: GPL-3.0-only
   min_ansible_version: "2.16"
-  platforms:
-    - name: EL
-      versions:
-        - "9"
-  galaxy_tags:
-    - aap
-    - cleanup
-    - migration
+  galaxy_tags: []
 dependencies: []
 ...

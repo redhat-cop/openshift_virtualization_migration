@@ -282,11 +282,11 @@ classDef rescue stroke:#665352,stroke-width:2px;
 
 ## Author Information
 
-Red Hat CoP
+Red Hat
 
 ## License
 
-GPL-3.0-or-later
+GPL-3.0-only
 
 ## Minimum Ansible Version
 
@@ -294,6 +294,6 @@ GPL-3.0-or-later
 
 ## Platforms
 
-* **EL**: ['9']
+No platforms specified.
 
 <!-- DOCSIBLE END -->
