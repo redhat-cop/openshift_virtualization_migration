@@ -1,0 +1,6 @@
+---
+minor_changes:
+  - Add validate_environment role to validate the migration environment before seeding AAP and running a migration — OpenShift API auth, OpenShift Virtualization and MTV operator health, AAP access, vCenter connectivity, and VDDK init image configuration (playbook vmf_validate_environment.yml).
+bugfixes:
+  - Preserve an explicit false for validate_certs in the validate_environment role's vCenter and AAP TLS-verification cascade — the previous fallback converted it to true.
+...

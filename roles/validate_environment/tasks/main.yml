@@ -1,0 +1,32 @@
+---
+# The environment validation pass runs before seeding AAP.
+#
+# The checks default to all six; validate_environment_checks limits the
+# pass to the named checks for a one-off run. The summary report fails
+# the play if any ran check failed, so one run reports everything that
+# needs attention. Checks whose target is not configured fail that check
+# with a message describing what to set — they do not crash the play.
+
+- name: Include pre-validation of required connection variables
+  ansible.builtin.include_tasks:
+    file: pre_validate.yml
+
+- name: Run environment validation checks
+  block:
+    - name: Include each selected environment validation check
+      ansible.builtin.include_tasks:
+        file: "validate_{{ __validate_environment_check }}.yml"
+      # CLI -e passes a string (e.g. -e validate_environment_checks=[vddk])
+      # where an inventory var is a real list — normalize both forms here.
+      loop: "{{ validate_environment_checks
+                if validate_environment_checks is not string
+                else (validate_environment_checks | replace('[', '') | replace(']', '')
+                | split(',') | map('trim') | reject('equalto', '') | list) }}"
+      loop_control:
+        loop_var: __validate_environment_check
+
+  always:
+    - name: Include the validate_environment summary report
+      ansible.builtin.include_tasks:
+        file: report.yml
+...

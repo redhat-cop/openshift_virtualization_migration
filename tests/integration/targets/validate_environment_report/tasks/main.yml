@@ -1,0 +1,103 @@
+---
+# Regression test for the validate_environment report aggregation.
+# Runs the report tasks against pre-populated check facts — no real
+# endpoints — covering the three summary paths: an isolated partial run,
+# an all-passed full run with mixed boolean forms, and a failed full run
+# whose assert names the failed checks.
+
+- name: Main | Isolated run — two checks ran, the assert covers those only
+  vars:
+    __validate_environment_result_openshift: {ran: true, passed: true, detail: 'isolated pass'}
+    __validate_environment_result_aap: {ran: true, passed: 'True', detail: 'isolated pass (string form)'}
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.validate_environment
+    tasks_from: report.yml
+
+- name: Main | Full run — all checks ran and passed in mixed boolean forms
+  vars:
+    __validate_environment_result_openshift: {ran: true, passed: true, detail: 'bool true'}
+    __validate_environment_result_cnv: {ran: true, passed: 'True', detail: 'string true'}
+    __validate_environment_result_mtv: {ran: true, passed: true, detail: 'bool true'}
+    __validate_environment_result_aap: {ran: true, passed: 'True', detail: 'string true'}
+    __validate_environment_result_vcenter: {ran: true, passed: true, detail: 'bool true'}
+    __validate_environment_result_vddk: {ran: true, passed: 'True', detail: 'string true'}
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.validate_environment
+    tasks_from: report.yml
+
+- name: Main | Full run — ran checks failed, the assert names them
+  block:
+    - name: Main | Run the report with a failed check
+      vars:
+        __validate_environment_result_openshift: {ran: true, passed: true, detail: 'pass'}
+        __validate_environment_result_cnv: {ran: true, passed: false, detail: 'failed'}
+        __validate_environment_result_mtv: {ran: true, passed: 'False', detail: 'string false form'}
+        __validate_environment_result_aap: {ran: true, passed: 'True', detail: 'pass'}
+        __validate_environment_result_vcenter: {ran: true, passed: true, detail: 'pass'}
+        __validate_environment_result_vddk: {ran: true, passed: 'True', detail: 'pass'}
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.validate_environment
+        tasks_from: report.yml
+  rescue:
+    - name: Main | Mark the expected failure observed
+      ansible.builtin.set_fact:
+        __validate_environment_report_failure_observed: true
+
+    - name: Main | Assert the summary marks both failed checks
+      ansible.builtin.assert:
+        that:
+          - not (__validate_environment_summary['OpenShift Virtualization operator'].passed | bool)
+          - not (__validate_environment_summary['MTV operator'].passed | bool)
+        quiet: true
+
+- name: Main | Assert the expected failure was observed
+  ansible.builtin.assert:
+    that: __validate_environment_report_failure_observed | default(false) | bool
+    quiet: true
+
+- name: Main | pre_validate accepts a clean https endpoint
+  vars:
+    validate_environment_openshift_host: https://api.cluster.example.com
+    validate_environment_openshift_api_key: test-token
+    validate_environment_aap_hostname: https://aap.example.com
+  ansible.builtin.include_role:
+    name: infra.openshift_virtualization_migration.validate_environment
+    tasks_from: pre_validate.yml
+
+- name: Main | pre_validate rejects a user:pass@ endpoint
+  block:
+    - name: Main | Run pre_validate with embedded credentials
+      vars:
+        validate_environment_openshift_host: https://svc-user:svc-pass@cluster.example.com
+        validate_environment_openshift_api_key: test-token
+        validate_environment_aap_hostname: https://aap.example.com
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.validate_environment
+        tasks_from: pre_validate.yml
+  rescue:
+    - name: Main | Mark the expected userinfo rejection observed
+      ansible.builtin.set_fact:
+        __validate_environment_userinfo_rejection_observed: true
+
+- name: Main | pre_validate rejects a case-variant plaintext endpoint
+  block:
+    - name: Main | Run pre_validate with an uppercase scheme
+      vars:
+        validate_environment_openshift_host: HTTP://api.cluster.example.com
+        validate_environment_openshift_api_key: test-token
+        validate_environment_aap_hostname: https://aap.example.com
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.validate_environment
+        tasks_from: pre_validate.yml
+  rescue:
+    - name: Main | Mark the expected plaintext rejection observed
+      ansible.builtin.set_fact:
+        __validate_environment_plaintext_rejection_observed: true
+
+- name: Main | Assert both endpoint rejections fired
+  ansible.builtin.assert:
+    that:
+      - __validate_environment_userinfo_rejection_observed | default(false) | bool
+      - __validate_environment_plaintext_rejection_observed | default(false) | bool
+    quiet: true
+...

@@ -1,0 +1,49 @@
+---
+# Probe the AAP API with the configured account.
+# ansible.builtin.uri is used instead of ansible.controller modules because
+# the validate_environment runs before seeding and needs only a lightweight auth probe
+# (the me/ endpoint returns the authenticated account); controller modules
+# pull in full controller configuration context that does not exist yet.
+
+- name: validate_aap | Probe AAP API with the configured account
+  when: validate_environment_aap_hostname | length > 0
+  ansible.builtin.uri:
+    url: "{{ validate_environment_aap_hostname }}{{ validate_environment_aap_api_path }}me/"
+    method: GET
+    validate_certs: "{{ validate_environment_aap_validate_certs }}"
+    headers:
+      Authorization: >-
+        {{
+          ('Bearer ' ~ (validate_environment_aap_token | trim))
+          if validate_environment_aap_token | length > 0
+          else ('Basic ' ~ ((validate_environment_aap_username ~ ':' ~ validate_environment_aap_password) | b64encode))
+        }}
+    status_code: [200, 401, 403]
+  register: __validate_environment_aap
+  failed_when: false
+  # A module crash (e.g. aiohttp ContentTypeError when the endpoint answers
+  # with a non-JSON body) bypasses failed_when and would abort the run; the
+  # record task below turns the fault into a graceful check result.
+  ignore_errors: true
+  no_log: "{{ validate_environment_secure_logging }}"
+
+- name: validate_aap | Record the AAP access check result
+  ansible.builtin.set_fact:
+    __validate_environment_result_aap:
+      ran: true
+      passed: "{{ (validate_environment_aap_hostname | length > 0)
+        and ((__validate_environment_aap.status | default(0)) == 200) }}"
+      detail: >-
+        {% if validate_environment_aap_hostname | length == 0 %}
+        Not configured — set aap_hostname in the inventory (or AAP_HOSTNAME)
+        to enable the AAP access check
+        {% elif (__validate_environment_aap.status | default(0)) == 200 %}
+        HTTP 200 at {{ validate_environment_aap_hostname }} (authenticated as
+        {{ __validate_environment_aap.json.results[0].username | default('unknown', true) }})
+        {% else %}
+        HTTP {{ __validate_environment_aap.status | default('connection error') }} at
+        {{ validate_environment_aap_hostname }} — 401/403 means the account or token is
+        wrong or expired; 404 means the API path is wrong — AAP 2.4
+        and earlier deployments need validate_environment_aap_api_path=/api/v2/
+        {% endif %}
+...

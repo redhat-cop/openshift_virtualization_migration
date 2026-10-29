@@ -5,32 +5,53 @@ argument_specs:
       Validate the migration environment before seeding AAP
     description:
       - >-
-        Runs every preflight check and reports a summary, then fails the
-        play if any check failed. Checks: OpenShift API auth, CNV and
-        MTV operator health, AAP access, vCenter connectivity, and VDDK
-        init image configuration.
+        Runs the selected validate_environment checks and reports a summary,
+        then fails the play if any ran check failed. Checks: OpenShift
+        API auth, CNV and MTV operator health, AAP access, vCenter
+        connectivity, and VDDK init image configuration.
       - >-
         Designed to run from an AAP job template (credentials inject
         K8S_AUTH_*, VMWARE_*, CONTROLLER_HOST, CONTROLLER_API_TOKEN) or
         a controller with the sample inventory. Connection variables
         cascade from environment variables to inventory host variables.
       - >-
-        All checks run on every invocation. An unconfigured target fails
+        All checks run by default; validate_environment_checks limits the
+        pass to the named checks. An unconfigured target fails
         that check with guidance rather than crashing the play, so one
         run reports everything that needs attention.
     options:
-      preflight_secure_logging:
+      validate_environment_checks:
+        type: list
+        elements: str
+        required: false
+        default:
+          - openshift
+          - cnv
+          - mtv
+          - aap
+          - vcenter
+          - vddk
+        description: >-
+          Which environment validation checks to run, as check-name
+          strings (openshift, cnv, mtv, aap, vcenter, vddk). Defaults to
+          all six. Accepts a list, a bare check name, or a bracketed
+          comma-separated string — the CLI -e form, e.g.
+          -e validate_environment_checks=[vcenter] to debug a single
+          check. An unknown name fails the include with a loud
+          file-not-found error — the summary report still runs.
+
+      validate_environment_secure_logging:
         type: bool
         required: false
         default: true
         description: >-
           Whether to enable secure logging for tasks that handle
           credentials. Set to false to debug failed probes. Prefer a
-          one-off CLI run (--tags <check>) over flipping the toggle on a
-          job template; if you must, rotate the exposed credential
-          (token or password) afterwards.
+          one-off CLI run (-e validate_environment_secure_logging=false)
+          over flipping the toggle on a job template; if you must,
+          rotate the exposed credential (token or password) afterwards.
 
-      preflight_target_name:
+      validate_environment_target_name:
         type: str
         required: false
         description: >-
@@ -38,7 +59,7 @@ argument_specs:
           Defaults to the target_name extra var (injected by the seeded
           credentials) or the first migration_clusters host.
 
-      preflight_source_name:
+      validate_environment_source_name:
         type: str
         required: false
         description: >-
@@ -46,24 +67,24 @@ argument_specs:
           checks. Defaults to the source_name extra var (injected by the
           seeded credentials) or the first vm_sources host.
 
-      preflight_aap_name:
+      validate_environment_aap_name:
         type: str
         required: false
         description: >-
           Inventory host whose aap_* variables feed the AAP check.
           Defaults to the first migration_aap host.
 
-      preflight_openshift_host:
+      validate_environment_openshift_host:
         type: str
         required: false
         default: ""
         description: >-
           OpenShift API endpoint. Resolves from K8S_AUTH_HOST env var or
           the openshift_host variable on the target cluster host
-          (preflight_target_name). Required — the preflight aborts
+          (validate_environment_target_name). Required — the validate_environment aborts
           without it.
 
-      preflight_openshift_api_key:
+      validate_environment_openshift_api_key:
         type: str
         required: false
         default: ""
@@ -71,52 +92,52 @@ argument_specs:
         description: >-
           OpenShift API token. Resolves from K8S_AUTH_API_KEY env var or
           the openshift_api_key variable on the target cluster host
-          (preflight_target_name). Required — the preflight aborts
+          (validate_environment_target_name). Required — the validate_environment aborts
           without it.
 
-      preflight_openshift_verify_ssl:
+      validate_environment_openshift_verify_ssl:
         type: bool
         required: false
         default: true
         description: >-
           Validate the OpenShift API TLS certificate.
 
-      preflight_vcenter_hostname:
+      validate_environment_vcenter_hostname:
         type: str
         required: false
         default: ""
         description: >-
           vCenter endpoint for the connectivity check. Resolves from
           VMWARE_HOST env var or the host variable on the source host
-          (preflight_source_name). The check applies to vmware sources;
+          (validate_environment_source_name). The check applies to vmware sources;
           other source types skip it. When unset, the vCenter check fails
           with instructions.
 
-      preflight_vcenter_username:
+      validate_environment_vcenter_username:
         type: str
         required: false
         default: ""
         description: >-
           vCenter username. Resolves from VMWARE_USER env var or the
-          username variable on the source host (preflight_source_name).
+          username variable on the source host (validate_environment_source_name).
 
-      preflight_vcenter_password:
+      validate_environment_vcenter_password:
         type: str
         required: false
         default: ""
         no_log: true
         description: >-
           vCenter password. Resolves from VMWARE_PASSWORD env var or the
-          password variable on the source host (preflight_source_name).
+          password variable on the source host (validate_environment_source_name).
 
-      preflight_vcenter_validate_certs:
+      validate_environment_vcenter_validate_certs:
         type: bool
         required: false
         default: true
         description: >-
           Validate the vCenter TLS certificate.
 
-      preflight_aap_hostname:
+      validate_environment_aap_hostname:
         type: str
         required: false
         default: ""
@@ -124,26 +145,27 @@ argument_specs:
           AAP controller URL for the access check. Resolves from
           AAP_HOSTNAME env var, the CONTROLLER_HOST env var injected by
           the controller for its own jobs, or the aap_hostname variable
-          on the AAP host (preflight_aap_name). When unset, the AAP check
+          on the AAP host (validate_environment_aap_name). When unset, the AAP check
           fails with instructions.
 
-      preflight_aap_api_path:
+      validate_environment_aap_api_path:
         type: str
         required: false
-        default: /api/v2/
+        default: /api/controller/v2/
         description: >-
-          API base path for the access check. Defaults to /api/v2/ (AWX
-          and AAP 2.4 and earlier); AAP 2.5 platform deployments serve
-          the controller API at /api/controller/v2/.
+          API base path for the access check. Defaults to
+          /api/controller/v2/ (AAP 2.5 platform deployments); AWX and
+          AAP 2.4 and earlier serve the controller API at /api/v2/ —
+          set that value for those environments.
 
-      preflight_aap_username:
+      validate_environment_aap_username:
         type: str
         required: false
         default: ""
         description: >-
           AAP username for the access check.
 
-      preflight_aap_password:
+      validate_environment_aap_password:
         type: str
         required: false
         default: ""
@@ -151,7 +173,7 @@ argument_specs:
         description: >-
           AAP password for the access check when no token is set.
 
-      preflight_aap_token:
+      validate_environment_aap_token:
         type: str
         required: false
         default: ""
@@ -162,21 +184,21 @@ argument_specs:
           own jobs, or the aap_token variable on the AAP host. Takes
           precedence over username/password.
 
-      preflight_aap_validate_certs:
+      validate_environment_aap_validate_certs:
         type: bool
         required: false
         default: true
         description: >-
           Validate the AAP TLS certificate.
 
-      preflight_cnv_namespace:
+      validate_environment_cnv_namespace:
         type: str
         required: false
         default: openshift-cnv
         description: >-
           Namespace holding the OpenShift Virtualization operator CSV.
 
-      preflight_mtv_namespace:
+      validate_environment_mtv_namespace:
         type: str
         required: false
         default: openshift-mtv
@@ -184,7 +206,7 @@ argument_specs:
           Namespace holding the MTV operator CSV. Resolves from the
           mtv_namespace inventory variable by default.
 
-      preflight_vddk_image:
+      validate_environment_vddk_image:
         type: str
         required: false
         default: ""
