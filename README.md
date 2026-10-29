@@ -42,6 +42,7 @@ See [CHANGELOG.md](CHANGELOG.md) for release history and changes.
 This collection includes the following roles for managing OpenShift Virtualization migrations:
 
 <!--ROLES_LIST_START-->
+* [aap_cleanup](roles/aap_cleanup/README.md) - Remove AAP artifacts created by the aap_seed role — job templates, credentials, credential types, projects, execution environments, inventories, hosts, and the organization.
 * [aap_seed](roles/aap_seed/README.md) - Seed AAP with Migration Factory Configuration as Code content
 * [e2e_testing](roles/e2e_testing/README.md) - Tooling to support E2E testing activities.
 * [mtv_hook_invoke_aap](roles/mtv_hook_invoke_aap/README.md) - Triggers AAP automation as part of an MTV hook.

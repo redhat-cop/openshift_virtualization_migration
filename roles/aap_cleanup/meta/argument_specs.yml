@@ -1,0 +1,135 @@
+---
+argument_specs:
+  main:
+    short_description: >-
+      Remove AAP artifacts created by the aap_seed role.
+    description: >-
+      Discovers resources via the AAP API (scoped to the target
+      organisation), builds state:absent lists, and dispatches
+      removal through the infra.aap_configuration CaC collection.
+    options:
+      aap_cleanup_hostname:
+        type: str
+        required: true
+        description: >-
+          Hostname of the AAP instance (including https:// scheme).
+
+      aap_cleanup_username:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Username for AAP authentication.
+
+      aap_cleanup_password:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          Password for AAP authentication.
+
+      aap_cleanup_token:
+        type: str
+        required: false
+        default: ""
+        description: >-
+          OAuth token for AAP authentication.
+
+      aap_cleanup_validate_certs:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to validate TLS certificates for AAP connections.
+
+      aap_cleanup_secure_logging:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Whether to enable secure logging for sensitive tasks.
+
+      aap_cleanup_api_base:
+        type: str
+        required: false
+        default: /api/controller/v2
+        description: >-
+          Controller API base path.
+
+      aap_cleanup_org_name:
+        type: str
+        required: false
+        default: OpenShift Virtualization Migration
+        description: >-
+          The AAP organization to clean up.
+
+      aap_cleanup_all:
+        type: bool
+        required: false
+        default: true
+        description: >-
+          Master switch — removes all object categories when true.
+
+      aap_cleanup_templates:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Whether to remove job templates.
+
+      aap_cleanup_credentials:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Whether to remove credentials.
+
+      aap_cleanup_credential_types:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Whether to remove custom credential types.
+
+      aap_cleanup_projects:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Whether to remove the SCM project.
+
+      aap_cleanup_execution_environments:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Whether to remove execution environments.
+
+      aap_cleanup_hosts:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Whether to remove hosts from the inventory.
+
+      aap_cleanup_inventories:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Whether to remove the inventory.
+
+      aap_cleanup_organization:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Whether to remove the organization itself.
+
+      aap_cleanup_dry_run:
+        type: bool
+        required: false
+        default: false
+        description: >-
+          Discover and report resources without deleting them.
+...

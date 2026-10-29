@@ -1,0 +1,141 @@
+---
+# =============================================================================
+# aap_cleanup — Remove AAP artifacts created by aap_seed
+#
+# Uses the same infra.aap_configuration CaC collection that aap_seed uses,
+# but in reverse.  Resources are discovered via the AAP API, filtered to the
+# target organisation, then dispatched with state: absent.
+# =============================================================================
+
+- name: Build authentication headers
+  ansible.builtin.set_fact:
+    _aap_cleanup_auth_headers: >-
+      {{ {'Authorization': 'Bearer ' ~ aap_cleanup_token}
+         if aap_cleanup_token | default('', true) | trim | length > 0
+         else {} }}
+    _aap_cleanup_force_basic_auth: >-
+      {{ aap_cleanup_token | default('', true)
+         | trim | length == 0 }}
+  no_log: "{{ aap_cleanup_secure_logging }}"
+
+- name: Resolve organization ID
+  ansible.builtin.uri:
+    url: >-
+      {{ aap_cleanup_hostname }}{{ aap_cleanup_api_base
+      }}/organizations/?name={{ aap_cleanup_org_name | urlencode }}
+    method: GET
+    headers: "{{ _aap_cleanup_auth_headers }}"
+    user: >-
+      {{ aap_cleanup_username
+         if (_aap_cleanup_force_basic_auth | bool) else omit }}
+    password: >-
+      {{ aap_cleanup_password
+         if (_aap_cleanup_force_basic_auth | bool) else omit }}
+    force_basic_auth: "{{ _aap_cleanup_force_basic_auth }}"
+    validate_certs: "{{ aap_cleanup_validate_certs }}"
+    body_format: json
+    status_code: [200]
+  register: _aap_cleanup_org_result
+  no_log: "{{ aap_cleanup_secure_logging }}"
+
+- name: Set organization ID
+  ansible.builtin.set_fact:
+    _aap_cleanup_org_id: >-
+      {{ _aap_cleanup_org_result.json.results[0].id }}
+  when: _aap_cleanup_org_result.json.count > 0
+
+- name: Discover and remove AAP resources
+  when: _aap_cleanup_org_id is defined
+  block:
+    # 1. Job templates
+    - name: Remove job templates
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: job_templates
+        _aap_cleanup_dispatch_var: controller_templates
+      when: aap_cleanup_all | bool or aap_cleanup_templates | bool
+
+    # 2. Credentials
+    - name: Remove credentials
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: credentials
+        _aap_cleanup_dispatch_var: controller_credentials
+        _aap_cleanup_extra_fields:
+          - credential_type
+      when: aap_cleanup_all | bool or aap_cleanup_credentials | bool
+
+    # 3. Credential types (filter out managed/built-in types)
+    - name: Remove credential types
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: credential_types
+        _aap_cleanup_dispatch_var: controller_credential_types
+        _aap_cleanup_filter_managed: true
+        _aap_cleanup_use_org_filter: false
+      when: >-
+        aap_cleanup_all | bool
+        or aap_cleanup_credential_types | bool
+
+    # 4. Projects
+    - name: Remove projects
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: projects
+        _aap_cleanup_dispatch_var: controller_projects
+      when: aap_cleanup_all | bool or aap_cleanup_projects | bool
+
+    # 5. Execution environments
+    - name: Remove execution environments
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: execution_environments
+        _aap_cleanup_dispatch_var: controller_execution_environments
+      when: >-
+        aap_cleanup_all | bool
+        or aap_cleanup_execution_environments | bool
+
+    # 6. Hosts (scoped to inventories within the org)
+    - name: Remove hosts
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: hosts
+        _aap_cleanup_dispatch_var: controller_hosts
+        _aap_cleanup_extra_fields:
+          - inventory
+        _aap_cleanup_use_org_filter: false
+        _aap_cleanup_extra_query: >-
+          inventory__organization={{ _aap_cleanup_org_id }}&
+      when: aap_cleanup_all | bool or aap_cleanup_hosts | bool
+
+    # 7. Inventories
+    - name: Remove inventories
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: inventories
+        _aap_cleanup_dispatch_var: controller_inventories
+      when: >-
+        aap_cleanup_all | bool
+        or aap_cleanup_inventories | bool
+
+    # 8. Organization (last — everything else must be gone first)
+    - name: Remove organization
+      ansible.builtin.include_tasks:
+        file: _build_absent_resources.yml
+      vars:
+        _aap_cleanup_resource_type: organizations
+        _aap_cleanup_dispatch_var: aap_organizations
+        _aap_cleanup_use_org_filter: false
+        _aap_cleanup_extra_query: >-
+          name={{ aap_cleanup_org_name | urlencode }}&
+      when: >-
+        aap_cleanup_all | bool
+        or aap_cleanup_organization | bool
+...

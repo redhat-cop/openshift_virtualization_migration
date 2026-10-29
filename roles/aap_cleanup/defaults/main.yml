@@ -1,0 +1,153 @@
+---
+# =============================================================================
+# aap_cleanup — Remove AAP artifacts created by aap_seed
+# =============================================================================
+# This role removes AAP objects created by the aap_seed role.  It discovers
+# resources via the AAP API (scoped to the target organisation), builds
+# state:absent lists, and dispatches through infra.aap_configuration — the
+# same CaC collection that aap_seed uses to create objects.
+#
+# Every object category has a toggle so you can selectively keep items.
+# Removal order respects dependencies: templates → credentials →
+# credential types → projects → execution environments → hosts →
+# inventories → organization.
+
+# ---------------------------------------------------------------------------
+# AAP connection (cascaded from inventory, same as aap_seed)
+# ---------------------------------------------------------------------------
+
+# title: AAP Hostname
+# required: True
+# description: >-
+#   Hostname of the AAP instance (including https:// scheme).
+#   Cascades from aap_hostname inventory variable.
+aap_cleanup_hostname: "{{ aap_hostname }}"
+
+# title: AAP Username
+# required: False
+# description: >-
+#   Username for AAP authentication.
+#   Cascades from aap_username inventory variable.
+aap_cleanup_username: "{{ aap_username | default('') }}"
+
+# title: AAP Password
+# required: False
+# description: >-
+#   Password for AAP authentication.
+#   Cascades from aap_password inventory variable.
+aap_cleanup_password: "{{ aap_password | default('') }}"
+
+# title: AAP Token
+# required: False
+# description: >-
+#   OAuth token for AAP authentication.
+#   Cascades from aap_token inventory variable.
+aap_cleanup_token: "{{ aap_token | default('') }}"
+
+# title: Validate Certificates
+# required: False
+# description: >-
+#   Whether to validate TLS certificates for AAP connections.
+aap_cleanup_validate_certs: >-
+  {{ aap_validate_certs | default(true) }}
+
+# title: Secure Logging
+# required: False
+# description: >-
+#   Whether to enable secure logging for sensitive tasks.
+aap_cleanup_secure_logging: "{{ secure_logging | default(true) }}"
+
+# ---------------------------------------------------------------------------
+# API base path
+# ---------------------------------------------------------------------------
+
+# title: API Base Path
+# required: False
+# description: >-
+#   Controller API base path. AAP 2.5+ uses /api/controller/v2.
+aap_cleanup_api_base: /api/controller/v2
+
+# ---------------------------------------------------------------------------
+# Organization
+# ---------------------------------------------------------------------------
+
+# title: Organization Name
+# required: False
+# description: >-
+#   The AAP organization to clean up. All discovered resources are
+#   scoped to this organization. Must match the org created by aap_seed.
+aap_cleanup_org_name: OpenShift Virtualization Migration
+
+# ---------------------------------------------------------------------------
+# Master switch
+# ---------------------------------------------------------------------------
+
+# title: Remove All
+# required: False
+# description: >-
+#   Master switch — when true, every object category is removed.
+#   Set to false to use the individual toggles below for selective
+#   removal.
+aap_cleanup_all: true
+
+# ---------------------------------------------------------------------------
+# Individual toggles (only effective when aap_cleanup_all is false)
+# ---------------------------------------------------------------------------
+
+# title: Remove Templates
+# required: False
+# description: Whether to remove job templates.
+aap_cleanup_templates: false
+
+# title: Remove Credentials
+# required: False
+# description: >-
+#   Whether to remove credentials (source, target, Git, registry).
+aap_cleanup_credentials: false
+
+# title: Remove Credential Types
+# required: False
+# description: >-
+#   Whether to remove custom credential types.
+aap_cleanup_credential_types: false
+
+# title: Remove Projects
+# required: False
+# description: Whether to remove the SCM project.
+aap_cleanup_projects: false
+
+# title: Remove Execution Environments
+# required: False
+# description: >-
+#   Whether to remove execution environment definitions.
+aap_cleanup_execution_environments: false
+
+# title: Remove Hosts
+# required: False
+# description: >-
+#   Whether to remove hosts from the inventory.
+aap_cleanup_hosts: false
+
+# title: Remove Inventories
+# required: False
+# description: Whether to remove the inventory.
+aap_cleanup_inventories: false
+
+# title: Remove Organization
+# required: False
+# description: >-
+#   Whether to remove the organization itself. Only removed after all
+#   other objects have been deleted. Set to false to keep the org shell.
+aap_cleanup_organization: false
+
+# ---------------------------------------------------------------------------
+# Dry-run mode
+# ---------------------------------------------------------------------------
+
+# title: Dry Run
+# required: False
+# description: >-
+#   When true, discover and report resources that would be removed
+#   but do not actually delete anything.
+aap_cleanup_dry_run: false
+...
