@@ -7,6 +7,28 @@
 # target organisation, then dispatched with state: absent.
 # =============================================================================
 
+- name: Validate at least one cleanup toggle is enabled
+  ansible.builtin.assert:
+    that:
+      - >-
+        aap_cleanup_all | bool
+        or aap_cleanup_templates | bool
+        or aap_cleanup_credentials | bool
+        or aap_cleanup_credential_types | bool
+        or aap_cleanup_projects | bool
+        or aap_cleanup_execution_environments | bool
+        or aap_cleanup_hosts | bool
+        or aap_cleanup_inventories | bool
+        or aap_cleanup_organization | bool
+    fail_msg: >-
+      No cleanup targets selected. Set aap_cleanup_all=true to remove
+      all Migration Factory AAP artifacts, or enable one or more
+      individual toggles (aap_cleanup_templates, aap_cleanup_credentials,
+      aap_cleanup_credential_types, aap_cleanup_projects,
+      aap_cleanup_execution_environments, aap_cleanup_hosts,
+      aap_cleanup_inventories, aap_cleanup_organization).
+    quiet: true
+
 - name: Build authentication headers
   ansible.builtin.set_fact:
     _aap_cleanup_auth_headers: >-

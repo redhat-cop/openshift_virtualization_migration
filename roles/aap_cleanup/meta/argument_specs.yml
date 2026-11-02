@@ -66,9 +66,11 @@ argument_specs:
       aap_cleanup_all:
         type: bool
         required: false
-        default: true
+        default: false
         description: >-
           Master switch — removes all object categories when true.
+          Defaults to false; set true to remove everything, or enable
+          one or more individual toggles for selective removal.
 
       aap_cleanup_templates:
         type: bool

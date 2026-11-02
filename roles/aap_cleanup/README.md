@@ -1,7 +1,7 @@
 <!-- STATIC CONTENT START -->
 # aap_cleanup
 
-Remove AAP artifacts created by the `aap_seed` role. Every object category has a toggle so you can selectively keep items. A master switch (`aap_cleanup_all`) removes everything by default; set it to `false` and enable individual toggles for fine-grained control.
+Remove AAP artifacts created by the `aap_seed` role. Every object category has a toggle so you can selectively remove items. Set `aap_cleanup_all=true` to remove everything, or enable individual toggles for fine-grained control. At least one toggle must be enabled.
 
 <!-- STATIC CONTENT END -->
 <!-- DOCSIBLE START -->
@@ -29,8 +29,8 @@ Description: Remove AAP artifacts created by the aap_seed role — job templates
   * **aap_cleanup_all**:
     * **Required**: False
     * **Type**: bool
-    * **Default**: True
-    * **Description**: Master switch — removes all object categories when true.
+    * **Default**: False
+    * **Description**: Master switch — removes all object categories when true. Defaults to false; set true to remove everything, or enable one or more individual toggles for selective removal.
   * **aap_cleanup_api_base**:
     * **Required**: False
     * **Type**: str
@@ -127,24 +127,24 @@ Description: Remove AAP artifacts created by the aap_seed role — job templates
 
 | Var          | Type         | Value       |Choices    |Required    | Title       |
 |--------------|--------------|-------------|-------------|-------------|-------------|
-| [`aap_cleanup_all`](defaults/main.yml#L91)   | bool   | `True` |  None  |   False  |  Remove All |
-| [`aap_cleanup_api_base`](defaults/main.yml#L68)   | str   | `/api/controller/v2` |  None  |   False  |  API Base Path |
-| [`aap_cleanup_credential_types`](defaults/main.yml#L112)   | bool   | `False` |  None  |   False  |  Remove Credential Types |
-| [`aap_cleanup_credentials`](defaults/main.yml#L106)   | bool   | `False` |  None  |   False  |  Remove Credentials |
-| [`aap_cleanup_dry_run`](defaults/main.yml#L152)   | bool   | `False` |  None  |   False  |  Dry Run |
-| [`aap_cleanup_execution_environments`](defaults/main.yml#L123)   | bool   | `False` |  None  |   False  |  Remove Execution Environments |
-| [`aap_cleanup_hostname`](defaults/main.yml#L24)   | str   | `{{ aap_hostname }}` |  None  |   True  |  AAP Hostname |
-| [`aap_cleanup_hosts`](defaults/main.yml#L129)   | bool   | `False` |  None  |   False  |  Remove Hosts |
-| [`aap_cleanup_inventories`](defaults/main.yml#L134)   | bool   | `False` |  None  |   False  |  Remove Inventories |
-| [`aap_cleanup_org_name`](defaults/main.yml#L79)   | str   | `OpenShift Virtualization Migration` |  None  |   False  |  Organization Name |
-| [`aap_cleanup_organization`](defaults/main.yml#L141)   | bool   | `False` |  None  |   False  |  Remove Organization |
-| [`aap_cleanup_password`](defaults/main.yml#L38)   | str   | `{{ aap_password ¦ default('') }}` |  None  |   False  |  AAP Password |
-| [`aap_cleanup_projects`](defaults/main.yml#L117)   | bool   | `False` |  None  |   False  |  Remove Projects |
-| [`aap_cleanup_secure_logging`](defaults/main.yml#L58)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   False  |  Secure Logging |
-| [`aap_cleanup_templates`](defaults/main.yml#L100)   | bool   | `False` |  None  |   False  |  Remove Templates |
-| [`aap_cleanup_token`](defaults/main.yml#L45)   | str   | `{{ aap_token ¦ default('') }}` |  None  |   False  |  AAP Token |
-| [`aap_cleanup_username`](defaults/main.yml#L31)   | str   | `{{ aap_username ¦ default('') }}` |  None  |   False  |  AAP Username |
-| [`aap_cleanup_validate_certs`](defaults/main.yml#L51)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Validate Certificates |
+| [`aap_cleanup_all`](defaults/main.yml#L93)   | bool   | `False` |  None  |   False  |  Remove All |
+| [`aap_cleanup_api_base`](defaults/main.yml#L70)   | str   | `/api/controller/v2` |  None  |   False  |  API Base Path |
+| [`aap_cleanup_credential_types`](defaults/main.yml#L114)   | bool   | `False` |  None  |   False  |  Remove Credential Types |
+| [`aap_cleanup_credentials`](defaults/main.yml#L108)   | bool   | `False` |  None  |   False  |  Remove Credentials |
+| [`aap_cleanup_dry_run`](defaults/main.yml#L154)   | bool   | `False` |  None  |   False  |  Dry Run |
+| [`aap_cleanup_execution_environments`](defaults/main.yml#L125)   | bool   | `False` |  None  |   False  |  Remove Execution Environments |
+| [`aap_cleanup_hostname`](defaults/main.yml#L26)   | str   | `{{ aap_hostname }}` |  None  |   True  |  AAP Hostname |
+| [`aap_cleanup_hosts`](defaults/main.yml#L131)   | bool   | `False` |  None  |   False  |  Remove Hosts |
+| [`aap_cleanup_inventories`](defaults/main.yml#L136)   | bool   | `False` |  None  |   False  |  Remove Inventories |
+| [`aap_cleanup_org_name`](defaults/main.yml#L81)   | str   | `OpenShift Virtualization Migration` |  None  |   False  |  Organization Name |
+| [`aap_cleanup_organization`](defaults/main.yml#L143)   | bool   | `False` |  None  |   False  |  Remove Organization |
+| [`aap_cleanup_password`](defaults/main.yml#L40)   | str   | `{{ aap_password ¦ default('') }}` |  None  |   False  |  AAP Password |
+| [`aap_cleanup_projects`](defaults/main.yml#L119)   | bool   | `False` |  None  |   False  |  Remove Projects |
+| [`aap_cleanup_secure_logging`](defaults/main.yml#L60)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   False  |  Secure Logging |
+| [`aap_cleanup_templates`](defaults/main.yml#L102)   | bool   | `False` |  None  |   False  |  Remove Templates |
+| [`aap_cleanup_token`](defaults/main.yml#L47)   | str   | `{{ aap_token ¦ default('') }}` |  None  |   False  |  AAP Token |
+| [`aap_cleanup_username`](defaults/main.yml#L33)   | str   | `{{ aap_username ¦ default('') }}` |  None  |   False  |  AAP Username |
+| [`aap_cleanup_validate_certs`](defaults/main.yml#L53)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Validate Certificates |
 
 <summary><b>🖇️ Full descriptions for vars in defaults/main.yml</b></summary>
 <br>
@@ -192,6 +192,7 @@ Description: Remove AAP artifacts created by the aap_seed role — job templates
 
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
+| Validate at least one cleanup toggle is enabled | `ansible.builtin.assert` | False |
 | Build authentication headers | `ansible.builtin.set_fact` | False |
 | Resolve organization ID | `ansible.builtin.uri` | False |
 | Set organization ID | `ansible.builtin.set_fact` | True |
@@ -264,11 +265,12 @@ classDef importRole stroke:#699ba7,stroke-width:2px;
 classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
-  Start-->|Task| Build_authentication_headers0[build authentication headers]:::task
-  Build_authentication_headers0-->|Task| Resolve_organization_ID1[resolve organization id]:::task
-  Resolve_organization_ID1-->|Task| Set_organization_ID2[set organization id<br>When: **aap cleanup org result json count   0**]:::task
-  Set_organization_ID2-->|Block Start| Discover_and_remove_AAP_resources3_block_start_0[[discover and remove aap resources<br>When: **aap cleanup org id is defined**]]:::block
-  Discover_and_remove_AAP_resources3_block_start_0-->|Include task| Remove_job_templates__build_absent_resources_yml_0[remove job templates<br>When: **aap cleanup all   bool or aap cleanup templates  <br>bool**<br>include_task:  build absent resources yml]:::includeTasks
+  Start-->|Task| Validate_at_least_one_cleanup_toggle_is_enabled0[validate at least one cleanup toggle is enabled]:::task
+  Validate_at_least_one_cleanup_toggle_is_enabled0-->|Task| Build_authentication_headers1[build authentication headers]:::task
+  Build_authentication_headers1-->|Task| Resolve_organization_ID2[resolve organization id]:::task
+  Resolve_organization_ID2-->|Task| Set_organization_ID3[set organization id<br>When: **aap cleanup org result json count   0**]:::task
+  Set_organization_ID3-->|Block Start| Discover_and_remove_AAP_resources4_block_start_0[[discover and remove aap resources<br>When: **aap cleanup org id is defined**]]:::block
+  Discover_and_remove_AAP_resources4_block_start_0-->|Include task| Remove_job_templates__build_absent_resources_yml_0[remove job templates<br>When: **aap cleanup all   bool or aap cleanup templates  <br>bool**<br>include_task:  build absent resources yml]:::includeTasks
   Remove_job_templates__build_absent_resources_yml_0-->|Include task| Remove_credentials__build_absent_resources_yml_1[remove credentials<br>When: **aap cleanup all   bool or aap cleanup credentials <br> bool**<br>include_task:  build absent resources yml]:::includeTasks
   Remove_credentials__build_absent_resources_yml_1-->|Include task| Remove_credential_types__build_absent_resources_yml_2[remove credential types<br>When: **aap cleanup all   bool or aap cleanup credential<br>types   bool**<br>include_task:  build absent resources yml]:::includeTasks
   Remove_credential_types__build_absent_resources_yml_2-->|Include task| Remove_projects__build_absent_resources_yml_3[remove projects<br>When: **aap cleanup all   bool or aap cleanup projects  <br>bool**<br>include_task:  build absent resources yml]:::includeTasks
@@ -276,7 +278,7 @@ classDef rescue stroke:#665352,stroke-width:2px;
   Remove_execution_environments__build_absent_resources_yml_4-->|Include task| Remove_hosts__build_absent_resources_yml_5[remove hosts<br>When: **aap cleanup all   bool or aap cleanup hosts   bool**<br>include_task:  build absent resources yml]:::includeTasks
   Remove_hosts__build_absent_resources_yml_5-->|Include task| Remove_inventories__build_absent_resources_yml_6[remove inventories<br>When: **aap cleanup all   bool or aap cleanup inventories <br> bool**<br>include_task:  build absent resources yml]:::includeTasks
   Remove_inventories__build_absent_resources_yml_6-->|Include task| Remove_organization__build_absent_resources_yml_7[remove organization<br>When: **aap cleanup all   bool or aap cleanup organization<br>  bool**<br>include_task:  build absent resources yml]:::includeTasks
-  Remove_organization__build_absent_resources_yml_7-.->|End of Block| Discover_and_remove_AAP_resources3_block_start_0
+  Remove_organization__build_absent_resources_yml_7-.->|End of Block| Discover_and_remove_AAP_resources4_block_start_0
   Remove_organization__build_absent_resources_yml_7-->End
 ```
 

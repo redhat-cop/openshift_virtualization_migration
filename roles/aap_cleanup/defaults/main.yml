@@ -7,7 +7,9 @@
 # state:absent lists, and dispatches through infra.aap_configuration — the
 # same CaC collection that aap_seed uses to create objects.
 #
-# Every object category has a toggle so you can selectively keep items.
+# Every object category has a toggle so you can selectively remove items.
+# Set aap_cleanup_all=true to remove everything, or enable individual
+# toggles. At least one must be enabled or the role fails validation.
 # Removal order respects dependencies: templates → credentials →
 # credential types → projects → execution environments → hosts →
 # inventories → organization.
@@ -86,12 +88,12 @@ aap_cleanup_org_name: OpenShift Virtualization Migration
 # required: False
 # description: >-
 #   Master switch — when true, every object category is removed.
-#   Set to false to use the individual toggles below for selective
-#   removal.
-aap_cleanup_all: true
+#   Defaults to false so individual toggles must be set explicitly,
+#   or set this to true to remove everything.
+aap_cleanup_all: false
 
 # ---------------------------------------------------------------------------
-# Individual toggles (only effective when aap_cleanup_all is false)
+# Individual toggles (also honored when aap_cleanup_all is true)
 # ---------------------------------------------------------------------------
 
 # title: Remove Templates
