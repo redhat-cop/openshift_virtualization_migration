@@ -1,0 +1,107 @@
+---
+# =============================================================================
+# _build_absent_resources — Query AAP API, build state:absent list, dispatch
+#
+# Expected vars from caller:
+#   _aap_cleanup_resource_type   — API resource path (e.g. job_templates)
+#   _aap_cleanup_dispatch_var    — CaC variable name (e.g. controller_templates)
+#   _aap_cleanup_extra_fields    — (optional) additional fields to keep
+#   _aap_cleanup_filter_managed  — (optional) exclude managed credential types
+#   _aap_cleanup_use_org_filter  — (optional, default true) filter by org ID
+#   _aap_cleanup_extra_query     — (optional) additional API query params
+# =============================================================================
+
+- name: _build_absent_resources | Query AAP API
+  ansible.builtin.uri:
+    url: >-
+      {{ aap_cleanup_hostname }}{{ aap_cleanup_api_base
+      }}/{{ _aap_cleanup_resource_type }}/?{{
+        'organization=' ~ _aap_cleanup_org_id ~ '&'
+        if (_aap_cleanup_use_org_filter | default(true))
+        else ''
+      }}{{ _aap_cleanup_extra_query | default('') }}page_size=200
+    method: GET
+    headers: "{{ _aap_cleanup_auth_headers }}"
+    user: >-
+      {{ aap_cleanup_username
+         if (_aap_cleanup_force_basic_auth | bool) else omit }}
+    password: >-
+      {{ aap_cleanup_password
+         if (_aap_cleanup_force_basic_auth | bool) else omit }}
+    force_basic_auth: "{{ _aap_cleanup_force_basic_auth }}"
+    validate_certs: "{{ aap_cleanup_validate_certs }}"
+    body_format: json
+    status_code: [200]
+  register: _aap_cleanup_query_result
+  no_log: "{{ aap_cleanup_secure_logging }}"
+
+- name: _build_absent_resources | Filter managed credential types
+  when: _aap_cleanup_filter_managed | default(false) | bool
+  ansible.builtin.set_fact:
+    _aap_cleanup_filtered_results: >-
+      {{ _aap_cleanup_query_result.json.results
+         | selectattr('managed', 'equalto', false)
+         | list }}
+
+- name: _build_absent_resources | Set results (no filter)
+  when: not (_aap_cleanup_filter_managed | default(false) | bool)
+  ansible.builtin.set_fact:
+    _aap_cleanup_filtered_results: >-
+      {{ _aap_cleanup_query_result.json.results }}
+
+- name: >-
+    _build_absent_resources | Report discovered —
+    {{ _aap_cleanup_resource_type }}
+  ansible.builtin.debug:
+    msg: >-
+      {{ _aap_cleanup_resource_type }}: found
+      {{ _aap_cleanup_filtered_results | length }} resource(s)
+      {{ '— DRY RUN, skipping deletion'
+         if aap_cleanup_dry_run | bool
+         else '— removing' }}
+
+- name: >-
+    _build_absent_resources | Show resources —
+    {{ _aap_cleanup_resource_type }}
+  when: _aap_cleanup_filtered_results | length > 0
+  ansible.builtin.debug:
+    msg: >-
+      {{ _aap_cleanup_filtered_results
+         | map(attribute='name') | list }}
+
+- name: >-
+    _build_absent_resources | Build and dispatch —
+    {{ _aap_cleanup_resource_type }}
+  when:
+    - _aap_cleanup_filtered_results | length > 0
+    - not (aap_cleanup_dry_run | bool)
+  block:
+    - name: _build_absent_resources | Build absent list
+      ansible.builtin.set_fact:
+        _aap_cleanup_absent_list: >-
+          {{ _aap_cleanup_filtered_results
+             | map('combine', {'state': 'absent'})
+             | map('dict2items')
+             | map('selectattr', 'key', 'in',
+                 ['name', 'organization', 'state']
+                 + (_aap_cleanup_extra_fields | default([])))
+             | map('items2dict')
+             | list }}
+
+    - name: >-
+        _build_absent_resources | Set dispatch var —
+        {{ _aap_cleanup_dispatch_var }}
+      ansible.builtin.set_fact:  # noqa: var-naming[no-role-prefix]
+        "{{ _aap_cleanup_dispatch_var }}": >-
+          {{ _aap_cleanup_absent_list }}
+
+    - name: _build_absent_resources | Dispatch removal
+      ansible.builtin.include_role:
+        name: infra.aap_configuration.dispatch
+
+    - name: >-
+        _build_absent_resources | Clear dispatch var —
+        {{ _aap_cleanup_dispatch_var }}
+      ansible.builtin.set_fact:  # noqa: var-naming[no-role-prefix]
+        "{{ _aap_cleanup_dispatch_var }}": []
+...
