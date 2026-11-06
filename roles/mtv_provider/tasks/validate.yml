@@ -136,6 +136,7 @@
       when: mtv_provider_source_type == 'vmware'
       vars:
         _mtv_provider_vmca_der_path: /tmp/.mtv_provider_vmca_ca.der
+        _mtv_provider_vmca_pem_path: /tmp/.mtv_provider_vmca_ca.pem
       block:
         - name: validate | Download VMCA CA certificate (DER format)
           ansible.builtin.uri:
@@ -149,18 +150,15 @@
           register: _mtv_provider_vmca_fetch
 
         - name: validate | Convert VMCA CA certificate from DER to PEM
-          ansible.builtin.command:
-            cmd: >-
-              openssl x509 -inform DER
-              -in {{ _mtv_provider_vmca_der_path }}
-              -outform PEM
-          register: _mtv_provider_vmca_pem
-          changed_when: false
+          community.crypto.x509_certificate_convert:
+            src_path: "{{ _mtv_provider_vmca_der_path }}"
+            dest_path: "{{ _mtv_provider_vmca_pem_path }}"
+            format: pem
 
         - name: validate | Store VMCA root CA certificate
           ansible.builtin.set_fact:
             _mtv_provider_source_certificate: >-
-              {{ _mtv_provider_vmca_pem.stdout ~ '\n' }}
+              {{ lookup('ansible.builtin.file', _mtv_provider_vmca_pem_path) }}
       rescue:
         - name: validate | VMCA endpoint unavailable, falling back to leaf cert
           ansible.builtin.debug:
@@ -168,6 +166,16 @@
               VMCA CA endpoint was not available on
               '{{ mtv_provider_source_host }}'. Falling back to the
               leaf certificate.
+      always:
+        - name: validate | Remove temporary certificate files
+          ansible.builtin.file:
+            path: "{{ __mtv_provider_tmp_cert_path }}"
+            state: absent
+          loop_control:
+            loop_var: __mtv_provider_tmp_cert_path
+          loop:
+            - "{{ _mtv_provider_vmca_der_path }}"
+            - "{{ _mtv_provider_vmca_pem_path }}"
 
     - name: validate | Store leaf certificate (non-VMware or VMCA fallback)
       ansible.builtin.set_fact:

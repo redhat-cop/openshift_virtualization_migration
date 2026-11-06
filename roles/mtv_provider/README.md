@@ -270,7 +270,7 @@ Description: Ensure host OpenShift provider and source provider CRs exist on tar
 | validate ¦ Retrieve leaf certificate from source | `community.crypto.get_certificate` | False |
 | validate ¦ Fetch CA certificate from VMCA endpoint | `block` | True |
 | validate ¦ Download VMCA CA certificate (DER format) | `ansible.builtin.uri` | False |
-| validate ¦ Convert VMCA CA certificate from DER to PEM | `ansible.builtin.command` | False |
+| validate ¦ Convert VMCA CA certificate from DER to PEM | `community.crypto.x509_certificate_convert` | False |
 | validate ¦ Store VMCA root CA certificate | `ansible.builtin.set_fact` | False |
 | validate ¦ Store leaf certificate (non-VMware or VMCA fallback) | `ansible.builtin.set_fact` | True |
 | validate ¦ Resolve effective certificate | `ansible.builtin.set_fact` | False |
