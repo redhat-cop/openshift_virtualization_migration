@@ -169,9 +169,17 @@ mtv_management_multiple_storage_maps_overrides: {}
 # description: Overrides for the network map
 mtv_management_network_map_overrides: [
 # - id: <network_id>
-#   network_destination_type: pod # Explicitly specify destination type
-#   network_attachment_definition: nad # Namespaced name (<namespace>/<name>) or just <name> if in default namespace
+#   network_destination_type: pod # Explicitly specify destination type (pod, ignored, or multus)
+#   network_attachment_definition: <namespace>/<name> # Namespaced name or just <name> if in default namespace
 #   exclude: true
+#   include: true
+#
+# Multiple port groups mapping to the same NAD:
+# - id: <first_portgroup_id>
+#   network_attachment_definition: my-namespace/my-nad
+#   include: true
+# - id: <second_portgroup_id>
+#   network_attachment_definition: my-namespace/my-nad  # Same NAD as above
 #   include: true
 ]
 ...

@@ -115,4 +115,20 @@ network_mgmt_manual_localnet_name: ''
 # required: True
 # description: NAD List in Manual Mode
 network_mgmt_manual_nad_list: []
+# - name: my-nad
+#   namespace: my-namespace
+#   portgroup: my-portgroup           # Single source portgroup (string)
+#   mtu: 1500                         # Optional MTU override (ovn-layer2 only)
+# - name: my-shared-nad
+#   namespace: my-namespace
+#   portgroups:                        # Multiple source portgroups (list)
+#     - portgroup-site-a               # Joined with comma in the source-portgroup annotation
+#     - portgroup-site-b
+#
+# 'portgroup' and 'portgroups' are mutually exclusive: defining both on the same entry
+# fails validation. Because the names are joined with commas into the
+# infra.openshift-virtualization-migration/source-portgroup annotation, and that annotation
+# is split on commas when the network map is built, a portgroup name containing a literal
+# comma is rejected. Map such a portgroup explicitly with the network_attachment_definition
+# override in mtv_management_network_map_overrides instead.
 ...
