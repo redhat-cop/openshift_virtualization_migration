@@ -195,6 +195,16 @@ aap_seed_mtv_provider_template_name: OpenShift Virtualization Migration - MTV Pr
 # description: Playbook path for the MTV provider job template.
 aap_seed_mtv_provider_playbook: playbooks/vmf_mtv_provider.yml
 
+# title: Network Management Template Name
+# required: False
+# description: Name of the target network preparation job template.
+aap_seed_network_mgmt_template_name: OpenShift Virtualization Migration - Network Management
+
+# title: Network Management Playbook
+# required: False
+# description: Playbook to prepare target networks before creating MTV maps.
+aap_seed_network_mgmt_playbook: playbooks/vmf_network_mgmt.yml
+
 # title: MTV Maps Template Name
 # required: False
 # description: Name of the MTV maps job template created in AAP.
@@ -430,6 +440,15 @@ aap_seed_controller_templates:
     organization: "{{ aap_seed_org_name }}"
     project: "{{ aap_seed_project_name }}"
     playbook: "{{ aap_seed_mtv_provider_playbook }}"
+    inventory: "{{ aap_seed_inventory_name }}"
+    execution_environment: "{{ aap_seed_execution_environment }}"
+    ask_credential_on_launch: true
+    ask_variables_on_launch: true
+    verbosity: 0
+  - name: "{{ aap_seed_network_mgmt_template_name }}"
+    organization: "{{ aap_seed_org_name }}"
+    project: "{{ aap_seed_project_name }}"
+    playbook: "{{ aap_seed_network_mgmt_playbook }}"
     inventory: "{{ aap_seed_inventory_name }}"
     execution_environment: "{{ aap_seed_execution_environment }}"
     ask_credential_on_launch: true

@@ -3,6 +3,17 @@
 
 Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift target clusters.
 
+## Preparing destination networks
+
+Run the V2 network-management job before creating maps when NADs or node
+network configuration need to be prepared. See the
+[V2 networking port guide](../../docs/networking-v2-port.md).
+
+The source-portgroup annotation can contain a single name or comma-separated
+names. Each name is matched exactly after trimming whitespace. Explicit
+`mtv_maps_network_map_overrides` take precedence; specifying `nad` alone implies
+`destination_type: multus`. Names containing commas require an explicit override.
+
 <!-- STATIC CONTENT END -->
 <!-- DOCSIBLE START -->
 ## mtv_maps

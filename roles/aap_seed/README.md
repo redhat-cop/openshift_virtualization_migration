@@ -9,7 +9,7 @@ The role dynamically builds all AAP objects from the Ansible inventory and role 
 - **Inventory, hosts, groups** -- source and target hosts with non-sensitive metadata
 - **Execution environments** -- optional custom EE definitions
 - **Project** -- SCM-backed project synced from Git
-- **Job templates** -- default migrate template
+- **Job templates** -- migration templates including target network preparation before MTV maps
 
 Target cluster credentials use the built-in AAP credential type
 "OpenShift or Kubernetes API Bearer Token".
@@ -1507,3 +1507,9 @@ GPL-3.0-only
 No platforms specified.
 
 <!-- DOCSIBLE END -->
+## Target network preparation
+
+The default template list includes **OpenShift Virtualization Migration - Network Management**,
+using `aap_seed_network_mgmt_template_name` and `aap_seed_network_mgmt_playbook`.
+See the [V2 networking guide](../../docs/networking-v2-port.md) for credentials, sequencing
+and guidance when overriding the full template list.

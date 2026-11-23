@@ -1,0 +1,66 @@
+---
+- name: automatic | Include tasks from gather_networks.yml
+  ansible.builtin.include_tasks:
+    file: gather_networks.yml
+
+- name: automatic | Reset discovered network state
+  ansible.builtin.set_fact:
+    network_mgmt_switches_to_migrate: []
+    network_mgmt_portgroups_to_migrate: []
+
+- name: automatic | Collect distributed switch settings
+  ansible.builtin.set_fact:
+    network_mgmt_switches_to_migrate: >-
+      {{ network_mgmt_switches_to_migrate + [_switch] }}
+  vars:
+    _switch:
+      name: "{{ network_mgmt_switch.configure.name }}"
+      mtu: "{{ network_mgmt_switch.configure.settings.properties.advanced.maxMtu }}"
+  loop: "{{ network_mgmt_dvswitch_info.distributed_virtual_switches }}"
+  loop_control:
+    loop_var: network_mgmt_switch
+
+- name: automatic | Collect distributed portgroup settings
+  ansible.builtin.set_fact:
+    network_mgmt_portgroups_to_migrate: >-
+      {{ network_mgmt_portgroups_to_migrate + [_portgroup] }}
+  vars:
+    _portgroup:
+      name: "{{ network_mgmt_portgroup.portgroup_name }}"
+      switch: "{{ network_mgmt_portgroup.dvswitch_name }}"
+      vlan: "{{ network_mgmt_portgroup.vlan_info }}"
+      uplinks: >-
+        {{ (network_mgmt_portgroup.active_uplinks | length) +
+           (network_mgmt_portgroup.standby_uplinks | length) }}
+  loop: >-
+    {{ network_mgmt_dvpg_info.dvs_portgroup_info
+       | dict2items | map(attribute='value') | flatten }}
+  loop_control:
+    loop_var: network_mgmt_portgroup
+
+- name: automatic | Include tasks from automatic_nncp.yml
+  ansible.builtin.include_tasks:
+    file: automatic_nncp.yml
+  when:
+    - (network_mgmt_openshift_node_network_ports | default([]) ) is iterable
+    - (network_mgmt_openshift_node_network_ports | default([]) ) is not string
+    - network_mgmt_openshift_node_network_ports | default([]) | length > 0
+    - network_mgmt_vcenter_dvswitch | default('', true) | trim | length > 0
+    - network_mgmt_vcenter_datacenter | default('', true) | trim | length > 0
+    - network_mgmt_openshift_network_bridge_mode != 'ovn-layer2'
+
+- name: automatic | Include tasks from automatic_nad.yml
+  ansible.builtin.include_tasks:
+    file: automatic_nad.yml
+  when:
+    - network_mgmt_vcenter_dvswitch | default('', true) | trim | length > 0
+    - network_mgmt_vcenter_datacenter | default('', true) | trim | length > 0
+    - ((network_mgmt_openshift_node_network_ports | default([]) ) is iterable and
+      (network_mgmt_openshift_node_network_ports | default([]) ) is not string and
+      (network_mgmt_openshift_node_network_ports | default([]) | length > 0))
+      or
+      (network_mgmt_nad_auto_bridge_name is defined and
+      network_mgmt_nad_auto_bridge_name |length > 0)
+      or
+      network_mgmt_openshift_network_bridge_mode == 'ovn-layer2'
+...
