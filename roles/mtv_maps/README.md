@@ -177,18 +177,18 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
 | [`mtv_maps_default_storage_class`](defaults/main.yml#L113)   | str   | `` |  None  |   False  |  Default Storage Class |
 | [`mtv_maps_destination_provider_name`](defaults/main.yml#L94)   | str   | `host` |  None  |   False  |  Destination Provider Name |
 | [`mtv_maps_destination_provider_namespace`](defaults/main.yml#L101)   | str   | `{{ mtv_maps_namespace }}` |  None  |   False  |  Destination Provider Namespace |
-| [`mtv_maps_inventory_retrieval_method`](defaults/main.yml#L152)   | str   | `api` |  None  |   False  |  Inventory Retrieval Method |
-| [`mtv_maps_managed_by_label`](defaults/main.yml#L167)   | str   | `ansible-migration-factory` |  None  |   False  |  Managed By Label |
+| [`mtv_maps_inventory_retrieval_method`](defaults/main.yml#L153)   | str   | `api` |  None  |   False  |  Inventory Retrieval Method |
+| [`mtv_maps_managed_by_label`](defaults/main.yml#L168)   | str   | `ansible-migration-factory` |  None  |   False  |  Managed By Label |
 | [`mtv_maps_multiple_storage_maps`](defaults/main.yml#L129)   | dict   | `{}` |  None  |   False  |  Multiple Storage Maps |
-| [`mtv_maps_nad_source_annotation`](defaults/main.yml#L144)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  NAD Source Annotation |
+| [`mtv_maps_nad_source_annotation`](defaults/main.yml#L145)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  NAD Source Annotation |
 | [`mtv_maps_namespace`](defaults/main.yml#L59)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Namespace |
 | [`mtv_maps_network_map_namespace`](defaults/main.yml#L74)   | str   | `{{ mtv_maps_namespace }}` |  None  |   False  |  Network Map Namespace |
-| [`mtv_maps_network_map_overrides`](defaults/main.yml#L137)   | list   | `[]` |  None  |   False  |  Network Map Overrides |
+| [`mtv_maps_network_map_overrides`](defaults/main.yml#L138)   | list   | `[]` |  None  |   False  |  Network Map Overrides |
 | [`mtv_maps_openshift_api_key`](defaults/main.yml#L23)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift API Key |
 | [`mtv_maps_openshift_host`](defaults/main.yml#L13)   | str   | `<multiline value: folded_strip>` |  None  |   True  |  OpenShift Host |
 | [`mtv_maps_openshift_verify_ssl`](defaults/main.yml#L38)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  OpenShift Verify SSL |
-| [`mtv_maps_query_delay`](defaults/main.yml#L162)   | int   | `5` |  None  |   False  |  Query Delay |
-| [`mtv_maps_query_retries`](defaults/main.yml#L157)   | int   | `5` |  None  |   False  |  Query Retries |
+| [`mtv_maps_query_delay`](defaults/main.yml#L163)   | int   | `5` |  None  |   False  |  Query Delay |
+| [`mtv_maps_query_retries`](defaults/main.yml#L158)   | int   | `5` |  None  |   False  |  Query Retries |
 | [`mtv_maps_secure_logging`](defaults/main.yml#L6)   | str   | `{{ secure_logging ¦ default(true) }}` |  None  |   False  |  Secure Logging |
 | [`mtv_maps_source_provider_name`](defaults/main.yml#L81)   | str   | `<multiline value: folded_strip>` |  None  |   False  |  Source Provider Name |
 | [`mtv_maps_source_provider_namespace`](defaults/main.yml#L89)   | str   | `{{ mtv_maps_namespace }}` |  None  |   False  |  Source Provider Namespace |
@@ -274,6 +274,8 @@ Description: Create MTV/Forklift StorageMap and NetworkMap CRs on OpenShift targ
 | Name | Module | Has Conditions |
 | ---- | ------ | --------- |
 | _resolve_network_destination ¦ Look up explicit override for this network | `ansible.builtin.set_fact` | False |
+| _resolve_network_destination ¦ Infer multus for an explicit NAD override | `ansible.builtin.set_fact` | True |
+| _resolve_network_destination ¦ Validate explicit destination | `ansible.builtin.assert` | True |
 | _resolve_network_destination ¦ Try annotation-based NAD auto-match | `ansible.builtin.set_fact` | True |
 | _resolve_network_destination ¦ Warn if multiple NADs match the same portgroup | `ansible.builtin.debug` | True |
 | _resolve_network_destination ¦ Build destination from explicit override | `ansible.builtin.set_fact` | True |
@@ -385,13 +387,15 @@ classDef includeVars stroke:#8e44ad,stroke-width:2px;
 classDef rescue stroke:#665352,stroke-width:2px;
 
   Start-->|Task| _resolve_network_destination___Look_up_explicit_override_for_this_network0[ resolve network destination   look up explicit<br>override for this network]:::task
-  _resolve_network_destination___Look_up_explicit_override_for_this_network0-->|Task| _resolve_network_destination___Try_annotation_based_NAD_auto_match1[ resolve network destination   try annotation<br>based nad auto match<br>When: **mtv maps net override destination type is not<br>defined**]:::task
-  _resolve_network_destination___Try_annotation_based_NAD_auto_match1-->|Task| _resolve_network_destination___Warn_if_multiple_NADs_match_the_same_portgroup2[ resolve network destination   warn if multiple<br>nads match the same portgroup<br>When: **mtv maps net matching nads is defined and  mtv<br>maps net matching nads   length   1**]:::task
-  _resolve_network_destination___Warn_if_multiple_NADs_match_the_same_portgroup2-->|Task| _resolve_network_destination___Build_destination_from_explicit_override3[ resolve network destination   build destination<br>from explicit override<br>When: **mtv maps net override destination type is defined**]:::task
-  _resolve_network_destination___Build_destination_from_explicit_override3-->|Task| _resolve_network_destination___Build_destination_from_auto_matched_NAD4[ resolve network destination   build destination<br>from auto matched nad<br>When: **mtv maps net override destination type is not<br>defined and  mtv maps net matching nads   default <br>     length   0**]:::task
-  _resolve_network_destination___Build_destination_from_auto_matched_NAD4-->|Task| _resolve_network_destination___Default_destination_to_pod_network5[ resolve network destination   default destination<br>to pod network<br>When: **mtv maps net override destination type is not<br>defined and  mtv maps net matching nads   default <br>     length    0**]:::task
-  _resolve_network_destination___Default_destination_to_pod_network5-->|Task| _resolve_network_destination___Append_entry_to_network_map6[ resolve network destination   append entry to<br>network map]:::task
-  _resolve_network_destination___Append_entry_to_network_map6-->End
+  _resolve_network_destination___Look_up_explicit_override_for_this_network0-->|Task| _resolve_network_destination___Infer_multus_for_an_explicit_NAD_override1[ resolve network destination   infer multus for an<br>explicit nad override<br>When: **mtv maps net override destination type is not<br>defined and  mtv maps net override nad   default  <br>    length   0**]:::task
+  _resolve_network_destination___Infer_multus_for_an_explicit_NAD_override1-->|Task| _resolve_network_destination___Validate_explicit_destination2[ resolve network destination   validate explicit<br>destination<br>When: **mtv maps net override destination type is defined**]:::task
+  _resolve_network_destination___Validate_explicit_destination2-->|Task| _resolve_network_destination___Try_annotation_based_NAD_auto_match3[ resolve network destination   try annotation<br>based nad auto match<br>When: **mtv maps net override destination type is not<br>defined**]:::task
+  _resolve_network_destination___Try_annotation_based_NAD_auto_match3-->|Task| _resolve_network_destination___Warn_if_multiple_NADs_match_the_same_portgroup4[ resolve network destination   warn if multiple<br>nads match the same portgroup<br>When: **mtv maps net matching nads is defined and  mtv<br>maps net matching nads   length   1**]:::task
+  _resolve_network_destination___Warn_if_multiple_NADs_match_the_same_portgroup4-->|Task| _resolve_network_destination___Build_destination_from_explicit_override5[ resolve network destination   build destination<br>from explicit override<br>When: **mtv maps net override destination type is defined**]:::task
+  _resolve_network_destination___Build_destination_from_explicit_override5-->|Task| _resolve_network_destination___Build_destination_from_auto_matched_NAD6[ resolve network destination   build destination<br>from auto matched nad<br>When: **mtv maps net override destination type is not<br>defined and  mtv maps net matching nads   default <br>     length   0**]:::task
+  _resolve_network_destination___Build_destination_from_auto_matched_NAD6-->|Task| _resolve_network_destination___Default_destination_to_pod_network7[ resolve network destination   default destination<br>to pod network<br>When: **mtv maps net override destination type is not<br>defined and  mtv maps net matching nads   default <br>     length    0**]:::task
+  _resolve_network_destination___Default_destination_to_pod_network7-->|Task| _resolve_network_destination___Append_entry_to_network_map8[ resolve network destination   append entry to<br>network map]:::task
+  _resolve_network_destination___Append_entry_to_network_map8-->End
 ```
 
 ### Graph for create_network_map.yml
