@@ -291,6 +291,45 @@ def test_v2_mapping_shared_network_explicit_override_and_no_match(runner):
     )
 
 
+def _multi_match_vars(overrides):
+    return {
+        "_net": {"id": "site-a", "name": "site-a"},
+        "_mtv_maps_network_map_entries": [],
+        "mtv_maps_nad_source_annotation": ANNOTATION,
+        "mtv_maps_network_map_overrides": overrides,
+        "_mtv_maps_nads": [nad(name="first", namespace="ns1"), nad(name="second", namespace="ns2")],
+    }
+
+
+def test_v2_mapping_multiple_nads_same_portgroup_fails(runner):
+    resolve = str(ROOT / "roles/mtv_maps/tasks/_resolve_network_destination.yml")
+    result, _ = runner(
+        [{"name": "Resolve", "ansible.builtin.include_tasks": resolve}],
+        _multi_match_vars([]),
+        success=False,
+    )
+    assert "Multiple NADs matched portgroup 'site-a': ns1/first, ns2/second." in result.stdout
+
+
+def test_v2_mapping_explicit_override_resolves_ambiguity(runner):
+    resolve = str(ROOT / "roles/mtv_maps/tasks/_resolve_network_destination.yml")
+    runner(
+        [
+            {"name": "Resolve", "ansible.builtin.include_tasks": resolve},
+            {
+                "name": "Check",
+                "ansible.builtin.assert": {
+                    "that": [
+                        "_mtv_maps_network_map_entries[0].destination == "
+                        "{'type': 'multus', 'name': 'second', 'namespace': 'ns2'}"
+                    ]
+                },
+            },
+        ],
+        _multi_match_vars([{"id": "site-a", "nad": "ns2/second"}]),
+    )
+
+
 @pytest.mark.parametrize(
     "override",
     [
