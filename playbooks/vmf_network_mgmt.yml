@@ -1,0 +1,12 @@
+---
+- name: Prepare target networks for migration
+  hosts: "{{ migration_clusters | default('migration_clusters') }}"
+  gather_facts: false
+  tasks:
+    - name: Prepare networks on the selected target
+      ansible.builtin.include_role:
+        name: infra.openshift_virtualization_migration.network_mgmt
+        apply:
+          delegate_to: localhost
+      when: inventory_hostname == target_name
+...

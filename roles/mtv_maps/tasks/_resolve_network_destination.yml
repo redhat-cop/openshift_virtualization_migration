@@ -11,6 +11,7 @@
 
 - name: _resolve_network_destination | Look up explicit override for this network
   ansible.builtin.set_fact:
+    _mtv_maps_net_matching_nads: []
     _mtv_maps_net_override: >-
       {{ (mtv_maps_network_map_overrides
           | selectattr('id', 'equalto', _net.id) | first)
@@ -18,27 +19,47 @@
              | selectattr('id', 'equalto', _net.id) | list | length > 0)
          else {} }}
 
+- name: _resolve_network_destination | Infer multus for an explicit NAD override
+  ansible.builtin.set_fact:
+    _mtv_maps_net_override: >-
+      {{ _mtv_maps_net_override | combine({'destination_type': 'multus'}) }}
+  when:
+    - _mtv_maps_net_override.destination_type is not defined
+    - _mtv_maps_net_override.nad | default('') | length > 0
+
+- name: _resolve_network_destination | Validate explicit destination
+  ansible.builtin.assert:
+    that:
+      - _mtv_maps_net_override.destination_type in ['pod', 'multus', 'ignored']
+      - >-
+        _mtv_maps_net_override.destination_type != 'multus' or
+        (_mtv_maps_net_override.nad | default('') is string and
+         _mtv_maps_net_override.nad | default('') is match('^[^/\s]+(/[^/\s]+)?$'))
+    fail_msg: >-
+      Network override for '{{ _net.name }}' requires a valid destination_type
+      and a non-empty nad (name or namespace/name) for multus.
+  when: _mtv_maps_net_override.destination_type is defined
+
 - name: _resolve_network_destination | Try annotation-based NAD auto-match
   ansible.builtin.set_fact:
     _mtv_maps_net_matching_nads: >-
       {{ _mtv_maps_nads | default([])
-         | selectattr('object.metadata.annotations', 'defined')
-         | json_query(_nad_query) }}
-  vars:
-    _nad_query: >-
-      [?object.metadata.annotations."{{ mtv_maps_nad_source_annotation }}"==`{{ _net.name }}`]
+         | infra.openshift_virtualization_migration.match_portgroup(
+             _net.name, mtv_maps_nad_source_annotation) }}
   when: _mtv_maps_net_override.destination_type is not defined
 
-- name: _resolve_network_destination | Warn if multiple NADs match the same portgroup
-  ansible.builtin.debug:
-    msg: >-
-      Multiple NADs matched portgroup '{{ _net.name }}'.
-      Using the first match:
-      {{ (_mtv_maps_net_matching_nads | first).object.metadata.namespace
-      }}/{{ (_mtv_maps_net_matching_nads | first).object.metadata.name }}.
-  when:
-    - _mtv_maps_net_matching_nads is defined
-    - _mtv_maps_net_matching_nads | length > 1
+- name: _resolve_network_destination | Fail if multiple NADs match the same portgroup
+  ansible.builtin.assert:
+    that:
+      - _mtv_maps_net_matching_nads | default([]) | length <= 1
+    fail_msg: >-
+      Multiple NADs matched portgroup '{{ _net.name }}':
+      {{ _mtv_maps_net_matching_nads | map(attribute='object.metadata.namespace')
+         | zip(_mtv_maps_net_matching_nads | map(attribute='object.metadata.name'))
+         | map('join', '/') | join(', ') }}.
+      Fix the source-portgroup annotations or pin the destination with an
+      explicit override in mtv_maps_network_map_overrides.
+  when: _mtv_maps_net_override.destination_type is not defined
 
 - name: _resolve_network_destination | Build destination from explicit override
   ansible.builtin.set_fact:

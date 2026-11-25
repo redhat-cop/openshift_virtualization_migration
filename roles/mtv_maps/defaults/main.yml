@@ -133,7 +133,8 @@ mtv_maps_multiple_storage_maps: {}
 # description: >-
 #   Per-network overrides for the network map. Each entry may contain
 #   id, destination_type (pod/multus/ignored), nad (namespace/name or
-#   just name), exclude, and include.
+#   just name), exclude, and include. A nad without destination_type implies
+#   multus. Explicit overrides take precedence over annotation matching.
 mtv_maps_network_map_overrides: []
 
 # title: NAD Source Annotation

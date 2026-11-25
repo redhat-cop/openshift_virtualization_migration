@@ -1,0 +1,7 @@
+---
+minor_changes:
+  - Port the main branch network_mgmt role to v2, including OVN layer2, MTU and multiple-portgroup annotations.
+  - Add a V2 network preparation playbook and AAP job template using injected credentials.
+bugfixes:
+  - Match multiple source portgroups to one NAD in mtv_maps and honor explicit NAD overrides without pod-network fallback.
+  - Fail mtv_maps network mapping when several NADs match one source portgroup, as on the main branch.
