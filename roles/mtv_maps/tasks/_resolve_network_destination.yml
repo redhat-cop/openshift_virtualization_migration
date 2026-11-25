@@ -48,16 +48,18 @@
              _net.name, mtv_maps_nad_source_annotation) }}
   when: _mtv_maps_net_override.destination_type is not defined
 
-- name: _resolve_network_destination | Warn if multiple NADs match the same portgroup
-  ansible.builtin.debug:
-    msg: >-
-      Multiple NADs matched portgroup '{{ _net.name }}'.
-      Using the first match:
-      {{ (_mtv_maps_net_matching_nads | first).object.metadata.namespace
-      }}/{{ (_mtv_maps_net_matching_nads | first).object.metadata.name }}.
-  when:
-    - _mtv_maps_net_matching_nads is defined
-    - _mtv_maps_net_matching_nads | length > 1
+- name: _resolve_network_destination | Fail if multiple NADs match the same portgroup
+  ansible.builtin.assert:
+    that:
+      - _mtv_maps_net_matching_nads | default([]) | length <= 1
+    fail_msg: >-
+      Multiple NADs matched portgroup '{{ _net.name }}':
+      {{ _mtv_maps_net_matching_nads | map(attribute='object.metadata.namespace')
+         | zip(_mtv_maps_net_matching_nads | map(attribute='object.metadata.name'))
+         | map('join', '/') | join(', ') }}.
+      Fix the source-portgroup annotations or pin the destination with an
+      explicit override in mtv_maps_network_map_overrides.
+  when: _mtv_maps_net_override.destination_type is not defined
 
 - name: _resolve_network_destination | Build destination from explicit override
   ansible.builtin.set_fact:
